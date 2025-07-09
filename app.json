@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "DESIST",
+    "slug": "desist",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "desist",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1B2D45"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to the camera for recording video.",
+        "NSMicrophoneUsageDescription": "This app needs access to the microphone for recording audio.",
+        "UIBackgroundModes": ["remote-notification"]
+      },
+      "bundleIdentifier": "com.ahmedashraf-dev.desist"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1B2D45",
+        "backgroundImage": "./assets/images/adaptive-icon.png"
+      },
+      "package": "com.ahmedashraf_dev.desist"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
