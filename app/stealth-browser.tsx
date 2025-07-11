@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   card: {
-    width: Platform.OS === 'web' ? 'calc(50% - 10px)' : '100%',
+    width: Platform.OS === 'web' ? '48%' : '100%',
     backgroundColor: colors.secondary,
     borderRadius: radius.lg,
     overflow: 'hidden',
@@ -257,6 +258,7 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: 200,
+    resizeMode: 'cover',
   },
   cardContent: {
     padding: 15,

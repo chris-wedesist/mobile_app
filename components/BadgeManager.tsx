@@ -18,6 +18,11 @@ type Badge = {
     type: string;
     value: number;
   };
+  unlocked?: boolean;
+  progress?: {
+    current: number;
+    total: number;
+  };
 };
 
 const BADGES: Badge[] = [
@@ -176,7 +181,10 @@ export function useBadgeManager() {
       <BadgeUnlockModal
         visible={showModal}
         onClose={() => setShowModal(false)}
-        badge={currentBadge}
+        badge={{
+          ...currentBadge,
+          unlocked: true,
+        }}
       />
     ) : null,
     manager: BadgeManager.getInstance(),

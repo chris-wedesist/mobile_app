@@ -46,7 +46,7 @@ export default function CoverStoryActivationScreen() {
       setError(null);
 
       await activate('manual');
-      router.push(`/stealth-${selectedStory}`);
+      router.push(`/stealth-${selectedStory}` as any);
     } catch (error) {
       console.error('Error activating cover story:', error);
       setError('Failed to activate cover story');

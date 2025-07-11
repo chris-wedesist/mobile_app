@@ -163,8 +163,8 @@ export default function StealthCalendarScreen() {
                   key={index}
                   style={[
                     styles.day,
-                    day && isToday(day) && styles.today,
-                    day && isSelected(day) && styles.selected,
+                    ...(day && isToday(day) ? [styles.today] : []),
+                    ...(day && isSelected(day) ? [styles.selected] : []),
                   ]}
                   onPress={() => day && setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))}>
                   {day && (

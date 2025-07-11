@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import { Camera } from 'expo-camera';
+import { Camera, CameraView } from 'expo-camera';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system';
 import { createClient } from '@supabase/supabase-js';
@@ -20,7 +20,7 @@ const TAP_INTERVAL = 2000;
 
 export default function PanicGestureHandler() {
   const [isRecording, setIsRecording] = useState(false);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
   const recordingPromise = useRef<Promise<any> | null>(null);
   const tapCount = useRef(0);
   const lastTapTime = useRef(0);
@@ -72,9 +72,10 @@ export default function PanicGestureHandler() {
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      const { data } = supabase.storage
         .from('recordings')
         .getPublicUrl(filePath);
+      const publicUrl = data?.publicURL;
 
       // Create safe encounter record
       const { data: encounterData, error: encounterError } = await supabase
@@ -154,10 +155,9 @@ export default function PanicGestureHandler() {
   return (
     <GestureDetector gesture={gesture}>
       <View style={StyleSheet.absoluteFill}>
-        <Camera
+        <CameraView
           ref={cameraRef}
           style={styles.hiddenCamera}
-          type="back"
         />
       </View>
     </GestureDetector>

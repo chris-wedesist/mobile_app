@@ -37,7 +37,7 @@ class UserSettingsManager {
       const cachedSettings = await AsyncStorage.getItem(this.settingsKey);
       if (cachedSettings) {
         this.settings = JSON.parse(cachedSettings);
-        return this.settings;
+        return this.settings!;
       }
 
       // If no cached settings, fetch from Supabase
@@ -87,8 +87,7 @@ class UserSettingsManager {
           updated_at: new Date().toISOString()
         })
         .select()
-        .single()
-        .headers(headers);
+        .single();
 
       if (error) throw error;
 

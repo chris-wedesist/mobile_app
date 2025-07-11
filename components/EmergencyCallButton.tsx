@@ -22,7 +22,7 @@ export default function EmergencyCallButton() {
 
   const [isLongPressing, setIsLongPressing] = useState(false);
   const [requireLongPress, setRequireLongPress] = useState(true);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -82,14 +82,14 @@ export default function EmergencyCallButton() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   
-  const onTouchStart = (e) => {
+  const onTouchStart = (e: any) => {
     const { pageX, pageY } = e.nativeEvent;
     setDragStart({ x: pageX, y: pageY });
     // Small delay before considering it a drag to allow for press detection
     setTimeout(() => setIsDragging(true), 100);
   };
   
-  const onTouchMove = (e) => {
+  const onTouchMove = (e: any) => {
     if (!isDragging) return;
     
     const { pageX, pageY } = e.nativeEvent;
@@ -149,7 +149,7 @@ export default function EmergencyCallButton() {
         longPressTimer.current = null;
       }
       // Reset the progress animation
-      Animated.timing(progressAnim).stop();
+      progressAnim.stopAnimation();
       progressAnim.setValue(0);
     }
   };

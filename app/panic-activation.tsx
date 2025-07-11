@@ -15,7 +15,7 @@ export default function PanicActivationScreen() {
   const countdownAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const cameraRef = useRef<CameraView>(null);
-  const countdownInterval = useRef<NodeJS.Timeout | null>(null);
+  const countdownInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     startPulseAnimation();
@@ -223,7 +223,6 @@ export default function PanicActivationScreen() {
         <CameraView
           ref={cameraRef}
           style={styles.hiddenCamera}
-          type="back"
         />
       )}
     </View>

@@ -86,7 +86,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const renderButton = (
-    content: string | JSX.Element,
+    content: string | React.ReactElement,
     onPress: () => void,
     style?: object
   ) => (

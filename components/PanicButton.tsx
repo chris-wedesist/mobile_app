@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Platform, Animated, Easing, Slider, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform, Animated, Easing, TouchableOpacity } from 'react-native';
 import * as Location from 'expo-location';
 import * as SMS from 'expo-sms';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,13 +17,13 @@ const supabase = createClient(
 export default function PanicButton() {
   const [isPressed, setIsPressed] = useState(false);
   const [isAlarmActive, setIsAlarmActive] = useState(false);
-  const [pressTimer, setPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [pressTimer, setPressTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [countdown, setCountdown] = useState(0);
   const [volume, setVolume] = useState(1);
   const [pulseAnim] = useState(new Animated.Value(1));
   const [countdownAnim] = useState(new Animated.Value(0));
   const soundRef = useRef<ExpoAV.Audio.Sound | null>(null);
-  const countdownInterval = useRef<NodeJS.Timeout | null>(null);
+  const countdownInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const lastAlertTime = useRef<number>(0);
   const ALERT_INTERVAL = 60000; // Minimum time between alerts (1 minute)
@@ -298,14 +298,7 @@ export default function PanicButton() {
           {isAlarmActive && (
             <View style={styles.volumeContainer}>
               <MaterialIcons name="volume-up" color={colors.text.primary} size={20} />
-              <Slider
-                style={styles.volumeSlider}
-                value={volume}
-                onChange={setVolume}
-                min={0}
-                max={1}
-                step={0.1}
-              />
+              <Text style={styles.volumeText}>Volume: {Math.round(volume * 100)}%</Text>
             </View>
           )}
           <Animated.View
@@ -321,8 +314,8 @@ export default function PanicButton() {
           <button
             style={{
               ...styles.button,
-              ...(isPressed && styles.buttonPressed),
-              ...(isAlarmActive && styles.buttonActive),
+              ...(isPressed && { backgroundColor: colors.status.error, transform: 'scale(0.95)' }),
+              ...(isAlarmActive && { backgroundColor: colors.status.error, borderWidth: 3, borderColor: colors.text.primary }),
               border: 'none',
               cursor: 'pointer',
             }}
@@ -369,17 +362,7 @@ export default function PanicButton() {
         {isAlarmActive && (
           <View style={styles.volumeContainer}>
             <MaterialIcons name="volume-up" color={colors.text.primary} size={20} />
-            <Slider
-              style={styles.volumeSlider}
-              value={volume}
-              onValueChange={setVolume}
-              minimumValue={0}
-              maximumValue={1}
-              step={0.1}
-              minimumTrackTintColor={colors.accent}
-              maximumTrackTintColor={colors.text.muted}
-              thumbTintColor={colors.accent}
-            />
+            <Text style={styles.volumeText}>Volume: {Math.round(volume * 100)}%</Text>
           </View>
         )}
         <Animated.View
@@ -433,10 +416,10 @@ const styles = StyleSheet.create({
     width: 200,
     ...shadows.sm,
   },
-  volumeSlider: {
-    flex: 1,
+  volumeText: {
+    color: colors.text.primary,
+    fontSize: 14,
     marginLeft: 10,
-    height: 40,
   },
   countdownOverlay: {
     ...StyleSheet.absoluteFillObject,

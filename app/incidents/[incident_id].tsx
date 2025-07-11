@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
-import { Video, AVPlaybackStatus } from 'expo-av';
+import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import { colors, radius, shadows } from '@/constants/theme';
@@ -237,7 +237,7 @@ export default function IncidentDetailScreen() {
             rate={1.0}
             volume={1.0}
             isMuted={false}
-            resizeMode="contain"
+            resizeMode={ResizeMode.CONTAIN}
             shouldPlay={false}
             useNativeControls
             style={styles.video}

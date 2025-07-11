@@ -143,7 +143,8 @@ export default function RecordingsScreen() {
           callback
         );
 
-        const { uri } = await downloadResumable.downloadAsync();
+        const result = await downloadResumable.downloadAsync();
+        const uri = result?.uri;
         if (uri) {
           // Share the downloaded file
           await Sharing.shareAsync(uri);

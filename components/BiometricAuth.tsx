@@ -27,7 +27,7 @@ export async function biometricVerify(prompt: string = 'Confirm your identity') 
       fallbackLabel: 'Enter Passcode',
     });
 
-    return { success: result.success, error: result.error };
+    return { success: result.success, error: result.success ? undefined : result.error };
   } catch (error) {
     console.error('Biometric authentication error:', error);
     return { success: false, error: 'Authentication failed' };

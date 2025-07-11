@@ -98,11 +98,6 @@ const styles = StyleSheet.create({
   },
   webButton: {
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    ':hover': {
-      opacity: 0.9,
-      transform: 'translateY(-1px)',
-    },
   },
   buttonActive: {
     backgroundColor: colors.status.error,

@@ -255,7 +255,7 @@ export default function TestPanicFlowScreen() {
           <CameraView
             ref={cameraRef}
             style={styles.hiddenCamera}
-            type="back"
+
           />
         )}
 

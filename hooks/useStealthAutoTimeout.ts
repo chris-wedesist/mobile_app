@@ -12,7 +12,7 @@ export function useStealthAutoTimeout(timeoutMinutes = 5) {
   useEffect(() => {
     if (!isActive) return;
     
-    let timeoutId: NodeJS.Timeout | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let lastActivity = Date.now();
     
     // Function to reset the timeout

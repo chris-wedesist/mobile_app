@@ -59,7 +59,7 @@ export default function IncidentsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
-  const refreshInterval = useRef<NodeJS.Timeout>();
+  const refreshInterval = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const mapRef = useRef<WebView>(null);
   const { newIncident } = useLocalSearchParams();
 
@@ -157,8 +157,8 @@ export default function IncidentsScreen() {
       const incidentsWithDistance = data.map(incident => {
         try {
           // Get coordinates directly from the incident
-          const latitude = parseFloat(incident.latitude);
-          const longitude = parseFloat(incident.longitude);
+          const latitude = incident.latitude;
+          const longitude = incident.longitude;
 
           if (isNaN(latitude) || isNaN(longitude)) {
             console.warn('Invalid coordinates:', incident);
@@ -291,8 +291,8 @@ export default function IncidentsScreen() {
             maxZoom: 16,
             zoomControl: true,
             maxBounds: [
-              [${location?.coords.latitude - 0.1}, ${location?.coords.longitude - 0.1}],
-              [${location?.coords.latitude + 0.1}, ${location?.coords.longitude + 0.1}]
+              [${(location?.coords.latitude || 0) - 0.1}, ${(location?.coords.longitude || 0) - 0.1}],
+              [${(location?.coords.latitude || 0) + 0.1}, ${(location?.coords.longitude || 0) + 0.1}]
             ],
             maxBoundsViscosity: 1.0
           }).setView([${location?.coords.latitude || 0}, ${location?.coords.longitude || 0}], 13);

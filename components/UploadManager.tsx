@@ -34,9 +34,10 @@ class UploadManager {
       if (uploadError) throw uploadError;
 
       // Get public URL for the uploaded media
-      const { data: { publicUrl } } = supabase.storage
+      const { data } = supabase.storage
         .from('recordings')
         .getPublicUrl(filePath);
+      const publicUrl = data?.publicURL;
 
       // Create panic event record
       const { data: panicEvent, error: panicError } = await supabase
@@ -98,9 +99,10 @@ class UploadManager {
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      const { data } = supabase.storage
         .from('recordings')
         .getPublicUrl(filePath);
+      const publicUrl = data?.publicURL;
 
       // Create safe encounter record
       const { data: encounter, error: encounterError } = await supabase
@@ -151,9 +153,10 @@ class UploadManager {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl: url } } = supabase.storage
+        const { data } = supabase.storage
           .from('stories')
           .getPublicUrl(filePath);
+        const url = data?.publicURL;
           
         publicUrl = url;
       }

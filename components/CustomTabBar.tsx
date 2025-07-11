@@ -34,7 +34,7 @@ export default function CustomTabBar() {
 
   const navigateToTab = (tabName: string) => {
     // Navigate directly to the tab's root screen
-    router.replace(getTabRoute(tabName));
+    router.replace(getTabRoute(tabName) as any);
   };
 
   const renderIcon = (iconName: string, size: number, color: string) => {

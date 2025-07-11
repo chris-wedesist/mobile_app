@@ -21,7 +21,7 @@ export default function RootLayout() {
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     console.log('RootLayout mounted, checking first launch...');
@@ -66,7 +66,7 @@ export default function RootLayout() {
       console.log('App is ready, navigating to:', initialRoute);
       // Use setTimeout to ensure navigation happens after render
       const navigationTimeout = setTimeout(() => {
-        router.replace(initialRoute);
+        router.replace(initialRoute as any);
         // Hide the native splash screen once navigation is complete
         SplashScreen.hideAsync().catch(() => {
           // Ignore errors - this happens on web

@@ -53,7 +53,7 @@ export default function DocumentsScreen() {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 1,
         allowsEditing: true,
       });

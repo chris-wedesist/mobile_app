@@ -46,7 +46,7 @@ export default function CoverStoryManager() {
       if (Platform.OS === 'web') {
         window.removeEventListener('keydown', handleCoverStory);
       } else {
-        BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+        // BackHandler.removeEventListener is deprecated, use the return function instead
       }
     };
   }, [isActive]);
