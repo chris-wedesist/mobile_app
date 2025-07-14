@@ -54,6 +54,16 @@ export default function HomeScreen() {
         </Text>
       </View>
 
+      {/* Test Authentication Button */}
+      <View style={styles.testSection}>
+        <Pressable 
+          style={styles.testButton}
+          onPress={() => router.push('/auth/login')}
+        >
+          <Text style={styles.testButtonText}>Test Authentication</Text>
+        </Pressable>
+      </View>
+
       <View style={styles.newsSection}>
         <View style={styles.newsHeader}>
           <Text style={styles.newsTitle}>Latest Updates</Text>
@@ -205,5 +215,21 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
+  },
+  testSection: {
+    padding: 20,
+    backgroundColor: colors.primary,
+  },
+  testButton: {
+    backgroundColor: '#007AFF',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  testButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
