@@ -21,8 +21,14 @@ export class AppError extends Error {
  */
 export const errorHandler = (error: unknown): string => {
   if (error instanceof AppError) {
+    const severityLevelMap = {
+      high: 'error',
+      medium: 'warning',
+      low: 'info',
+    } as const;
+
     Sentry.captureException(error, {
-      level: error.severity,
+      level: severityLevelMap[error.severity] as any, // cast to avoid TS version mismatches
       tags: { errorCode: error.code },
     });
     return error.userMessage;
