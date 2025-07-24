@@ -1,3 +1,4 @@
+import '@/utils/sentry'; // Initialise Sentry (error monitoring)
 import { useEffect, useState, useRef } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
