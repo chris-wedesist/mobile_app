@@ -5,10 +5,14 @@ import { useEffect, useState } from 'react';
 import { getNews, NewsItem, fetchNewsWithOptimization } from '@/lib/news';
 import { router } from 'expo-router';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
+import { useLoadingState, useErrorState, StateManager } from '@/utils/stateManager';
 
 export default function HomeScreen() {
   const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Use state management for loading and error states
+  const loading = useLoadingState('home_news');
+  const error = useErrorState('home_news');
 
   useEffect(() => {
     loadNews();
@@ -16,11 +20,10 @@ export default function HomeScreen() {
 
   const loadNews = async () => {
     try {
-      console.log('Loading news with optimization...');
-      setLoading(true);
+      console.log('Loading news with state management...');
       
-      // Use optimized parallel fetching for better performance
-      const optimizedData = await performanceOptimizer.fetchWithCache('home_news', async () => {
+      // Use StateManager for fetching with integrated state management
+      const optimizedData = await StateManager.fetchWithState('home_news', async () => {
         const result = await fetchNewsWithOptimization();
         return result.news.slice(0, 3); // Only fetch 3 items for preview
       }, {
@@ -33,8 +36,6 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('Error loading news:', error);
       setNews([]); // Set empty array on error
-    } finally {
-      setLoading(false);
     }
   };
 

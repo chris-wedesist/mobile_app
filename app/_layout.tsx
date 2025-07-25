@@ -13,6 +13,7 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import * as React from 'react';
 import * as Sentry from '@sentry/react-native';
 import { errorHandler } from '@/utils/errorHandler';
+import { StateManager } from '@/utils/stateManager';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -74,7 +75,21 @@ export default function RootLayout() {
 
   useEffect(() => {
     console.log('RootLayout mounted, checking first launch...');
-    checkFirstLaunch();
+    
+    // Initialize state management
+    const initializeApp = async () => {
+      try {
+        await StateManager.initialize();
+        console.log('State management initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize state management:', error);
+      }
+      
+      // Continue with existing initialization
+      checkFirstLaunch();
+    };
+    
+    initializeApp();
 
     // Cleanup function to clear timeout if component unmounts
     return () => {
