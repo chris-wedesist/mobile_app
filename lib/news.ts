@@ -220,6 +220,55 @@ export async function fetchNewsWithLocation(userLocation?: { latitude: number; l
   }
 }
 
+// New function to fetch news for tabbed interface
+export async function fetchNewsForTabs(userLocation?: { latitude: number; longitude: number }): Promise<{
+  local: NewsItem[];
+  national: NewsItem[];
+}> {
+  try {
+    console.log('Fetching news for tabbed interface...');
+    
+    if (userLocation) {
+      // Fetch both local and national news with location
+      const combinedNews = await LiveDataService.getCombinedNews(userLocation, {
+        localRadiusKm: 50,
+        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
+        importance: ['urgent', 'high', 'normal'],
+        localLimit: 20,
+        nationalLimit: 20,
+      });
+
+      return {
+        local: combinedNews.local.map(convertLiveNewsToNewsItem),
+        national: combinedNews.national.map(convertLiveNewsToNewsItem),
+      };
+    } else {
+      // Fallback to national news only if location is not available
+      const nationalNews = await LiveDataService.getNewsByLocation('national', undefined, undefined, {
+        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
+        importance: ['urgent', 'high', 'normal'],
+        limit: 40,
+      });
+
+      const convertedNews = nationalNews.map(convertLiveNewsToNewsItem);
+      
+      return {
+        local: [],
+        national: convertedNews,
+      };
+    }
+  } catch (error) {
+    errorHandler(error);
+    console.error('Error fetching news for tabs:', error);
+    
+    // Return fallback data
+    return {
+      local: fallbackNews.slice(0, 2),
+      national: fallbackNews,
+    };
+  }
+}
+
 function removeDuplicates(news: NewsItem[]): NewsItem[] {
   const seen = new Set();
   return news.filter(item => {

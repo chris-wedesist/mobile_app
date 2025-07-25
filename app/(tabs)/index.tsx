@@ -2,13 +2,15 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-na
 import NoHandsIcon from '../../components/NoHandsIcon';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
-import { getNews, NewsItem, fetchNewsWithOptimization } from '@/lib/news';
+import { getNews, NewsItem, fetchNewsWithOptimization, fetchNewsForTabs } from '@/lib/news';
 import { router } from 'expo-router';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
 import { useLoadingState, useErrorState, StateManager } from '@/utils/stateManager';
+import * as Location from 'expo-location';
 
 export default function HomeScreen() {
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>();
   
   // Use state management for loading and error states
   const loading = useLoadingState('home_news');
@@ -22,10 +24,34 @@ export default function HomeScreen() {
     try {
       console.log('Loading news with state management...');
       
+      // Get user location for local news
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          setUserLocation({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+        }
+      } catch (error) {
+        console.log('Location permission denied or error:', error);
+      }
+      
       // Use StateManager for fetching with integrated state management
       const optimizedData = await StateManager.fetchWithState('home_news', async () => {
-        const result = await fetchNewsWithOptimization();
-        return result.news.slice(0, 3); // Only fetch 3 items for preview
+        // Fetch news for both tabs and combine for preview
+        const newsData = await fetchNewsForTabs(userLocation);
+        const combinedNews = [...newsData.local, ...newsData.national];
+        
+        // Sort by date and take first 3 for preview
+        const sortedNews = combinedNews.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        
+        return sortedNews.slice(0, 3); // Only fetch 3 items for preview
       }, {
         key: 'home_news',
         duration: 5 * 60 * 1000 // 5 minutes cache
