@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { errorHandler, AppError } from '@/utils/errorHandler';
 
 export interface NewsItem {
   id: string;
@@ -28,6 +29,7 @@ async function fetchFromAPI(): Promise<NewsItem[]> {
     console.log('Using fallback news data');
     return fallbackNews;
   } catch (error) {
+    errorHandler(error); // Integrated errorHandler for monitoring
     console.error('Error fetching news from API:', error);
     return [];
   }
@@ -84,6 +86,7 @@ export async function fetchNews(): Promise<NewsItem[]> {
     console.warn('No results from API, using fallback data');
     return fallbackNews;
   } catch (error: unknown) {
+    errorHandler(error); // Integrated errorHandler for monitoring
     console.error('Error in fetchNews:', error);
     return fallbackNews;
   }
@@ -114,6 +117,7 @@ export async function getNews(page: number = 1, limit: number = 10): Promise<New
     console.log('Using fallback news data:', paginatedNews);
     return paginatedNews;
   } catch (error) {
+    errorHandler(error); // Integrated errorHandler for monitoring
     console.error('Error fetching news:', error);
     // Return fallback data if API fails
     return fallbackNews;
