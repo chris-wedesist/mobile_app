@@ -14,7 +14,22 @@ import * as React from 'react';
 import * as Sentry from '@sentry/react-native';
 import { errorHandler } from '@/utils/errorHandler';
 import { StateManager } from '@/utils/stateManager';
-import '@/utils/i18n'; // Initialize i18n system
+
+// Initialize i18n system safely
+let i18nInitialized = false;
+const initializeI18n = () => {
+  if (!i18nInitialized) {
+    try {
+      // Dynamic import to avoid Hermes issues
+      import('@/utils/i18n').catch((error) => {
+        console.warn('Failed to initialize i18n system:', error);
+      });
+      i18nInitialized = true;
+    } catch (error) {
+      console.warn('Failed to initialize i18n system:', error);
+    }
+  }
+};
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync().catch(() => {

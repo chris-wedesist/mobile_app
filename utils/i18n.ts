@@ -18,37 +18,48 @@ const resources = {
 const getDeviceLanguage = (): string => {
   let locale = 'en';
   
-  if (Platform.OS === 'ios') {
-    locale = NativeModules.SettingsManager?.settings?.AppleLocale || 
-             NativeModules.SettingsManager?.settings?.AppleLanguages?.[0] || 
-             'en';
-  } else {
-    locale = NativeModules.I18nManager?.localeIdentifier || 'en';
+  try {
+    if (Platform.OS === 'ios') {
+      locale = NativeModules.SettingsManager?.settings?.AppleLocale || 
+               NativeModules.SettingsManager?.settings?.AppleLanguages?.[0] || 
+               'en';
+    } else {
+      locale = NativeModules.I18nManager?.localeIdentifier || 'en';
+    }
+  } catch (error) {
+    console.warn('Error getting device language:', error);
+    locale = 'en';
   }
   
   // Extract language code (e.g., 'en-US' -> 'en')
   return locale.split('-')[0];
 };
 
-// Initialize i18n
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'en',
-    debug: typeof __DEV__ !== 'undefined' ? __DEV__ : false,
-    
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-    
-    react: {
-      useSuspense: false, // React Native doesn't support Suspense yet
-    },
-    
-    // Mobile-specific options
-    compatibilityJSON: 'v4', // Updated to v4
-  });
+// Initialize i18n with error handling
+const initializeI18n = () => {
+  try {
+    i18n
+      .use(initReactI18next)
+      .init({
+        resources,
+        fallbackLng: 'en',
+        debug: typeof __DEV__ !== 'undefined' ? __DEV__ : false,
+        
+        interpolation: {
+          escapeValue: false, // React already escapes values
+        },
+        
+        react: {
+          useSuspense: false, // React Native doesn't support Suspense yet
+        },
+        
+        // Mobile-specific options
+        compatibilityJSON: 'v4', // Updated to v4
+      });
+  } catch (error) {
+    console.error('Error initializing i18n:', error);
+  }
+};
 
 // Set initial language
 const initializeLanguage = async () => {
@@ -70,12 +81,23 @@ const initializeLanguage = async () => {
   } catch (error) {
     console.error('Error initializing language:', error);
     // Fallback to English
-    await i18n.changeLanguage('en');
+    try {
+      await i18n.changeLanguage('en');
+    } catch (fallbackError) {
+      console.error('Error setting fallback language:', fallbackError);
+    }
   }
 };
 
-// Initialize language on startup
-initializeLanguage();
+// Initialize i18n system
+let isInitialized = false;
+const initializeI18nSystem = () => {
+  if (!isInitialized) {
+    initializeI18n();
+    initializeLanguage();
+    isInitialized = true;
+  }
+};
 
 // Export language utilities
 export const changeLanguage = async (language: string) => {
@@ -103,5 +125,8 @@ export const getSupportedLanguages = (): string[] => {
 export const isLanguageSupported = (language: string): boolean => {
   return Object.keys(resources).includes(language);
 };
+
+// Initialize the system
+initializeI18nSystem();
 
 export default i18n; 
