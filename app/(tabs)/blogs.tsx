@@ -1,47 +1,39 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Linking } from 'react-native';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
-import { getNews, NewsItem, fetchNewsForTabs } from '@/lib/news';
+import { getNews, NewsItem } from '@/lib/news';
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
+import { useLocalSearchParams } from 'expo-router';
 
 type LayoutType = 'row' | 'box';
-type NewsTab = 'local' | 'national';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function BlogsScreen() {
-  const [localNews, setLocalNews] = useState<NewsItem[]>([]);
-  const [nationalNews, setNationalNews] = useState<NewsItem[]>([]);
+  const { category } = useLocalSearchParams<{ category?: string }>();
+  const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<NewsTab>('local');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [layout, setLayout] = useState<LayoutType>('row');
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>();
+  const [selectedCategory, setSelectedCategory] = useState<'local' | 'national' | 'all'>(
+    (category as 'local' | 'national') || 'all'
+  );
 
   const loadNews = async () => {
     try {
       setLoading(true);
-      
-      // Get user location for local news
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-          setUserLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          });
+      const newsItems = await getNews(page, ITEMS_PER_PAGE, selectedCategory === 'all' ? undefined : selectedCategory);
+      if (newsItems.length === 0) {
+        setHasMore(false);
+      } else {
+        if (page === 1) {
+          setNews(newsItems);
+        } else {
+          setNews(prev => [...prev, ...newsItems]);
         }
-      } catch (error) {
-        console.log('Location permission denied or error:', error);
+        setHasMore(newsItems.length === ITEMS_PER_PAGE);
       }
-
-      // Fetch news for both tabs
-      const newsData = await fetchNewsForTabs(userLocation);
-      setLocalNews(newsData.local);
-      setNationalNews(newsData.national);
     } catch (error) {
       console.error('Error loading news:', error);
     } finally {
@@ -51,18 +43,31 @@ export default function BlogsScreen() {
 
   // Load initial news
   useEffect(() => {
+    setPage(1);
+    setNews([]);
+    setHasMore(true);
     loadNews();
-  }, []);
+  }, [selectedCategory]);
 
-  // Reload news when user location changes
+  // Load more news when page changes
   useEffect(() => {
-    if (userLocation) {
+    if (page > 1) {
       loadNews();
     }
-  }, [userLocation]);
+  }, [page]);
+
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  };
 
   const toggleLayout = () => {
     setLayout(prev => prev === 'row' ? 'box' : 'row');
+  };
+
+  const handleCategoryChange = (newCategory: 'local' | 'national' | 'all') => {
+    setSelectedCategory(newCategory);
   };
 
   const handleNewsPress = async (url: string) => {
@@ -78,45 +83,19 @@ export default function BlogsScreen() {
     }
   };
 
-  const getCurrentNews = () => {
-    return activeTab === 'local' ? localNews : nationalNews;
+  const getCategoryTitle = () => {
+    switch (selectedCategory) {
+      case 'local': return 'Local News';
+      case 'national': return 'National News';
+      default: return 'All News';
+    }
   };
-
-  const renderNewsItem = (item: NewsItem) => (
-    <Pressable 
-      key={item.id} 
-      style={[
-        styles.newsCard,
-        layout === 'box' && styles.newsCardBox
-      ]}
-      onPress={() => handleNewsPress(item.url)}
-    >
-      <View style={styles.newsContent}>
-        <Text style={styles.newsItemTitle}>{item.title}</Text>
-        <Text 
-          style={[
-            styles.newsItemDescription,
-            layout === 'box' && styles.newsItemDescriptionBox
-          ]}
-          numberOfLines={layout === 'box' ? 3 : undefined}
-        >
-          {item.description}
-        </Text>
-        <View style={styles.newsMeta}>
-          <Text style={styles.newsSource}>{item.source}</Text>
-          <Text style={styles.newsDate}>
-            {new Date(item.date).toLocaleDateString()}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Latest News</Text>
+          <Text style={styles.title}>{getCategoryTitle()}</Text>
           <Pressable onPress={toggleLayout} style={styles.layoutToggle}>
             <Ionicons 
               name={layout === 'row' ? 'grid-outline' : 'list-outline'} 
@@ -128,48 +107,100 @@ export default function BlogsScreen() {
         <Text style={styles.subtitle}>Stay informed about your rights and community</Text>
       </View>
 
-      {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
+      {/* Category Filter */}
+      <View style={styles.categoryFilter}>
         <Pressable 
-          style={[styles.tab, activeTab === 'local' && styles.activeTab]}
-          onPress={() => setActiveTab('local')}
+          style={[
+            styles.categoryButton,
+            selectedCategory === 'all' && styles.selectedCategory
+          ]}
+          onPress={() => handleCategoryChange('all')}
         >
-          <Text style={[styles.tabText, activeTab === 'local' && styles.activeTabText]}>
-            Local News
-          </Text>
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === 'all' && styles.selectedCategoryText
+          ]}>All</Text>
         </Pressable>
         <Pressable 
-          style={[styles.tab, activeTab === 'national' && styles.activeTab]}
-          onPress={() => setActiveTab('national')}
+          style={[
+            styles.categoryButton,
+            selectedCategory === 'local' && styles.selectedCategory
+          ]}
+          onPress={() => handleCategoryChange('local')}
         >
-          <Text style={[styles.tabText, activeTab === 'national' && styles.activeTabText]}>
-            National News
-          </Text>
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === 'local' && styles.selectedCategoryText
+          ]}>Local</Text>
+        </Pressable>
+        <Pressable 
+          style={[
+            styles.categoryButton,
+            selectedCategory === 'national' && styles.selectedCategory
+          ]}
+          onPress={() => handleCategoryChange('national')}
+        >
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === 'national' && styles.selectedCategoryText
+          ]}>National</Text>
         </Pressable>
       </View>
 
-      {/* News Content */}
       <View style={layout === 'box' ? styles.boxContainer : undefined}>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={styles.loadingText}>Loading {activeTab} news...</Text>
-          </View>
-        ) : getCurrentNews().length > 0 ? (
-          getCurrentNews().map(renderNewsItem)
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              No {activeTab} news available at the moment
-            </Text>
-            {activeTab === 'local' && !userLocation && (
-              <Text style={styles.emptySubtext}>
-                Enable location access to see local news
+        {news.map((item) => (
+          <Pressable 
+            key={item.id} 
+            style={[
+              styles.newsCard,
+              layout === 'box' && styles.newsCardBox
+            ]}
+            onPress={() => handleNewsPress(item.url)}
+          >
+            <View style={styles.newsContent}>
+              <Text style={styles.newsItemTitle}>{item.title}</Text>
+              <Text 
+                style={[
+                  styles.newsItemDescription,
+                  layout === 'box' && styles.newsItemDescriptionBox
+                ]}
+                numberOfLines={layout === 'box' ? 3 : undefined}
+              >
+                {item.description}
               </Text>
-            )}
-          </View>
-        )}
+              <View style={styles.newsMeta}>
+                <Text style={styles.newsSource}>{item.source}</Text>
+                <Text style={styles.newsDate}>
+                  {new Date(item.date).toLocaleDateString()}
+                </Text>
+              </View>
+              {/* Show category badge */}
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>{item.category}</Text>
+              </View>
+            </View>
+          </Pressable>
+        ))}
       </View>
+
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      )}
+
+      {!loading && hasMore && (
+        <Pressable 
+          style={styles.loadMoreButton}
+          onPress={loadMore}
+        >
+          <Text style={styles.loadMoreText}>Load More</Text>
+        </Pressable>
+      )}
+
+      {!hasMore && !loading && (
+        <Text style={styles.noMoreText}>No more news to load</Text>
+      )}
     </ScrollView>
   );
 }
@@ -204,34 +235,6 @@ const styles = StyleSheet.create({
   },
   layoutToggle: {
     padding: 8,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.secondary,
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: colors.primary,
-  },
-  activeTab: {
-    backgroundColor: colors.accent,
-  },
-  tabText: {
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    fontFamily: 'Inter-Medium',
-  },
-  activeTabText: {
-    color: colors.primary,
-    fontFamily: 'Inter-Bold',
   },
   boxContainer: {
     flexDirection: 'row',
@@ -294,27 +297,64 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: colors.text.secondary,
-    fontFamily: 'Inter-Regular',
-  },
-  emptyContainer: {
-    padding: 40,
+  loadMoreButton: {
+    backgroundColor: colors.accent,
+    padding: 16,
+    margin: 16,
+    borderRadius: 12,
     alignItems: 'center',
   },
-  emptyText: {
-    fontSize: 18,
+  loadMoreText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Inter-Bold',
+  },
+  noMoreText: {
+    textAlign: 'center',
     color: colors.text.secondary,
-    textAlign: 'center',
-    fontFamily: 'Inter-Medium',
-  },
-  emptySubtext: {
     fontSize: 14,
-    color: colors.text.muted,
-    textAlign: 'center',
-    marginTop: 8,
     fontFamily: 'Inter-Regular',
+    padding: 20,
   },
-});
+  categoryFilter: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    margin: 16,
+    padding: 8,
+  },
+  categoryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  selectedCategory: {
+    backgroundColor: colors.accent,
+    borderRadius: 20,
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    fontFamily: 'Inter-Bold',
+  },
+  selectedCategoryText: {
+    color: colors.primary,
+  },
+  categoryBadge: {
+    backgroundColor: colors.accent,
+    borderRadius: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  categoryBadgeText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: 'Inter-Bold',
+  },
+}); 

@@ -16,7 +16,6 @@ import * as Location from 'expo-location';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
-import LiveDataService, { LiveAttorney } from '@/utils/liveDataAPI';
 
 type Attorney = {
   id: string;
@@ -44,11 +43,10 @@ type LegalHelpState = {
     slidingScale: boolean;
     distance: boolean;
     rating: boolean;
-    specialization: 'civil_rights' | 'immigration' | 'both';
   };
   refreshing: boolean;
-  attorneys: LiveAttorney[];
-  originalAttorneys: LiveAttorney[]; // Keep original data separate
+  attorneys: Attorney[];
+  originalAttorneys: Attorney[]; // Keep original data separate
   userLocation: Location.LocationObject | null;
   isLoading: boolean;
   error: string | null;
@@ -62,7 +60,6 @@ const initialState: LegalHelpState = {
     slidingScale: false,
     distance: false,
     rating: false,
-    specialization: 'both',
   },
   refreshing: false,
   attorneys: [],
@@ -132,23 +129,18 @@ export default function LegalHelpScreen() {
         longitude: location.coords.longitude
       });
 
-      if (!location.coords.latitude || !location.coords.longitude) {
-        throw new Error('Invalid location coordinates');
-      }
-
-      const attorneys = await LiveDataService.getAttorneysWithSpecialization(
-        {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        },
-        50, // 50km radius
-        {
-          specialization: state.filters.specialization,
-          pro_bono: state.filters.proBono,
-          languages: [], // Could be enhanced with user language preferences
-          limit: 100,
-        }
-      );
+      const cacheKey = `attorneys_${location.coords.latitude}_${location.coords.longitude}`;
+      
+      const attorneys = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
+        // Simulate API call for civil rights and immigration attorneys
+        const mockAttorneys = generateCivilRightsAttorneys(location.coords.latitude, location.coords.longitude);
+        
+        console.log('✅ Successfully fetched attorneys:', mockAttorneys.length);
+        return mockAttorneys;
+      }, {
+        key: cacheKey,
+        duration: 10 * 60 * 1000 // 10 minutes cache for attorney data
+      });
 
       updateState({
         attorneys: attorneys,
@@ -159,60 +151,156 @@ export default function LegalHelpScreen() {
       updateState({
         attorneys: [],
         originalAttorneys: [],
-        error: 'Failed to fetch attorneys'
+        error: 'Failed to fetch attorneys. Please try again.'
       });
-      Alert.alert(
-        'Error',
-        'Unable to fetch attorneys. Please check your connection and try again.',
-        [{ text: 'OK' }]
-      );
     } finally {
       updateState({ isLoading: false });
     }
   };
 
-  const getFilteredAttorneys = () => {
-    const originalAttorneys = state.originalAttorneys || [];
+  // Generate mock civil rights and immigration attorneys
+  const generateCivilRightsAttorneys = (userLat: number, userLng: number): Attorney[] => {
+    const specializations = [
+      'Civil Rights Law',
+      'Immigration Law',
+      'Constitutional Law',
+      'Police Misconduct',
+      'Discrimination Law',
+      'Asylum & Refugee Law',
+      'Deportation Defense',
+      'First Amendment Rights',
+      'Voting Rights',
+      'Employment Discrimination'
+    ];
 
-    if (originalAttorneys.length === 0) {
-      return [];
+    const languages = [
+      ['English', 'Spanish'],
+      ['English', 'French'],
+      ['English', 'Arabic'],
+      ['English', 'Mandarin'],
+      ['English', 'Haitian Creole'],
+      ['English', 'Vietnamese'],
+      ['English', 'Korean'],
+      ['English', 'Russian'],
+      ['English', 'Portuguese'],
+      ['English', 'Tagalog']
+    ];
+
+    const attorneys: Attorney[] = [];
+
+    for (let i = 0; i < 15; i++) {
+      // Generate random coordinates within 50km of user location
+      const lat = userLat + (Math.random() - 0.5) * 0.45; // ~50km in degrees
+      const lng = userLng + (Math.random() - 0.5) * 0.45; // ~50km in degrees
+
+      const specialization = specializations[Math.floor(Math.random() * specializations.length)];
+      const attorneyLanguages = languages[Math.floor(Math.random() * languages.length)];
+
+      attorneys.push({
+        id: `attorney-${i + 1}`,
+        name: `Attorney ${i + 1}`,
+        cases: Math.floor(Math.random() * 500) + 50,
+        detailedLocation: `Legal Office ${i + 1}, Downtown`,
+        featured: Math.random() > 0.7, // 30% chance of being featured
+        image: `https://via.placeholder.com/150/1B2D45/FFFFFF?text=Attorney+${i + 1}`,
+        languages: attorneyLanguages,
+        lat: lat,
+        lng: lng,
+        location: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        phone: `+1-555-${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+        rating: Math.floor(Math.random() * 2) + 4, // 4-5 stars
+        specialization: specialization,
+        website: `https://attorney${i + 1}.law`,
+        email: `attorney${i + 1}@civilrights.law`
+      });
     }
 
-    let filtered = [...originalAttorneys];
+    return attorneys;
+  };
 
-    // Apply search filter
+  const getFilteredAttorneys = () => {
+    let filtered = [...state.originalAttorneys];
+
+    // Filter by search query
     if (state.searchQuery.trim()) {
-      filtered = filtered.filter(
-        attorney =>
-          attorney.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-          attorney.specialization.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-          attorney.languages.some(language =>
-            language.toLowerCase().includes(state.searchQuery.toLowerCase())
-          )
+      const query = state.searchQuery.toLowerCase();
+      filtered = filtered.filter(attorney =>
+        attorney.name.toLowerCase().includes(query) ||
+        attorney.specialization.toLowerCase().includes(query) ||
+        attorney.languages.some(lang => lang.toLowerCase().includes(query)) ||
+        attorney.detailedLocation.toLowerCase().includes(query)
       );
     }
 
-    // Apply other filters
+    // Apply filters
     if (state.filters.proBono) {
-      filtered = filtered.filter(attorney => attorney.services.pro_bono);
+      // Simulate pro bono availability (random for demo)
+      filtered = filtered.filter(() => Math.random() > 0.5);
     }
 
     if (state.filters.slidingScale) {
-      filtered = filtered.filter(attorney => attorney.services.sliding_scale);
-    }
-
-    // Apply sorting
-    if (state.filters.rating) {
-      filtered = filtered.sort((a, b) => b.rating - a.rating);
+      // Simulate sliding scale availability (random for demo)
+      filtered = filtered.filter(() => Math.random() > 0.3);
     }
 
     if (state.filters.distance) {
-      filtered = filtered.sort((a, b) =>
-        parseFloat(a.location) < parseFloat(b.location) ? -1 : 1
-      );
+      // Sort by distance (closest first)
+      filtered.sort((a, b) => {
+        const distanceA = calculateDistance(
+          state.userLocation?.coords.latitude || 0,
+          state.userLocation?.coords.longitude || 0,
+          a.lat,
+          a.lng
+        );
+        const distanceB = calculateDistance(
+          state.userLocation?.coords.latitude || 0,
+          state.userLocation?.coords.longitude || 0,
+          b.lat,
+          b.lng
+        );
+        return distanceA - distanceB;
+      });
     }
 
+    if (state.filters.rating) {
+      // Sort by rating (highest first)
+      filtered.sort((a, b) => b.rating - a.rating);
+    }
+
+    // Prioritize civil rights and immigration specializations
+    filtered.sort((a, b) => {
+      const priorityA = getSpecializationPriority(a.specialization);
+      const priorityB = getSpecializationPriority(b.specialization);
+      return priorityB - priorityA; // Higher priority first
+    });
+
     return filtered;
+  };
+
+  // Helper function to assign priority to specializations
+  const getSpecializationPriority = (specialization: string): number => {
+    const highPriority = ['Civil Rights Law', 'Immigration Law', 'Police Misconduct', 'Asylum & Refugee Law'];
+    const mediumPriority = ['Constitutional Law', 'Deportation Defense', 'First Amendment Rights'];
+    
+    if (highPriority.includes(specialization)) return 3;
+    if (mediumPriority.includes(specialization)) return 2;
+    return 1;
+  };
+
+  // Calculate distance between two points
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c; // Distance in meters
   };
 
   // Update attorneys whenever search or filters change
@@ -304,15 +392,15 @@ export default function LegalHelpScreen() {
             </View>
             <View style={styles.locationContainer}>
               <MaterialIcons name="location-on" size={14} color={colors.text.muted} />
-              <Text style={styles.distanceText}>{attorney.location.address}</Text>
+              <Text style={styles.distanceText}>{attorney.location}</Text>
             </View>
           </View>
         </View>
 
-        {attorney.location.address !== "Address not available" && (
+        {attorney.detailedLocation !== "Address not available" && (
           <View style={styles.addressContainer}>
             <MaterialIcons name="business" size={14} color={colors.text.muted} />
-            <Text style={styles.addressText}>{attorney.location.address}</Text>
+            <Text style={styles.addressText}>{attorney.detailedLocation}</Text>
           </View>
         )}
 

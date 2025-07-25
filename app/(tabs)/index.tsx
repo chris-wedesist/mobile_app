@@ -2,15 +2,14 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-na
 import NoHandsIcon from '../../components/NoHandsIcon';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
-import { getNews, NewsItem, fetchNewsWithOptimization, fetchNewsForTabs } from '@/lib/news';
+import { getNews, NewsItem, fetchNewsWithOptimization } from '@/lib/news';
 import { router } from 'expo-router';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
 import { useLoadingState, useErrorState, StateManager } from '@/utils/stateManager';
-import * as Location from 'expo-location';
 
 export default function HomeScreen() {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>();
+  const [localNews, setLocalNews] = useState<NewsItem[]>([]);
+  const [nationalNews, setNationalNews] = useState<NewsItem[]>([]);
   
   // Use state management for loading and error states
   const loading = useLoadingState('home_news');
@@ -24,44 +23,29 @@ export default function HomeScreen() {
     try {
       console.log('Loading news with state management...');
       
-      // Get user location for local news
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-          setUserLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          });
-        }
-      } catch (error) {
-        console.log('Location permission denied or error:', error);
-      }
-      
       // Use StateManager for fetching with integrated state management
       const optimizedData = await StateManager.fetchWithState('home_news', async () => {
-        // Fetch news for both tabs and combine for preview
-        const newsData = await fetchNewsForTabs(userLocation);
-        const combinedNews = [...newsData.local, ...newsData.national];
-        
-        // Sort by date and take first 3 for preview
-        const sortedNews = combinedNews.sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        
-        return sortedNews.slice(0, 3); // Only fetch 3 items for preview
+        const result = await fetchNewsWithOptimization();
+        return {
+          local: result.local.slice(0, 2), // Only fetch 2 items for preview
+          national: result.national.slice(0, 2) // Only fetch 2 items for preview
+        };
       }, {
         key: 'home_news',
         duration: 5 * 60 * 1000 // 5 minutes cache
       });
       
-      console.log('Loaded optimized news items:', optimizedData);
-      setNews(optimizedData);
+      console.log('Loaded optimized news items:', {
+        local: optimizedData.local.length,
+        national: optimizedData.national.length
+      });
+      
+      setLocalNews(optimizedData.local);
+      setNationalNews(optimizedData.national);
     } catch (error) {
       console.error('Error loading news:', error);
-      setNews([]); // Set empty array on error
+      setLocalNews([]);
+      setNationalNews([]);
     }
   };
 
@@ -78,6 +62,46 @@ export default function HomeScreen() {
     }
   };
 
+  const renderNewsSection = (title: string, news: NewsItem[], category: 'local' | 'national') => (
+    <View style={styles.newsSection}>
+      <View style={styles.newsHeader}>
+        <Text style={styles.newsTitle}>{title}</Text>
+        <Pressable 
+          style={styles.viewAllButton}
+          onPress={() => router.push(`/blogs?category=${category}`)}
+        >
+          <Text style={styles.viewAllText}>View All</Text>
+        </Pressable>
+      </View>
+      {loading ? (
+        <Text style={styles.loadingText}>Loading {category} news...</Text>
+      ) : news.length > 0 ? (
+        news.map((item) => (
+          <Pressable 
+            key={item.id} 
+            style={styles.newsCard}
+            onPress={() => handleNewsPress(item.url)}
+          >
+            <View style={styles.newsContent}>
+              <Text style={styles.newsItemTitle}>{item.title}</Text>
+              <Text style={styles.newsItemDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+              <View style={styles.newsMeta}>
+                <Text style={styles.newsSource}>{item.source}</Text>
+                <Text style={styles.newsDate}>
+                  {new Date(item.date).toLocaleDateString()}
+                </Text>
+              </View>
+            </View>
+          </Pressable>
+        ))
+      ) : (
+        <Text style={styles.noNewsText}>No {category} news available</Text>
+      )}
+    </View>
+  );
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.iconContainer}>
@@ -91,43 +115,8 @@ export default function HomeScreen() {
         </Text>
       </View>
 
-      <View style={styles.newsSection}>
-        <View style={styles.newsHeader}>
-          <Text style={styles.newsTitle}>Latest Updates</Text>
-          <Pressable 
-            style={styles.viewAllButton}
-            onPress={() => router.push('/blogs')}
-          >
-            <Text style={styles.viewAllText}>View All</Text>
-          </Pressable>
-        </View>
-        {loading ? (
-          <Text style={styles.loadingText}>Loading news...</Text>
-        ) : news.length > 0 ? (
-          news.map((item) => (
-            <Pressable 
-              key={item.id} 
-              style={styles.newsCard}
-              onPress={() => handleNewsPress(item.url)}
-            >
-              <View style={styles.newsContent}>
-                <Text style={styles.newsItemTitle}>{item.title}</Text>
-                <Text style={styles.newsItemDescription} numberOfLines={2}>
-                  {item.description}
-                </Text>
-                <View style={styles.newsMeta}>
-                  <Text style={styles.newsSource}>{item.source}</Text>
-                  <Text style={styles.newsDate}>
-                    {new Date(item.date).toLocaleDateString()}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-          ))
-        ) : (
-          <Text style={styles.loadingText}>No news available</Text>
-        )}
-      </View>
+      {renderNewsSection('Local News', localNews, 'local')}
+      {renderNewsSection('National News', nationalNews, 'national')}
     </ScrollView>
   );
 }
@@ -238,6 +227,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   loadingText: {
+    textAlign: 'center',
+    color: colors.text.secondary,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+  },
+  noNewsText: {
     textAlign: 'center',
     color: colors.text.secondary,
     fontSize: 16,

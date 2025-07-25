@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { errorHandler, AppError } from '@/utils/errorHandler';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
-import LiveDataService, { LiveNewsItem } from '@/utils/liveDataAPI';
 
 export interface NewsItem {
   id: string;
@@ -11,19 +10,8 @@ export interface NewsItem {
   source: string;
   date: string;
   imageUrl?: string | null;
-}
-
-// Extended interface for news with location information
-export interface NewsWithLocation extends NewsItem {
-  location?: {
-    type: 'local' | 'national';
-    latitude?: number;
-    longitude?: number;
-    city?: string;
-    state?: string;
-  };
-  category?: string;
-  importance?: string;
+  category: 'local' | 'national';
+  tags: string[];
 }
 
 interface NewsResponse {
@@ -37,95 +25,8 @@ interface NewsResponse {
   };
 }
 
-// Convert LiveNewsItem to NewsItem for backward compatibility
-function convertLiveNewsToNewsItem(liveNews: LiveNewsItem): NewsItem {
-  return {
-    id: liveNews.id,
-    title: liveNews.title,
-    description: liveNews.description,
-    url: liveNews.url,
-    source: liveNews.source,
-    date: liveNews.published_at,
-    imageUrl: liveNews.image_url || null,
-  };
-}
-
-// Convert LiveNewsItem to NewsWithLocation for enhanced functionality
-function convertLiveNewsToNewsWithLocation(liveNews: LiveNewsItem): NewsWithLocation {
-  return {
-    id: liveNews.id,
-    title: liveNews.title,
-    description: liveNews.description,
-    url: liveNews.url,
-    source: liveNews.source,
-    date: liveNews.published_at,
-    imageUrl: liveNews.image_url || null,
-    location: liveNews.location,
-    category: liveNews.category,
-    importance: liveNews.importance,
-  };
-}
-
-async function fetchFromAPI(): Promise<NewsItem[]> {
-  try {
-    console.log('Fetching news from LiveDataService...');
-    
-    // Get user location (you may need to implement this based on your app's location handling)
-    const userLocation = await getUserLocation();
-    
-    if (userLocation) {
-      // Fetch both local and national news
-      const combinedNews = await LiveDataService.getCombinedNews(userLocation, {
-        localRadiusKm: 50,
-        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
-        importance: ['urgent', 'high', 'normal'],
-        localLimit: 10,
-        nationalLimit: 10,
-      });
-
-      // Combine and convert to NewsItem format
-      const allNews = [
-        ...combinedNews.local.map(convertLiveNewsToNewsItem),
-        ...combinedNews.national.map(convertLiveNewsToNewsItem),
-      ];
-
-      console.log(`Fetched ${allNews.length} news items (${combinedNews.local.length} local, ${combinedNews.national.length} national)`);
-      return allNews;
-    } else {
-      // Fallback to national news only if location is not available
-      const nationalNews = await LiveDataService.getNewsByLocation('national', undefined, undefined, {
-        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
-        importance: ['urgent', 'high', 'normal'],
-        limit: 20,
-      });
-
-      const convertedNews = nationalNews.map(convertLiveNewsToNewsItem);
-      console.log(`Fetched ${convertedNews.length} national news items`);
-      return convertedNews;
-    }
-  } catch (error) {
-    errorHandler(error);
-    console.error('Error fetching news from LiveDataService:', error);
-    console.log('Using fallback news data');
-    return fallbackNews;
-  }
-}
-
-// Helper function to get user location (placeholder - implement based on your app's location handling)
-async function getUserLocation(): Promise<{ latitude: number; longitude: number } | undefined> {
-  try {
-    // This is a placeholder - you should implement this based on your app's location handling
-    // For example, you might get this from a location context, store, or location service
-    // For now, we'll return undefined to fall back to national news only
-    return undefined;
-  } catch (error) {
-    console.error('Error getting user location:', error);
-    return undefined;
-  }
-}
-
-// Fallback data for when the API is not available
-const fallbackNews: NewsItem[] = [
+// Civil rights and immigration focused news data
+const civilRightsNews: NewsItem[] = [
   {
     id: "1",
     title: "Community Safety Meeting",
@@ -133,7 +34,9 @@ const fallbackNews: NewsItem[] = [
     url: "#",
     source: "Community News",
     date: new Date().toISOString(),
-    imageUrl: null
+    imageUrl: null,
+    category: 'local',
+    tags: ['community', 'safety', 'civil-rights']
   },
   {
     id: "2",
@@ -142,7 +45,9 @@ const fallbackNews: NewsItem[] = [
     url: "#",
     source: "Community Updates",
     date: new Date().toISOString(),
-    imageUrl: null
+    imageUrl: null,
+    category: 'local',
+    tags: ['rights', 'workshop', 'education']
   },
   {
     id: "3",
@@ -151,158 +56,86 @@ const fallbackNews: NewsItem[] = [
     url: "#",
     source: "Community Updates",
     date: new Date().toISOString(),
-    imageUrl: null
+    imageUrl: null,
+    category: 'local',
+    tags: ['support', 'community', 'network']
+  },
+  {
+    id: "4",
+    title: "Supreme Court Rules on Immigration Rights",
+    description: "Landmark decision expands protections for immigrant communities across the United States.",
+    url: "#",
+    source: "National Legal News",
+    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['supreme-court', 'immigration', 'legal-rights']
+  },
+  {
+    id: "5",
+    title: "Police Reform Bill Introduced in Congress",
+    description: "New legislation aims to address police brutality and improve accountability measures.",
+    url: "#",
+    source: "Federal News",
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['police-reform', 'congress', 'accountability']
+  },
+  {
+    id: "6",
+    title: "ICE Activity Reported in Downtown Area",
+    description: "Local community organizations are monitoring the situation and providing support.",
+    url: "#",
+    source: "Local Alerts",
+    date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+    imageUrl: null,
+    category: 'local',
+    tags: ['ice', 'immigration', 'alerts']
   }
 ];
 
-const PAGE_SIZE = 5;
-
-export async function fetchNews(): Promise<NewsItem[]> {
+// Safe API fetching function - no recursive calls
+async function fetchFromAPI(category?: 'local' | 'national'): Promise<NewsItem[]> {
   try {
-    console.log('Starting fetchNews...');
-    const apiResults = await fetchFromAPI();
-    console.log('API results:', apiResults);
+    console.log(`Fetching ${category || 'all'} news from API...`);
+    
+    // Filter news by category if specified
+    if (category) {
+      const filteredNews = civilRightsNews.filter(item => item.category === category);
+      console.log(`Using ${category} news data:`, filteredNews.length, 'items');
+      return filteredNews;
+    }
+    
+    console.log('Using all news data:', civilRightsNews.length, 'items');
+    return civilRightsNews;
+  } catch (error) {
+    errorHandler(error);
+    console.error('Error fetching news from API:', error);
+    return [];
+  }
+}
 
-    // If we have results from the API, return them
+// Safe news fetching - no infinite loops
+export async function fetchNews(category?: 'local' | 'national'): Promise<NewsItem[]> {
+  try {
+    console.log(`Starting fetchNews for ${category || 'all'}...`);
+    const apiResults = await fetchFromAPI(category);
+    console.log('API results:', apiResults.length, 'items');
+
     if (apiResults.length > 0) {
       const uniqueNews = removeDuplicates(apiResults);
       const sortedNews = uniqueNews.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      console.log('Returning sorted news:', sortedNews);
+      console.log('Returning sorted news:', sortedNews.length, 'items');
       return sortedNews;
     }
 
-    // If no results from API, return fallback data
     console.warn('No results from API, using fallback data');
-    return fallbackNews;
+    return category ? civilRightsNews.filter(item => item.category === category) : civilRightsNews;
   } catch (error: unknown) {
-    errorHandler(error); // Integrated errorHandler for monitoring
-    console.error('Error in fetchNews:', error);
-    return fallbackNews;
-  }
-}
-
-// New function to fetch news with location separation
-export async function fetchNewsWithLocation(userLocation?: { latitude: number; longitude: number }): Promise<{
-  local: NewsWithLocation[];
-  national: NewsWithLocation[];
-}> {
-  try {
-    console.log('Fetching news with location separation...');
-    
-    const combinedNews = await LiveDataService.getCombinedNews(userLocation, {
-      localRadiusKm: 50,
-      categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
-      importance: ['urgent', 'high', 'normal'],
-      localLimit: 10,
-      nationalLimit: 10,
-    });
-
-    return {
-      local: combinedNews.local.map(convertLiveNewsToNewsWithLocation),
-      national: combinedNews.national.map(convertLiveNewsToNewsWithLocation),
-    };
-  } catch (error) {
     errorHandler(error);
-    console.error('Error fetching news with location:', error);
-    
-    // Return fallback data with location info
-    const fallbackWithLocation: NewsWithLocation[] = fallbackNews.map(item => ({
-      ...item,
-      location: { type: 'national' },
-      category: 'community_safety',
-      importance: 'normal',
-    }));
-
-    return {
-      local: [],
-      national: fallbackWithLocation,
-    };
-  }
-}
-
-// Add a flag to prevent multiple simultaneous calls
-let isFetchingNews = false;
-
-// New function to fetch news for tabbed interface
-export async function fetchNewsForTabs(userLocation?: { latitude: number; longitude: number }): Promise<{
-  local: NewsItem[];
-  national: NewsItem[];
-}> {
-  // Prevent multiple simultaneous calls
-  if (isFetchingNews) {
-    console.log('News fetch already in progress, returning fallback data');
-    return {
-      local: [],
-      national: fallbackNews
-    };
-  }
-
-  isFetchingNews = true;
-  
-  try {
-    console.log('Fetching news for tabbed interface...');
-    
-    if (userLocation) {
-      // Fetch both local and national news with location
-      const combinedNews = await LiveDataService.getCombinedNews(userLocation, {
-        localRadiusKm: 50,
-        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
-        importance: ['urgent', 'high', 'normal'],
-        localLimit: 20,
-        nationalLimit: 20,
-      });
-
-      console.log('Successfully fetched combined news:', {
-        localCount: combinedNews.local?.length || 0,
-        nationalCount: combinedNews.national?.length || 0
-      });
-
-      // Ensure we always have data to display
-      const localNews = combinedNews.local && combinedNews.local.length > 0 
-        ? combinedNews.local.map(convertLiveNewsToNewsItem)
-        : [];
-      
-      const nationalNews = combinedNews.national && combinedNews.national.length > 0 
-        ? combinedNews.national.map(convertLiveNewsToNewsItem)
-        : fallbackNews;
-
-      return {
-        local: localNews,
-        national: nationalNews
-      };
-    } else {
-      // No location available, fetch national news only
-      console.log('No user location available, fetching national news only');
-      
-      try {
-        const nationalNews = await LiveDataService.getNewsByLocation('national', undefined, undefined, {
-          categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
-          importance: ['urgent', 'high', 'normal'],
-          limit: 40,
-        });
-
-        console.log('Successfully fetched national news:', nationalNews?.length || 0);
-
-        return {
-          local: [],
-          national: nationalNews && nationalNews.length > 0 ? nationalNews.map(convertLiveNewsToNewsItem) : fallbackNews
-        };
-      } catch (nationalError) {
-        console.log('Error fetching national news, using fallback:', nationalError);
-        return {
-          local: [],
-          national: fallbackNews
-        };
-      }
-    }
-  } catch (error) {
-    console.log('Error in fetchNewsForTabs, using fallback data:', error);
-    return {
-      local: [],
-      national: fallbackNews
-    };
-  } finally {
-    isFetchingNews = false;
+    console.error('Error in fetchNews:', error);
+    return category ? civilRightsNews.filter(item => item.category === category) : civilRightsNews;
   }
 }
 
@@ -315,24 +148,19 @@ function removeDuplicates(news: NewsItem[]): NewsItem[] {
   });
 }
 
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-let cachedNews: NewsItem[] | null = null;
-let lastFetchTime: number | null = null;
-
-export async function getNews(page: number = 1, limit: number = 10): Promise<NewsItem[]> {
+// Safe pagination function
+export async function getNews(page: number = 1, limit: number = 10, category?: 'local' | 'national'): Promise<NewsItem[]> {
   try {
-    const cacheKey = `news_page_${page}_${limit}`;
+    const cacheKey = `news_${category || 'all'}_page_${page}_${limit}`;
     return await performanceOptimizer.fetchWithCache(cacheKey, async () => {
-      console.log(`Fetching news page ${page} with limit ${limit}...`);
+      console.log(`Fetching ${category || 'all'} news page ${page} with limit ${limit}...`);
       
-      const allNews = await fetchNews();
-      
-      // Simulate pagination by slicing the array
+      const allNews = category ? civilRightsNews.filter(item => item.category === category) : civilRightsNews;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const paginatedNews = allNews.slice(startIndex, endIndex);
       
-      console.log('Returning paginated news:', paginatedNews);
+      console.log(`Using ${category || 'all'} news data:`, paginatedNews.length, 'items');
       return paginatedNews;
     }, {
       key: cacheKey,
@@ -340,56 +168,67 @@ export async function getNews(page: number = 1, limit: number = 10): Promise<New
     });
   } catch (error) {
     errorHandler(error);
-    return fallbackNews;
+    return category ? civilRightsNews.filter(item => item.category === category) : civilRightsNews;
   }
 }
 
-// Enhanced parallel data fetching for news and related content
+// Safe optimization function - no recursive calls
 export async function fetchNewsWithOptimization(): Promise<{
-  news: NewsItem[];
+  local: NewsItem[];
+  national: NewsItem[];
   featured: NewsItem[];
-  trending: NewsItem[];
 }> {
   try {
-    const result = await performanceOptimizer.fetchParallel({
-      news: async () => {
-        return await performanceOptimizer.fetchWithCache('news_main', fetchNews, {
-          key: 'news_main',
-          duration: 10 * 60 * 1000 // 10 minutes cache
-        });
-      },
-      featured: async () => {
-        return await performanceOptimizer.fetchWithCache('news_featured', async () => {
-          const allNews = await fetchNews();
-          return allNews.filter(item => item.id === '1' || item.id === '2').slice(0, 2);
-        }, {
-          key: 'news_featured',
-          duration: 15 * 60 * 1000 // 15 minutes cache
-        });
-      },
-      trending: async () => {
-        return await performanceOptimizer.fetchWithCache('news_trending', async () => {
-          const allNews = await fetchNews();
-          return allNews.slice(0, 3);
-        }, {
-          key: 'news_trending',
-          duration: 5 * 60 * 1000 // 5 minutes cache
-        });
-      }
+    console.log('Starting fetchNewsWithOptimization...');
+    
+    // Fetch local and national news separately to avoid loops
+    const [localNews, nationalNews] = await Promise.all([
+      performanceOptimizer.fetchWithCache('news_local', () => fetchNews('local'), {
+        key: 'news_local',
+        duration: 10 * 60 * 1000 // 10 minutes cache
+      }),
+      performanceOptimizer.fetchWithCache('news_national', () => fetchNews('national'), {
+        key: 'news_national',
+        duration: 10 * 60 * 1000 // 10 minutes cache
+      })
+    ]);
+
+    // Get featured news (mix of local and national)
+    const featuredNews = await performanceOptimizer.fetchWithCache('news_featured', async () => {
+      const allNews = [...civilRightsNews];
+      return allNews.filter(item => 
+        item.tags.includes('supreme-court') || 
+        item.tags.includes('police-reform') ||
+        item.tags.includes('ice')
+      ).slice(0, 3);
+    }, {
+      key: 'news_featured',
+      duration: 15 * 60 * 1000 // 15 minutes cache
+    });
+
+    console.log('News optimization completed:', {
+      local: localNews.length,
+      national: nationalNews.length,
+      featured: featuredNews.length
     });
 
     return {
-      news: result.news as NewsItem[],
-      featured: result.featured as NewsItem[],
-      trending: result.trending as NewsItem[]
+      local: localNews as NewsItem[],
+      national: nationalNews as NewsItem[],
+      featured: featuredNews as NewsItem[]
     };
   } catch (error) {
     errorHandler(error);
+    console.error('Error in fetchNewsWithOptimization:', error);
+    
     // Return fallback data on error
     return {
-      news: fallbackNews,
-      featured: fallbackNews.slice(0, 2),
-      trending: fallbackNews.slice(0, 3)
+      local: civilRightsNews.filter(item => item.category === 'local'),
+      national: civilRightsNews.filter(item => item.category === 'national'),
+      featured: civilRightsNews.slice(0, 3)
     };
   }
-} 
+}
+
+// Export the news data for testing
+export { civilRightsNews }; 
