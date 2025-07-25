@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { errorHandler, AppError } from '@/utils/errorHandler';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
+import LiveDataService, { LiveNewsItem } from '@/utils/liveDataAPI';
 
 export interface NewsItem {
   id: string;
@@ -10,6 +11,19 @@ export interface NewsItem {
   source: string;
   date: string;
   imageUrl?: string | null;
+}
+
+// Extended interface for news with location information
+export interface NewsWithLocation extends NewsItem {
+  location?: {
+    type: 'local' | 'national';
+    latitude?: number;
+    longitude?: number;
+    city?: string;
+    state?: string;
+  };
+  category?: string;
+  importance?: string;
 }
 
 interface NewsResponse {
@@ -23,16 +37,90 @@ interface NewsResponse {
   };
 }
 
+// Convert LiveNewsItem to NewsItem for backward compatibility
+function convertLiveNewsToNewsItem(liveNews: LiveNewsItem): NewsItem {
+  return {
+    id: liveNews.id,
+    title: liveNews.title,
+    description: liveNews.description,
+    url: liveNews.url,
+    source: liveNews.source,
+    date: liveNews.published_at,
+    imageUrl: liveNews.image_url || null,
+  };
+}
+
+// Convert LiveNewsItem to NewsWithLocation for enhanced functionality
+function convertLiveNewsToNewsWithLocation(liveNews: LiveNewsItem): NewsWithLocation {
+  return {
+    id: liveNews.id,
+    title: liveNews.title,
+    description: liveNews.description,
+    url: liveNews.url,
+    source: liveNews.source,
+    date: liveNews.published_at,
+    imageUrl: liveNews.image_url || null,
+    location: liveNews.location,
+    category: liveNews.category,
+    importance: liveNews.importance,
+  };
+}
+
 async function fetchFromAPI(): Promise<NewsItem[]> {
   try {
-    console.log('Fetching news from API...');
-    // Simulate API call since the external API is not available
+    console.log('Fetching news from LiveDataService...');
+    
+    // Get user location (you may need to implement this based on your app's location handling)
+    const userLocation = await getUserLocation();
+    
+    if (userLocation) {
+      // Fetch both local and national news
+      const combinedNews = await LiveDataService.getCombinedNews(userLocation, {
+        localRadiusKm: 50,
+        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
+        importance: ['urgent', 'high', 'normal'],
+        localLimit: 10,
+        nationalLimit: 10,
+      });
+
+      // Combine and convert to NewsItem format
+      const allNews = [
+        ...combinedNews.local.map(convertLiveNewsToNewsItem),
+        ...combinedNews.national.map(convertLiveNewsToNewsItem),
+      ];
+
+      console.log(`Fetched ${allNews.length} news items (${combinedNews.local.length} local, ${combinedNews.national.length} national)`);
+      return allNews;
+    } else {
+      // Fallback to national news only if location is not available
+      const nationalNews = await LiveDataService.getNewsByLocation('national', undefined, undefined, {
+        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
+        importance: ['urgent', 'high', 'normal'],
+        limit: 20,
+      });
+
+      const convertedNews = nationalNews.map(convertLiveNewsToNewsItem);
+      console.log(`Fetched ${convertedNews.length} national news items`);
+      return convertedNews;
+    }
+  } catch (error) {
+    errorHandler(error);
+    console.error('Error fetching news from LiveDataService:', error);
     console.log('Using fallback news data');
     return fallbackNews;
+  }
+}
+
+// Helper function to get user location (placeholder - implement based on your app's location handling)
+async function getUserLocation(): Promise<{ latitude: number; longitude: number } | undefined> {
+  try {
+    // This is a placeholder - you should implement this based on your app's location handling
+    // For example, you might get this from a location context, store, or location service
+    // For now, we'll return undefined to fall back to national news only
+    return undefined;
   } catch (error) {
-    errorHandler(error); // Integrated errorHandler for monitoring
-    console.error('Error fetching news from API:', error);
-    return [];
+    console.error('Error getting user location:', error);
+    return undefined;
   }
 }
 
@@ -93,6 +181,45 @@ export async function fetchNews(): Promise<NewsItem[]> {
   }
 }
 
+// New function to fetch news with location separation
+export async function fetchNewsWithLocation(userLocation?: { latitude: number; longitude: number }): Promise<{
+  local: NewsWithLocation[];
+  national: NewsWithLocation[];
+}> {
+  try {
+    console.log('Fetching news with location separation...');
+    
+    const combinedNews = await LiveDataService.getCombinedNews(userLocation, {
+      localRadiusKm: 50,
+      categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
+      importance: ['urgent', 'high', 'normal'],
+      localLimit: 10,
+      nationalLimit: 10,
+    });
+
+    return {
+      local: combinedNews.local.map(convertLiveNewsToNewsWithLocation),
+      national: combinedNews.national.map(convertLiveNewsToNewsWithLocation),
+    };
+  } catch (error) {
+    errorHandler(error);
+    console.error('Error fetching news with location:', error);
+    
+    // Return fallback data with location info
+    const fallbackWithLocation: NewsWithLocation[] = fallbackNews.map(item => ({
+      ...item,
+      location: { type: 'national' },
+      category: 'community_safety',
+      importance: 'normal',
+    }));
+
+    return {
+      local: [],
+      national: fallbackWithLocation,
+    };
+  }
+}
+
 function removeDuplicates(news: NewsItem[]): NewsItem[] {
   const seen = new Set();
   return news.filter(item => {
@@ -111,13 +238,15 @@ export async function getNews(page: number = 1, limit: number = 10): Promise<New
     const cacheKey = `news_page_${page}_${limit}`;
     return await performanceOptimizer.fetchWithCache(cacheKey, async () => {
       console.log(`Fetching news page ${page} with limit ${limit}...`);
-      // Since the external API is not available, use fallback data
+      
+      const allNews = await fetchNews();
+      
       // Simulate pagination by slicing the array
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
-      const paginatedNews = fallbackNews.slice(startIndex, endIndex);
+      const paginatedNews = allNews.slice(startIndex, endIndex);
       
-      console.log('Using fallback news data:', paginatedNews);
+      console.log('Returning paginated news:', paginatedNews);
       return paginatedNews;
     }, {
       key: cacheKey,
