@@ -9,6 +9,10 @@ import { colors, shadows, radius } from '@/constants/theme';
 import { useFocusEffect } from '@react-navigation/native';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AccessibleButton } from '@/components/AccessibleButton';
+import { AccessibleText, AccessibleHeading, AccessibleBody } from '@/components/AccessibleText';
+import { useAccessibility } from '@/utils/accessibility';
+import { generateAccessibilityLabel, generateAccessibilityHint } from '@/utils/accessibility';
 
 interface Incident {
   id: string;
@@ -41,6 +45,9 @@ export default function SettingsScreen() {
     'EMERGENCY: I need immediate assistance. My location is attached.'
   );
   const [isEditingContact, setIsEditingContact] = useState(false);
+
+  // Add accessibility hook
+  const accessibilityConfig = useAccessibility();
 
   useEffect(() => {
     // Configure notification handler
