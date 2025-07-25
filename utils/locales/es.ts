@@ -1,0 +1,64 @@
+export default {
+  common: {
+    welcome: "Bienvenido",
+    loading: "Cargando...",
+    error: "Error",
+    success: "Éxito",
+    cancel: "Cancelar",
+    save: "Guardar",
+    delete: "Eliminar",
+    edit: "Editar",
+    back: "Atrás",
+    next: "Siguiente",
+    previous: "Anterior",
+    submit: "Enviar",
+    close: "Cerrar",
+    ok: "OK",
+    yes: "Sí",
+    no: "No"
+  },
+  navigation: {
+    home: "Inicio",
+    profile: "Perfil",
+    settings: "Configuración",
+    incidents: "Incidentes",
+    legal_help: "Ayuda Legal",
+    documents: "Documentos",
+    recordings: "Grabaciones",
+    blogs: "Blogs",
+    badges: "Insignias"
+  },
+  auth: {
+    login: "Iniciar Sesión",
+    logout: "Cerrar Sesión",
+    signup: "Registrarse",
+    email: "Correo Electrónico",
+    password: "Contraseña",
+    forgot_password: "¿Olvidaste tu contraseña?",
+    reset_password: "Restablecer Contraseña"
+  },
+  incidents: {
+    report_incident: "Reportar Incidente",
+    incident_details: "Detalles del Incidente",
+    location: "Ubicación",
+    description: "Descripción",
+    date_time: "Fecha y Hora",
+    witnesses: "Testigos",
+    evidence: "Evidencia"
+  },
+  settings: {
+    general: "General",
+    privacy: "Privacidad",
+    notifications: "Notificaciones",
+    language: "Idioma",
+    theme: "Tema",
+    about: "Acerca de",
+    help: "Ayuda"
+  },
+  accessibility: {
+    screen_reader_enabled: "Lector de Pantalla Habilitado",
+    screen_reader_disabled: "Lector de Pantalla Deshabilitado",
+    reduce_motion_enabled: "Reducir Movimiento Habilitado",
+    reduce_motion_disabled: "Reducir Movimiento Deshabilitado"
+  }
+}; 

@@ -14,6 +14,7 @@ import * as React from 'react';
 import * as Sentry from '@sentry/react-native';
 import { errorHandler } from '@/utils/errorHandler';
 import { StateManager } from '@/utils/stateManager';
+import '@/utils/i18n'; // Initialize i18n system
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync().catch(() => {
