@@ -16,6 +16,7 @@ import * as Location from 'expo-location';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
+import LiveDataService, { LiveAttorney } from '@/utils/liveDataAPI';
 
 type Attorney = {
   id: string;
@@ -43,10 +44,11 @@ type LegalHelpState = {
     slidingScale: boolean;
     distance: boolean;
     rating: boolean;
+    specialization: 'civil_rights' | 'immigration' | 'both';
   };
   refreshing: boolean;
-  attorneys: Attorney[];
-  originalAttorneys: Attorney[]; // Keep original data separate
+  attorneys: LiveAttorney[];
+  originalAttorneys: LiveAttorney[]; // Keep original data separate
   userLocation: Location.LocationObject | null;
   isLoading: boolean;
   error: string | null;
@@ -60,6 +62,7 @@ const initialState: LegalHelpState = {
     slidingScale: false,
     distance: false,
     rating: false,
+    specialization: 'both',
   },
   refreshing: false,
   attorneys: [],
@@ -129,35 +132,23 @@ export default function LegalHelpScreen() {
         longitude: location.coords.longitude
       });
 
-      const cacheKey = `attorneys_${location.coords.latitude}_${location.coords.longitude}`;
-      
-      const attorneys = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
-        const url = `https://www.wedesist.com/api/attorneys?lat=${location.coords.latitude}&lng=${location.coords.longitude}&radius=50`;
-        console.log('🌐 Request URL:', url);
+      if (!location.coords.latitude || !location.coords.longitude) {
+        throw new Error('Invalid location coordinates');
+      }
 
-        const response = await fetch(url);
-        console.log('📥 Response status:', response.status);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('❌ Server error response:', errorText);
-          throw new Error(`Server error: ${response.status} - ${errorText}`);
+      const attorneys = await LiveDataService.getAttorneysWithSpecialization(
+        {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        },
+        50, // 50km radius
+        {
+          specialization: state.filters.specialization,
+          pro_bono: state.filters.proBono,
+          languages: [], // Could be enhanced with user language preferences
+          limit: 100,
         }
-        
-        const data = await response.json();
-        console.log('📦 Parsed response data:', data);
-        
-        if (!data || !Array.isArray(data.attorneys)) {
-          console.error('❌ Invalid data format:', data);
-          throw new Error('Invalid response format from server');
-        }
-        
-        console.log('✅ Successfully fetched attorneys:', data.attorneys.length);
-        return data.attorneys;
-      }, {
-        key: cacheKey,
-        duration: 10 * 60 * 1000 // 10 minutes cache for attorney data
-      });
+      );
 
       updateState({
         attorneys: attorneys,
@@ -203,11 +194,11 @@ export default function LegalHelpScreen() {
 
     // Apply other filters
     if (state.filters.proBono) {
-      filtered = filtered.filter(attorney => attorney.featured);
+      filtered = filtered.filter(attorney => attorney.services.pro_bono);
     }
 
     if (state.filters.slidingScale) {
-      filtered = filtered.filter(attorney => attorney.featured);
+      filtered = filtered.filter(attorney => attorney.services.sliding_scale);
     }
 
     // Apply sorting
@@ -313,15 +304,15 @@ export default function LegalHelpScreen() {
             </View>
             <View style={styles.locationContainer}>
               <MaterialIcons name="location-on" size={14} color={colors.text.muted} />
-              <Text style={styles.distanceText}>{attorney.location}</Text>
+              <Text style={styles.distanceText}>{attorney.location.address}</Text>
             </View>
           </View>
         </View>
 
-        {attorney.detailedLocation !== "Address not available" && (
+        {attorney.location.address !== "Address not available" && (
           <View style={styles.addressContainer}>
             <MaterialIcons name="business" size={14} color={colors.text.muted} />
-            <Text style={styles.addressText}>{attorney.detailedLocation}</Text>
+            <Text style={styles.addressText}>{attorney.location.address}</Text>
           </View>
         )}
 
