@@ -18,8 +18,13 @@ jest.mock('./errorHandler', () => ({
 }));
 
 describe('PerformanceOptimizer', () => {
+  const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Clear the in-memory cache between tests
+    (performanceOptimizer as any).cache.clear();
+    (performanceOptimizer as any).pendingRequests.clear();
   });
 
   describe('fetchParallel', () => {
@@ -61,10 +66,9 @@ describe('PerformanceOptimizer', () => {
   describe('fetchWithCache', () => {
     it('should return cached data if available', async () => {
       const mockFetch = jest.fn().mockResolvedValue('fresh data');
-      const AsyncStorage = require('@react-native-async-storage/async-storage');
 
       // Mock cached data
-      AsyncStorage.getItem.mockResolvedValue(
+      mockAsyncStorage.getItem.mockResolvedValue(
         JSON.stringify({
           data: 'cached data',
           timestamp: Date.now(),
@@ -80,10 +84,9 @@ describe('PerformanceOptimizer', () => {
 
     it('should fetch fresh data if cache is expired', async () => {
       const mockFetch = jest.fn().mockResolvedValue('fresh data');
-      const AsyncStorage = require('@react-native-async-storage/async-storage');
 
       // Mock expired cached data
-      AsyncStorage.getItem.mockResolvedValue(
+      mockAsyncStorage.getItem.mockResolvedValue(
         JSON.stringify({
           data: 'expired data',
           timestamp: Date.now() - 120000, // 2 minutes ago
@@ -95,22 +98,51 @@ describe('PerformanceOptimizer', () => {
 
       expect(result).toBe('fresh data');
       expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('cache_test-key');
     });
 
     it('should handle pending requests', async () => {
+      let resolvePromise: (value: string) => void;
       const mockFetch = jest.fn().mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve('data'), 100))
+        new Promise<string>(resolve => {
+          resolvePromise = resolve;
+        })
       );
+
+      // Mock no cached data
+      mockAsyncStorage.getItem.mockResolvedValue(null);
+
+      // Clear any existing cache
+      (performanceOptimizer as any).cache.clear();
+      (performanceOptimizer as any).pendingRequests.clear();
 
       // Start two simultaneous requests
       const promise1 = performanceOptimizer.fetchWithCache('test-key', mockFetch);
       const promise2 = performanceOptimizer.fetchWithCache('test-key', mockFetch);
 
+      // Verify only one fetch was called
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      // Resolve the promise
+      resolvePromise!('data');
+
       const [result1, result2] = await Promise.all([promise1, promise2]);
 
       expect(result1).toBe('data');
       expect(result2).toBe('data');
-      expect(mockFetch).toHaveBeenCalledTimes(1); // Should only call once
+    });
+
+    it('should handle corrupted cache data', async () => {
+      const mockFetch = jest.fn().mockResolvedValue('fresh data');
+
+      // Mock corrupted cached data
+      mockAsyncStorage.getItem.mockResolvedValue('invalid json');
+
+      const result = await performanceOptimizer.fetchWithCache('test-key', mockFetch);
+
+      expect(result).toBe('fresh data');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('cache_test-key');
     });
   });
 
@@ -118,10 +150,9 @@ describe('PerformanceOptimizer', () => {
     it('should batch multiple fetch operations efficiently', async () => {
       const mockFetch1 = jest.fn().mockResolvedValue('data1');
       const mockFetch2 = jest.fn().mockResolvedValue('data2');
-      const AsyncStorage = require('@react-native-async-storage/async-storage');
 
       // Mock no cached data
-      AsyncStorage.getItem.mockResolvedValue(null);
+      mockAsyncStorage.getItem.mockResolvedValue(null);
 
       const result = await performanceOptimizer.fetchBatch({
         events: { key: 'events', fetch: mockFetch1 },
@@ -140,21 +171,19 @@ describe('PerformanceOptimizer', () => {
 
   describe('clearCache', () => {
     it('should clear all cache when no pattern is provided', async () => {
-      const AsyncStorage = require('@react-native-async-storage/async-storage');
-      AsyncStorage.getAllKeys.mockResolvedValue(['cache_key1', 'cache_key2', 'other_key']);
+      mockAsyncStorage.getAllKeys.mockResolvedValue(['cache_key1', 'cache_key2', 'other_key']);
 
       await performanceOptimizer.clearCache();
 
-      expect(AsyncStorage.multiRemove).toHaveBeenCalledWith(['cache_key1', 'cache_key2']);
+      expect(mockAsyncStorage.multiRemove).toHaveBeenCalledWith(['cache_key1', 'cache_key2']);
     });
 
     it('should clear specific cache pattern', async () => {
-      const AsyncStorage = require('@react-native-async-storage/async-storage');
-      AsyncStorage.getAllKeys.mockResolvedValue(['cache_news_1', 'cache_news_2', 'cache_other']);
+      mockAsyncStorage.getAllKeys.mockResolvedValue(['cache_news_1', 'cache_news_2', 'cache_other']);
 
       await performanceOptimizer.clearCache('news');
 
-      expect(AsyncStorage.multiRemove).toHaveBeenCalledWith(['cache_news_1', 'cache_news_2']);
+      expect(mockAsyncStorage.multiRemove).toHaveBeenCalledWith(['cache_news_1', 'cache_news_2']);
     });
   });
 }); 

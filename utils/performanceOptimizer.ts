@@ -49,22 +49,32 @@ class PerformanceOptimizer {
    */
   async getCached<T>(key: string): Promise<T | null> {
     try {
+      const now = Date.now();
+      
       // Check in-memory cache first
       const cached = this.cache.get(key);
-      if (cached && Date.now() < cached.expiresAt) {
+      if (cached && now < cached.expiresAt) {
         return cached.data;
+      } else if (cached && now >= cached.expiresAt) {
+        // Remove expired in-memory cache
+        this.cache.delete(key);
       }
 
       // Check AsyncStorage
       const stored = await AsyncStorage.getItem(`cache_${key}`);
       if (stored) {
-        const parsed: CacheItem<T> = JSON.parse(stored);
-        if (Date.now() < parsed.expiresAt) {
-          // Update in-memory cache
-          this.cache.set(key, parsed);
-          return parsed.data;
-        } else {
-          // Remove expired cache
+        try {
+          const parsed: CacheItem<T> = JSON.parse(stored);
+          if (now < parsed.expiresAt) {
+            // Update in-memory cache
+            this.cache.set(key, parsed);
+            return parsed.data;
+          } else {
+            // Remove expired cache
+            await AsyncStorage.removeItem(`cache_${key}`);
+          }
+        } catch (parseError) {
+          // Remove corrupted cache
           await AsyncStorage.removeItem(`cache_${key}`);
         }
       }
@@ -112,18 +122,22 @@ class PerformanceOptimizer {
     config?: CacheConfig
   ): Promise<T> {
     try {
-      // Check if request is already pending
+      // Check if request is already pending FIRST
       if (this.pendingRequests.has(key)) {
+        console.log(`Request already pending for key: ${key}`);
         return await this.pendingRequests.get(key)!;
       }
 
-      // Check cache first
+      // Check cache only if no pending request
       const cached = await this.getCached<T>(key);
       if (cached !== null) {
+        console.log(`Cache hit for key: ${key}`);
         return cached;
       }
 
-      // Fetch fresh data
+      console.log(`Cache miss for key: ${key}, fetching fresh data`);
+      
+      // Create the fetch promise and store it BEFORE starting the fetch
       const fetchPromise = fetchFunction();
       this.pendingRequests.set(key, fetchPromise);
 
@@ -135,6 +149,8 @@ class PerformanceOptimizer {
         this.pendingRequests.delete(key);
       }
     } catch (error) {
+      // Clean up pending request on error
+      this.pendingRequests.delete(key);
       errorHandler(error);
       throw error;
     }
