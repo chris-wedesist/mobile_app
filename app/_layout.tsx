@@ -15,20 +15,39 @@ import * as Sentry from '@sentry/react-native';
 import { errorHandler } from '@/utils/errorHandler';
 import { StateManager } from '@/utils/stateManager';
 
+// Initialize i18n system safely
+let i18nInitialized = false;
+const initializeI18n = () => {
+  if (!i18nInitialized) {
+    try {
+      // Dynamic import to avoid Hermes issues
+      import('@/utils/i18n').catch((error) => {
+        console.warn('Failed to initialize i18n system:', error);
+      });
+      i18nInitialized = true;
+    } catch (error) {
+      console.warn('Failed to initialize i18n system:', error);
+    }
+  }
+};
+
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore errors - this happens on web
 });
 
-// Initialize Sentry at app startup
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'YOUR_SENTRY_DSN', // TODO: Replace with your actual DSN or set EXPO_PUBLIC_SENTRY_DSN
-  debug: __DEV__,
-});
+// Initialize Sentry at app startup (only if DSN is properly configured)
+const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN') {
+  Sentry.init({
+    dsn: sentryDsn,
+    debug: __DEV__,
+  });
+}
 
-// Global handler for unhandled promise rejections
-if (typeof global !== 'undefined' && typeof global.process !== 'undefined') {
-  process.on('unhandledRejection', (reason: any) => {
+// Global handler for unhandled promise rejections (Hermes compatible)
+if (typeof global !== 'undefined' && typeof global.process !== 'undefined' && global.process.on) {
+  global.process.on('unhandledRejection', (reason: any) => {
     errorHandler(reason);
   });
 }

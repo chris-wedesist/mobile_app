@@ -76,4 +76,9 @@ export async function GET(request: Request) {
   };
 
   return Response.json(response);
+}
+
+// Default export for the route
+export default function NewsRoute() {
+  return null; // This is an API route, not a React component
 } 

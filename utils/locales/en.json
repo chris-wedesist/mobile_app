@@ -1,0 +1,64 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "settings": "Settings",
+    "incidents": "Incidents",
+    "legal_help": "Legal Help",
+    "documents": "Documents",
+    "recordings": "Recordings",
+    "blogs": "Blogs",
+    "badges": "Badges"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot Password?",
+    "reset_password": "Reset Password"
+  },
+  "incidents": {
+    "report_incident": "Report Incident",
+    "incident_details": "Incident Details",
+    "location": "Location",
+    "description": "Description",
+    "date_time": "Date & Time",
+    "witnesses": "Witnesses",
+    "evidence": "Evidence"
+  },
+  "settings": {
+    "general": "General",
+    "privacy": "Privacy",
+    "notifications": "Notifications",
+    "language": "Language",
+    "theme": "Theme",
+    "about": "About",
+    "help": "Help"
+  },
+  "accessibility": {
+    "screen_reader_enabled": "Screen Reader Enabled",
+    "screen_reader_disabled": "Screen Reader Disabled",
+    "reduce_motion_enabled": "Reduce Motion Enabled",
+    "reduce_motion_disabled": "Reduce Motion Disabled"
+  }
+} 

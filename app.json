@@ -17,6 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "jsEngine": "hermes",
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs access to the camera for recording video.",
         "NSMicrophoneUsageDescription": "This app needs access to the microphone for recording audio.",
@@ -25,6 +26,7 @@
       "bundleIdentifier": "com.ahmedashraf-dev.desist"
     },
     "android": {
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1B2D45",
