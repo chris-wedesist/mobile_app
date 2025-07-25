@@ -15,6 +15,7 @@ import {
 import * as Location from 'expo-location';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { performanceOptimizer } from '@/utils/performanceOptimizer';
 
 type Attorney = {
   id: string;
@@ -128,30 +129,39 @@ export default function LegalHelpScreen() {
         longitude: location.coords.longitude
       });
 
-      const url = `https://www.wedesist.com/api/attorneys?lat=${location.coords.latitude}&lng=${location.coords.longitude}&radius=50`;
-      console.log('🌐 Request URL:', url);
+      const cacheKey = `attorneys_${location.coords.latitude}_${location.coords.longitude}`;
+      
+      const attorneys = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
+        const url = `https://www.wedesist.com/api/attorneys?lat=${location.coords.latitude}&lng=${location.coords.longitude}&radius=50`;
+        console.log('🌐 Request URL:', url);
 
-      const response = await fetch(url);
-      console.log('📥 Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Server error response:', errorText);
-        throw new Error(`Server error: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('📦 Parsed response data:', data);
-      
-      if (!data || !Array.isArray(data.attorneys)) {
-        console.error('❌ Invalid data format:', data);
-        throw new Error('Invalid response format from server');
-      }
-      
-      console.log('✅ Successfully fetched attorneys:', data.attorneys.length);
+        const response = await fetch(url);
+        console.log('📥 Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Server error response:', errorText);
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📦 Parsed response data:', data);
+        
+        if (!data || !Array.isArray(data.attorneys)) {
+          console.error('❌ Invalid data format:', data);
+          throw new Error('Invalid response format from server');
+        }
+        
+        console.log('✅ Successfully fetched attorneys:', data.attorneys.length);
+        return data.attorneys;
+      }, {
+        key: cacheKey,
+        duration: 10 * 60 * 1000 // 10 minutes cache for attorney data
+      });
+
       updateState({
-        attorneys: data.attorneys,
-        originalAttorneys: data.attorneys
+        attorneys: attorneys,
+        originalAttorneys: attorneys
       });
     } catch (error) {
       console.error('❌ Error in fetchAttorneys:', error);
