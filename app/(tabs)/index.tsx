@@ -2,8 +2,9 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-na
 import NoHandsIcon from '../../components/NoHandsIcon';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
-import { getNews, NewsItem } from '@/lib/news';
+import { getNews, NewsItem, fetchNewsWithOptimization } from '@/lib/news';
 import { router } from 'expo-router';
+import { performanceOptimizer } from '@/utils/performanceOptimizer';
 
 export default function HomeScreen() {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -15,11 +16,20 @@ export default function HomeScreen() {
 
   const loadNews = async () => {
     try {
-      console.log('Loading news...');
+      console.log('Loading news with optimization...');
       setLoading(true);
-      const newsItems = await getNews(1, 3); // Only fetch 3 items for preview
-      console.log('Loaded news items:', newsItems);
-      setNews(newsItems);
+      
+      // Use optimized parallel fetching for better performance
+      const optimizedData = await performanceOptimizer.fetchWithCache('home_news', async () => {
+        const result = await fetchNewsWithOptimization();
+        return result.news.slice(0, 3); // Only fetch 3 items for preview
+      }, {
+        key: 'home_news',
+        duration: 5 * 60 * 1000 // 5 minutes cache
+      });
+      
+      console.log('Loaded optimized news items:', optimizedData);
+      setNews(optimizedData);
     } catch (error) {
       console.error('Error loading news:', error);
       setNews([]); // Set empty array on error

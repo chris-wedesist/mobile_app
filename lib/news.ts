@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { errorHandler, AppError } from '@/utils/errorHandler';
+import { performanceOptimizer } from '@/utils/performanceOptimizer';
 
 export interface NewsItem {
   id: string;
@@ -107,19 +108,73 @@ let lastFetchTime: number | null = null;
 
 export async function getNews(page: number = 1, limit: number = 10): Promise<NewsItem[]> {
   try {
-    console.log(`Fetching news page ${page} with limit ${limit}...`);
-    // Since the external API is not available, use fallback data
-    // Simulate pagination by slicing the array
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedNews = fallbackNews.slice(startIndex, endIndex);
-    
-    console.log('Using fallback news data:', paginatedNews);
-    return paginatedNews;
+    const cacheKey = `news_page_${page}_${limit}`;
+    return await performanceOptimizer.fetchWithCache(cacheKey, async () => {
+      console.log(`Fetching news page ${page} with limit ${limit}...`);
+      // Since the external API is not available, use fallback data
+      // Simulate pagination by slicing the array
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedNews = fallbackNews.slice(startIndex, endIndex);
+      
+      console.log('Using fallback news data:', paginatedNews);
+      return paginatedNews;
+    }, {
+      key: cacheKey,
+      duration: 5 * 60 * 1000 // 5 minutes cache
+    });
   } catch (error) {
-    errorHandler(error); // Integrated errorHandler for monitoring
-    console.error('Error fetching news:', error);
-    // Return fallback data if API fails
+    errorHandler(error);
     return fallbackNews;
+  }
+}
+
+// Enhanced parallel data fetching for news and related content
+export async function fetchNewsWithOptimization(): Promise<{
+  news: NewsItem[];
+  featured: NewsItem[];
+  trending: NewsItem[];
+}> {
+  try {
+    const result = await performanceOptimizer.fetchParallel({
+      news: async () => {
+        return await performanceOptimizer.fetchWithCache('news_main', fetchNews, {
+          key: 'news_main',
+          duration: 10 * 60 * 1000 // 10 minutes cache
+        });
+      },
+      featured: async () => {
+        return await performanceOptimizer.fetchWithCache('news_featured', async () => {
+          const allNews = await fetchNews();
+          return allNews.filter(item => item.id === '1' || item.id === '2').slice(0, 2);
+        }, {
+          key: 'news_featured',
+          duration: 15 * 60 * 1000 // 15 minutes cache
+        });
+      },
+      trending: async () => {
+        return await performanceOptimizer.fetchWithCache('news_trending', async () => {
+          const allNews = await fetchNews();
+          return allNews.slice(0, 3);
+        }, {
+          key: 'news_trending',
+          duration: 5 * 60 * 1000 // 5 minutes cache
+        });
+      }
+    });
+
+    return {
+      news: result.news as NewsItem[],
+      featured: result.featured as NewsItem[],
+      trending: result.trending as NewsItem[]
+    };
+  } catch (error) {
+    errorHandler(error);
+    // Return fallback data on error
+    return {
+      news: fallbackNews,
+      featured: fallbackNews.slice(0, 2),
+      trending: fallbackNews.slice(0, 3)
+    };
   }
 } 

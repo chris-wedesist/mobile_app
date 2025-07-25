@@ -6,6 +6,7 @@ import WebView from 'react-native-webview';
 import { colors, shadows, radius } from '@/constants/theme';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
+import { performanceOptimizer } from '@/utils/performanceOptimizer';
 
 const supabase = createClient(
   'https://example.supabase.co',
@@ -150,51 +151,58 @@ export default function IncidentsScreen() {
 
   const fetchIncidents = async (userLocation: Location.LocationObject) => {
     try {  
-      // Generate test data instead of fetching from Supabase
-      const data = generateTestData(10, userLocation.coords.latitude, userLocation.coords.longitude);
+      const cacheKey = `incidents_${userLocation.coords.latitude?.toString() || '0'}_${userLocation.coords.longitude?.toString() || '0'}`;
+      
+      const incidents = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
+        // Generate test data instead of fetching from Supabase
+        const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0);
 
-      // Calculate distances for each incident
-      const incidentsWithDistance = data.map(incident => {
-        try {
-          // Get coordinates directly from the incident
-          const latitude = parseFloat(incident.latitude);
-          const longitude = parseFloat(incident.longitude);
+        // Calculate distances for each incident
+        const incidentsWithDistance = data.map(incident => {
+          try {
+            // Get coordinates directly from the incident
+            const latitude = parseFloat(incident.latitude);
+            const longitude = parseFloat(incident.longitude);
 
-          if (isNaN(latitude) || isNaN(longitude)) {
-            console.warn('Invalid coordinates:', incident);
+            if (isNaN(latitude) || isNaN(longitude)) {
+              console.warn('Invalid coordinates:', incident);
+              return { ...incident, distance: 0 };
+            }
+
+            // Calculate distance
+            const distance = calculateDistance(
+              userLocation.coords.latitude || 0,
+              userLocation.coords.longitude || 0,
+              latitude,
+              longitude
+            );
+
+            return {
+              ...incident,
+              latitude,
+              longitude,
+              distance
+            };
+          } catch (error) {
+            console.error('Error processing incident:', error);
             return { ...incident, distance: 0 };
           }
+        });
 
-          // Calculate distance
-          const distance = calculateDistance(
-            userLocation.coords.latitude,
-            userLocation.coords.longitude,
-            latitude,
-            longitude
-          );
-
-          return {
-            ...incident,
-            latitude,
-            longitude,
-            distance
-          };
-        } catch (error) {
-          console.error('Error processing incident:', error);
-          return { ...incident, distance: 0 };
-        }
+        // Sort incidents by distance
+        return incidentsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      }, {
+        key: cacheKey,
+        duration: 2 * 60 * 1000 // 2 minutes cache for location-based data
       });
-
-      // Sort incidents by distance
-      const sortedIncidents = incidentsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
       
-      setIncidents(sortedIncidents);
+      setIncidents(incidents);
       setIsConnected(true);
       setError(null);
 
       if (showMap && mapRef.current) {
         const mapScript = `
-          updateMarkers(${JSON.stringify(sortedIncidents)});
+          updateMarkers(${JSON.stringify(incidents)});
           true;
         `;
         mapRef.current.injectJavaScript(mapScript);
