@@ -7,6 +7,8 @@ import { colors, shadows, radius } from '@/constants/theme';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
+import LiveDataService, { LiveIncident } from '@/utils/liveDataAPI';
+import RadiusAdjuster from '@/components/RadiusAdjuster';
 
 const supabase = createClient(
   'https://example.supabase.co',
@@ -54,12 +56,13 @@ const REFRESH_INTERVAL = 30000; // 30 seconds
 const NEARBY_RADIUS = 5000; // 5km
 
 export default function IncidentsScreen() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidents, setIncidents] = useState<LiveIncident[]>([]);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
+  const [currentRadius, setCurrentRadius] = useState(5); // Default 5km radius
   const refreshInterval = useRef<NodeJS.Timeout>();
   const mapRef = useRef<WebView>(null);
   const { newIncident } = useLocalSearchParams();
@@ -150,65 +153,37 @@ export default function IncidentsScreen() {
   };
 
   const fetchIncidents = async (userLocation: Location.LocationObject) => {
-    try {  
-      const cacheKey = `incidents_${userLocation.coords.latitude?.toString() || '0'}_${userLocation.coords.longitude?.toString() || '0'}`;
-      
-      const incidents = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
-        // Generate test data instead of fetching from Supabase
-        const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0);
+    try {
+      if (!userLocation.coords.latitude || !userLocation.coords.longitude) {
+        setError('Unable to get your location. Please check your location settings.');
+        return;
+      }
 
-        // Calculate distances for each incident
-        const incidentsWithDistance = data.map(incident => {
-          try {
-            // Get coordinates directly from the incident
-            const latitude = parseFloat(incident.latitude);
-            const longitude = parseFloat(incident.longitude);
+      const liveIncidents = await LiveDataService.getIncidentsWithRadius(
+        {
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+        },
+        currentRadius,
+        {
+          status: 'active',
+          limit: 50,
+        }
+      );
 
-            if (isNaN(latitude) || isNaN(longitude)) {
-              console.warn('Invalid coordinates:', incident);
-              return { ...incident, distance: 0 };
-            }
-
-            // Calculate distance
-            const distance = calculateDistance(
-              userLocation.coords.latitude || 0,
-              userLocation.coords.longitude || 0,
-              latitude,
-              longitude
-            );
-
-            return {
-              ...incident,
-              latitude,
-              longitude,
-              distance
-            };
-          } catch (error) {
-            console.error('Error processing incident:', error);
-            return { ...incident, distance: 0 };
-          }
-        });
-
-        // Sort incidents by distance
-        return incidentsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-      }, {
-        key: cacheKey,
-        duration: 2 * 60 * 1000 // 2 minutes cache for location-based data
-      });
-      
-      setIncidents(incidents);
+      setIncidents(liveIncidents);
       setIsConnected(true);
       setError(null);
 
       if (showMap && mapRef.current) {
         const mapScript = `
-          updateMarkers(${JSON.stringify(incidents)});
+          updateMarkers(${JSON.stringify(liveIncidents)});
           true;
         `;
         mapRef.current.injectJavaScript(mapScript);
       }
     } catch (error) {
-      console.error('Error fetching incidents:', error);
+      console.error('Error fetching live incidents:', error);
       setIsConnected(false);
       setError('Failed to fetch nearby incidents. Please check your connection and try again.');
     }
@@ -227,7 +202,7 @@ export default function IncidentsScreen() {
     return `${(meters / 1609.34).toFixed(1)}mi`;
   };
 
-  const renderIncident = ({ item }: { item: Incident }) => (
+  const renderIncident = ({ item }: { item: LiveIncident }) => (
     <View style={styles.incidentCard}>
       <View style={styles.incidentHeader}>
         <MaterialIcons name="error-outline" color={colors.accent} size={24} />
@@ -255,6 +230,13 @@ export default function IncidentsScreen() {
       await fetchIncidents(location);
     }
     setIsLoading(false);
+  };
+
+  const handleRadiusChange = async (newRadius: number) => {
+    setCurrentRadius(newRadius);
+    if (location) {
+      await fetchIncidents(location);
+    }
   };
 
   const mapHTML = `
@@ -291,19 +273,23 @@ export default function IncidentsScreen() {
         </style>
       </head>
       <body>
-        <div class="area-indicator">Allowed to view your nearby area and limited limmited radius</div>
+        <div class="area-indicator">Viewing incidents within ${currentRadius}km radius</div>
         <div id="map"></div>
         <script>
+          const userLat = ${location?.coords.latitude || 0};
+          const userLng = ${location?.coords.longitude || 0};
+          const radius = ${currentRadius};
+          
           const map = L.map('map', {
             minZoom: 12,
             maxZoom: 16,
             zoomControl: true,
             maxBounds: [
-              [${location?.coords.latitude - 0.1}, ${location?.coords.longitude - 0.1}],
-              [${location?.coords.latitude + 0.1}, ${location?.coords.longitude + 0.1}]
+              [userLat - 0.1, userLng - 0.1],
+              [userLat + 0.1, userLng + 0.1]
             ],
             maxBoundsViscosity: 1.0
-          }).setView([${location?.coords.latitude || 0}, ${location?.coords.longitude || 0}], 13);
+          }).setView([userLat, userLng], 13);
           
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -399,6 +385,16 @@ export default function IncidentsScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Radius Adjuster */}
+      <RadiusAdjuster
+        currentRadius={currentRadius}
+        onRadiusChange={handleRadiusChange}
+        maxRadius={100}
+        minRadius={1}
+        stepSize={1}
+        disabled={isLoading}
+      />
 
       {showMap ? (
         <View style={styles.mapContainer}>
