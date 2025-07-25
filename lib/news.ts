@@ -220,11 +220,25 @@ export async function fetchNewsWithLocation(userLocation?: { latitude: number; l
   }
 }
 
+// Add a flag to prevent multiple simultaneous calls
+let isFetchingNews = false;
+
 // New function to fetch news for tabbed interface
 export async function fetchNewsForTabs(userLocation?: { latitude: number; longitude: number }): Promise<{
   local: NewsItem[];
   national: NewsItem[];
 }> {
+  // Prevent multiple simultaneous calls
+  if (isFetchingNews) {
+    console.log('News fetch already in progress, returning fallback data');
+    return {
+      local: [],
+      national: fallbackNews
+    };
+  }
+
+  isFetchingNews = true;
+  
   try {
     console.log('Fetching news for tabbed interface...');
     
@@ -238,34 +252,57 @@ export async function fetchNewsForTabs(userLocation?: { latitude: number; longit
         nationalLimit: 20,
       });
 
-      return {
-        local: combinedNews.local.map(convertLiveNewsToNewsItem),
-        national: combinedNews.national.map(convertLiveNewsToNewsItem),
-      };
-    } else {
-      // Fallback to national news only if location is not available
-      const nationalNews = await LiveDataService.getNewsByLocation('national', undefined, undefined, {
-        categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
-        importance: ['urgent', 'high', 'normal'],
-        limit: 40,
+      console.log('Successfully fetched combined news:', {
+        localCount: combinedNews.local?.length || 0,
+        nationalCount: combinedNews.national?.length || 0
       });
 
-      const convertedNews = nationalNews.map(convertLiveNewsToNewsItem);
+      // Ensure we always have data to display
+      const localNews = combinedNews.local && combinedNews.local.length > 0 
+        ? combinedNews.local.map(convertLiveNewsToNewsItem)
+        : [];
       
+      const nationalNews = combinedNews.national && combinedNews.national.length > 0 
+        ? combinedNews.national.map(convertLiveNewsToNewsItem)
+        : fallbackNews;
+
       return {
-        local: [],
-        national: convertedNews,
+        local: localNews,
+        national: nationalNews
       };
+    } else {
+      // No location available, fetch national news only
+      console.log('No user location available, fetching national news only');
+      
+      try {
+        const nationalNews = await LiveDataService.getNewsByLocation('national', undefined, undefined, {
+          categories: ['civil_rights', 'immigration', 'policing', 'police_brutality', 'community_safety'],
+          importance: ['urgent', 'high', 'normal'],
+          limit: 40,
+        });
+
+        console.log('Successfully fetched national news:', nationalNews?.length || 0);
+
+        return {
+          local: [],
+          national: nationalNews && nationalNews.length > 0 ? nationalNews.map(convertLiveNewsToNewsItem) : fallbackNews
+        };
+      } catch (nationalError) {
+        console.log('Error fetching national news, using fallback:', nationalError);
+        return {
+          local: [],
+          national: fallbackNews
+        };
+      }
     }
   } catch (error) {
-    errorHandler(error);
-    console.error('Error fetching news for tabs:', error);
-    
-    // Return fallback data
+    console.log('Error in fetchNewsForTabs, using fallback data:', error);
     return {
-      local: fallbackNews.slice(0, 2),
-      national: fallbackNews,
+      local: [],
+      national: fallbackNews
     };
+  } finally {
+    isFetchingNews = false;
   }
 }
 

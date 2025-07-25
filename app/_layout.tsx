@@ -38,11 +38,15 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 
 // Initialize Sentry at app startup (only if DSN is properly configured)
 const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
-if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN') {
-  Sentry.init({
-    dsn: sentryDsn,
-    debug: __DEV__,
-  });
+if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN' && sentryDsn !== '') {
+  try {
+    Sentry.init({
+      dsn: sentryDsn,
+      debug: __DEV__,
+    });
+  } catch (error) {
+    console.warn('Failed to initialize Sentry:', error);
+  }
 }
 
 // Global handler for unhandled promise rejections (Hermes compatible)
