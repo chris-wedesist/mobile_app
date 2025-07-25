@@ -36,15 +36,18 @@ SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore errors - this happens on web
 });
 
-// Initialize Sentry at app startup
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'YOUR_SENTRY_DSN', // TODO: Replace with your actual DSN or set EXPO_PUBLIC_SENTRY_DSN
-  debug: __DEV__,
-});
+// Initialize Sentry at app startup (only if DSN is properly configured)
+const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN') {
+  Sentry.init({
+    dsn: sentryDsn,
+    debug: __DEV__,
+  });
+}
 
-// Global handler for unhandled promise rejections
-if (typeof global !== 'undefined' && typeof global.process !== 'undefined') {
-  process.on('unhandledRejection', (reason: any) => {
+// Global handler for unhandled promise rejections (Hermes compatible)
+if (typeof global !== 'undefined' && typeof global.process !== 'undefined' && global.process.on) {
+  global.process.on('unhandledRejection', (reason: any) => {
     errorHandler(reason);
   });
 }
