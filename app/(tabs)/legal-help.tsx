@@ -33,6 +33,16 @@ type Attorney = {
   specialization: string;
   website?: string;
   email?: string;
+  // New properties for enhanced filtering
+  feeStructure: 'pro-bono' | 'sliding-scale' | 'contingency' | 'flat-fee' | 'hourly' | 'mixed';
+  firmSize: 'solo' | 'small-firm' | 'large-firm';
+  experienceYears: number;
+  availability: 'immediate' | 'within-week' | 'within-month' | 'consultation-only';
+  consultationFee?: number;
+  acceptsNewClients: boolean;
+  emergencyAvailable: boolean;
+  virtualConsultation: boolean;
+  inPersonConsultation: boolean;
 };
 
 type LegalHelpState = {
@@ -43,6 +53,16 @@ type LegalHelpState = {
     slidingScale: boolean;
     distance: boolean;
     rating: boolean;
+    // New filter options
+    feeStructure: string[];
+    firmSize: string[];
+    experienceLevel: string[];
+    availability: string[];
+    acceptsNewClients: boolean;
+    emergencyAvailable: boolean;
+    virtualConsultation: boolean;
+    inPersonConsultation: boolean;
+    maxConsultationFee?: number;
   };
   refreshing: boolean;
   attorneys: Attorney[];
@@ -60,6 +80,16 @@ const initialState: LegalHelpState = {
     slidingScale: false,
     distance: false,
     rating: false,
+    // New filter defaults
+    feeStructure: [],
+    firmSize: [],
+    experienceLevel: [],
+    availability: [],
+    acceptsNewClients: false,
+    emergencyAvailable: false,
+    virtualConsultation: false,
+    inPersonConsultation: false,
+    maxConsultationFee: undefined,
   },
   refreshing: false,
   attorneys: [],
@@ -186,15 +216,26 @@ export default function LegalHelpScreen() {
       ['English', 'Tagalog']
     ];
 
+    const feeStructures: Attorney['feeStructure'][] = ['pro-bono', 'sliding-scale', 'contingency', 'flat-fee', 'hourly', 'mixed'];
+    const firmSizes: Attorney['firmSize'][] = ['solo', 'small-firm', 'large-firm'];
+    const availabilities: Attorney['availability'][] = ['immediate', 'within-week', 'within-month', 'consultation-only'];
+
     const attorneys: Attorney[] = [];
 
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 20; i++) { // Increased to 20 for more variety
       // Generate random coordinates within 50km of user location
       const lat = userLat + (Math.random() - 0.5) * 0.45; // ~50km in degrees
       const lng = userLng + (Math.random() - 0.5) * 0.45; // ~50km in degrees
 
       const specialization = specializations[Math.floor(Math.random() * specializations.length)];
       const attorneyLanguages = languages[Math.floor(Math.random() * languages.length)];
+      const feeStructure = feeStructures[Math.floor(Math.random() * feeStructures.length)];
+      const firmSize = firmSizes[Math.floor(Math.random() * firmSizes.length)];
+      const availability = availabilities[Math.floor(Math.random() * availabilities.length)];
+      const experienceYears = Math.floor(Math.random() * 25) + 2; // 2-27 years
+      const consultationFee = feeStructure === 'pro-bono' ? 0 : 
+                             feeStructure === 'sliding-scale' ? Math.floor(Math.random() * 100) + 25 :
+                             Math.floor(Math.random() * 300) + 50; // $50-$350
 
       attorneys.push({
         id: `attorney-${i + 1}`,
@@ -211,7 +252,17 @@ export default function LegalHelpScreen() {
         rating: Math.floor(Math.random() * 2) + 4, // 4-5 stars
         specialization: specialization,
         website: `https://attorney${i + 1}.law`,
-        email: `attorney${i + 1}@civilrights.law`
+        email: `attorney${i + 1}@civilrights.law`,
+        // Enhanced properties for better filtering
+        feeStructure: feeStructure,
+        firmSize: firmSize,
+        experienceYears: experienceYears,
+        availability: availability,
+        consultationFee: consultationFee,
+        acceptsNewClients: Math.random() > 0.2, // 80% accept new clients
+        emergencyAvailable: Math.random() > 0.4, // 60% available for emergencies
+        virtualConsultation: Math.random() > 0.1, // 90% offer virtual consultation
+        inPersonConsultation: Math.random() > 0.3, // 70% offer in-person consultation
       });
     }
 
@@ -232,15 +283,76 @@ export default function LegalHelpScreen() {
       );
     }
 
-    // Apply filters
+    // Apply fee structure filters
+    if (state.filters.feeStructure.length > 0) {
+      filtered = filtered.filter(attorney =>
+        state.filters.feeStructure.includes(attorney.feeStructure)
+      );
+    }
+
+    // Apply firm size filters
+    if (state.filters.firmSize.length > 0) {
+      filtered = filtered.filter(attorney =>
+        state.filters.firmSize.includes(attorney.firmSize)
+      );
+    }
+
+    // Apply experience level filters
+    if (state.filters.experienceLevel.length > 0) {
+      filtered = filtered.filter(attorney => {
+        const experience = attorney.experienceYears;
+        return state.filters.experienceLevel.some(level => {
+          switch (level) {
+            case '0-5': return experience <= 5;
+            case '5-10': return experience > 5 && experience <= 10;
+            case '10-20': return experience > 10 && experience <= 20;
+            case '20+': return experience > 20;
+            default: return true;
+          }
+        });
+      });
+    }
+
+    // Apply availability filters
+    if (state.filters.availability.length > 0) {
+      filtered = filtered.filter(attorney =>
+        state.filters.availability.includes(attorney.availability)
+      );
+    }
+
+    // Apply consultation type filters
+    if (state.filters.virtualConsultation) {
+      filtered = filtered.filter(attorney => attorney.virtualConsultation);
+    }
+
+    if (state.filters.inPersonConsultation) {
+      filtered = filtered.filter(attorney => attorney.inPersonConsultation);
+    }
+
+    // Apply new client acceptance filter
+    if (state.filters.acceptsNewClients) {
+      filtered = filtered.filter(attorney => attorney.acceptsNewClients);
+    }
+
+    // Apply emergency availability filter
+    if (state.filters.emergencyAvailable) {
+      filtered = filtered.filter(attorney => attorney.emergencyAvailable);
+    }
+
+    // Apply consultation fee filter
+    if (state.filters.maxConsultationFee !== undefined) {
+      filtered = filtered.filter(attorney =>
+        (attorney.consultationFee || 0) <= state.filters.maxConsultationFee!
+      );
+    }
+
+    // Legacy filters (for backward compatibility)
     if (state.filters.proBono) {
-      // Simulate pro bono availability (random for demo)
-      filtered = filtered.filter(() => Math.random() > 0.5);
+      filtered = filtered.filter(attorney => attorney.feeStructure === 'pro-bono');
     }
 
     if (state.filters.slidingScale) {
-      // Simulate sliding scale availability (random for demo)
-      filtered = filtered.filter(() => Math.random() > 0.3);
+      filtered = filtered.filter(attorney => attorney.feeStructure === 'sliding-scale');
     }
 
     if (state.filters.distance) {
@@ -413,6 +525,81 @@ export default function LegalHelpScreen() {
           </View>
         )}
 
+        {/* New attorney information display */}
+        <View style={styles.attorneyInfoContainer}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoItem}>
+              <MaterialIcons name="work" size={14} color={colors.text.muted} />
+              <Text style={styles.infoText}>{attorney.firmSize.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <MaterialIcons name="schedule" size={14} color={colors.text.muted} />
+              <Text style={styles.infoText}>{attorney.experienceYears} years</Text>
+            </View>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoItem}>
+              <MaterialIcons name="attach-money" size={14} color={colors.text.muted} />
+              <Text style={styles.infoText}>
+                {attorney.feeStructure === 'pro-bono' ? 'Pro Bono' : 
+                 attorney.feeStructure === 'sliding-scale' ? 'Sliding Scale' :
+                 attorney.feeStructure.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Text>
+            </View>
+            {attorney.consultationFee !== undefined && attorney.consultationFee > 0 && (
+              <View style={styles.infoItem}>
+                <MaterialIcons name="receipt" size={14} color={colors.text.muted} />
+                <Text style={styles.infoText}>${attorney.consultationFee} consultation</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoItem}>
+              <MaterialIcons name="event" size={14} color={colors.text.muted} />
+              <Text style={styles.infoText}>
+                {attorney.availability === 'immediate' ? 'Immediate' :
+                 attorney.availability === 'within-week' ? 'Within Week' :
+                 attorney.availability === 'within-month' ? 'Within Month' :
+                 'Consultation Only'}
+              </Text>
+            </View>
+            <View style={styles.infoItem}>
+              <MaterialIcons name="cases" size={14} color={colors.text.muted} />
+              <Text style={styles.infoText}>{attorney.cases} cases</Text>
+            </View>
+          </View>
+
+          {/* Consultation type badges */}
+          <View style={styles.badgesContainer}>
+            {attorney.virtualConsultation && (
+              <View style={styles.badge}>
+                <MaterialIcons name="videocam" size={12} color={colors.accent} />
+                <Text style={styles.badgeText}>Virtual</Text>
+              </View>
+            )}
+            {attorney.inPersonConsultation && (
+              <View style={styles.badge}>
+                <MaterialIcons name="person" size={12} color={colors.accent} />
+                <Text style={styles.badgeText}>In-Person</Text>
+              </View>
+            )}
+            {attorney.acceptsNewClients && (
+              <View style={styles.badge}>
+                <MaterialIcons name="person-add" size={12} color={colors.accent} />
+                <Text style={styles.badgeText}>New Clients</Text>
+              </View>
+            )}
+            {attorney.emergencyAvailable && (
+              <View style={styles.badge}>
+                <MaterialIcons name="emergency" size={12} color={colors.accent} />
+                <Text style={styles.badgeText}>Emergency</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
         <View style={styles.contactContainer}>
           {attorney.phone && (
             <TouchableOpacity
@@ -469,106 +656,330 @@ export default function LegalHelpScreen() {
       </View>
 
       {state.showFilters && (
-        <View style={styles.filtersContainer}>
-          <TouchableOpacity
-            style={[
-              styles.filterChip,
-              state.filters.proBono && styles.filterChipActive,
-            ]}
-            onPress={() =>
-              updateState({
-                filters: { ...state.filters, proBono: !state.filters.proBono },
-              })
-            }>
-            <MaterialIcons
-              name="check-circle"
-              size={16}
-              color={state.filters.proBono ? colors.status.success : colors.text.muted}
-            />
-            <Text
-              style={[
-                styles.filterChipText,
-                state.filters.proBono && styles.filterChipTextActive,
-              ]}>
-              Pro Bono
-            </Text>
-          </TouchableOpacity>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScrollContainer}>
+          <View style={styles.filtersContainer}>
+            {/* Fee Structure Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Fee Structure</Text>
+              <View style={styles.filterChipsRow}>
+                {[
+                  { key: 'pro-bono', label: 'Pro Bono', icon: 'check-circle' },
+                  { key: 'sliding-scale', label: 'Sliding Scale', icon: 'attach-money' },
+                  { key: 'contingency', label: 'Contingency', icon: 'trending-up' },
+                  { key: 'flat-fee', label: 'Flat Fee', icon: 'receipt' },
+                  { key: 'hourly', label: 'Hourly', icon: 'schedule' },
+                  { key: 'mixed', label: 'Mixed', icon: 'swap-horiz' }
+                ].map(({ key, label, icon }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.filterChip,
+                      state.filters.feeStructure.includes(key) && styles.filterChipActive,
+                    ]}
+                    onPress={() => {
+                      const newFeeStructure = state.filters.feeStructure.includes(key)
+                        ? state.filters.feeStructure.filter(f => f !== key)
+                        : [...state.filters.feeStructure, key];
+                      updateState({
+                        filters: { ...state.filters, feeStructure: newFeeStructure },
+                      });
+                    }}>
+                    <MaterialIcons
+                      name={icon as any}
+                      size={16}
+                      color={state.filters.feeStructure.includes(key) ? colors.accent : colors.text.muted}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        state.filters.feeStructure.includes(key) && styles.filterChipTextActive,
+                      ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-          <TouchableOpacity
-            style={[
-              styles.filterChip,
-              state.filters.slidingScale && styles.filterChipActive,
-            ]}
-            onPress={() =>
-              updateState({
-                filters: {
-                  ...state.filters,
-                  slidingScale: !state.filters.slidingScale,
-                },
-              })
-            }>
-            <MaterialIcons
-              name="attach-money"
-              size={16}
-              color={state.filters.slidingScale ? colors.accent : colors.text.muted}
-            />
-            <Text
-              style={[
-                styles.filterChipText,
-                state.filters.slidingScale && styles.filterChipTextActive,
-              ]}>
-              Sliding Scale
-            </Text>
-          </TouchableOpacity>
+            {/* Firm Size Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Firm Size</Text>
+              <View style={styles.filterChipsRow}>
+                {[
+                  { key: 'solo', label: 'Solo Practice', icon: 'person' },
+                  { key: 'small-firm', label: 'Small Firm', icon: 'group' },
+                  { key: 'large-firm', label: 'Large Firm', icon: 'business' }
+                ].map(({ key, label, icon }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.filterChip,
+                      state.filters.firmSize.includes(key) && styles.filterChipActive,
+                    ]}
+                    onPress={() => {
+                      const newFirmSize = state.filters.firmSize.includes(key)
+                        ? state.filters.firmSize.filter(f => f !== key)
+                        : [...state.filters.firmSize, key];
+                      updateState({
+                        filters: { ...state.filters, firmSize: newFirmSize },
+                      });
+                    }}>
+                    <MaterialIcons
+                      name={icon as any}
+                      size={16}
+                      color={state.filters.firmSize.includes(key) ? colors.accent : colors.text.muted}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        state.filters.firmSize.includes(key) && styles.filterChipTextActive,
+                      ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-          <TouchableOpacity
-            style={[
-              styles.filterChip,
-              state.filters.distance && styles.filterChipActive,
-            ]}
-            onPress={() =>
-              updateState({
-                filters: { ...state.filters, distance: !state.filters.distance },
-              })
-            }>
-            <MaterialIcons
-              name="location-on"
-              size={16}
-              color={state.filters.distance ? colors.accent : colors.text.muted}
-            />
-            <Text
-              style={[
-                styles.filterChipText,
-                state.filters.distance && styles.filterChipTextActive,
-              ]}>
-              Distance
-            </Text>
-          </TouchableOpacity>
+            {/* Experience Level Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Experience</Text>
+              <View style={styles.filterChipsRow}>
+                {[
+                  { key: '0-5', label: '0-5 Years', icon: 'school' },
+                  { key: '5-10', label: '5-10 Years', icon: 'work' },
+                  { key: '10-20', label: '10-20 Years', icon: 'star' },
+                  { key: '20+', label: '20+ Years', icon: 'verified' }
+                ].map(({ key, label, icon }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.filterChip,
+                      state.filters.experienceLevel.includes(key) && styles.filterChipActive,
+                    ]}
+                    onPress={() => {
+                      const newExperienceLevel = state.filters.experienceLevel.includes(key)
+                        ? state.filters.experienceLevel.filter(f => f !== key)
+                        : [...state.filters.experienceLevel, key];
+                      updateState({
+                        filters: { ...state.filters, experienceLevel: newExperienceLevel },
+                      });
+                    }}>
+                    <MaterialIcons
+                      name={icon as any}
+                      size={16}
+                      color={state.filters.experienceLevel.includes(key) ? colors.accent : colors.text.muted}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        state.filters.experienceLevel.includes(key) && styles.filterChipTextActive,
+                      ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-          <TouchableOpacity
-            style={[
-              styles.filterChip,
-              state.filters.rating && styles.filterChipActive,
-            ]}
-            onPress={() =>
-              updateState({
-                filters: { ...state.filters, rating: !state.filters.rating },
-              })
-            }>
-            <MaterialIcons
-              name="star"
-              size={16}
-              color={state.filters.rating ? colors.accent : colors.text.muted}
-            />
-            <Text
-              style={[
-                styles.filterChipText,
-                state.filters.rating && styles.filterChipTextActive,
-              ]}>
-              Rating
-            </Text>
-          </TouchableOpacity>
-        </View>
+            {/* Availability Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Availability</Text>
+              <View style={styles.filterChipsRow}>
+                {[
+                  { key: 'immediate', label: 'Immediate', icon: 'flash-on' },
+                  { key: 'within-week', label: 'Within Week', icon: 'today' },
+                  { key: 'within-month', label: 'Within Month', icon: 'event' },
+                  { key: 'consultation-only', label: 'Consultation Only', icon: 'chat' }
+                ].map(({ key, label, icon }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.filterChip,
+                      state.filters.availability.includes(key) && styles.filterChipActive,
+                    ]}
+                    onPress={() => {
+                      const newAvailability = state.filters.availability.includes(key)
+                        ? state.filters.availability.filter(f => f !== key)
+                        : [...state.filters.availability, key];
+                      updateState({
+                        filters: { ...state.filters, availability: newAvailability },
+                      });
+                    }}>
+                    <MaterialIcons
+                      name={icon as any}
+                      size={16}
+                      color={state.filters.availability.includes(key) ? colors.accent : colors.text.muted}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        state.filters.availability.includes(key) && styles.filterChipTextActive,
+                      ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Consultation Type Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Consultation Type</Text>
+              <View style={styles.filterChipsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    state.filters.virtualConsultation && styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    updateState({
+                      filters: { ...state.filters, virtualConsultation: !state.filters.virtualConsultation },
+                    })
+                  }>
+                  <MaterialIcons
+                    name="videocam"
+                    size={16}
+                    color={state.filters.virtualConsultation ? colors.accent : colors.text.muted}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      state.filters.virtualConsultation && styles.filterChipTextActive,
+                    ]}>
+                    Virtual
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    state.filters.inPersonConsultation && styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    updateState({
+                      filters: { ...state.filters, inPersonConsultation: !state.filters.inPersonConsultation },
+                    })
+                  }>
+                  <MaterialIcons
+                    name="person"
+                    size={16}
+                    color={state.filters.inPersonConsultation ? colors.accent : colors.text.muted}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      state.filters.inPersonConsultation && styles.filterChipTextActive,
+                    ]}>
+                    In-Person
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Additional Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Additional</Text>
+              <View style={styles.filterChipsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    state.filters.acceptsNewClients && styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    updateState({
+                      filters: { ...state.filters, acceptsNewClients: !state.filters.acceptsNewClients },
+                    })
+                  }>
+                  <MaterialIcons
+                    name="person-add"
+                    size={16}
+                    color={state.filters.acceptsNewClients ? colors.accent : colors.text.muted}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      state.filters.acceptsNewClients && styles.filterChipTextActive,
+                    ]}>
+                    Accepts New Clients
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    state.filters.emergencyAvailable && styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    updateState({
+                      filters: { ...state.filters, emergencyAvailable: !state.filters.emergencyAvailable },
+                    })
+                  }>
+                  <MaterialIcons
+                    name="emergency"
+                    size={16}
+                    color={state.filters.emergencyAvailable ? colors.accent : colors.text.muted}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      state.filters.emergencyAvailable && styles.filterChipTextActive,
+                    ]}>
+                    Emergency Available
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    state.filters.distance && styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    updateState({
+                      filters: { ...state.filters, distance: !state.filters.distance },
+                    })
+                  }>
+                  <MaterialIcons
+                    name="location-on"
+                    size={16}
+                    color={state.filters.distance ? colors.accent : colors.text.muted}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      state.filters.distance && styles.filterChipTextActive,
+                    ]}>
+                    Sort by Distance
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    state.filters.rating && styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    updateState({
+                      filters: { ...state.filters, rating: !state.filters.rating },
+                    })
+                  }>
+                  <MaterialIcons
+                    name="star"
+                    size={16}
+                    color={state.filters.rating ? colors.accent : colors.text.muted}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      state.filters.rating && styles.filterChipTextActive,
+                    ]}>
+                    Sort by Rating
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
       )}
 
       <ScrollView
@@ -642,12 +1053,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Regular',
   },
-  filtersContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
+  filtersScrollContainer: {
+    maxHeight: 300,
     marginBottom: 20,
+  },
+  filtersContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  filterSection: {
+    marginBottom: 20,
+  },
+  filterSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 8,
+    fontFamily: 'Inter-SemiBold',
+  },
+  filterChipsRow: {
+    flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   filterChip: {
     backgroundColor: colors.secondary,
@@ -757,6 +1184,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text.muted,
     marginLeft: 4,
+  },
+  attorneyInfoContainer: {
+    marginBottom: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  infoText: {
+    fontSize: 12,
+    color: colors.text.muted,
+    marginLeft: 4,
+    fontFamily: 'Inter-Regular',
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  badgeText: {
+    fontSize: 10,
+    color: colors.accent,
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
   },
   contactContainer: {
     flexDirection: 'row',
