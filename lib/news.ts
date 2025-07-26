@@ -27,6 +27,7 @@ interface NewsResponse {
 
 // Civil rights and immigration focused news data
 const civilRightsNews: NewsItem[] = [
+  // LOCAL NEWS (Community-focused)
   {
     id: "1",
     title: "Community Safety Meeting",
@@ -62,28 +63,6 @@ const civilRightsNews: NewsItem[] = [
   },
   {
     id: "4",
-    title: "Supreme Court Rules on Immigration Rights",
-    description: "Landmark decision expands protections for immigrant communities across the United States.",
-    url: "#",
-    source: "National Legal News",
-    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-    imageUrl: null,
-    category: 'national',
-    tags: ['supreme-court', 'immigration', 'legal-rights']
-  },
-  {
-    id: "5",
-    title: "Police Reform Bill Introduced in Congress",
-    description: "New legislation aims to address police brutality and improve accountability measures.",
-    url: "#",
-    source: "Federal News",
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-    imageUrl: null,
-    category: 'national',
-    tags: ['police-reform', 'congress', 'accountability']
-  },
-  {
-    id: "6",
     title: "ICE Activity Reported in Downtown Area",
     description: "Local community organizations are monitoring the situation and providing support.",
     url: "#",
@@ -92,6 +71,184 @@ const civilRightsNews: NewsItem[] = [
     imageUrl: null,
     category: 'local',
     tags: ['ice', 'immigration', 'alerts']
+  },
+  {
+    id: "5",
+    title: "Local Police Accountability Meeting",
+    description: "Community leaders meet with local police department to discuss transparency and accountability measures.",
+    url: "#",
+    source: "Local Government",
+    date: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+    imageUrl: null,
+    category: 'local',
+    tags: ['police-accountability', 'local-government', 'transparency']
+  },
+  {
+    id: "6",
+    title: "Immigration Legal Clinic Opens",
+    description: "New free legal clinic provides immigration assistance and deportation defense services.",
+    url: "#",
+    source: "Community Services",
+    date: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
+    imageUrl: null,
+    category: 'local',
+    tags: ['immigration', 'legal-aid', 'deportation-defense']
+  },
+
+  // NATIONAL NEWS (Nationally relevant content with broad reach)
+  {
+    id: "7",
+    title: "Supreme Court Rules on Immigration Rights",
+    description: "Landmark decision expands protections for immigrant communities across the United States.",
+    url: "#",
+    source: "Supreme Court",
+    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['supreme-court', 'immigration', 'legal-rights']
+  },
+  {
+    id: "8",
+    title: "Police Reform Bill Introduced in Congress",
+    description: "New legislation aims to address police brutality and improve accountability measures.",
+    url: "#",
+    source: "U.S. Congress",
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['police-reform', 'congress', 'accountability']
+  },
+  {
+    id: "9",
+    title: "Major City Police Department Faces Civil Rights Lawsuit",
+    description: "Class action lawsuit alleges systematic racial profiling and excessive force by police department.",
+    url: "#",
+    source: "National Civil Rights Organization",
+    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['police-brutality', 'civil-rights', 'racial-profiling', 'lawsuit']
+  },
+  {
+    id: "10",
+    title: "National Immigration Rights Coalition Forms",
+    description: "Major organizations unite to coordinate nationwide immigration advocacy and legal support.",
+    url: "#",
+    source: "Immigration Rights Network",
+    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['immigration', 'advocacy', 'coalition', 'legal-support']
+  },
+  {
+    id: "11",
+    title: "Supreme Court Hears Voting Rights Case",
+    description: "Court considers challenge to voting restrictions that could impact minority communities.",
+    url: "#",
+    source: "Supreme Court",
+    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['supreme-court', 'voting-rights', 'civil-rights']
+  },
+  {
+    id: "12",
+    title: "National Police Accountability Database Launches",
+    description: "New nationwide database tracks police misconduct and accountability measures across all states.",
+    url: "#",
+    source: "Police Accountability Project",
+    date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['police-accountability', 'database', 'transparency', 'misconduct']
+  },
+  {
+    id: "13",
+    title: "Federal Judge Blocks Immigration Policy",
+    description: "Federal court issues injunction against controversial immigration enforcement policy.",
+    url: "#",
+    source: "Federal Court",
+    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['federal-court', 'immigration', 'legal-challenge']
+  },
+  {
+    id: "14",
+    title: "DOJ Announces Civil Rights Investigation",
+    description: "Department of Justice launches investigation into police department practices.",
+    url: "#",
+    source: "Department of Justice",
+    date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['doj', 'civil-rights', 'police-investigation']
+  },
+  {
+    id: "15",
+    title: "National Civil Rights Organization Releases Police Violence Report",
+    description: "Comprehensive study reveals patterns of police violence and recommendations for reform.",
+    url: "#",
+    source: "Civil Rights Research Institute",
+    date: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(), // 9 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['police-violence', 'research', 'civil-rights', 'reform']
+  },
+  {
+    id: "16",
+    title: "Supreme Court Decision on Search and Seizure",
+    description: "Court rules on Fourth Amendment rights in case involving police search procedures.",
+    url: "#",
+    source: "Supreme Court",
+    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['supreme-court', 'fourth-amendment', 'search-seizure']
+  },
+  {
+    id: "17",
+    title: "National Immigration Legal Network Expands",
+    description: "Major expansion of pro bono legal services for immigrants across multiple states.",
+    url: "#",
+    source: "Immigration Legal Network",
+    date: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(), // 11 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['immigration', 'legal-aid', 'pro-bono', 'expansion']
+  },
+  {
+    id: "18",
+    title: "Congressional Hearing on Police Accountability",
+    description: "House Judiciary Committee holds hearing on federal police reform legislation.",
+    url: "#",
+    source: "U.S. Congress",
+    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), // 12 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['congress', 'police-accountability', 'judiciary-committee']
+  },
+  {
+    id: "19",
+    title: "National Coalition Against Racial Profiling Forms",
+    description: "Multi-state coalition launches campaign to end racial profiling in law enforcement.",
+    url: "#",
+    source: "Anti-Racial Profiling Coalition",
+    date: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString(), // 13 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['racial-profiling', 'coalition', 'law-enforcement', 'campaign']
+  },
+  {
+    id: "20",
+    title: "Federal Appeals Court Rules on Asylum Rights",
+    description: "Court decision affects asylum seekers' rights and deportation procedures.",
+    url: "#",
+    source: "Federal Appeals Court",
+    date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days ago
+    imageUrl: null,
+    category: 'national',
+    tags: ['federal-court', 'asylum', 'immigration-rights']
   }
 ];
 
