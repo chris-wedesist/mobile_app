@@ -43,6 +43,9 @@ type LegalHelpState = {
   userLocation: Location.LocationObject | null;
   isLoading: boolean;
   error: string | null;
+  // Radius control
+  radius: number; // Search radius in miles
+  showRadiusControl: boolean; // Show/hide radius adjustment UI
 };
 
 const initialState: LegalHelpState = {
@@ -70,6 +73,9 @@ const initialState: LegalHelpState = {
   userLocation: null,
   isLoading: true,
   error: null,
+  // Radius control defaults
+  radius: 25, // Default 25 mile radius
+  showRadiusControl: false, // Hidden by default
 };
 
 export default function LegalHelpScreen() {
@@ -124,22 +130,24 @@ export default function LegalHelpScreen() {
     }
   };
 
-  const fetchAttorneys = async (location: Location.LocationObject) => {
+  const fetchAttorneys = async (location: Location.LocationObject, radius?: number) => {
     try {
+      const searchRadius = radius ?? state.radius;
       updateState({ isLoading: true, error: null, attorneys: [], originalAttorneys: [] });
       console.log('🔍 Fetching real attorneys with location:', {
         latitude: location.coords.latitude,
-        longitude: location.coords.longitude
+        longitude: location.coords.longitude,
+        radius: searchRadius
       });
 
-      const cacheKey = `real_attorneys_${location.coords.latitude}_${location.coords.longitude}`;
+      const cacheKey = `real_attorneys_${location.coords.latitude}_${location.coords.longitude}_${searchRadius}`;
       
       const attorneys = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
         // Fetch real attorney data from multiple sources
         const realAttorneys = await getAttorneys(
           location.coords.latitude,
           location.coords.longitude,
-          50 // 50 mile radius
+          searchRadius
         );
         
         console.log('✅ Successfully fetched real attorneys:', realAttorneys.length);
@@ -313,6 +321,29 @@ export default function LegalHelpScreen() {
     return R * c; // Distance in meters
   };
 
+  // Radius control functions
+  const adjustRadius = (newRadius: number) => {
+    const clampedRadius = Math.max(5, Math.min(100, newRadius)); // 5-100 mile range
+    updateState({ radius: clampedRadius });
+    
+    // Refetch attorneys with new radius if location is available
+    if (state.userLocation) {
+      fetchAttorneys(state.userLocation, clampedRadius);
+    }
+  };
+
+  const toggleRadiusControl = () => {
+    updateState({ showRadiusControl: !state.showRadiusControl });
+  };
+
+  const increaseRadius = () => {
+    adjustRadius(state.radius + 5);
+  };
+
+  const decreaseRadius = () => {
+    adjustRadius(state.radius - 5);
+  };
+
   // Update attorneys whenever search or filters change
   useEffect(() => {
     if (state.originalAttorneys.length > 0) {
@@ -324,7 +355,7 @@ export default function LegalHelpScreen() {
   const onRefresh = async () => {
     updateState({ refreshing: true });
     if (state.userLocation) {
-      await fetchAttorneys(state.userLocation);
+      await fetchAttorneys(state.userLocation, state.radius);
     }
     updateState({ refreshing: false });
   };
@@ -551,6 +582,90 @@ export default function LegalHelpScreen() {
           value={state.searchQuery}
           onChangeText={(text) => updateState({ searchQuery: text })}
         />
+      </View>
+
+      {/* Radius Control */}
+      <View style={styles.radiusContainer}>
+        <View style={styles.radiusHeader}>
+          <MaterialIcons name="location-on" size={20} color={colors.text.primary} />
+          <Text style={styles.radiusTitle}>Search Radius</Text>
+          <TouchableOpacity
+            style={styles.radiusToggleButton}
+            onPress={toggleRadiusControl}>
+            <MaterialIcons
+              name={state.showRadiusControl ? "expand-less" : "expand-more"}
+              size={20}
+              color={colors.text.primary}
+            />
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.radiusDisplay}>
+          <Text style={styles.radiusText}>{state.radius} miles</Text>
+        </View>
+
+        {state.showRadiusControl && (
+          <View style={styles.radiusControlContainer}>
+            <View style={styles.radiusButtonsContainer}>
+              <TouchableOpacity
+                style={styles.radiusButton}
+                onPress={decreaseRadius}
+                disabled={state.radius <= 5}>
+                <MaterialIcons
+                  name="remove"
+                  size={20}
+                  color={state.radius <= 5 ? colors.text.muted : colors.text.primary}
+                />
+              </TouchableOpacity>
+              
+              <View style={styles.radiusSliderContainer}>
+                <Text style={styles.radiusLabel}>5 - 100 miles</Text>
+                <View style={styles.radiusSlider}>
+                  <View 
+                    style={[
+                      styles.radiusSliderFill, 
+                      { width: `${((state.radius - 5) / 95) * 100}%` }
+                    ]} 
+                  />
+                </View>
+              </View>
+              
+              <TouchableOpacity
+                style={styles.radiusButton}
+                onPress={increaseRadius}
+                disabled={state.radius >= 100}>
+                <MaterialIcons
+                  name="add"
+                  size={20}
+                  color={state.radius >= 100 ? colors.text.muted : colors.text.primary}
+                />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.radiusPresetsContainer}>
+              <TouchableOpacity
+                style={[styles.radiusPreset, state.radius === 10 && styles.radiusPresetActive]}
+                onPress={() => adjustRadius(10)}>
+                <Text style={[styles.radiusPresetText, state.radius === 10 && styles.radiusPresetTextActive]}>10 mi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.radiusPreset, state.radius === 25 && styles.radiusPresetActive]}
+                onPress={() => adjustRadius(25)}>
+                <Text style={[styles.radiusPresetText, state.radius === 25 && styles.radiusPresetTextActive]}>25 mi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.radiusPreset, state.radius === 50 && styles.radiusPresetActive]}
+                onPress={() => adjustRadius(50)}>
+                <Text style={[styles.radiusPresetText, state.radius === 50 && styles.radiusPresetTextActive]}>50 mi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.radiusPreset, state.radius === 100 && styles.radiusPresetActive]}
+                onPress={() => adjustRadius(100)}>
+                <Text style={[styles.radiusPresetText, state.radius === 100 && styles.radiusPresetTextActive]}>100 mi</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
 
       {state.showFilters && (
@@ -1227,5 +1342,108 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     textAlignVertical: 'center',
+  },
+  // Radius control styles
+  radiusContainer: {
+    backgroundColor: colors.secondary,
+    marginHorizontal: 20,
+    marginBottom: 15,
+    borderRadius: radius.lg,
+    padding: 15,
+    ...shadows.sm,
+  },
+  radiusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  radiusTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    fontFamily: 'Inter-SemiBold',
+    flex: 1,
+    marginLeft: 8,
+  },
+  radiusToggleButton: {
+    padding: 4,
+  },
+  radiusDisplay: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  radiusText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.accent,
+    fontFamily: 'Inter-Bold',
+  },
+  radiusControlContainer: {
+    borderTopWidth: 1,
+    borderTopColor: colors.text.muted,
+    paddingTop: 15,
+  },
+  radiusButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  radiusButton: {
+    backgroundColor: colors.accent,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
+  radiusSliderContainer: {
+    flex: 1,
+    marginHorizontal: 15,
+  },
+  radiusLabel: {
+    fontSize: 12,
+    color: colors.text.muted,
+    textAlign: 'center',
+    marginBottom: 5,
+    fontFamily: 'Inter-Regular',
+  },
+  radiusSlider: {
+    height: 4,
+    backgroundColor: colors.text.muted,
+    borderRadius: 2,
+    position: 'relative',
+  },
+  radiusSliderFill: {
+    height: '100%',
+    backgroundColor: colors.accent,
+    borderRadius: 2,
+  },
+  radiusPresetsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  radiusPreset: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.text.muted,
+  },
+  radiusPresetActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  radiusPresetText: {
+    fontSize: 14,
+    color: colors.text.muted,
+    fontFamily: 'Inter-Regular',
+  },
+  radiusPresetTextActive: {
+    color: colors.text.primary,
+    fontFamily: 'Inter-SemiBold',
   },
 });

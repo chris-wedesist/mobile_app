@@ -91,7 +91,7 @@ const API_CONFIG = {
   MAX_RETRIES: 3,
   CACHE_DURATION: 30 * 60 * 1000, // 30 minutes
   MAX_RESULTS: 50,
-  SEARCH_RADIUS: 50, // 50 miles
+  SEARCH_RADIUS: 25, // 25 miles default
 };
 
 // Fallback data for when APIs are unavailable
