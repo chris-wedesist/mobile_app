@@ -16,34 +16,7 @@ import * as Location from 'expo-location';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { performanceOptimizer } from '@/utils/performanceOptimizer';
-
-type Attorney = {
-  id: string;
-  name: string;
-  cases: number;
-  detailedLocation: string;
-  featured: boolean;
-  image: string;
-  languages: string[];
-  lat: number;
-  lng: number;
-  location: string;
-  phone?: string;
-  rating: number;
-  specialization: string;
-  website?: string;
-  email?: string;
-  // New properties for enhanced filtering
-  feeStructure: 'pro-bono' | 'sliding-scale' | 'contingency' | 'flat-fee' | 'hourly' | 'mixed';
-  firmSize: 'solo' | 'small-firm' | 'large-firm';
-  experienceYears: number;
-  availability: 'immediate' | 'within-week' | 'within-month' | 'consultation-only';
-  consultationFee?: number;
-  acceptsNewClients: boolean;
-  emergencyAvailable: boolean;
-  virtualConsultation: boolean;
-  inPersonConsultation: boolean;
-};
+import { getAttorneys, type Attorney } from '@/lib/attorneys';
 
 type LegalHelpState = {
   searchQuery: string;
@@ -154,22 +127,26 @@ export default function LegalHelpScreen() {
   const fetchAttorneys = async (location: Location.LocationObject) => {
     try {
       updateState({ isLoading: true, error: null, attorneys: [], originalAttorneys: [] });
-      console.log('🔍 Fetching attorneys with location:', {
+      console.log('🔍 Fetching real attorneys with location:', {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
       });
 
-      const cacheKey = `attorneys_${location.coords.latitude}_${location.coords.longitude}`;
+      const cacheKey = `real_attorneys_${location.coords.latitude}_${location.coords.longitude}`;
       
       const attorneys = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
-        // Simulate API call for civil rights and immigration attorneys
-        const mockAttorneys = generateCivilRightsAttorneys(location.coords.latitude, location.coords.longitude);
+        // Fetch real attorney data from multiple sources
+        const realAttorneys = await getAttorneys(
+          location.coords.latitude,
+          location.coords.longitude,
+          50 // 50 mile radius
+        );
         
-        console.log('✅ Successfully fetched attorneys:', mockAttorneys.length);
-        return mockAttorneys;
+        console.log('✅ Successfully fetched real attorneys:', realAttorneys.length);
+        return realAttorneys;
       }, {
         key: cacheKey,
-        duration: 10 * 60 * 1000 // 10 minutes cache for attorney data
+        duration: 30 * 60 * 1000 // 30 minutes cache for real attorney data
       });
 
       updateState({
@@ -188,136 +165,7 @@ export default function LegalHelpScreen() {
     }
   };
 
-  // Generate mock civil rights and immigration attorneys
-  const generateCivilRightsAttorneys = (userLat: number, userLng: number): Attorney[] => {
-    const specializations = [
-      'Civil Rights Law',
-      'Immigration Law',
-      'Constitutional Law',
-      'Police Misconduct',
-      'Discrimination Law',
-      'Asylum & Refugee Law',
-      'Deportation Defense',
-      'First Amendment Rights',
-      'Voting Rights',
-      'Employment Discrimination'
-    ];
 
-    const languages = [
-      ['English', 'Spanish'],
-      ['English', 'French'],
-      ['English', 'Arabic'],
-      ['English', 'Mandarin'],
-      ['English', 'Haitian Creole'],
-      ['English', 'Vietnamese'],
-      ['English', 'Korean'],
-      ['English', 'Russian'],
-      ['English', 'Portuguese'],
-      ['English', 'Tagalog']
-    ];
-
-    // Realistic attorney names for civil rights and immigration law
-    const attorneyNames = [
-      'Sarah Rodriguez',
-      'Marcus Johnson',
-      'Elena Martinez',
-      'David Chen',
-      'Aisha Patel',
-      'Michael Thompson',
-      'Isabella Santos',
-      'James Wilson',
-      'Maria Gonzalez',
-      'Robert Kim',
-      'Fatima Hassan',
-      'Christopher Lee',
-      'Sofia Rodriguez',
-      'Daniel Brown',
-      'Priya Sharma',
-      'Andrew Davis',
-      'Carmen Lopez',
-      'Kevin O\'Connor',
-      'Yuki Tanaka',
-      'Thomas Anderson'
-    ];
-
-    const officeNames = [
-      'Civil Rights Legal Group',
-      'Justice & Equality Law',
-      'Immigration Rights Center',
-      'Constitutional Defense Firm',
-      'Community Legal Services',
-      'Rights Protection Law',
-      'Liberty Legal Associates',
-      'Equal Justice Partners',
-      'Defense & Rights Law',
-      'Freedom Legal Group',
-      'Justice for All Law',
-      'Rights Advocacy Center',
-      'Legal Equality Partners',
-      'Community Defense Law',
-      'Rights & Justice Firm',
-      'Liberty Defense Group',
-      'Equal Rights Law',
-      'Justice Partners Legal',
-      'Rights Protection Center',
-      'Community Justice Law'
-    ];
-
-    const feeStructures: Attorney['feeStructure'][] = ['pro-bono', 'sliding-scale', 'contingency', 'flat-fee', 'hourly', 'mixed'];
-    const firmSizes: Attorney['firmSize'][] = ['solo', 'small-firm', 'large-firm'];
-    const availabilities: Attorney['availability'][] = ['immediate', 'within-week', 'within-month', 'consultation-only'];
-
-    const attorneys: Attorney[] = [];
-
-    for (let i = 0; i < 20; i++) { // Increased to 20 for more variety
-      // Generate random coordinates within 50km of user location
-      const lat = userLat + (Math.random() - 0.5) * 0.45; // ~50km in degrees
-      const lng = userLng + (Math.random() - 0.5) * 0.45; // ~50km in degrees
-
-      const specialization = specializations[Math.floor(Math.random() * specializations.length)];
-      const attorneyLanguages = languages[Math.floor(Math.random() * languages.length)];
-      const feeStructure = feeStructures[Math.floor(Math.random() * feeStructures.length)];
-      const firmSize = firmSizes[Math.floor(Math.random() * firmSizes.length)];
-      const availability = availabilities[Math.floor(Math.random() * availabilities.length)];
-      const experienceYears = Math.floor(Math.random() * 25) + 2; // 2-27 years
-      const consultationFee = feeStructure === 'pro-bono' ? 0 : 
-                             feeStructure === 'sliding-scale' ? Math.floor(Math.random() * 100) + 25 :
-                             Math.floor(Math.random() * 300) + 50; // $50-$350
-
-      const attorneyName = attorneyNames[i];
-      const officeName = officeNames[i];
-
-      attorneys.push({
-        id: `attorney-${i + 1}`,
-        name: attorneyName,
-        cases: Math.floor(Math.random() * 500) + 50,
-        detailedLocation: `${officeName}, Downtown`,
-        featured: Math.random() > 0.7, // 30% chance of being featured
-        image: `https://via.placeholder.com/150/1B2D45/FFFFFF?text=${encodeURIComponent(attorneyName.split(' ')[0])}`,
-        languages: attorneyLanguages,
-        lat: lat,
-        lng: lng,
-        location: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-        phone: `+1-555-${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-        rating: Math.floor(Math.random() * 2) + 4, // 4-5 stars
-        specialization: specialization,
-        website: `https://${attorneyName.toLowerCase().replace(' ', '')}.law`,
-        email: `${attorneyName.toLowerCase().replace(' ', '.')}@civilrights.law`,
-        // Enhanced properties for better filtering
-        feeStructure: feeStructure,
-        firmSize: firmSize,
-        experienceYears: experienceYears,
-        availability: availability,
-        consultationFee: consultationFee,
-        acceptsNewClients: Math.random() > 0.2, // 80% accept new clients
-        emergencyAvailable: Math.random() > 0.4, // 60% available for emergencies
-        virtualConsultation: Math.random() > 0.1, // 90% offer virtual consultation
-        inPersonConsultation: Math.random() > 0.3, // 70% offer in-person consultation
-      });
-    }
-
-    return attorneys;
-  };
 
   const getFilteredAttorneys = () => {
     let filtered = [...state.originalAttorneys];
