@@ -216,6 +216,53 @@ export default function LegalHelpScreen() {
       ['English', 'Tagalog']
     ];
 
+    // Realistic attorney names for civil rights and immigration law
+    const attorneyNames = [
+      'Sarah Rodriguez',
+      'Marcus Johnson',
+      'Elena Martinez',
+      'David Chen',
+      'Aisha Patel',
+      'Michael Thompson',
+      'Isabella Santos',
+      'James Wilson',
+      'Maria Gonzalez',
+      'Robert Kim',
+      'Fatima Hassan',
+      'Christopher Lee',
+      'Sofia Rodriguez',
+      'Daniel Brown',
+      'Priya Sharma',
+      'Andrew Davis',
+      'Carmen Lopez',
+      'Kevin O\'Connor',
+      'Yuki Tanaka',
+      'Thomas Anderson'
+    ];
+
+    const officeNames = [
+      'Civil Rights Legal Group',
+      'Justice & Equality Law',
+      'Immigration Rights Center',
+      'Constitutional Defense Firm',
+      'Community Legal Services',
+      'Rights Protection Law',
+      'Liberty Legal Associates',
+      'Equal Justice Partners',
+      'Defense & Rights Law',
+      'Freedom Legal Group',
+      'Justice for All Law',
+      'Rights Advocacy Center',
+      'Legal Equality Partners',
+      'Community Defense Law',
+      'Rights & Justice Firm',
+      'Liberty Defense Group',
+      'Equal Rights Law',
+      'Justice Partners Legal',
+      'Rights Protection Center',
+      'Community Justice Law'
+    ];
+
     const feeStructures: Attorney['feeStructure'][] = ['pro-bono', 'sliding-scale', 'contingency', 'flat-fee', 'hourly', 'mixed'];
     const firmSizes: Attorney['firmSize'][] = ['solo', 'small-firm', 'large-firm'];
     const availabilities: Attorney['availability'][] = ['immediate', 'within-week', 'within-month', 'consultation-only'];
@@ -237,13 +284,16 @@ export default function LegalHelpScreen() {
                              feeStructure === 'sliding-scale' ? Math.floor(Math.random() * 100) + 25 :
                              Math.floor(Math.random() * 300) + 50; // $50-$350
 
+      const attorneyName = attorneyNames[i];
+      const officeName = officeNames[i];
+
       attorneys.push({
         id: `attorney-${i + 1}`,
-        name: `Attorney ${i + 1}`,
+        name: attorneyName,
         cases: Math.floor(Math.random() * 500) + 50,
-        detailedLocation: `Legal Office ${i + 1}, Downtown`,
+        detailedLocation: `${officeName}, Downtown`,
         featured: Math.random() > 0.7, // 30% chance of being featured
-        image: `https://via.placeholder.com/150/1B2D45/FFFFFF?text=Attorney+${i + 1}`,
+        image: `https://via.placeholder.com/150/1B2D45/FFFFFF?text=${encodeURIComponent(attorneyName.split(' ')[0])}`,
         languages: attorneyLanguages,
         lat: lat,
         lng: lng,
@@ -251,8 +301,8 @@ export default function LegalHelpScreen() {
         phone: `+1-555-${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
         rating: Math.floor(Math.random() * 2) + 4, // 4-5 stars
         specialization: specialization,
-        website: `https://attorney${i + 1}.law`,
-        email: `attorney${i + 1}@civilrights.law`,
+        website: `https://${attorneyName.toLowerCase().replace(' ', '')}.law`,
+        email: `${attorneyName.toLowerCase().replace(' ', '.')}@civilrights.law`,
         // Enhanced properties for better filtering
         feeStructure: feeStructure,
         firmSize: firmSize,
