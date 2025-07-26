@@ -97,6 +97,8 @@ node scripts/monitor-production.js
 - [ ] Test each API individually
 - [ ] Verify attorney search functionality
 - [ ] Test all filtering features
+- [ ] **CRITICAL**: Ensure only real attorney data is returned
+- [ ] **CRITICAL**: Verify nationwide scope is maintained
 
 #### **After Session**
 - [ ] Commit working changes
@@ -112,6 +114,8 @@ node scripts/monitor-production.js
 - [ ] Attorney search working with real results
 - [ ] Distance calculations accurate
 - [ ] Filtering and sorting functional
+- [ ] **ZERO** dummy/mock/fake attorney data generated
+- [ ] **FULL** nationwide coverage maintained
 
 #### **Performance**
 - [ ] Response times under 2000ms
@@ -145,6 +149,22 @@ node scripts/monitor-production.js
 - Cache misses
 - Memory usage
 
+### ⚠️ **CRITICAL CONSTRAINTS - DO NOT VIOLATE**
+
+#### **🚫 NO DUMMY DATA POLICY**
+- **UNDER NO CIRCUMSTANCES** create dummy/mock/fake attorney data
+- **NEVER** generate placeholder attorneys to solve API failures
+- **DO NOT** implement fallback data generation
+- **ONLY** return real, verified attorney data from legitimate APIs
+- If APIs fail, return empty results and inform users appropriately
+
+#### **🌍 MAINTAIN NATIONWIDE SCOPE**
+- **DO NOT** reduce the nationwide scope of attorney search
+- **MAINTAIN** location-based results for all 50 states and territories
+- **PRESERVE** the user's location-based attorney finding functionality
+- **ENSURE** the app works for users anywhere in the U.S. and territories
+- **NEVER** limit results to specific regions or states only
+
 ### 📞 **Resources for Next Session**
 
 #### **Documentation**
@@ -174,4 +194,17 @@ By the end of the next session, the DESIST mobile app should be:
 
 **Session Notes**: This document should be updated during the next session to track progress and document any issues encountered.
 
-**Next Session**: Start fresh with this TODO list and complete the remaining 15% of the API key implementation. 
+**Next Session**: Start fresh with this TODO list and complete the remaining 15% of the API key implementation.
+
+---
+
+### 🚨 **FINAL REMINDER FOR TOMORROW'S SESSION**
+
+**CRITICAL CONSTRAINTS THAT MUST BE RESPECTED:**
+
+1. **🚫 NO DUMMY DATA**: Never create fake attorney data under any circumstances
+2. **🌍 MAINTAIN NATIONWIDE SCOPE**: Keep location-based results for all 50 states and territories
+3. **✅ ONLY REAL DATA**: Only return verified attorney data from legitimate APIs
+4. **📍 LOCATION-BASED**: Preserve user location-based attorney finding functionality
+
+**If APIs fail, the correct response is to return empty results and inform users that no verified attorneys are available in their area, NOT to generate fake data or reduce scope.** 
