@@ -53,7 +53,7 @@ export default function DocumentsScreen() {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 1,
         allowsEditing: true,
       });
@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
   typeButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.secondary,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -352,11 +353,15 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   selectedTypeButtonText: {
     color: colors.text.primary,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   uploadButton: {
     backgroundColor: colors.accent,
@@ -373,6 +378,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   documentList: {
     flex: 1,

@@ -3,22 +3,27 @@ import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
 import { getNews, NewsItem } from '@/lib/news';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 
 type LayoutType = 'row' | 'box';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function BlogsScreen() {
+  const { category } = useLocalSearchParams<{ category?: string }>();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [layout, setLayout] = useState<LayoutType>('row');
+  const [selectedCategory, setSelectedCategory] = useState<'local' | 'national' | 'all'>(
+    (category as 'local' | 'national') || 'all'
+  );
 
   const loadNews = async () => {
     try {
       setLoading(true);
-      const newsItems = await getNews(page, ITEMS_PER_PAGE);
+      const newsItems = await getNews(page, ITEMS_PER_PAGE, selectedCategory === 'all' ? undefined : selectedCategory);
       if (newsItems.length === 0) {
         setHasMore(false);
       } else {
@@ -38,8 +43,11 @@ export default function BlogsScreen() {
 
   // Load initial news
   useEffect(() => {
+    setPage(1);
+    setNews([]);
+    setHasMore(true);
     loadNews();
-  }, []);
+  }, [selectedCategory]);
 
   // Load more news when page changes
   useEffect(() => {
@@ -58,6 +66,10 @@ export default function BlogsScreen() {
     setLayout(prev => prev === 'row' ? 'box' : 'row');
   };
 
+  const handleCategoryChange = (newCategory: 'local' | 'national' | 'all') => {
+    setSelectedCategory(newCategory);
+  };
+
   const handleNewsPress = async (url: string) => {
     try {
       const supported = await Linking.canOpenURL(url);
@@ -71,11 +83,19 @@ export default function BlogsScreen() {
     }
   };
 
+  const getCategoryTitle = () => {
+    switch (selectedCategory) {
+      case 'local': return 'Local News';
+      case 'national': return 'National News';
+      default: return 'All News';
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Latest News</Text>
+          <Text style={styles.title}>{getCategoryTitle()}</Text>
           <Pressable onPress={toggleLayout} style={styles.layoutToggle}>
             <Ionicons 
               name={layout === 'row' ? 'grid-outline' : 'list-outline'} 
@@ -85,6 +105,46 @@ export default function BlogsScreen() {
           </Pressable>
         </View>
         <Text style={styles.subtitle}>Stay informed about your rights and community</Text>
+      </View>
+
+      {/* Category Filter */}
+      <View style={styles.categoryFilter}>
+        <Pressable 
+          style={[
+            styles.categoryButton,
+            selectedCategory === 'all' && styles.selectedCategory
+          ]}
+          onPress={() => handleCategoryChange('all')}
+        >
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === 'all' && styles.selectedCategoryText
+          ]}>All</Text>
+        </Pressable>
+        <Pressable 
+          style={[
+            styles.categoryButton,
+            selectedCategory === 'local' && styles.selectedCategory
+          ]}
+          onPress={() => handleCategoryChange('local')}
+        >
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === 'local' && styles.selectedCategoryText
+          ]}>Local</Text>
+        </Pressable>
+        <Pressable 
+          style={[
+            styles.categoryButton,
+            selectedCategory === 'national' && styles.selectedCategory
+          ]}
+          onPress={() => handleCategoryChange('national')}
+        >
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === 'national' && styles.selectedCategoryText
+          ]}>National</Text>
+        </Pressable>
       </View>
 
       <View style={layout === 'box' ? styles.boxContainer : undefined}>
@@ -113,6 +173,10 @@ export default function BlogsScreen() {
                 <Text style={styles.newsDate}>
                   {new Date(item.date).toLocaleDateString()}
                 </Text>
+              </View>
+              {/* Show category badge */}
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>{item.category}</Text>
               </View>
             </View>
           </Pressable>
@@ -239,12 +303,15 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   loadMoreText: {
     color: colors.primary,
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   noMoreText: {
     textAlign: 'center',
@@ -252,5 +319,51 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     padding: 20,
+  },
+  categoryFilter: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    margin: 16,
+    padding: 8,
+  },
+  categoryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedCategory: {
+    backgroundColor: colors.accent,
+    borderRadius: 20,
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  selectedCategoryText: {
+    color: colors.primary,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  categoryBadge: {
+    backgroundColor: colors.accent,
+    borderRadius: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  categoryBadgeText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: 'Inter-Bold',
   },
 }); 

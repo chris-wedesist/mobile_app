@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Platform, RefreshControl, Dimensions, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Platform, RefreshControl, Dimensions, ScrollView, ActivityIndicator, Alert, TextInput } from 'react-native';
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
 import WebView from 'react-native-webview';
@@ -14,14 +14,15 @@ const supabase = createClient(
 );
 
 // Test data generator
-const generateTestData = (count: number, userLat: number, userLng: number) => {
+const generateTestData = (count: number, userLat: number, userLng: number, radiusKm: number) => {
   const types = ['ICE Activity', 'Border Patrol Activity', 'Checkpoint', 'Raid in Progress', 'Suspicious Vehicle'];
   const incidents = [];
 
   for (let i = 0; i < count; i++) {
-    // Generate random coordinates within 5km of user location
-    const lat = userLat + (Math.random() - 0.5) * 0.045; // ~5km in degrees
-    const lng = userLng + (Math.random() - 0.5) * 0.045; // ~5km in degrees
+    // Generate random coordinates within the specified radius of user location
+    const radiusDegrees = radiusKm / 111; // Convert km to degrees (approximate)
+    const lat = userLat + (Math.random() - 0.5) * radiusDegrees * 2;
+    const lng = userLng + (Math.random() - 0.5) * radiusDegrees * 2;
 
     incidents.push({
       id: `test-${i}`,
@@ -51,7 +52,7 @@ type Incident = {
 };
 
 const REFRESH_INTERVAL = 30000; // 30 seconds
-const NEARBY_RADIUS = 5000; // 5km
+const DEFAULT_RADIUS = 5; // 5km default
 
 export default function IncidentsScreen() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -60,6 +61,9 @@ export default function IncidentsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
+  const [radius, setRadius] = useState(DEFAULT_RADIUS); // Radius in kilometers
+  const [showRadiusControl, setShowRadiusControl] = useState(false);
+  const [customRadius, setCustomRadius] = useState(DEFAULT_RADIUS.toString());
   const refreshInterval = useRef<NodeJS.Timeout>();
   const mapRef = useRef<WebView>(null);
   const { newIncident } = useLocalSearchParams();
@@ -83,6 +87,13 @@ export default function IncidentsScreen() {
       }
     }
   }, [newIncident]);
+
+  // Refetch incidents when radius changes
+  useEffect(() => {
+    if (location) {
+      fetchIncidents(location);
+    }
+  }, [radius, location]);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     // Convert coordinates to radians
@@ -139,7 +150,7 @@ export default function IncidentsScreen() {
           console.error('Refresh error:', error);
           setIsConnected(false);
         }
-      }, REFRESH_INTERVAL);
+      }, REFRESH_INTERVAL) as unknown as NodeJS.Timeout;
     } catch (error) {
       console.error('Setup error:', error);
       setError('Failed to get your location. Please check your settings and try again.');
@@ -151,11 +162,11 @@ export default function IncidentsScreen() {
 
   const fetchIncidents = async (userLocation: Location.LocationObject) => {
     try {  
-      const cacheKey = `incidents_${userLocation.coords.latitude?.toString() || '0'}_${userLocation.coords.longitude?.toString() || '0'}`;
+      const cacheKey = `incidents_${userLocation.coords.latitude?.toString() || '0'}_${userLocation.coords.longitude?.toString() || '0'}_${radius}`;
       
       const incidents = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
-        // Generate test data instead of fetching from Supabase
-        const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0);
+        // Generate test data with the current radius
+        const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0, radius);
 
         // Calculate distances for each incident
         const incidentsWithDistance = data.map(incident => {
@@ -171,8 +182,8 @@ export default function IncidentsScreen() {
 
             // Calculate distance
             const distance = calculateDistance(
-              userLocation.coords.latitude || 0,
-              userLocation.coords.longitude || 0,
+              userLocation.coords.latitude,
+              userLocation.coords.longitude,
               latitude,
               longitude
             );
@@ -189,8 +200,14 @@ export default function IncidentsScreen() {
           }
         });
 
+        // Filter incidents within the specified radius
+        const radiusInMeters = radius * 1000;
+        const filteredIncidents = incidentsWithDistance.filter(incident => 
+          (incident.distance || 0) <= radiusInMeters
+        );
+
         // Sort incidents by distance
-        return incidentsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        return filteredIncidents.sort((a, b) => (a.distance || 0) - (b.distance || 0));
       }, {
         key: cacheKey,
         duration: 2 * 60 * 1000 // 2 minutes cache for location-based data
@@ -209,236 +226,194 @@ export default function IncidentsScreen() {
       }
     } catch (error) {
       console.error('Error fetching incidents:', error);
+      setError('Failed to fetch incidents. Please try again.');
       setIsConnected(false);
-      setError('Failed to fetch nearby incidents. Please check your connection and try again.');
+    }
+  };
+
+  const adjustRadius = (increment: number) => {
+    const newRadius = Math.max(1, Math.min(50, radius + increment)); // Limit between 1-50km
+    setRadius(newRadius);
+    setCustomRadius(newRadius.toString());
+  };
+
+  const handleCustomRadiusChange = (value: string) => {
+    setCustomRadius(value);
+  };
+
+  const applyCustomRadius = () => {
+    const newRadius = parseFloat(customRadius);
+    if (!isNaN(newRadius) && newRadius >= 1 && newRadius <= 50) {
+      setRadius(newRadius);
+      setShowRadiusControl(false);
+    } else {
+      Alert.alert('Invalid Radius', 'Please enter a radius between 1 and 50 kilometers.');
     }
   };
 
   const formatTimeAgo = (timestamp: string) => {
-    const minutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000 / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
   const formatDistance = (meters: number) => {
     if (meters < 1000) return `${Math.round(meters)}m`;
-    return `${(meters / 1609.34).toFixed(1)}mi`;
+    return `${(meters / 1000).toFixed(1)}km`;
   };
 
   const renderIncident = ({ item }: { item: Incident }) => (
-    <View style={styles.incidentCard}>
+    <TouchableOpacity
+      style={styles.incidentCard}
+      onPress={() => router.push(`/incidents/${item.id}`)}
+    >
       <View style={styles.incidentHeader}>
-        <MaterialIcons name="error-outline" color={colors.accent} size={24} />
         <Text style={styles.incidentType}>{item.type}</Text>
+        <Text style={styles.incidentTime}>{formatTimeAgo(item.created_at)}</Text>
       </View>
       <Text style={styles.incidentDescription}>{item.description}</Text>
       <View style={styles.incidentFooter}>
-        <View style={styles.locationInfo}>
-          <MaterialIcons name="location-on" size={16} color={colors.text.muted} />
-          <Text style={styles.distanceText}>
-            {formatDistance(item.distance || 0)} away
-          </Text>
-        </View>
-        <View style={styles.timeInfo}>
-          <MaterialIcons name="access-time" size={16} color={colors.text.muted} />
-          <Text style={styles.timeAgo}>{formatTimeAgo(item.created_at)}</Text>
-        </View>
+        <Text style={styles.incidentDistance}>
+          {formatDistance(item.distance || 0)} away
+        </Text>
+        <View style={[styles.statusIndicator, { backgroundColor: item.status === 'active' ? colors.accent : colors.text.secondary }]} />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const onRefresh = async () => {
-    setIsLoading(true);
     if (location) {
       await fetchIncidents(location);
     }
-    setIsLoading(false);
   };
-
-  const mapHTML = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>
-          body { margin: 0; background: ${colors.primary}; }
-          #map { width: 100vw; height: 100vh; background: ${colors.primary}; }
-          .leaflet-popup-content-wrapper {
-            background: ${colors.secondary};
-            color: ${colors.text.primary};
-          }
-          .leaflet-popup-tip {
-            background: ${colors.secondary};
-          }
-          .area-indicator {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: ${colors.secondary};
-            color: ${colors.text.primary};
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-family: 'Inter-Medium';
-            font-size: 14px;
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          }
-        </style>
-      </head>
-      <body>
-        <div class="area-indicator">Allowed to view your nearby area and limited limmited radius</div>
-        <div id="map"></div>
-        <script>
-          const map = L.map('map', {
-            minZoom: 12,
-            maxZoom: 16,
-            zoomControl: true,
-            maxBounds: [
-              [${location?.coords.latitude - 0.1}, ${location?.coords.longitude - 0.1}],
-              [${location?.coords.latitude + 0.1}, ${location?.coords.longitude + 0.1}]
-            ],
-            maxBoundsViscosity: 1.0
-          }).setView([${location?.coords.latitude || 0}, ${location?.coords.longitude || 0}], 13);
-          
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-          }).addTo(map);
-
-          const circle = L.circle([${location?.coords.latitude || 0}, ${location?.coords.longitude || 0}], {
-            color: '${colors.accent}',
-            fillColor: '${colors.accent}',
-            fillOpacity: 0.1,
-            radius: 5000 // 5km in meters
-          }).addTo(map);
-
-          // Add a marker for user's location
-          const userMarker = L.marker([${location?.coords.latitude || 0}, ${location?.coords.longitude || 0}], {
-            icon: L.divIcon({
-              className: 'user-location-marker',
-              html: '<div style="background-color: ${colors.accent}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>'
-            })
-          }).addTo(map);
-
-          let markers = [];
-
-          function updateMarkers(incidents) {
-            markers.forEach(marker => marker.remove());
-            markers = [];
-
-            incidents.forEach(incident => {
-              const marker = L.marker([incident.latitude, incident.longitude])
-                .bindPopup(
-                  '<strong style="color: ${colors.text.primary}">' + incident.type + '</strong><br>' +
-                  '<div style="color: ${colors.text.secondary}">' + incident.description + '</div><br>' +
-                  '<small style="color: ${colors.text.muted}">' + new Date(incident.created_at).toLocaleString() + '</small>'
-                )
-                .addTo(map);
-              markers.push(marker);
-            });
-          }
-
-          updateMarkers(${JSON.stringify(incidents)});
-        </script>
-      </body>
-    </html>
-  `;
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Nearby Incidents</Text>
-        </View>
-        <View style={styles.errorContainer}>
-          <MaterialIcons name="error-outline" size={80} color={colors.status.error} />
-          <Text style={styles.errorTitle}>Connection Error</Text>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={checkLocationPermission}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
-      {!isConnected && (
-        <View style={styles.connectionStatus}>
-          <MaterialIcons name="wifi-off" size={16} color={colors.status.error} />
-          <Text style={styles.connectionStatusText}>
-            Connection lost. Retrying...
-          </Text>
-        </View>
-      )}
-      
-      <View style={styles.headerContainer}>
-        <View style={styles.titleContainer}>
+      {/* Header with radius control */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
           <Text style={styles.title}>Nearby Incidents</Text>
-        </View>
-        <View style={styles.headerButtons}>
           <TouchableOpacity 
-            style={styles.viewToggle} 
-            onPress={() => setShowMap(!showMap)}>
-            {showMap ? (
-              <MaterialIcons name="view-list" size={20} color={colors.text.primary} />
-            ) : (
-              <MaterialIcons name="map" size={20} color={colors.text.primary} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.reportButton} 
-            onPress={() => router.push('/report-incident')}>
-            <Text style={styles.reportButtonText}>Report</Text>
+            style={styles.radiusButton}
+            onPress={() => setShowRadiusControl(!showRadiusControl)}
+          >
+            <MaterialIcons name="tune" size={24} color={colors.text.primary} />
+            <Text style={styles.radiusText}>{radius}km</Text>
           </TouchableOpacity>
         </View>
+        
+        {showRadiusControl && (
+          <View style={styles.radiusControl}>
+            <View style={styles.radiusIncrement}>
+              <TouchableOpacity 
+                style={styles.radiusButton}
+                onPress={() => adjustRadius(-1)}
+              >
+                <MaterialIcons name="remove" size={20} color={colors.text.primary} />
+              </TouchableOpacity>
+              <Text style={styles.radiusLabel}>Radius: {radius}km</Text>
+              <TouchableOpacity 
+                style={styles.radiusButton}
+                onPress={() => adjustRadius(1)}
+              >
+                <MaterialIcons name="add" size={20} color={colors.text.primary} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.customRadius}>
+              <TextInput
+                style={styles.radiusInput}
+                value={customRadius}
+                onChangeText={handleCustomRadiusChange}
+                placeholder="Enter radius (1-50km)"
+                keyboardType="numeric"
+                maxLength={2}
+              />
+              <TouchableOpacity 
+                style={styles.applyButton}
+                onPress={applyCustomRadius}
+              >
+                <Text style={styles.applyButtonText}>Apply</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
 
-      {showMap ? (
-        <View style={styles.mapContainer}>
-          <WebView
-            ref={mapRef}
-            source={{ html: mapHTML }}
-            style={styles.map}
-            onError={(syntheticEvent) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn('WebView error: ', nativeEvent);
-            }}
-          />
+      {/* Connection status */}
+      {!isConnected && (
+        <View style={styles.connectionWarning}>
+                     <MaterialIcons name="wifi-off" size={16} color={colors.status.warning} />
+           <Text style={styles.connectionText}>Offline mode - showing cached data</Text>
+        </View>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {/* Incidents list */}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={styles.loadingText}>Loading incidents...</Text>
         </View>
       ) : (
         <FlatList
           data={incidents}
           renderItem={renderIncident}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
+          style={styles.incidentsList}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
               onRefresh={onRefresh}
-              tintColor={colors.accent}
               colors={[colors.accent]}
             />
           }
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <MaterialIcons name="error-outline" size={80} color={colors.text.muted} />
-              <Text style={styles.emptyStateText}>
-                No incidents reported nearby
-              </Text>
-              <Text style={styles.emptyStateSubtext}>
-                You'll be notified when activity is reported in your area
-              </Text>
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="location-off" size={48} color={colors.text.secondary} />
+              <Text style={styles.emptyText}>No incidents found within {radius}km</Text>
+              <Text style={styles.emptySubtext}>Try adjusting the radius or check back later</Text>
             </View>
           }
         />
+      )}
+
+      {/* Map toggle button */}
+      <TouchableOpacity
+        style={styles.mapToggle}
+        onPress={() => setShowMap(!showMap)}
+      >
+        <MaterialIcons 
+          name={showMap ? "list" : "map"} 
+          size={24} 
+          color={colors.primary} 
+        />
+        <Text style={styles.mapToggleText}>
+          {showMap ? "List View" : "Map View"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Map view */}
+      {showMap && (
+        <View style={styles.mapContainer}>
+          <WebView
+            ref={mapRef}
+            source={{ uri: 'https://www.google.com/maps' }}
+            style={styles.map}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+        </View>
       )}
     </View>
   );
@@ -450,24 +425,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
   header: {
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,
@@ -475,48 +440,110 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontFamily: 'Inter-Bold',
   },
-  viewToggle: {
+  radiusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.secondary,
     padding: 10,
     borderRadius: radius.round,
     ...shadows.sm,
   },
-  reportButton: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: radius.round,
-    ...shadows.sm,
-  },
-  reportButtonText: {
+  radiusText: {
     color: colors.text.primary,
+    fontSize: 16,
     fontWeight: '600',
-    fontSize: 14,
+    marginLeft: 5,
     fontFamily: 'Inter-SemiBold',
   },
-  connectionStatus: {
+  radiusControl: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: colors.secondary,
+    borderRadius: radius.lg,
+    ...shadows.md,
+  },
+  radiusIncrement: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  radiusLabel: {
+    color: colors.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+  },
+  customRadius: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+         borderColor: colors.text.muted,
+  },
+  radiusInput: {
+    flex: 1,
+    color: colors.text.primary,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+  },
+  applyButton: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  applyButtonText: {
+    color: colors.text.primary,
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  connectionWarning: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.secondary,
     paddingVertical: 8,
     paddingHorizontal: 20,
     gap: 8,
+    marginTop: 10,
   },
-  connectionStatusText: {
-    color: colors.status.error,
+  connectionText: {
+         color: colors.status.warning,
     fontSize: 14,
     fontFamily: 'Inter-Medium',
   },
-  mapContainer: {
-    flex: 1,
-    backgroundColor: colors.primary,
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
   },
-  map: {
-    flex: 1,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height - 120,
+  errorText: {
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
-  listContainer: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  loadingText: {
+    color: colors.text.muted,
+    fontSize: 18,
+    fontFamily: 'Inter-Medium',
+  },
+  incidentsList: {
     padding: 20,
     paddingBottom: 100, // Extra padding at the bottom of the list
   },
@@ -529,6 +556,7 @@ const styles = StyleSheet.create({
   },
   incidentHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
   },
@@ -536,8 +564,12 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 18,
     fontWeight: '600',
-    marginLeft: 10,
     fontFamily: 'Inter-SemiBold',
+  },
+  incidentTime: {
+    color: colors.text.muted,
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
   },
   incidentDescription: {
     color: colors.text.secondary,
@@ -551,65 +583,50 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  locationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timeInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  distanceText: {
+  incidentDistance: {
     color: colors.text.muted,
-    marginLeft: 5,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
   },
-  timeAgo: {
-    color: colors.text.muted,
-    marginLeft: 5,
-    fontFamily: 'Inter-Regular',
+  statusIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorTitle: {
-    color: colors.text.primary,
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
-    fontFamily: 'Inter-Bold',
-  },
-  errorText: {
-    color: colors.text.secondary,
-    textAlign: 'center',
-    fontSize: 16,
-    marginBottom: 30,
-    fontFamily: 'Inter-Regular',
-  },
-  retryButton: {
+  mapToggle: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
     backgroundColor: colors.accent,
-    paddingHorizontal: 30,
-    paddingVertical: 15,
+    padding: 15,
     borderRadius: radius.round,
-    ...shadows.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    ...shadows.md,
   },
-  retryButtonText: {
+  mapToggleText: {
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
-  emptyState: {
+  mapContainer: {
+    flex: 1,
+    backgroundColor: colors.primary,
+  },
+  map: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height - 120,
+  },
+  emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
   },
-  emptyStateText: {
+  emptyText: {
     color: colors.text.muted,
     fontSize: 20,
     fontWeight: '600',
@@ -617,7 +634,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: 'Inter-SemiBold',
   },
-  emptyStateSubtext: {
+  emptySubtext: {
     color: colors.text.muted,
     fontSize: 16,
     textAlign: 'center',

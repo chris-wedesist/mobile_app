@@ -552,6 +552,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: radius.lg,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 10,
     ...shadows.sm,
   },
@@ -560,6 +561,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   emergencyContactButton: {
     flexDirection: 'row',

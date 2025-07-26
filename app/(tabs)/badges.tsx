@@ -282,12 +282,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   retryButtonText: {
     color: colors.text.primary,
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   progressCard: {
     backgroundColor: colors.secondary,
