@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -85,6 +85,9 @@ export default function LegalHelpScreen() {
     originalAttorneys: []
   }));
 
+  // Debounce timer for radius adjustments
+  const radiusDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const updateState = (updates: Partial<LegalHelpState>) => {
     setState(prev => ({
       ...prev,
@@ -157,6 +160,18 @@ export default function LegalHelpScreen() {
         duration: 30 * 60 * 1000 // 30 minutes cache for real attorney data
       });
 
+      console.log(`📊 Fetched ${attorneys.length} attorneys from API`);
+      if (attorneys.length > 0) {
+        console.log(`📍 Sample attorney data:`, {
+          name: attorneys[0].name,
+          lat: attorneys[0].lat,
+          lng: attorneys[0].lng,
+          location: attorneys[0].location,
+          feeStructure: attorneys[0].feeStructure,
+          firmSize: attorneys[0].firmSize
+        });
+      }
+      
       updateState({
         attorneys: attorneys,
         originalAttorneys: attorneys
@@ -177,9 +192,27 @@ export default function LegalHelpScreen() {
 
   const getFilteredAttorneys = () => {
     let filtered = [...state.originalAttorneys];
+    console.log(`🔍 Starting with ${filtered.length} original attorneys`);
+
+    // Filter by radius (distance from user location)
+    if (state.userLocation && state.radius > 0) {
+      const beforeRadius = filtered.length;
+      filtered = filtered.filter(attorney => {
+        const distanceInMeters = calculateDistance(
+          state.userLocation!.coords.latitude,
+          state.userLocation!.coords.longitude,
+          attorney.lat,
+          attorney.lng
+        );
+        const distanceInMiles = distanceInMeters / 1609.34; // Convert meters to miles
+        return distanceInMiles <= state.radius;
+      });
+      console.log(`📍 Radius filter: ${filtered.length}/${beforeRadius} attorneys within ${state.radius} miles`);
+    }
 
     // Filter by search query
     if (state.searchQuery.trim()) {
+      const beforeSearch = filtered.length;
       const query = state.searchQuery.toLowerCase();
       filtered = filtered.filter(attorney =>
         attorney.name.toLowerCase().includes(query) ||
@@ -187,20 +220,25 @@ export default function LegalHelpScreen() {
         attorney.languages.some(lang => lang.toLowerCase().includes(query)) ||
         attorney.detailedLocation.toLowerCase().includes(query)
       );
+      console.log(`🔎 Search filter: ${filtered.length}/${beforeSearch} attorneys match "${state.searchQuery}"`);
     }
 
     // Apply fee structure filters
     if (state.filters.feeStructure.length > 0) {
+      const beforeFee = filtered.length;
       filtered = filtered.filter(attorney =>
         state.filters.feeStructure.includes(attorney.feeStructure)
       );
+      console.log(`💰 Fee structure filter: ${filtered.length}/${beforeFee} attorneys match ${state.filters.feeStructure.join(', ')}`);
     }
 
     // Apply firm size filters
     if (state.filters.firmSize.length > 0) {
+      const beforeFirm = filtered.length;
       filtered = filtered.filter(attorney =>
         state.filters.firmSize.includes(attorney.firmSize)
       );
+      console.log(`🏢 Firm size filter: ${filtered.length}/${beforeFirm} attorneys match ${state.filters.firmSize.join(', ')}`);
     }
 
     // Apply experience level filters
@@ -254,11 +292,15 @@ export default function LegalHelpScreen() {
 
     // Legacy filters (for backward compatibility)
     if (state.filters.proBono) {
+      const beforeProBono = filtered.length;
       filtered = filtered.filter(attorney => attorney.feeStructure === 'pro-bono');
+      console.log(`🆓 Pro bono filter: ${filtered.length}/${beforeProBono} attorneys are pro bono`);
     }
 
     if (state.filters.slidingScale) {
+      const beforeSliding = filtered.length;
       filtered = filtered.filter(attorney => attorney.feeStructure === 'sliding-scale');
+      console.log(`📊 Sliding scale filter: ${filtered.length}/${beforeSliding} attorneys offer sliding scale`);
     }
 
     if (state.filters.distance) {
@@ -292,6 +334,7 @@ export default function LegalHelpScreen() {
       return priorityB - priorityA; // Higher priority first
     });
 
+    console.log(`✅ Final filtered result: ${filtered.length} attorneys after all filters`);
     return filtered;
   };
 
@@ -322,13 +365,28 @@ export default function LegalHelpScreen() {
   };
 
   // Radius control functions
-  const adjustRadius = (newRadius: number) => {
+  const adjustRadius = async (newRadius: number) => {
     const clampedRadius = Math.max(5, Math.min(100, newRadius)); // 5-100 mile range
-    updateState({ radius: clampedRadius });
     
-    // Refetch attorneys with new radius if location is available
-    if (state.userLocation) {
-      fetchAttorneys(state.userLocation, clampedRadius);
+    // Only update if radius actually changed
+    if (clampedRadius !== state.radius) {
+      updateState({ radius: clampedRadius });
+      
+      // Clear existing debounce timer
+      if (radiusDebounceRef.current) {
+        clearTimeout(radiusDebounceRef.current);
+      }
+      
+      // Set loading state immediately for UI feedback
+      updateState({ isLoading: true });
+      
+      // Debounce the actual API call to prevent too many requests
+      radiusDebounceRef.current = setTimeout(async () => {
+        if (state.userLocation) {
+          console.log(`🔄 Adjusting search radius to ${clampedRadius} miles`);
+          await fetchAttorneys(state.userLocation, clampedRadius);
+        }
+      }, 500); // 500ms debounce delay
     }
   };
 
@@ -336,21 +394,21 @@ export default function LegalHelpScreen() {
     updateState({ showRadiusControl: !state.showRadiusControl });
   };
 
-  const increaseRadius = () => {
-    adjustRadius(state.radius + 5);
+  const increaseRadius = async () => {
+    await adjustRadius(state.radius + 5);
   };
 
-  const decreaseRadius = () => {
-    adjustRadius(state.radius - 5);
+  const decreaseRadius = async () => {
+    await adjustRadius(state.radius - 5);
   };
 
-  // Update attorneys whenever search or filters change
+  // Update attorneys whenever search, filters, or radius change
   useEffect(() => {
     if (state.originalAttorneys.length > 0) {
       const filteredAttorneys = getFilteredAttorneys();
       updateState({ attorneys: filteredAttorneys });
     }
-  }, [state.searchQuery, state.filters, state.originalAttorneys]);
+  }, [state.searchQuery, state.filters, state.originalAttorneys, state.radius]);
 
   const onRefresh = async () => {
     updateState({ refreshing: true });
@@ -410,7 +468,32 @@ export default function LegalHelpScreen() {
     if (attorneys.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No attorneys found in your area</Text>
+          <MaterialIcons name="gavel" size={48} color={colors.text.muted} />
+          <Text style={styles.emptyTitle}>No Verified Attorneys Available</Text>
+          <Text style={styles.emptyText}>
+            We couldn't find any verified civil rights or immigration attorneys in your area at this time.
+          </Text>
+          <Text style={styles.emptySubtext}>
+            This could be due to:
+          </Text>
+          <View style={styles.emptyReasonsContainer}>
+            <Text style={styles.emptyReason}>• Limited attorney coverage in your region</Text>
+            <Text style={styles.emptyReason}>• Temporary unavailability of our data sources</Text>
+            <Text style={styles.emptyReason}>• Network connectivity issues</Text>
+          </View>
+          <Text style={styles.emptySubtext}>
+            We recommend:
+          </Text>
+          <View style={styles.emptyReasonsContainer}>
+            <Text style={styles.emptyReason}>• Contacting your local legal aid organization directly</Text>
+            <Text style={styles.emptyReason}>• Reaching out to your state bar association</Text>
+            <Text style={styles.emptyReason}>• Checking with civil rights organizations in your area</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={onRefresh}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
         </View>
       );
     }
@@ -434,6 +517,16 @@ export default function LegalHelpScreen() {
             <View style={styles.locationContainer}>
               <MaterialIcons name="location-on" size={14} color={colors.text.muted} />
               <Text style={styles.distanceText}>{attorney.location}</Text>
+              {state.userLocation && attorney.lat && attorney.lng && (
+                <Text style={styles.distanceIndicator}>
+                  {(calculateDistance(
+                    state.userLocation.coords.latitude,
+                    state.userLocation.coords.longitude,
+                    attorney.lat,
+                    attorney.lng
+                  ) / 1609.34).toFixed(1)} mi away
+                </Text>
+              )}
             </View>
           </View>
         </View>
@@ -602,6 +695,17 @@ export default function LegalHelpScreen() {
         
         <View style={styles.radiusDisplay}>
           <Text style={styles.radiusText}>{state.radius} miles</Text>
+          {state.originalAttorneys.length > 0 && (
+            <Text style={styles.radiusCountText}>
+              {state.attorneys.length} of {state.originalAttorneys.length} attorneys within radius
+            </Text>
+          )}
+          {state.isLoading && (
+            <View style={{ alignItems: 'center', marginTop: 5 }}>
+              <ActivityIndicator size="small" color={colors.accent} />
+              <Text style={[styles.radiusLabel, { marginTop: 3 }]}>Updating search...</Text>
+            </View>
+          )}
         </View>
 
         {state.showRadiusControl && (
@@ -645,22 +749,22 @@ export default function LegalHelpScreen() {
             <View style={styles.radiusPresetsContainer}>
               <TouchableOpacity
                 style={[styles.radiusPreset, state.radius === 10 && styles.radiusPresetActive]}
-                onPress={() => adjustRadius(10)}>
+                onPress={async () => await adjustRadius(10)}>
                 <Text style={[styles.radiusPresetText, state.radius === 10 && styles.radiusPresetTextActive]}>10 mi</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.radiusPreset, state.radius === 25 && styles.radiusPresetActive]}
-                onPress={() => adjustRadius(25)}>
+                onPress={async () => await adjustRadius(25)}>
                 <Text style={[styles.radiusPresetText, state.radius === 25 && styles.radiusPresetTextActive]}>25 mi</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.radiusPreset, state.radius === 50 && styles.radiusPresetActive]}
-                onPress={() => adjustRadius(50)}>
+                onPress={async () => await adjustRadius(50)}>
                 <Text style={[styles.radiusPresetText, state.radius === 50 && styles.radiusPresetTextActive]}>50 mi</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.radiusPreset, state.radius === 100 && styles.radiusPresetActive]}
-                onPress={() => adjustRadius(100)}>
+                onPress={async () => await adjustRadius(100)}>
                 <Text style={[styles.radiusPresetText, state.radius === 100 && styles.radiusPresetTextActive]}>100 mi</Text>
               </TouchableOpacity>
             </View>
@@ -1165,6 +1269,12 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
     marginLeft: 4,
   },
+  distanceIndicator: {
+    color: colors.accent,
+    fontSize: 12,
+    fontFamily: 'Inter-SemiBold',
+    marginLeft: 8,
+  },
   ratingText: {
     marginLeft: 4,
     fontSize: 14,
@@ -1300,11 +1410,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  emptyTitle: {
+    color: colors.text.primary,
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 12,
+  },
   emptyText: {
     color: colors.text.primary,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 24,
+  },
+  emptySubtext: {
+    color: colors.text.primary,
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyReasonsContainer: {
+    marginBottom: 16,
+  },
+  emptyReason: {
+    color: colors.text.muted,
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    textAlign: 'left',
+    marginBottom: 4,
+    lineHeight: 20,
   },
   errorContainer: {
     flex: 1,
@@ -1378,6 +1519,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.accent,
     fontFamily: 'Inter-Bold',
+  },
+  radiusCountText: {
+    fontSize: 12,
+    color: colors.text.muted,
+    fontFamily: 'Inter-Regular',
+    marginTop: 4,
+    textAlign: 'center',
   },
   radiusControlContainer: {
     borderTopWidth: 1,

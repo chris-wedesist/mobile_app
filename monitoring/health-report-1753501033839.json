@@ -1,0 +1,122 @@
+{
+  "timestamp": "2025-07-26T03:37:13.839Z",
+  "overallHealth": {
+    "totalAPIs": 8,
+    "healthyAPIs": 7,
+    "unhealthyAPIs": 1,
+    "overallHealth": 87.5,
+    "averageResponseTime": 1542.625
+  },
+  "performance": {
+    "averageResponseTime": 1542.625,
+    "fastestAPI": {
+      "apiName": "NLG",
+      "endpoint": "https://www.nlg.org/api/attorneys",
+      "isHealthy": true,
+      "responseTime": 742,
+      "lastCheck": "2025-07-26T03:37:08.568Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "slowestAPI": {
+      "apiName": "LSC",
+      "endpoint": "https://www.lsc.gov/api/find-legal-aid",
+      "isHealthy": true,
+      "responseTime": 2333,
+      "lastCheck": "2025-07-26T03:37:06.853Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "totalErrors": 1,
+    "recentErrors": [
+      {
+        "timestamp": "2025-07-26T03:37:02.932Z",
+        "apiName": "FindLaw",
+        "error": "API timeout or error",
+        "responseTime": 1480
+      }
+    ]
+  },
+  "apiStatus": {
+    "FindLaw": {
+      "apiName": "FindLaw",
+      "endpoint": "https://lawyers.findlaw.com/api/search",
+      "isHealthy": false,
+      "responseTime": 1480,
+      "lastCheck": "2025-07-26T03:37:02.932Z",
+      "errorCount": 1,
+      "successRate": 85
+    },
+    "Justia": {
+      "apiName": "Justia",
+      "endpoint": "https://lawyers.justia.com/api/lawyers",
+      "isHealthy": true,
+      "responseTime": 1587,
+      "lastCheck": "2025-07-26T03:37:04.520Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "LSC": {
+      "apiName": "LSC",
+      "endpoint": "https://www.lsc.gov/api/find-legal-aid",
+      "isHealthy": true,
+      "responseTime": 2333,
+      "lastCheck": "2025-07-26T03:37:06.853Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "ACLU": {
+      "apiName": "ACLU",
+      "endpoint": "https://www.aclu.org/api/attorney-directory",
+      "isHealthy": true,
+      "responseTime": 972,
+      "lastCheck": "2025-07-26T03:37:07.825Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "NLG": {
+      "apiName": "NLG",
+      "endpoint": "https://www.nlg.org/api/attorneys",
+      "isHealthy": true,
+      "responseTime": 742,
+      "lastCheck": "2025-07-26T03:37:08.568Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "SPLC": {
+      "apiName": "SPLC",
+      "endpoint": "https://www.splcenter.org/api/attorney-search",
+      "isHealthy": true,
+      "responseTime": 1211,
+      "lastCheck": "2025-07-26T03:37:09.780Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "Florida Bar": {
+      "apiName": "Florida Bar",
+      "endpoint": "https://www.floridabar.org/directories/find-mbr/api",
+      "isHealthy": true,
+      "responseTime": 1801,
+      "lastCheck": "2025-07-26T03:37:11.581Z",
+      "errorCount": 0,
+      "successRate": 95
+    },
+    "California Bar": {
+      "apiName": "California Bar",
+      "endpoint": "https://apps.calbar.ca.gov/attorney/LicenseeSearch/api",
+      "isHealthy": true,
+      "responseTime": 2215,
+      "lastCheck": "2025-07-26T03:37:13.796Z",
+      "errorCount": 0,
+      "successRate": 95
+    }
+  },
+  "errorLog": [
+    {
+      "timestamp": "2025-07-26T03:37:02.932Z",
+      "apiName": "FindLaw",
+      "error": "API timeout or error",
+      "responseTime": 1480
+    }
+  ]
+}
