@@ -1083,6 +1083,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.round,
     borderWidth: 1,
     borderColor: colors.text.muted,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   filterChipActive: {
     backgroundColor: colors.accent,
@@ -1237,6 +1239,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 4,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   contactButtonText: {
     color: colors.text.primary,
@@ -1299,9 +1302,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   settingsButton: {
     backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   retryButtonText: {
     color: colors.text.primary,

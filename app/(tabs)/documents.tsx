@@ -53,7 +53,7 @@ export default function DocumentsScreen() {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 1,
         allowsEditing: true,
       });
@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
   typeButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.secondary,
     paddingHorizontal: 15,
     paddingVertical: 10,

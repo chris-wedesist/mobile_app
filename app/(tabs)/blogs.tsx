@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   loadMoreText: {
     color: colors.primary,
@@ -329,6 +330,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedCategory: {
     backgroundColor: colors.accent,

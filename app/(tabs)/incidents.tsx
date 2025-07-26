@@ -182,8 +182,8 @@ export default function IncidentsScreen() {
 
             // Calculate distance
             const distance = calculateDistance(
-              userLocation.coords.latitude || 0,
-              userLocation.coords.longitude || 0,
+              userLocation.coords.latitude,
+              userLocation.coords.longitude,
               latitude,
               longitude
             );
@@ -497,6 +497,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   applyButtonText: {
     color: colors.text.primary,

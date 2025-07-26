@@ -177,6 +177,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   viewAllText: {
     color: colors.primary,

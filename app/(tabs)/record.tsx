@@ -660,6 +660,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
     ...shadows.sm,
   },
   permissionButtonText: {
