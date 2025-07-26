@@ -1085,6 +1085,8 @@ const styles = StyleSheet.create({
     borderColor: colors.text.muted,
     alignItems: 'center',
     justifyContent: 'center',
+    minWidth: 80,
+    maxWidth: 120,
   },
   filterChipActive: {
     backgroundColor: colors.accent,
@@ -1094,11 +1096,17 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    flexWrap: 'wrap',
   },
   filterChipTextActive: {
     color: colors.text.primary,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    flexWrap: 'wrap',
   },
   content: {
     flex: 1,
@@ -1230,21 +1238,26 @@ const styles = StyleSheet.create({
   contactContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    gap: 8,
   },
   contactButton: {
     backgroundColor: colors.accent,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     flex: 1,
     marginHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
+    minWidth: 80,
   },
   contactButtonText: {
     color: colors.text.primary,
     fontSize: 14,
     fontWeight: '600',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    flexWrap: 'wrap',
   },
   addAttorneyText: {
     color: colors.text.primary,
@@ -1314,5 +1327,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
 });

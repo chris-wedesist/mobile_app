@@ -185,6 +185,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   newsCard: {
     backgroundColor: colors.secondary,

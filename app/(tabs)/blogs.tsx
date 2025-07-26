@@ -310,6 +310,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   noMoreText: {
     textAlign: 'center',
@@ -342,9 +344,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text.primary,
     fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   selectedCategoryText: {
     color: colors.primary,
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   categoryBadge: {
     backgroundColor: colors.accent,

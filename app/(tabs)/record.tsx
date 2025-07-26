@@ -669,6 +669,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   webMessage: {
     flex: 1,

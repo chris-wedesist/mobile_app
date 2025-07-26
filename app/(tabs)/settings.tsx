@@ -561,6 +561,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   emergencyContactButton: {
     flexDirection: 'row',
