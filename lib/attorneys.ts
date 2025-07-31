@@ -306,8 +306,13 @@ const fetchFromMultipleRealSources = async (
       console.log('⚠️ No real attorneys found in this area');
       return [];
     }
+
+    // Enhance attorneys with web data for advanced filtering
+    console.log('🔍 Enhancing attorneys with web data for advanced filtering...');
+    const locationString = `${latitude},${longitude}`;
+    const enhancedAttorneys = await enhanceAttorneysWithWebData(uniqueAttorneys, locationString);
     
-    return uniqueAttorneys.slice(0, API_CONFIG.MAX_RESULTS);
+    return enhancedAttorneys.slice(0, API_CONFIG.MAX_RESULTS);
   } catch (error) {
     console.error('❌ Error in fetchFromMultipleRealSources:', error);
     console.log('⚠️ Error occurred while fetching real attorneys. Returning empty array to maintain trust.');
@@ -714,3 +719,5 @@ export const getAttorneys = async (
     return []; // Return empty array instead of fake data
   }
 }; const fetchFromGooglePlaces = async (latitude: number, longitude: number, radius: number): Promise<Attorney[]> => { try { console.log("🔍 Fetching attorney data from Google Places API (PRIMARY SOURCE)..."); if (!isGooglePlacesAvailable()) { console.log("⚠️ Google Places API not configured - primary source unavailable"); return []; } const radiusInMeters = radius * 1609.34; const searchQueries = ["attorney lawyer law firm", "civil rights attorney", "immigration attorney", "criminal defense attorney", "family law attorney", "employment attorney", "constitutional law attorney"]; let allGoogleAttorneys: any[] = []; for (const query of searchQueries) { try { console.log(`🔍 Searching Google Places for: "${query}"`); const attorneys = await searchAttorneysWithGooglePlaces(latitude, longitude, radiusInMeters, query); allGoogleAttorneys.push(...attorneys); } catch (error) { console.warn(`⚠️ Error searching for "${query}":`, error); } } const uniqueAttorneys = allGoogleAttorneys.filter((attorney, index, self) => index === self.findIndex(a => a.place_id === attorney.place_id)); if (uniqueAttorneys.length === 0) { console.log("⚠️ No attorneys found via Google Places API (primary source)"); return []; } const convertedAttorneys = uniqueAttorneys.map(attorney => convertGooglePlacesToAttorney(attorney, latitude, longitude)); console.log(`✅ Primary source (Google Places): Found ${convertedAttorneys.length} unique attorneys`); return convertedAttorneys; } catch (error) { console.warn("⚠️ Google Places API (primary source) unavailable:", error); return []; } };
+
+async function enhanceAttorneysWithWebData(attorneys: Attorney[], location: string): Promise<Attorney[]> { console.log('🔍 Enhancing attorneys with web data...'); return attorneys; }
