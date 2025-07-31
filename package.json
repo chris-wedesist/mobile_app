@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "EXPO_NO_TELEMETRY=1 expo start --web",
-    "dev:tunnel": "EXPO_NO_TELEMETRY=1 expo start --web --tunnel",
-    "dev:clear": "EXPO_NO_TELEMETRY=1 expo start --web --clear",
+    "dev": "EXPO_NO_TELEMETRY=1 expo start --web --port 8082",
+    "dev:tunnel": "EXPO_NO_TELEMETRY=1 expo start --web --tunnel --port 8082",
+    "dev:clear": "EXPO_NO_TELEMETRY=1 expo start --web --clear --port 8082",
     "build:web": "expo export --platform web",
     "lint": "expo lint",
     "android": "expo run:android",
