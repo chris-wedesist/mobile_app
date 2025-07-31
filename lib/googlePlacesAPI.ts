@@ -1,8 +1,14 @@
 // Using fetch instead of axios to avoid dependency issues
 
-// Google Places API configuration
+// Google Places API configuration with enhanced validation
 const GOOGLE_PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY || '';
 const GOOGLE_PLACES_BASE_URL = 'https://maps.googleapis.com/maps/api/place';
+
+// Enhanced environment variable validation and debugging
+console.log('🔧 Environment Variable Debug:');
+console.log('  - EXPO_PUBLIC_GOOGLE_PLACES_API_KEY exists:', !!process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY);
+console.log('  - GOOGLE_PLACES_API_KEY length:', GOOGLE_PLACES_API_KEY.length);
+console.log('  - GOOGLE_PLACES_API_KEY starts with AIza:', GOOGLE_PLACES_API_KEY.startsWith('AIza'));
 
 export interface GooglePlacesAttorney {
   place_id: string;
@@ -53,8 +59,8 @@ export async function searchAttorneysWithGooglePlaces(
   keyword: string = 'attorney lawyer law firm'
 ): Promise<GooglePlacesAttorney[]> {
   try {
-    if (!GOOGLE_PLACES_API_KEY) {
-      console.warn('⚠️ Google Places API key not configured');
+    if (!isGooglePlacesAvailable()) {
+      console.warn('⚠️ Google Places API not configured - primary source unavailable');
       return [];
     }
 
@@ -96,8 +102,8 @@ export async function searchAttorneysWithGooglePlaces(
  */
 export async function getAttorneyDetails(placeId: string): Promise<GooglePlacesAttorney | null> {
   try {
-    if (!GOOGLE_PLACES_API_KEY) {
-      console.warn('⚠️ Google Places API key not configured');
+    if (!isGooglePlacesAvailable()) {
+      console.warn('⚠️ Google Places API not configured - primary source unavailable');
       return null;
     }
 
@@ -141,8 +147,8 @@ export async function searchAttorneysByQuery(
   radius: number = 50000
 ): Promise<GooglePlacesAttorney[]> {
   try {
-    if (!GOOGLE_PLACES_API_KEY) {
-      console.warn('⚠️ Google Places API key not configured');
+    if (!isGooglePlacesAvailable()) {
+      console.warn('⚠️ Google Places API not configured - primary source unavailable');
       return [];
     }
 
@@ -249,7 +255,15 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
  * Check if Google Places API is available and configured
  */
 export function isGooglePlacesAvailable(): boolean {
-  return !!GOOGLE_PLACES_API_KEY;
+  const hasKey = !!GOOGLE_PLACES_API_KEY;
+  const isValidKey = GOOGLE_PLACES_API_KEY.startsWith('AIza') && GOOGLE_PLACES_API_KEY.length > 30;
+  
+  console.log('🔧 Google Places Availability Check:');
+  console.log('  - Has API Key:', hasKey);
+  console.log('  - Valid API Key Format:', isValidKey);
+  console.log('  - API Key Length:', GOOGLE_PLACES_API_KEY.length);
+  
+  return hasKey && isValidKey;
 }
 
 // Default export for Expo Router compatibility
