@@ -370,8 +370,18 @@ export default function LegalHelpScreen() {
 
   // Helper function to assign priority to specializations
   const getSpecializationPriority = (specialization: string): number => {
-    const highPriority = ['Civil Rights Law', 'Immigration Law', 'Police Misconduct', 'Asylum & Refugee Law'];
-    const mediumPriority = ['Constitutional Law', 'Deportation Defense', 'First Amendment Rights'];
+    // High priority civil rights specializations (Feature Set 6)
+    const highPriority = [
+      'Civil Rights Law', 'Immigration Law', 'Police Misconduct', 'Asylum & Refugee Law',
+      'Discrimination Law', 'Voting Rights', 'Employment Discrimination', 'Housing Discrimination',
+      'Disability Rights', 'LGBTQ+ Rights', 'Women\'s Rights', 'Racial Justice',
+      'Criminal Justice Reform', 'Prisoners\' Rights', 'Environmental Justice', 'Immigrant Rights'
+    ];
+    // Medium priority civil rights specializations
+    const mediumPriority = [
+      'Constitutional Law', 'Deportation Defense', 'First Amendment Rights',
+      'Education Law'
+    ];
     
     if (highPriority.includes(specialization)) return 3;
     if (mediumPriority.includes(specialization)) return 2;
@@ -657,21 +667,21 @@ export default function LegalHelpScreen() {
             <TouchableOpacity
               style={styles.contactButton}
               onPress={() => Linking.openURL(`tel:${attorney.phone}`)}>
-              <Text style={styles.contactButtonText}>Call</Text>
+              <Text style={styles.contactButtonText}>📞 Call</Text>
             </TouchableOpacity>
           )}
           {attorney.email && (
             <TouchableOpacity
               style={styles.contactButton}
               onPress={() => Linking.openURL(`mailto:${attorney.email}`)}>
-              <Text style={styles.contactButtonText}>Email</Text>
+              <Text style={styles.contactButtonText}>📧 Email</Text>
             </TouchableOpacity>
           )}
           {attorney.website && (
             <TouchableOpacity
               style={styles.contactButton}
               onPress={() => attorney.website && Linking.openURL(attorney.website)}>
-              <Text style={styles.contactButtonText}>Website</Text>
+              <Text style={styles.contactButtonText}>🌐 Website</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1182,11 +1192,31 @@ export default function LegalHelpScreen() {
               <Text style={styles.filterSectionTitle}>Specializations</Text>
               <View style={styles.filterChipsRow}>
                 {[
+                  // Civil Rights Specializations (Feature Set 6)
+                  { key: 'civil-rights-law', label: 'Civil Rights Law', icon: 'security' },
+                  { key: 'immigration-law', label: 'Immigration Law', icon: 'flight' },
+                  { key: 'constitutional-law', label: 'Constitutional Law', icon: 'gavel' },
+                  { key: 'police-misconduct', label: 'Police Misconduct', icon: 'security' },
+                  { key: 'discrimination-law', label: 'Discrimination Law', icon: 'people' },
+                  { key: 'asylum-refugee-law', label: 'Asylum & Refugee Law', icon: 'flight' },
+                  { key: 'deportation-defense', label: 'Deportation Defense', icon: 'security' },
+                  { key: 'first-amendment-rights', label: 'First Amendment Rights', icon: 'gavel' },
+                  { key: 'voting-rights', label: 'Voting Rights', icon: 'how-to-vote' },
+                  { key: 'employment-discrimination', label: 'Employment Discrimination', icon: 'work' },
+                  { key: 'housing-discrimination', label: 'Housing Discrimination', icon: 'home' },
+                  { key: 'education-law', label: 'Education Law', icon: 'school' },
+                  { key: 'disability-rights', label: 'Disability Rights', icon: 'accessibility' },
+                  { key: 'lgbtq-rights', label: 'LGBTQ+ Rights', icon: 'people' },
+                  { key: 'womens-rights', label: 'Women\'s Rights', icon: 'people' },
+                  { key: 'racial-justice', label: 'Racial Justice', icon: 'security' },
+                  { key: 'criminal-justice-reform', label: 'Criminal Justice Reform', icon: 'gavel' },
+                  { key: 'prisoners-rights', label: 'Prisoners\' Rights', icon: 'security' },
+                  { key: 'environmental-justice', label: 'Environmental Justice', icon: 'eco' },
+                  { key: 'immigrant-rights', label: 'Immigrant Rights', icon: 'people' },
+                  // Additional specializations for comprehensive coverage
                   { key: 'criminal-defense', label: 'Criminal Defense', icon: 'gavel' },
                   { key: 'family-law', label: 'Family Law', icon: 'family-restroom' },
                   { key: 'personal-injury', label: 'Personal Injury', icon: 'healing' },
-                  { key: 'immigration', label: 'Immigration', icon: 'flight' },
-                  { key: 'civil-rights', label: 'Civil Rights', icon: 'security' },
                   { key: 'employment-law', label: 'Employment Law', icon: 'work' },
                   { key: 'real-estate', label: 'Real Estate', icon: 'home' },
                   { key: 'bankruptcy', label: 'Bankruptcy', icon: 'account-balance' },
