@@ -2,8 +2,9 @@ import { performanceOptimizer } from '@/utils/performanceOptimizer';
 import { searchStateBarAttorneys, hasStateBarAPI } from './stateBarAPI';
 import { searchLSCAttorneys, searchLegalAidOrganizations, hasLegalAidOrganization } from './legalAidAPI';
 import { searchACLUAttorneys, searchNLGAttorneys, searchCivilRightsOrganizations, hasCivilRightsOrganization } from './civilRightsAPI';
+import { searchAttorneysWithGooglePlaces, convertGooglePlacesToAttorney, isGooglePlacesAvailable } from './googlePlacesAPI';
 
-import { searchAttorneysWithGooglePlaces, convertGooglePlacesToAttorney, isGooglePlacesAvailable } from './googlePlacesAPI';export interface Attorney {
+export interface Attorney {
   id: string;
   name: string;
   cases?: number;
@@ -307,12 +308,10 @@ const fetchFromMultipleRealSources = async (
       return [];
     }
 
-    // Enhance attorneys with web data for advanced filtering
-    console.log('🔍 Enhancing attorneys with web data for advanced filtering...');
-    const locationString = `${latitude},${longitude}`;
-    const enhancedAttorneys = await enhanceAttorneysWithWebData(uniqueAttorneys, locationString);
+    // Return attorneys with basic enhancement (web enhancement can be added later)
+    console.log('🔍 Returning attorneys with basic data...');
     
-    return enhancedAttorneys.slice(0, API_CONFIG.MAX_RESULTS);
+    return uniqueAttorneys.slice(0, API_CONFIG.MAX_RESULTS);
   } catch (error) {
     console.error('❌ Error in fetchFromMultipleRealSources:', error);
     console.log('⚠️ Error occurred while fetching real attorneys. Returning empty array to maintain trust.');
@@ -567,7 +566,13 @@ const fetchFromImmigrationOrganizations = async (
     
   } catch (error) {
     console.warn('⚠️ Immigration organizations unavailable:', error);
+    return [];
+  }
+};
 
+/**
+ * Fetch from Google Places API - REAL DATA ONLY
+ */
 const fetchFromGooglePlaces = async (
   latitude: number,
   longitude: number,
@@ -634,8 +639,6 @@ const fetchFromGooglePlaces = async (
   } catch (error) {
     console.warn("⚠️ Google Places API (primary source) unavailable:", error);
     return [];
-  }
-};    return [];
   }
 };
 
@@ -718,6 +721,10 @@ export const getAttorneys = async (
     console.log('⚠️ Error occurred. Returning empty array to maintain trust.');
     return []; // Return empty array instead of fake data
   }
-}; const fetchFromGooglePlaces = async (latitude: number, longitude: number, radius: number): Promise<Attorney[]> => { try { console.log("🔍 Fetching attorney data from Google Places API (PRIMARY SOURCE)..."); if (!isGooglePlacesAvailable()) { console.log("⚠️ Google Places API not configured - primary source unavailable"); return []; } const radiusInMeters = radius * 1609.34; const searchQueries = ["attorney lawyer law firm", "civil rights attorney", "immigration attorney", "criminal defense attorney", "family law attorney", "employment attorney", "constitutional law attorney"]; let allGoogleAttorneys: any[] = []; for (const query of searchQueries) { try { console.log(`🔍 Searching Google Places for: "${query}"`); const attorneys = await searchAttorneysWithGooglePlaces(latitude, longitude, radiusInMeters, query); allGoogleAttorneys.push(...attorneys); } catch (error) { console.warn(`⚠️ Error searching for "${query}":`, error); } } const uniqueAttorneys = allGoogleAttorneys.filter((attorney, index, self) => index === self.findIndex(a => a.place_id === attorney.place_id)); if (uniqueAttorneys.length === 0) { console.log("⚠️ No attorneys found via Google Places API (primary source)"); return []; } const convertedAttorneys = uniqueAttorneys.map(attorney => convertGooglePlacesToAttorney(attorney, latitude, longitude)); console.log(`✅ Primary source (Google Places): Found ${convertedAttorneys.length} unique attorneys`); return convertedAttorneys; } catch (error) { console.warn("⚠️ Google Places API (primary source) unavailable:", error); return []; } };
+};
 
-async function enhanceAttorneysWithWebData(attorneys: Attorney[], location: string): Promise<Attorney[]> { console.log('🔍 Enhancing attorneys with web data...'); return attorneys; }
+// Default export for Expo Router compatibility
+export default {
+  getAttorneys,
+  fetchRealAttorneys
+};

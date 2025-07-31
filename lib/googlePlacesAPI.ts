@@ -251,3 +251,12 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export function isGooglePlacesAvailable(): boolean {
   return !!GOOGLE_PLACES_API_KEY;
 }
+
+// Default export for Expo Router compatibility
+export default {
+  searchAttorneysWithGooglePlaces,
+  getAttorneyDetails,
+  searchAttorneysByQuery,
+  convertGooglePlacesToAttorney,
+  isGooglePlacesAvailable
+};
