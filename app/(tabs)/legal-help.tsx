@@ -74,7 +74,7 @@ const initialState: LegalHelpState = {
   isLoading: true,
   error: null,
   // Radius control defaults
-  radius: 25, // Default 25 mile radius
+  radius: 10, // Default 10 mile radius
   showRadiusControl: false, // Hidden by default
 };
 
