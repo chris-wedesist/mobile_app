@@ -48,9 +48,6 @@
     },
     "plugins": [
       "expo-router"
-    ],
-    "extra": {
-      "EXPO_PUBLIC_GOOGLE_PLACES_API_KEY": "AIzaSyAfi0WKfQ7L9UM9VNNqlOnj9jpU7sL1iX4"
-    },
+    ]
   }
 }

@@ -1,12 +1,15 @@
 // Using fetch instead of axios to avoid dependency issues
+import Constants from 'expo-constants';
 
 // Google Places API configuration with enhanced validation
-const GOOGLE_PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY || '';
+const GOOGLE_PLACES_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY || 
+                             process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY || '';
 const GOOGLE_PLACES_BASE_URL = 'https://maps.googleapis.com/maps/api/place';
 
 // Enhanced environment variable validation and debugging
 console.log('🔧 Environment Variable Debug:');
-console.log('  - EXPO_PUBLIC_GOOGLE_PLACES_API_KEY exists:', !!process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY);
+console.log('  - Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY exists:', !!Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY);
+console.log('  - process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY exists:', !!process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY);
 console.log('  - GOOGLE_PLACES_API_KEY length:', GOOGLE_PLACES_API_KEY.length);
 console.log('  - GOOGLE_PLACES_API_KEY starts with AIza:', GOOGLE_PLACES_API_KEY.startsWith('AIza'));
 
@@ -59,8 +62,11 @@ export async function searchAttorneysWithGooglePlaces(
   keyword: string = 'attorney lawyer law firm'
 ): Promise<GooglePlacesAttorney[]> {
   try {
+    console.log(`🔍 Attempting Google Places search for attorneys near ${latitude}, ${longitude} with radius ${radius}m`);
+    
     if (!isGooglePlacesAvailable()) {
       console.warn('⚠️ Google Places API not configured - primary source unavailable');
+      console.warn('⚠️ This means attorney search functionality will be limited');
       return [];
     }
 
@@ -75,23 +81,36 @@ export async function searchAttorneysWithGooglePlaces(
       key: GOOGLE_PLACES_API_KEY
     });
 
-    const response = await fetch(`${GOOGLE_PLACES_BASE_URL}/nearbysearch/json?${params}`);
+    const url = `${GOOGLE_PLACES_BASE_URL}/nearbysearch/json?${params}`;
+    console.log(`🌐 Making request to: ${GOOGLE_PLACES_BASE_URL}/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&keyword=${keyword}&type=lawyer&key=${GOOGLE_PLACES_API_KEY.substring(0, 8)}...`);
+
+    const response = await fetch(url);
 
     if (response.ok) {
       const data = await response.json();
+      console.log(`📊 Google Places API Response Status: ${data.status}`);
+      
       if (data.status === 'OK') {
         console.log(`✅ Found ${data.results.length} attorneys via Google Places API`);
         return data.results;
+      } else if (data.status === 'ZERO_RESULTS') {
+        console.log(`ℹ️ No attorneys found in the specified area via Google Places API`);
+        return [];
+      } else if (data.status === 'REQUEST_DENIED') {
+        console.error(`❌ Google Places API request denied: ${data.error_message || 'Unknown error'}`);
+        console.error(`❌ This usually indicates API key issues or service not enabled`);
+        return [];
       } else {
-        console.error(`❌ Google Places API error: ${data.status}`);
+        console.error(`❌ Google Places API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
         return [];
       }
     } else {
-      console.error(`❌ HTTP error: ${response.status}`);
+      console.error(`❌ HTTP error: ${response.status} ${response.statusText}`);
       return [];
     }
   } catch (error) {
     console.error('❌ Error searching Google Places API:', error);
+    console.error('❌ This could be due to network issues or API configuration problems');
     return [];
   }
 }
@@ -119,15 +138,20 @@ export async function getAttorneyDetails(placeId: string): Promise<GooglePlacesA
 
     if (response.ok) {
       const data = await response.json();
+      console.log(`📊 Google Places Details API Response Status: ${data.status}`);
+      
       if (data.status === 'OK') {
         console.log(`✅ Retrieved detailed information for ${data.result.name}`);
         return data.result;
+      } else if (data.status === 'REQUEST_DENIED') {
+        console.error(`❌ Google Places Details API request denied: ${data.error_message || 'Unknown error'}`);
+        return null;
       } else {
-        console.error(`❌ Google Places Details API error: ${data.status}`);
+        console.error(`❌ Google Places Details API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
         return null;
       }
     } else {
-      console.error(`❌ HTTP error: ${response.status}`);
+      console.error(`❌ HTTP error: ${response.status} ${response.statusText}`);
       return null;
     }
   } catch (error) {
@@ -166,15 +190,23 @@ export async function searchAttorneysByQuery(
 
     if (response.ok) {
       const data = await response.json();
+      console.log(`📊 Google Places Text Search API Response Status: ${data.status}`);
+      
       if (data.status === 'OK') {
         console.log(`✅ Found ${data.results.length} results for query: "${query}"`);
         return data.results;
+      } else if (data.status === 'ZERO_RESULTS') {
+        console.log(`ℹ️ No results found for query: "${query}"`);
+        return [];
+      } else if (data.status === 'REQUEST_DENIED') {
+        console.error(`❌ Google Places Text Search API request denied: ${data.error_message || 'Unknown error'}`);
+        return [];
       } else {
-        console.error(`❌ Google Places Text Search API error: ${data.status}`);
+        console.error(`❌ Google Places Text Search API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
         return [];
       }
     } else {
-      console.error(`❌ HTTP error: ${response.status}`);
+      console.error(`❌ HTTP error: ${response.status} ${response.statusText}`);
       return [];
     }
   } catch (error) {
@@ -256,12 +288,22 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
  */
 export function isGooglePlacesAvailable(): boolean {
   const hasKey = !!GOOGLE_PLACES_API_KEY;
-  const isValidKey = GOOGLE_PLACES_API_KEY.startsWith('AIza') && GOOGLE_PLACES_API_KEY.length > 30;
+  const isValidKey = GOOGLE_PLACES_API_KEY.length >= 30 && 
+                     (GOOGLE_PLACES_API_KEY.startsWith('AIza') || 
+                      GOOGLE_PLACES_API_KEY.startsWith('AIza')); // Allow for any valid Google API key format
   
   console.log('🔧 Google Places Availability Check:');
   console.log('  - Has API Key:', hasKey);
-  console.log('  - Valid API Key Format:', isValidKey);
   console.log('  - API Key Length:', GOOGLE_PLACES_API_KEY.length);
+  console.log('  - API Key Preview:', GOOGLE_PLACES_API_KEY ? GOOGLE_PLACES_API_KEY.substring(0, 8) + '...' : 'None');
+  console.log('  - Valid API Key Format:', isValidKey);
+  console.log('  - Final Status:', hasKey && isValidKey ? '✅ AVAILABLE' : '❌ NOT AVAILABLE');
+  
+  if (!hasKey) {
+    console.warn('⚠️ Google Places API Key not found. Check environment variable configuration.');
+  } else if (!isValidKey) {
+    console.warn('⚠️ Google Places API Key format appears invalid. Expected 30+ characters starting with AIza.');
+  }
   
   return hasKey && isValidKey;
 }
