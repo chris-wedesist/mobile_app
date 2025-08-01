@@ -2,6 +2,10 @@ import { performanceOptimizer } from '@/utils/performanceOptimizer';
 import { searchStateBarAttorneys, hasStateBarAPI } from './stateBarAPI';
 import { searchLSCAttorneys, searchLegalAidOrganizations, hasLegalAidOrganization } from './legalAidAPI';
 import { searchACLUAttorneys, searchNLGAttorneys, searchCivilRightsOrganizations, hasCivilRightsOrganization } from './civilRightsAPI';
+import { searchAttorneysWithGooglePlaces, convertGooglePlacesToAttorney, isGooglePlacesAvailable } from './googlePlacesAPI';
+import { processAttorneyData, ProcessedAttorney } from './dataProcessor';
+import { errorHandler, withLoadingState } from './errorHandler';
+import { locationService } from './locationService';
 
 export interface Attorney {
   id: string;
@@ -278,6 +282,8 @@ const fetchFromMultipleRealSources = async (
     fetchFromProBonoNetworks(latitude, longitude, radius, locationInfo),
     fetchFromCivilRightsOrganizations(latitude, longitude, radius, locationInfo),
     fetchFromImmigrationOrganizations(latitude, longitude, radius, locationInfo),
+    // Google Places API (PRIMARY SOURCE)
+    fetchFromGooglePlaces(latitude, longitude, radius),
   ];
 
   try {
@@ -300,12 +306,15 @@ const fetchFromMultipleRealSources = async (
     console.log(`📊 Total real attorneys found: ${allAttorneys.length}, Unique: ${uniqueAttorneys.length}, Civil Rights: ${filteredAttorneys.length}`);
     
     // If no real attorneys found, return empty array
-    if (filteredAttorneys.length === 0) {
+    if (uniqueAttorneys.length === 0) {
       console.log('⚠️ No real attorneys found in this area');
       return [];
     }
+
+    // Return attorneys with basic enhancement (web enhancement can be added later)
+    console.log('🔍 Returning attorneys with basic data...');
     
-    return filteredAttorneys.slice(0, API_CONFIG.MAX_RESULTS);
+    return uniqueAttorneys.slice(0, API_CONFIG.MAX_RESULTS);
   } catch (error) {
     console.error('❌ Error in fetchFromMultipleRealSources:', error);
     console.log('⚠️ Error occurred while fetching real attorneys. Returning empty array to maintain trust.');
@@ -565,6 +574,78 @@ const fetchFromImmigrationOrganizations = async (
 };
 
 /**
+ * Fetch from Google Places API - REAL DATA ONLY
+ */
+const fetchFromGooglePlaces = async (
+  latitude: number,
+  longitude: number,
+  radius: number
+): Promise<Attorney[]> => {
+  try {
+    console.log("🔍 Fetching attorney data from Google Places API (PRIMARY SOURCE)...");
+    
+    if (!isGooglePlacesAvailable()) {
+      console.log("⚠️ Google Places API not configured - primary source unavailable");
+      return [];
+    }
+    
+    // Convert radius from miles to meters for Google Places API
+    const radiusInMeters = radius * 1609.34;
+    
+    // Enhanced search queries for comprehensive attorney coverage
+    const searchQueries = [
+      "attorney lawyer law firm",
+      "civil rights attorney",
+      "immigration attorney",
+      "criminal defense attorney",
+      "family law attorney",
+      "employment attorney",
+      "constitutional law attorney"
+    ];
+    
+    let allGoogleAttorneys: any[] = [];
+    
+    // Search with multiple queries to get comprehensive results
+    for (const query of searchQueries) {
+      try {
+        console.log(`🔍 Searching Google Places for: "${query}"`);
+        const attorneys = await searchAttorneysWithGooglePlaces(
+          latitude,
+          longitude,
+          radiusInMeters,
+          query
+        );
+        allGoogleAttorneys.push(...attorneys);
+      } catch (error) {
+        console.warn(`⚠️ Error searching for "${query}":`, error);
+      }
+    }
+    
+    // Remove duplicates based on place_id
+    const uniqueAttorneys = allGoogleAttorneys.filter((attorney, index, self) =>
+      index === self.findIndex(a => a.place_id === attorney.place_id)
+    );
+    
+    if (uniqueAttorneys.length === 0) {
+      console.log("⚠️ No attorneys found via Google Places API (primary source)");
+      return [];
+    }
+    
+    // Convert Google Places data to our Attorney format
+    const convertedAttorneys = uniqueAttorneys.map(attorney =>
+      convertGooglePlacesToAttorney(attorney, latitude, longitude)
+    );
+    
+    console.log(`✅ Primary source (Google Places): Found ${convertedAttorneys.length} unique attorneys`);
+    return convertedAttorneys;
+    
+  } catch (error) {
+    console.warn("⚠️ Google Places API (primary source) unavailable:", error);
+    return [];
+  }
+};
+
+/**
  * Remove duplicate attorneys based on name and location
  */
 const removeDuplicates = (attorneys: Attorney[]): Attorney[] => {
@@ -616,31 +697,79 @@ export const getAttorneys = async (
   longitude: number,
   radius: number = API_CONFIG.SEARCH_RADIUS
 ): Promise<Attorney[]> => {
-  try {
-    const attorneys = await fetchRealAttorneys(latitude, longitude, radius);
+  return withLoadingState(async () => {
+    console.log(`🔍 Fetching real attorneys with location: {latitude: ${latitude}, longitude: ${longitude}, radius: ${radius}}`);
     
-    // If no real attorneys found, return empty array
-    if (attorneys.length === 0) {
-      console.log('⚠️ No real attorneys found in this area. Users should be informed that no verified attorneys are available.');
-      return [];
+    // Feature Set 10: Real-Time Location Integration
+    // Update location service with current search location
+    locationService.setUpdateInterval(30000); // 30 seconds for real-time updates
+    
+    // Check cache first
+    const cacheKey = `real_attorneys_${latitude}_${longitude}_${radius}`;
+    const cachedData = await performanceOptimizer.getCached(cacheKey);
+    
+    if (cachedData) {
+      console.log('📊 Fetched attorneys from cache');
+      return cachedData as Attorney[];
+    }
+
+    // Fetch fresh data with error handling
+    let attorneys: Attorney[] = [];
+    try {
+      attorneys = await fetchRealAttorneys(latitude, longitude, radius);
+    } catch (error) {
+      console.error('❌ Error fetching attorneys:', error);
+      // Feature Set 9: Error Handling & Fallbacks
+      return errorHandler.handleAPIError(error, 'attorney_fetch');
+    }
+
+    // Feature Set 8: Data Processing & Deduplication
+    if (attorneys.length > 0) {
+      console.log(`🔧 Processing ${attorneys.length} raw attorney records...`);
+      const processedAttorneys = processAttorneyData(attorneys, latitude, longitude);
+      
+      // Convert back to Attorney interface
+      attorneys = processedAttorneys.map(processed => ({
+        id: processed.id,
+        name: processed.name,
+        detailedLocation: processed.detailedLocation,
+        location: processed.location,
+        lat: processed.lat,
+        lng: processed.lng,
+        phone: processed.phone,
+        website: processed.website,
+        rating: processed.rating,
+        cases: processed.cases,
+        featured: processed.featured,
+        image: processed.image,
+        languages: processed.languages,
+        specialization: processed.specialization,
+        email: processed.email,
+        feeStructure: processed.feeStructure as any,
+        firmSize: processed.firmSize as any,
+        experienceYears: processed.experienceYears,
+        availability: processed.availability as any,
+        consultationFee: processed.consultationFee,
+        acceptsNewClients: processed.acceptsNewClients,
+        emergencyAvailable: processed.emergencyAvailable,
+        virtualConsultation: processed.virtualConsultation,
+        inPersonConsultation: processed.inPersonConsultation,
+        verified: processed.verified,
+        source: processed.source,
+        lastVerified: processed.lastVerified
+      }));
     }
     
-    // Add distance calculations for real attorneys only
-    const attorneysWithDistance = attorneys.map(attorney => ({
-      ...attorney,
-      distance: calculateDistance(latitude, longitude, attorney.lat, attorney.lng)
-    }));
+    // Cache the results
+    await performanceOptimizer.setCached(cacheKey, attorneys, { duration: API_CONFIG.CACHE_DURATION });
     
-    // Sort by distance and rating
-    return attorneysWithDistance.sort((a, b) => {
-      if (a.distance !== b.distance) {
-        return a.distance - b.distance;
-      }
-      return b.rating - a.rating;
-    });
-  } catch (error) {
-    console.error('❌ Error in getAttorneys:', error);
-    console.log('⚠️ Error occurred. Returning empty array to maintain trust.');
-    return []; // Return empty array instead of fake data
-  }
-}; 
+    console.log(`📊 Fetched ${attorneys.length} attorneys from API`);
+    return attorneys;
+  }, 'Searching for attorneys in your area...');
+};
+
+// Default export for Expo Router compatibility
+export default {
+  getAttorneys,
+  fetchRealAttorneys
+};

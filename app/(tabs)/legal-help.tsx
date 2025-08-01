@@ -36,6 +36,9 @@ type LegalHelpState = {
     virtualConsultation: boolean;
     inPersonConsultation: boolean;
     maxConsultationFee?: number;
+    // Additional filter options for enhanced data
+    languages: string[];
+    specializations: string[];
   };
   refreshing: boolean;
   attorneys: Attorney[];
@@ -66,6 +69,9 @@ const initialState: LegalHelpState = {
     virtualConsultation: false,
     inPersonConsultation: false,
     maxConsultationFee: undefined,
+    // Additional filter defaults
+    languages: [],
+    specializations: [],
   },
   refreshing: false,
   attorneys: [],
@@ -74,7 +80,7 @@ const initialState: LegalHelpState = {
   isLoading: true,
   error: null,
   // Radius control defaults
-  radius: 25, // Default 25 mile radius
+  radius: 10, // Default 10 mile radius
   showRadiusControl: false, // Hidden by default
 };
 
@@ -290,6 +296,30 @@ export default function LegalHelpScreen() {
       );
     }
 
+    // Apply languages filter
+    if (state.filters.languages.length > 0) {
+      const beforeLanguages = filtered.length;
+      filtered = filtered.filter(attorney =>
+        state.filters.languages.some(lang => 
+          attorney.languages.some(attorneyLang => 
+            attorneyLang.toLowerCase().includes(lang.toLowerCase())
+          )
+        )
+      );
+      console.log(`🌐 Languages filter: ${filtered.length}/${beforeLanguages} attorneys speak ${state.filters.languages.join(', ')}`);
+    }
+
+    // Apply specializations filter
+    if (state.filters.specializations.length > 0) {
+      const beforeSpecializations = filtered.length;
+      filtered = filtered.filter(attorney =>
+        state.filters.specializations.some(spec => 
+          attorney.specialization.toLowerCase().includes(spec.replace('-', ' ').toLowerCase())
+        )
+      );
+      console.log(`⚖️ Specializations filter: ${filtered.length}/${beforeSpecializations} attorneys practice ${state.filters.specializations.join(', ')}`);
+    }
+
     // Legacy filters (for backward compatibility)
     if (state.filters.proBono) {
       const beforeProBono = filtered.length;
@@ -340,8 +370,18 @@ export default function LegalHelpScreen() {
 
   // Helper function to assign priority to specializations
   const getSpecializationPriority = (specialization: string): number => {
-    const highPriority = ['Civil Rights Law', 'Immigration Law', 'Police Misconduct', 'Asylum & Refugee Law'];
-    const mediumPriority = ['Constitutional Law', 'Deportation Defense', 'First Amendment Rights'];
+    // High priority civil rights specializations (Feature Set 6)
+    const highPriority = [
+      'Civil Rights Law', 'Immigration Law', 'Police Misconduct', 'Asylum & Refugee Law',
+      'Discrimination Law', 'Voting Rights', 'Employment Discrimination', 'Housing Discrimination',
+      'Disability Rights', 'LGBTQ+ Rights', 'Women\'s Rights', 'Racial Justice',
+      'Criminal Justice Reform', 'Prisoners\' Rights', 'Environmental Justice', 'Immigrant Rights'
+    ];
+    // Medium priority civil rights specializations
+    const mediumPriority = [
+      'Constitutional Law', 'Deportation Defense', 'First Amendment Rights',
+      'Education Law'
+    ];
     
     if (highPriority.includes(specialization)) return 3;
     if (mediumPriority.includes(specialization)) return 2;
@@ -627,21 +667,21 @@ export default function LegalHelpScreen() {
             <TouchableOpacity
               style={styles.contactButton}
               onPress={() => Linking.openURL(`tel:${attorney.phone}`)}>
-              <Text style={styles.contactButtonText}>Call</Text>
+              <Text style={styles.contactButtonText}>📞 Call</Text>
             </TouchableOpacity>
           )}
           {attorney.email && (
             <TouchableOpacity
               style={styles.contactButton}
               onPress={() => Linking.openURL(`mailto:${attorney.email}`)}>
-              <Text style={styles.contactButtonText}>Email</Text>
+              <Text style={styles.contactButtonText}>📧 Email</Text>
             </TouchableOpacity>
           )}
           {attorney.website && (
             <TouchableOpacity
               style={styles.contactButton}
               onPress={() => attorney.website && Linking.openURL(attorney.website)}>
-              <Text style={styles.contactButtonText}>Website</Text>
+              <Text style={styles.contactButtonText}>🌐 Website</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1093,6 +1133,130 @@ export default function LegalHelpScreen() {
                     Sort by Rating
                   </Text>
                 </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Languages Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Languages</Text>
+              <View style={styles.filterChipsRow}>
+                {[
+                  { key: 'spanish', label: 'Spanish', icon: 'language' },
+                  { key: 'french', label: 'French', icon: 'language' },
+                  { key: 'german', label: 'German', icon: 'language' },
+                  { key: 'italian', label: 'Italian', icon: 'language' },
+                  { key: 'portuguese', label: 'Portuguese', icon: 'language' },
+                  { key: 'chinese', label: 'Chinese', icon: 'language' },
+                  { key: 'japanese', label: 'Japanese', icon: 'language' },
+                  { key: 'korean', label: 'Korean', icon: 'language' },
+                  { key: 'vietnamese', label: 'Vietnamese', icon: 'language' },
+                  { key: 'arabic', label: 'Arabic', icon: 'language' },
+                  { key: 'russian', label: 'Russian', icon: 'language' },
+                  { key: 'hindi', label: 'Hindi', icon: 'language' },
+                  { key: 'creole', label: 'Creole', icon: 'language' },
+                  { key: 'tagalog', label: 'Tagalog', icon: 'language' },
+                ].map(({ key, label, icon }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.filterChip,
+                      state.filters.languages.includes(key) && styles.filterChipActive,
+                    ]}
+                    onPress={() => {
+                      const newLanguages = state.filters.languages.includes(key)
+                        ? state.filters.languages.filter(lang => lang !== key)
+                        : [...state.filters.languages, key];
+                      updateState({
+                        filters: { ...state.filters, languages: newLanguages },
+                      });
+                    }}>
+                    <MaterialIcons
+                      name={icon as any}
+                      size={16}
+                      color={state.filters.languages.includes(key) ? colors.accent : colors.text.muted}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        state.filters.languages.includes(key) && styles.filterChipTextActive,
+                      ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Specializations Filters */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Specializations</Text>
+              <View style={styles.filterChipsRow}>
+                {[
+                  // Civil Rights Specializations (Feature Set 6)
+                  { key: 'civil-rights-law', label: 'Civil Rights Law', icon: 'security' },
+                  { key: 'immigration-law', label: 'Immigration Law', icon: 'flight' },
+                  { key: 'constitutional-law', label: 'Constitutional Law', icon: 'gavel' },
+                  { key: 'police-misconduct', label: 'Police Misconduct', icon: 'security' },
+                  { key: 'discrimination-law', label: 'Discrimination Law', icon: 'people' },
+                  { key: 'asylum-refugee-law', label: 'Asylum & Refugee Law', icon: 'flight' },
+                  { key: 'deportation-defense', label: 'Deportation Defense', icon: 'security' },
+                  { key: 'first-amendment-rights', label: 'First Amendment Rights', icon: 'gavel' },
+                  { key: 'voting-rights', label: 'Voting Rights', icon: 'how-to-vote' },
+                  { key: 'employment-discrimination', label: 'Employment Discrimination', icon: 'work' },
+                  { key: 'housing-discrimination', label: 'Housing Discrimination', icon: 'home' },
+                  { key: 'education-law', label: 'Education Law', icon: 'school' },
+                  { key: 'disability-rights', label: 'Disability Rights', icon: 'accessibility' },
+                  { key: 'lgbtq-rights', label: 'LGBTQ+ Rights', icon: 'people' },
+                  { key: 'womens-rights', label: 'Women\'s Rights', icon: 'people' },
+                  { key: 'racial-justice', label: 'Racial Justice', icon: 'security' },
+                  { key: 'criminal-justice-reform', label: 'Criminal Justice Reform', icon: 'gavel' },
+                  { key: 'prisoners-rights', label: 'Prisoners\' Rights', icon: 'security' },
+                  { key: 'environmental-justice', label: 'Environmental Justice', icon: 'eco' },
+                  { key: 'immigrant-rights', label: 'Immigrant Rights', icon: 'people' },
+                  // Additional specializations for comprehensive coverage
+                  { key: 'criminal-defense', label: 'Criminal Defense', icon: 'gavel' },
+                  { key: 'family-law', label: 'Family Law', icon: 'family-restroom' },
+                  { key: 'personal-injury', label: 'Personal Injury', icon: 'healing' },
+                  { key: 'employment-law', label: 'Employment Law', icon: 'work' },
+                  { key: 'real-estate', label: 'Real Estate', icon: 'home' },
+                  { key: 'bankruptcy', label: 'Bankruptcy', icon: 'account-balance' },
+                  { key: 'estate-planning', label: 'Estate Planning', icon: 'description' },
+                  { key: 'business-law', label: 'Business Law', icon: 'business' },
+                  { key: 'tax-law', label: 'Tax Law', icon: 'receipt' },
+                  { key: 'intellectual-property', label: 'IP Law', icon: 'copyright' },
+                  { key: 'medical-malpractice', label: 'Medical Malpractice', icon: 'local-hospital' },
+                  { key: 'workers-compensation', label: 'Workers Comp', icon: 'construction' },
+                  { key: 'social-security', label: 'Social Security', icon: 'elderly' },
+                  { key: 'veterans-benefits', label: 'Veterans Benefits', icon: 'military-tech' },
+                ].map(({ key, label, icon }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.filterChip,
+                      state.filters.specializations.includes(key) && styles.filterChipActive,
+                    ]}
+                    onPress={() => {
+                      const newSpecializations = state.filters.specializations.includes(key)
+                        ? state.filters.specializations.filter(spec => spec !== key)
+                        : [...state.filters.specializations, key];
+                      updateState({
+                        filters: { ...state.filters, specializations: newSpecializations },
+                      });
+                    }}>
+                    <MaterialIcons
+                      name={icon as any}
+                      size={16}
+                      color={state.filters.specializations.includes(key) ? colors.accent : colors.text.muted}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        state.filters.specializations.includes(key) && styles.filterChipTextActive,
+                      ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
           </View>

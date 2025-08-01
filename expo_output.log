@@ -1,0 +1,7 @@
+env: load .env
+env: export MARTINDALE_API_KEY AVVO_API_KEY LSC_API_KEY PROBONO_NET_API_KEY ACLU_API_KEY NLG_API_KEY SPLC_API_KEY LOG_LEVEL ENABLE_API_MONITORING DEFAULT_RATE_LIMIT MAX_RETRIES REQUEST_TIMEOUT CACHE_DURATION MAX_CACHE_SIZE REQUIRE_VERIFICATION MIN_ATTORNEY_RATING MAX_DISTANCE_RADIUS
+Starting project at /Users/chrismitchell/mobile_app
+Starting Metro Bundler
+CommandError: Input is required, but 'npx expo' is in non-interactive mode.
+Required input:
+> The package @expo/ngrok@^4.1.0 is required to use tunnels, would you like to install it globally?
