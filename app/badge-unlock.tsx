@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ScrollView from 'react-native-gesture-handler';
 
 export default function BadgeUnlockScreen() {
   const [isCompleting, setIsCompleting] = useState(false);
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.accent}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.lg,
+    ...shadows.large,
   },
   award: {
     position: 'absolute',

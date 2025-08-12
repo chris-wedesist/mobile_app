@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '@/components/StealthModeManager';
-import { useStealthAutoTimeout } from '@/hooks/useStealthAutoTimeout';
+import { useStealthMode } from '../components/StealthModeManager';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function StealthDocumentScreen() {

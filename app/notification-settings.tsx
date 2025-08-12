@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch 
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import Slider from '@react-native-community/slider';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';

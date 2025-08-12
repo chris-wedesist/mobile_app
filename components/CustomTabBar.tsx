@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 const isNarrowScreen = width < 768;
@@ -34,7 +34,7 @@ export default function CustomTabBar() {
 
   const navigateToTab = (tabName: string) => {
     // Navigate directly to the tab's root screen
-    router.replace(getTabRoute(tabName));
+    router.replace(getTabRoute(tabName) as any);
   };
 
   const renderIcon = (iconName: string, size: number, color: string) => {

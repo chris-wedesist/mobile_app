@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '@/components/StealthModeManager';
-import { useStealthAutoTimeout } from '@/hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '@/constants/theme';
+import { useStealthMode } from '../components/StealthModeManager';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
+import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type Operation = '+' | '-' | '×' | '÷' | '=' | null;
@@ -86,7 +86,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const renderButton = (
-    content: string | JSX.Element,
+    content: string | React.ReactElement,
     onPress: () => void,
     style?: object
   ) => (

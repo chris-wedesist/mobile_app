@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '@/components/StealthModeManager';
-import { useStealthAutoTimeout } from '@/hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '@/constants/theme';
+import { useStealthMode } from '../components/StealthModeManager';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
+import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type Event = {
@@ -325,10 +325,10 @@ const styles = StyleSheet.create({
   eventsContainer: {
     flex: 1,
     backgroundColor: colors.secondary,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
+    borderTopLeftRadius: radius.xlarge,
+    borderTopRightRadius: radius.xlarge,
     padding: 20,
-    ...shadows.lg,
+    ...shadows.large,
   },
   eventsTitle: {
     fontSize: 20,

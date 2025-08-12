@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useTranslation } from '../hooks/useTranslation';
 import { LanguageSelector } from './LanguageSelector';
 import { AccessibleButton } from './AccessibleButton';
 import { AccessibleText, AccessibleHeading, AccessibleBody } from './AccessibleText';
-import { colors } from '@/constants/theme';
+import { colors } from '../constants/theme';
 
 /**
  * Example component demonstrating internationalization features

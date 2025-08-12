@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Linking, Dimensions, Animated, Easi
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 
 let isEmergencyButtonMounted = false;
 
@@ -22,7 +22,7 @@ export default function EmergencyCallButton() {
 
   const [isLongPressing, setIsLongPressing] = useState(false);
   const [requireLongPress, setRequireLongPress] = useState(true);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<number | null>(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -149,7 +149,7 @@ export default function EmergencyCallButton() {
         longPressTimer.current = null;
       }
       // Reset the progress animation
-      Animated.timing(progressAnim).stop();
+      progressAnim.stopAnimation();
       progressAnim.setValue(0);
     }
   };

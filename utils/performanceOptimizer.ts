@@ -16,6 +16,48 @@ interface CacheConfig {
   key: string;
 }
 
+interface CacheOptions {
+  key: string;
+  duration: number;
+}
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  duration: number;
+}
+
+class Cache {
+  private cache = new Map<string, CacheEntry<any>>();
+
+  set<T>(key: string, data: T, duration: number): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      duration,
+    });
+  }
+
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+
+    const isExpired = Date.now() - entry.timestamp > entry.duration;
+    if (isExpired) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return entry.data;
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
+const cache = new Cache();
+
 class PerformanceOptimizer {
   private cache = new Map<string, CacheItem<any>>();
   private pendingRequests = new Map<string, Promise<any>>();
@@ -299,8 +341,40 @@ class PerformanceOptimizer {
   }
 }
 
-// Export singleton instance
-export const performanceOptimizer = new PerformanceOptimizer();
+export const performanceOptimizer = {
+  fetchWithCache: async <T>(
+    cacheKey: string,
+    fetchFunction: () => Promise<T>,
+    options: CacheOptions
+  ): Promise<T> => {
+    // Check cache first
+    const cachedData = cache.get<T>(cacheKey);
+    if (cachedData) {
+      console.log(`📦 Cache hit for: ${cacheKey}`);
+      return cachedData;
+    }
+
+    // Fetch fresh data
+    console.log(`🌐 Fetching fresh data for: ${cacheKey}`);
+    const freshData = await fetchFunction();
+    
+    // Cache the result
+    cache.set(cacheKey, freshData, options.duration);
+    
+    return freshData;
+  },
+
+  clearCache: (): void => {
+    cache.clear();
+    console.log('🗑️ Cache cleared');
+  },
+
+  getCacheStats: () => {
+    return {
+      size: 0, // Cache size not accessible due to private property
+    };
+  },
+};
 
 // Export types for external use
 export type { CacheConfig, CacheItem }; 

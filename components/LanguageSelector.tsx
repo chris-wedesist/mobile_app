@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from '@/hooks/useTranslation';
-import { colors } from '@/constants/theme';
+import { useTranslation } from '../hooks/useTranslation';
+import { colors } from '../constants/theme';
 
 interface LanguageSelectorProps {
   visible: boolean;

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, Alert, ActivityIndicator, AppState } from 'react-native';
 import { useCameraPermissions, CameraView } from 'expo-camera';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../../constants/theme';
 import { Audio } from 'expo-av';
 import { createClient } from '@supabase/supabase-js';
 import { router } from 'expo-router';

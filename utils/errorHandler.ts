@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react-native';
+// Error handling utility - simplified for Expo SDK 53 compatibility
 
 export class AppError extends Error {
   constructor(
@@ -11,25 +11,14 @@ export class AppError extends Error {
   }
 }
 
-// Map custom severity to Sentry SeverityLevel
-const mapSeverityToSentryLevel = (severity: 'low' | 'medium' | 'high'): Sentry.SeverityLevel => {
-  switch (severity) {
-    case 'low':
-      return 'info';
-    case 'medium':
-      return 'warning';
-    case 'high':
-      return 'error';
-    default:
-      return 'error';
-  }
-};
-
 export const errorHandler = (error: unknown): string => {
   if (error instanceof AppError) {
-    Sentry.captureException(error, { level: mapSeverityToSentryLevel(error.severity), tags: { errorCode: error.code } });
+    // Log error for debugging
+    console.warn(`AppError [${error.code}]: ${error.message}`, error);
     return error.userMessage;
   }
-  Sentry.captureException(error);
+  
+  // Log unexpected errors
+  console.error('Unexpected error:', error);
   return 'An unexpected error occurred. Please try again later.';
 }; 

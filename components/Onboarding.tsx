@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions, Image }
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, radius, shadows } from '@/constants/theme';
+import { colors, radius, shadows } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -19,7 +19,7 @@ const slides: OnboardingSlide[] = [
     id: '1',
     title: 'Welcome to DESIST!',
     description: 'Your personal safety companion that helps you document, protect, and respond to incidents.',
-    icon: <Image source={require('@/assets/images/splash.png')} style={{height: 220, width: 220}} />
+    icon: <Image source={require('../assets/images/splash.png')} style={{height: 220, width: 220}} />
   },
   {
     id: '2',

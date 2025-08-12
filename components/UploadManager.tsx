@@ -34,7 +34,7 @@ class UploadManager {
       if (uploadError) throw uploadError;
 
       // Get public URL for the uploaded media
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicURL } } = supabase.storage
         .from('recordings')
         .getPublicUrl(filePath);
 
@@ -43,7 +43,7 @@ class UploadManager {
         .from('panic_events')
         .insert([{
           location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-          media_urls: [publicUrl],
+          media_urls: [publicURL],
           status: 'active'
         }])
         .select()
@@ -57,7 +57,7 @@ class UploadManager {
         .insert([{
           encounter_type: 'police_interaction',
           description: 'Panic event recorded',
-          media_url: publicUrl,
+          media_url: publicURL,
           location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
         }])
         .select()
@@ -68,7 +68,7 @@ class UploadManager {
       return {
         panicEvent,
         encounter,
-        mediaUrl: publicUrl
+        mediaUrl: publicURL
       };
     } catch (error) {
       console.error('Error uploading panic event:', error);
@@ -98,7 +98,7 @@ class UploadManager {
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicURL } } = supabase.storage
         .from('recordings')
         .getPublicUrl(filePath);
 
@@ -108,7 +108,7 @@ class UploadManager {
         .insert([{
           encounter_type: details.type,
           description: details.description,
-          media_url: publicUrl,
+          media_url: publicURL,
           location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
         }])
         .select()
@@ -118,7 +118,7 @@ class UploadManager {
 
       return {
         encounter,
-        mediaUrl: publicUrl
+        mediaUrl: publicURL
       };
     } catch (error) {
       console.error('Error uploading safe encounter:', error);
@@ -151,7 +151,7 @@ class UploadManager {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl: url } } = supabase.storage
+        const { data: { publicURL: url } } = supabase.storage
           .from('stories')
           .getPublicUrl(filePath);
           

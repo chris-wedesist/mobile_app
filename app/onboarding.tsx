@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import { Stack } from 'expo-router';
-import Onboarding from '@/components/Onboarding';
-import { colors } from '@/constants/theme';
+import Onboarding from '../components/Onboarding';
+import { colors, shadows, radius } from '../constants/theme';
 
 export default function OnboardingScreen() {
   return (

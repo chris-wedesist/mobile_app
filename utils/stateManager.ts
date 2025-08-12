@@ -129,7 +129,10 @@ export class StateManager {
       store.setError(key, null);
       
       // Use performance optimizer for fetching
-      const data = await performanceOptimizer.fetchWithCache(key, fetchFunction, cacheConfig);
+      const data = await performanceOptimizer.fetchWithCache(key, fetchFunction, {
+        key: cacheConfig?.key || key,
+        duration: cacheConfig?.duration || 300000 // 5 minutes default
+      });
       
       // Update cached data in state
       store.setCachedData(key, data);

@@ -4,7 +4,14 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SMS from 'expo-sms';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
+// Emergency contact type definition
+interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: string;
+}
 
 export default function EmergencySetupScreen() {
   const [contact, setContact] = useState({

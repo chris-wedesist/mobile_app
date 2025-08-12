@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { colors, radius, shadows } from '@/constants/theme';
+import { colors, radius, shadows } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function SettingsIndexScreen() {

@@ -39,15 +39,14 @@ export default function CoverStoryManager() {
     if (Platform.OS === 'web') {
       window.addEventListener('keydown', handleCoverStory);
     } else {
-      BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+      const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     }
 
     return () => {
       if (Platform.OS === 'web') {
         window.removeEventListener('keydown', handleCoverStory);
-      } else {
-        BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
       }
+      // BackHandler subscription is automatically cleaned up
     };
   }, [isActive]);
 

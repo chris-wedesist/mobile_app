@@ -3,25 +3,36 @@
  */
 import { errorHandler, AppError } from './errorHandler';
 
-// Mock Sentry to prevent actual network calls
-jest.mock('@sentry/react-native', () => ({
-  captureException: jest.fn(),
-}));
-
+// Updated tests for simplified error handler (without Sentry)
 describe('errorHandler', () => {
-  it('returns userMessage for AppError and calls Sentry with correct level and tags', () => {
+  // Spy on console methods to verify logging
+  const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+  const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+  afterEach(() => {
+    consoleSpy.mockClear();
+    consoleErrorSpy.mockClear();
+  });
+
+  afterAll(() => {
+    consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('returns userMessage for AppError and logs to console', () => {
     const error = new AppError('Internal error', 'E123', 'high', 'Something went wrong!');
     const result = errorHandler(error);
     expect(result).toBe('Something went wrong!');
-    const Sentry = require('@sentry/react-native');
-    expect(Sentry.captureException).toHaveBeenCalledWith(error, { level: 'error', tags: { errorCode: 'E123' } });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('AppError [E123]: Internal error'),
+      error
+    );
   });
 
-  it('returns default message and calls Sentry for unknown error', () => {
+  it('returns default message and logs to console for unknown error', () => {
     const error = new Error('Unknown');
     const result = errorHandler(error);
     expect(result).toBe('An unexpected error occurred. Please try again later.');
-    const Sentry = require('@sentry/react-native');
-    expect(Sentry.captureException).toHaveBeenCalledWith(error);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Unexpected error:', error);
   });
 }); 

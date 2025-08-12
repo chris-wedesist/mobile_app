@@ -1,11 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
 import NoHandsIcon from '../../components/NoHandsIcon';
-import { colors } from '@/constants/theme';
+import { colors } from '../../constants/theme';
 import { useEffect, useState } from 'react';
-import { getNews, NewsItem, fetchNewsWithOptimization } from '@/lib/news';
+import { getNews, NewsItem, fetchNewsWithOptimization } from '../../lib/news';
 import { router } from 'expo-router';
-import { performanceOptimizer } from '@/utils/performanceOptimizer';
-import { useLoadingState, useErrorState, StateManager } from '@/utils/stateManager';
+import { useLoadingState, useErrorState, StateManager } from '../../utils/stateManager';
 
 export default function HomeScreen() {
   const [localNews, setLocalNews] = useState<NewsItem[]>([]);

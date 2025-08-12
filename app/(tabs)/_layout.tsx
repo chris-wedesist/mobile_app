@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { Tabs } from 'expo-router';
-import CustomTabBar from '@/components/CustomTabBar';
-import EmergencyCallButton from '@/components/EmergencyCallButton';
+import CustomTabBar from '../../components/CustomTabBar';
+import EmergencyCallButton from '../../components/EmergencyCallButton';
 
 export default function TabLayout() {
   return (

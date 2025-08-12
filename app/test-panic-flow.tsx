@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } 
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
-import { colors, shadows, radius } from '@/constants/theme';
-import UserSettingsManager from '@/components/UserSettingsManager';
-import UploadManager from '@/components/UploadManager';
-import SMSManager from '@/components/SMSManager';
-import AutoWipeManager from '@/components/AutoWipeManager';
+import { colors, shadows, radius } from '../constants/theme';
+import UserSettingsManager from '../components/UserSettingsManager';
+import UploadManager from '../components/UploadManager';
+import SMSManager from '../components/SMSManager';
+import AutoWipeManager from '../components/AutoWipeManager';
 import * as FileSystem from 'expo-file-system';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -255,7 +255,7 @@ export default function TestPanicFlowScreen() {
           <CameraView
             ref={cameraRef}
             style={styles.hiddenCamera}
-            type="back"
+            facing="back"
           />
         )}
 

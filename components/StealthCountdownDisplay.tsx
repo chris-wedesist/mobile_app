@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useStealthCountdown } from '@/hooks/useStealthCountdown';
-import { colors, radius, shadows } from '@/constants/theme';
+import { useStealthCountdown } from '../hooks/useStealthCountdown';
+import { colors, radius, shadows } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type StealthCountdownDisplayProps = {

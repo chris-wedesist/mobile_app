@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { colors, shadows, radius } from '@/constants/theme';
-import StealthCountdownDisplay from '@/components/StealthCountdownDisplay';
-import { useStealthCountdown } from '@/hooks/useStealthCountdown';
+import { colors, shadows, radius } from '../constants/theme';
+import StealthCountdownDisplay from '../components/StealthCountdownDisplay';
+import { useStealthCountdown } from '../hooks/useStealthCountdown';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type DemoSection = {

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { colors, radius, shadows } from '@/constants/theme';
-import { generateSampleIncidents, clearSampleIncidents } from '@/utils/generate-sample-incidents';
+import { colors, radius, shadows } from '../../constants/theme';
+import { generateSampleIncidents, clearSampleIncidents } from '../../utils/generate-sample-incidents';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function DeveloperToolsScreen() {

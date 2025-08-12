@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, Image } from 'react-native';
 import { router } from 'expo-router';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.accent}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.lg,
+    ...shadows.large,
   },
   award: {
     position: 'absolute',

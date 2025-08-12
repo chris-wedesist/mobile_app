@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
-import { Video, AVPlaybackStatus } from 'expo-av';
+import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
-import { colors, radius, shadows } from '@/constants/theme';
-import { deleteIncidentFromDevice, uploadIncidentToCloud } from '@/utils/incident-storage';
-import { BiometricAuth } from '@/components/BiometricAuth';
+import { colors, radius, shadows } from '../../constants/theme';
+import { deleteIncidentFromDevice, uploadIncidentToCloud } from '../../utils/incident-storage';
+import { BiometricAuth } from '../../components/BiometricAuth';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type Incident = {
@@ -237,7 +237,7 @@ export default function IncidentDetailScreen() {
             rate={1.0}
             volume={1.0}
             isMuted={false}
-            resizeMode="contain"
+            resizeMode={ResizeMode.CONTAIN}
             shouldPlay={false}
             useNativeControls
             style={styles.video}
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
-    ...shadows.lg,
+    ...shadows.large,
   },
   biometricTitle: {
     fontSize: 20,

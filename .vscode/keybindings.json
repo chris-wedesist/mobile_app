@@ -1,0 +1,32 @@
+[
+  {
+    "key": "cmd+shift+i",
+    "command": "github.copilot.generate",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+shift+/",
+    "command": "github.copilot.chat.open",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+k cmd+i",
+    "command": "github.copilot.interactiveEditor.explain"
+  },
+  {
+    "key": "cmd+k cmd+d",
+    "command": "github.copilot.interactiveEditor.generateDocs"
+  },
+  {
+    "key": "cmd+k cmd+t",
+    "command": "github.copilot.interactiveEditor.generateTests"
+  },
+  {
+    "key": "cmd+k cmd+f",
+    "command": "github.copilot.interactiveEditor.fix"
+  },
+  {
+    "key": "cmd+k cmd+r",
+    "command": "github.copilot.interactiveEditor.refactor"
+  }
+]

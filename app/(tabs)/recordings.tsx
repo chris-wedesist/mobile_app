@@ -11,12 +11,15 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
+  ImageStyle,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const supabase = createClient(
@@ -209,9 +212,9 @@ export default function RecordingsScreen() {
     const recordingComments = comments[item.id] || [];
 
     return (
-      <View style={styles.recordingCard}>
+      <View style={styles.recordingCard as ViewStyle}>
         <TouchableOpacity
-          style={styles.thumbnailContainer}
+          style={styles.thumbnailContainer as ViewStyle}
           onPress={() => {
             setSelectedRecording(isSelected ? null : item.id);
             if (!isSelected) {
@@ -220,68 +223,68 @@ export default function RecordingsScreen() {
           }}>
           <Image
             source={{ uri: item.thumbnail_url }}
-            style={styles.thumbnail}
+            style={styles.thumbnail as ImageStyle}
           />
-          <View style={styles.playButton}>
+          <View style={styles.playButton as ViewStyle}>
             <MaterialIcons name="play-arrow" size={24} color={colors.text.primary} />
           </View>
         </TouchableOpacity>
 
-        <View style={styles.recordingInfo}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.description}>{item.description}</Text>
+        <View style={styles.recordingInfo as ViewStyle}>
+          <Text style={styles.title as TextStyle}>{item.title}</Text>
+          <Text style={styles.description as TextStyle}>{item.description}</Text>
 
-          <View style={styles.stats}>
-            <View style={styles.stat}>
+          <View style={styles.stats as ViewStyle}>
+            <View style={styles.stat as ViewStyle}>
               <MaterialIcons name="visibility" size={16} color={colors.text.muted} />
-              <Text style={styles.statText}>{item.view_count}</Text>
+              <Text style={styles.statText as TextStyle}>{item.view_count}</Text>
             </View>
-            <View style={styles.stat}>
+            <View style={styles.stat as ViewStyle}>
               <MaterialIcons name="share" size={16} color={colors.text.muted} />
-              <Text style={styles.statText}>{item.share_count}</Text>
+              <Text style={styles.statText as TextStyle}>{item.share_count}</Text>
             </View>
-            <View style={styles.stat}>
+            <View style={styles.stat as ViewStyle}>
               <MaterialIcons name="file-download" size={16} color={colors.text.muted} />
-              <Text style={styles.statText}>{item.download_count}</Text>
+              <Text style={styles.statText as TextStyle}>{item.download_count}</Text>
             </View>
           </View>
 
-          <View style={styles.actions}>
+          <View style={styles.actions as ViewStyle}>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={styles.actionButton as ViewStyle}
               onPress={() => handleShare(item)}>
               <MaterialIcons name="share" size={20} color={colors.text.primary} />
-              <Text style={styles.actionText}>Share</Text>
+              <Text style={styles.actionText as TextStyle}>Share</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionButton}
+              style={styles.actionButton as ViewStyle}
               onPress={() => handleDownload(item)}>
               <MaterialIcons name="file-download" size={20} color={colors.text.primary} />
-              <Text style={styles.actionText}>Download</Text>
+              <Text style={styles.actionText as TextStyle}>Download</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, { opacity: item.youtube_url ? 0.5 : 1 }]}
+              style={[styles.actionButton as ViewStyle, { opacity: item.youtube_url ? 0.5 : 1 }]}
               disabled={!!item.youtube_url}>
               <MaterialIcons name="upload" size={20} color={colors.text.primary} />
-              <Text style={styles.actionText}>
+              <Text style={styles.actionText as TextStyle}>
                 {item.youtube_url ? 'Uploaded' : 'Upload to YT'}
               </Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={styles.commentsHeader}
+            style={styles.commentsHeader as ViewStyle}
             onPress={() => {
               setSelectedRecording(isSelected ? null : item.id);
               if (!isSelected) {
                 fetchComments(item.id);
               }
             }}>
-            <View style={styles.commentsHeaderLeft}>
+            <View style={styles.commentsHeaderLeft as ViewStyle}>
               <MaterialIcons name="message" size={20} color={colors.text.muted} />
-              <Text style={styles.commentsCount}>
+              <Text style={styles.commentsCount as TextStyle}>
                 {recordingComments.length} Comments
               </Text>
             </View>
@@ -293,21 +296,21 @@ export default function RecordingsScreen() {
           </TouchableOpacity>
 
           {isSelected && (
-            <View style={styles.commentsSection}>
-              <View style={styles.commentsList}>
+            <View style={styles.commentsSection as ViewStyle}>
+              <View style={styles.commentsList as ViewStyle}>
                 {recordingComments.map(comment => (
-                  <View key={comment.id} style={styles.comment}>
-                    <Text style={styles.commentContent}>{comment.content}</Text>
-                    <Text style={styles.commentTime}>
+                  <View key={comment.id} style={styles.comment as ViewStyle}>
+                    <Text style={styles.commentContent as TextStyle}>{comment.content}</Text>
+                    <Text style={styles.commentTime as TextStyle}>
                       {new Date(comment.created_at).toLocaleDateString()}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <View style={styles.commentInput}>
+              <View style={styles.commentInput as ViewStyle}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.input as TextStyle}
                   placeholder="Add a comment..."
                   placeholderTextColor={colors.text.muted}
                   value={newComment}
@@ -316,7 +319,7 @@ export default function RecordingsScreen() {
                 />
                 <TouchableOpacity
                   style={[
-                    styles.sendButton,
+                    styles.sendButton as ViewStyle,
                     { opacity: commentLoading || !newComment.trim() ? 0.5 : 1 },
                   ]}
                   onPress={() => handleComment(item.id)}
@@ -337,20 +340,20 @@ export default function RecordingsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.loadingContainer as ViewStyle}>
         <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.screenTitle}>Incident Recordings</Text>
+    <View style={styles.container as ViewStyle}>
+      <Text style={styles.screenTitle as TextStyle}>Incident Recordings</Text>
       <FlatList
         data={recordings}
         renderItem={renderRecording}
         keyExtractor={item => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.list as ViewStyle}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

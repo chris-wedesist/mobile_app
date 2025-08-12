@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AI Code Review",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "Use Cmd+Shift+/ for GitHub Copilot Chat to review your code, or use Cmd+I for inline suggestions and refactoring"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

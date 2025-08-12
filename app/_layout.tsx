@@ -5,15 +5,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
-import EmergencyCallButton from '@/components/EmergencyCallButton';
-import CustomSplashScreen from '@/components/SplashScreen';
-import { colors } from '@/constants/theme';
+import EmergencyCallButton from '../components/EmergencyCallButton';
+import CustomSplashScreen from '../components/SplashScreen';
+import { colors } from '../constants/theme';
 import { View, Text } from 'react-native'
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import * as React from 'react';
-import * as Sentry from '@sentry/react-native';
-import { errorHandler } from '@/utils/errorHandler';
-import { StateManager } from '@/utils/stateManager';
+import { errorHandler } from '../utils/errorHandler';
+import { StateManager } from '../utils/stateManager';
+
+// Import polyfills for Expo Go compatibility
+import './polyfills';
 
 // Initialize i18n system safely
 let i18nInitialized = false;
@@ -21,7 +23,7 @@ const initializeI18n = () => {
   if (!i18nInitialized) {
     try {
       // Dynamic import to avoid Hermes issues
-      import('@/utils/i18n').catch((error) => {
+      import('../utils/i18n').catch((error) => {
         console.warn('Failed to initialize i18n system:', error);
       });
       i18nInitialized = true;
@@ -37,6 +39,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 // Initialize Sentry at app startup (only if DSN is properly configured)
+// Temporarily disabled for SDK 53 compatibility
+/*
 const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN') {
   Sentry.init({
@@ -44,6 +48,7 @@ if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN') {
     debug: __DEV__,
   });
 }
+*/
 
 // Global handler for unhandled promise rejections (Hermes compatible)
 if (typeof global !== 'undefined' && typeof global.process !== 'undefined' && global.process.on) {
@@ -90,7 +95,7 @@ export default function RootLayout() {
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     console.log('RootLayout mounted, checking first launch...');
@@ -136,7 +141,7 @@ export default function RootLayout() {
       timeoutRef.current = setTimeout(() => {
         console.log('Setting isReady to true');
         setIsReady(true);
-      }, 500);
+      }, 500) as any;
     } catch (error) {
       console.error('Error checking first launch status:', error);
       setInitialRoute('/(tabs)'); // Default to tabs on error
@@ -149,7 +154,7 @@ export default function RootLayout() {
       console.log('App is ready, navigating to:', initialRoute);
       // Use setTimeout to ensure navigation happens after render
       const navigationTimeout = setTimeout(() => {
-        router.replace(initialRoute);
+        router.replace(initialRoute as any);
         // Hide the native splash screen once navigation is complete
         SplashScreen.hideAsync().catch(() => {
           // Ignore errors - this happens on web

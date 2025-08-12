@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from '
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 
 type Badge = {
   id: string;

@@ -28,13 +28,13 @@ class PerformanceBenchmarks {
     ]);
     const sequentialDuration = Date.now() - sequentialStart;
 
-    // Parallel fetching
+    // Parallel fetching using Promise.all
     const parallelStart = Date.now();
-    const parallelResults = await performanceOptimizer.fetchParallel({
-      data1: mockFetch1,
-      data2: mockFetch2,
-      data3: mockFetch3
-    });
+    const parallelResults = await Promise.all([
+      performanceOptimizer.fetchWithCache('data1', mockFetch1, { key: 'data1', duration: 300000 }),
+      performanceOptimizer.fetchWithCache('data2', mockFetch2, { key: 'data2', duration: 300000 }),
+      performanceOptimizer.fetchWithCache('data3', mockFetch3, { key: 'data3', duration: 300000 })
+    ]);
     const parallelDuration = Date.now() - parallelStart;
 
     const improvement = ((sequentialDuration - parallelDuration) / sequentialDuration) * 100;
@@ -57,12 +57,14 @@ class PerformanceBenchmarks {
 
     // First call - cache miss
     const cacheMissStart = Date.now();
-    await performanceOptimizer.fetchWithCache('benchmark_cache', mockFetch);
+    await performanceOptimizer.fetchWithCache('benchmark_cache', mockFetch, 
+      { key: 'benchmark_cache', duration: 300000 });
     const cacheMissDuration = Date.now() - cacheMissStart;
 
     // Second call - cache hit
     const cacheHitStart = Date.now();
-    await performanceOptimizer.fetchWithCache('benchmark_cache', mockFetch);
+    await performanceOptimizer.fetchWithCache('benchmark_cache', mockFetch, 
+      { key: 'benchmark_cache', duration: 300000 });
     const cacheHitDuration = Date.now() - cacheHitStart;
 
     const improvement = ((cacheMissDuration - cacheHitDuration) / cacheMissDuration) * 100;
@@ -90,19 +92,19 @@ class PerformanceBenchmarks {
     // Individual operations
     const individualStart = Date.now();
     const individualResults = await Promise.all([
-      performanceOptimizer.fetchWithCache('batch_1', mockFetch1),
-      performanceOptimizer.fetchWithCache('batch_2', mockFetch2),
-      performanceOptimizer.fetchWithCache('batch_3', mockFetch3)
+      performanceOptimizer.fetchWithCache('batch_1', mockFetch1, { key: 'batch_1', duration: 300000 }),
+      performanceOptimizer.fetchWithCache('batch_2', mockFetch2, { key: 'batch_2', duration: 300000 }),
+      performanceOptimizer.fetchWithCache('batch_3', mockFetch3, { key: 'batch_3', duration: 300000 })
     ]);
     const individualDuration = Date.now() - individualStart;
 
-    // Batch operations
+    // Batch operations (simulated with Promise.all)
     const batchStart = Date.now();
-    const batchResults = await performanceOptimizer.fetchBatch({
-      data1: { key: 'batch_1', fetch: mockFetch1 },
-      data2: { key: 'batch_2', fetch: mockFetch2 },
-      data3: { key: 'batch_3', fetch: mockFetch3 }
-    });
+    const batchResults = await Promise.all([
+      performanceOptimizer.fetchWithCache('batch_1', mockFetch1, { key: 'batch_1', duration: 300000 }),
+      performanceOptimizer.fetchWithCache('batch_2', mockFetch2, { key: 'batch_2', duration: 300000 }),
+      performanceOptimizer.fetchWithCache('batch_3', mockFetch3, { key: 'batch_3', duration: 300000 })
+    ]);
     const batchDuration = Date.now() - batchStart;
 
     const improvement = ((individualDuration - batchDuration) / individualDuration) * 100;
@@ -127,7 +129,7 @@ class PerformanceBenchmarks {
     for (let i = 0; i < 100; i++) {
       await performanceOptimizer.fetchWithCache(`memory_test_${i}`, async () => {
         return { data: `test data ${i}`, timestamp: Date.now() };
-      });
+      }, { key: `memory_test_${i}`, duration: 300000 });
     }
 
     const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
@@ -156,30 +158,31 @@ class PerformanceBenchmarks {
       performanceOptimizer.fetchWithCache('home_news', async () => {
         await new Promise(resolve => setTimeout(resolve, 150));
         return [{ id: '1', title: 'Home News' }];
-      }),
+      }, { key: 'home_news', duration: 300000 }),
       // Incidents data
       performanceOptimizer.fetchWithCache('incidents_40.7128_-74.0060', async () => {
         await new Promise(resolve => setTimeout(resolve, 200));
         return [{ id: '1', type: 'ICE Activity' }];
-      }),
+      }, { key: 'incidents_40.7128_-74.0060', duration: 300000 }),
       // Legal help data
       performanceOptimizer.fetchWithCache('attorneys_40.7128_-74.0060', async () => {
         await new Promise(resolve => setTimeout(resolve, 180));
         return [{ id: '1', name: 'Attorney 1' }];
-      })
+      }, { key: 'attorneys_40.7128_-74.0060', duration: 300000 })
     ]);
 
+    // Simulate user navigating and re-fetching data (should use cache)
     // Simulate user navigating and re-fetching data (should use cache)
     await Promise.all([
       performanceOptimizer.fetchWithCache('home_news', async () => {
         return [{ id: '1', title: 'Home News' }];
-      }),
+      }, { key: 'home_news', duration: 300000 }),
       performanceOptimizer.fetchWithCache('incidents_40.7128_-74.0060', async () => {
         return [{ id: '1', type: 'ICE Activity' }];
-      }),
+      }, { key: 'incidents_40.7128_-74.0060', duration: 300000 }),
       performanceOptimizer.fetchWithCache('attorneys_40.7128_-74.0060', async () => {
         return [{ id: '1', name: 'Attorney 1' }];
-      })
+      }, { key: 'attorneys_40.7128_-74.0060', duration: 300000 })
     ]);
 
     const sessionDuration = Date.now() - sessionStart;

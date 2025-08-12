@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Platform } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '@/constants/theme';
-import { textStyles, cardStyles, layoutStyles } from '@/constants/styles';
+import { colors, shadows, radius } from '../constants/theme';
+import { textStyles, cardStyles, layoutStyles } from '../constants/styles';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const supabase = createClient(
