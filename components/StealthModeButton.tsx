@@ -1,6 +1,6 @@
-import { TouchableOpacity, StyleSheet, Text, Platform } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { useStealthMode } from './StealthModeManager';
-import { colors, radius, shadows } from '@/constants/theme';
+import { colors, radius, shadows } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type StealthModeButtonProps = {
@@ -70,7 +70,6 @@ export default function StealthModeButton({
       style={[
         styles.button,
         isActive && styles.buttonActive,
-        Platform.OS === 'web' && styles.webButton
       ]}
       onPress={() => toggle('manual')}>
       {isActive ? (
@@ -95,14 +94,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     gap: 8,
     ...shadows.sm,
-  },
-  webButton: {
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    ':hover': {
-      opacity: 0.9,
-      transform: 'translateY(-1px)',
-    },
   },
   buttonActive: {
     backgroundColor: colors.status.error,

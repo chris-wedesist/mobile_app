@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BadgeUnlockModal from '@/components/BadgeUnlockModal';
+import BadgeUnlockModal from '../../components/BadgeUnlockModal';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type Badge = {

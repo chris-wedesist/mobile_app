@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { useUser, useTheme, useLanguage, useUserActions, useThemeActions, useLanguageActions } from '@/utils/store';
-import { useAppState, useLoadingState, useErrorState } from '@/utils/stateManager';
-import { colors } from '@/constants/theme';
+import { useUser, useTheme, useLanguage, useUserActions, useThemeActions, useLanguageActions } from '../utils/store';
+import { useAppState, useLoadingState, useErrorState } from '../utils/stateManager';
+import { colors } from '../constants/theme';
 
 /**
  * Example component demonstrating state management usage

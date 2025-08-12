@@ -1,8 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { listLocalIncidents } from '@/utils/incident-storage';
-import { colors, radius, shadows } from '@/constants/theme';
+import { listLocalIncidents } from '../../utils/incident-storage';
+import { colors, radius, shadows } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type Incident = {

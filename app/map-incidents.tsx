@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'expo-router';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,

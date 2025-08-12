@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '@/components/StealthModeManager';
-import { useStealthAutoTimeout } from '@/hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '@/constants/theme';
+import { useStealthMode } from '../components/StealthModeManager';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
+import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function StealthBrowserScreen() {
@@ -84,7 +84,7 @@ export default function StealthBrowserScreen() {
               <View style={styles.header}>
                 <Image
                   source={{ uri: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg' }}
-                  style={styles.headerImage}
+                  style={styles.headerImage as ImageStyle}
                 />
                 <View style={styles.overlay} />
                 <Text style={styles.headerTitle}>Welcome to Example</Text>
@@ -98,7 +98,7 @@ export default function StealthBrowserScreen() {
                     <View key={i} style={styles.card}>
                       <Image
                         source={{ uri: `https://images.pexels.com/photos/${3184465 + i}/pexels-photo-${3184465 + i}.jpeg` }}
-                        style={styles.cardImage}
+                        style={styles.cardImage as ImageStyle}
                       />
                       <View style={styles.cardContent}>
                         <Text style={styles.cardTitle}>Article Title {i}</Text>
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   card: {
-    width: Platform.OS === 'web' ? 'calc(50% - 10px)' : '100%',
+    width: Platform.OS === 'web' ? '48%' : '100%',
     backgroundColor: colors.secondary,
     borderRadius: radius.lg,
     overflow: 'hidden',

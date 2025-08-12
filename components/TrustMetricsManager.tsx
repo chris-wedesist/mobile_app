@@ -28,11 +28,20 @@ class TrustMetricsManager {
 
       if (encounterError) throw encounterError;
 
+      // First get current metrics
+      const { data: currentMetrics, error: fetchError } = await supabase
+        .from('trust_metrics')
+        .select('total_verified')
+        .eq('id', encounter.user_id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       // Update trust metrics
       const { data: metrics, error: metricsError } = await supabase
         .from('trust_metrics')
         .update({
-          total_verified: metrics.total_verified + 1,
+          total_verified: (currentMetrics?.total_verified || 0) + 1,
           // Trust score is automatically calculated by the database trigger
         })
         .eq('id', encounter.user_id)
@@ -101,11 +110,20 @@ class TrustMetricsManager {
 
       if (encounterError) throw encounterError;
 
+      // First get current metrics
+      const { data: currentFlaggedMetrics, error: fetchFlaggedError } = await supabase
+        .from('trust_metrics')
+        .select('total_flagged')
+        .eq('id', encounter.user_id)
+        .single();
+
+      if (fetchFlaggedError) throw fetchFlaggedError;
+
       // Update trust metrics
       const { data: metrics, error: metricsError } = await supabase
         .from('trust_metrics')
         .update({
-          total_flagged: metrics.total_flagged + 1,
+          total_flagged: (currentFlaggedMetrics?.total_flagged || 0) + 1,
           // Trust score is automatically calculated by the database trigger
         })
         .eq('id', encounter.user_id)

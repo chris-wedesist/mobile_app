@@ -61,12 +61,12 @@ describe('Performance Optimization Integration Tests', () => {
       // First call - should fetch from API
       const result1 = await performanceOptimizer.fetchWithCache('news_page_1', async () => {
         return await mockNews.getNews(1, 10);
-      });
+      }, { key: 'news_page_1', duration: 300000 });
 
       // Second call - should use cache
       const result2 = await performanceOptimizer.fetchWithCache('news_page_1', async () => {
         return await mockNews.getNews(1, 10);
-      });
+      }, { key: 'news_page_1', duration: 300000 });
 
       expect(result1).toEqual(mockPaginatedNews);
       expect(result2).toEqual(mockPaginatedNews);
@@ -128,23 +128,17 @@ describe('Performance Optimization Integration Tests', () => {
       const mockPosts = [{ id: '1', title: 'Post 1' }];
       const mockStats = { total: 100, active: 50 };
 
-      const result = await performanceOptimizer.fetchBatch({
-        events: {
-          key: 'events',
-          fetch: async () => mockEvents,
-          cacheConfig: { key: 'events', duration: 5 * 60 * 1000 }
-        },
-        posts: {
-          key: 'posts',
-          fetch: async () => mockPosts,
-          cacheConfig: { key: 'posts', duration: 5 * 60 * 1000 }
-        },
-        stats: {
-          key: 'stats',
-          fetch: async () => mockStats,
-          cacheConfig: { key: 'stats', duration: 2 * 60 * 1000 }
-        }
-      });
+      // Simulate batch operation with individual calls
+      const [events, posts, stats] = await Promise.all([
+        performanceOptimizer.fetchWithCache('events', async () => mockEvents, 
+          { key: 'events', duration: 5 * 60 * 1000 }),
+        performanceOptimizer.fetchWithCache('posts', async () => mockPosts, 
+          { key: 'posts', duration: 5 * 60 * 1000 }),
+        performanceOptimizer.fetchWithCache('stats', async () => mockStats, 
+          { key: 'stats', duration: 2 * 60 * 1000 })
+      ]);
+
+      const result = { events, posts, stats };
 
       expect(result).toEqual({
         events: mockEvents,
@@ -166,7 +160,8 @@ describe('Performance Optimization Integration Tests', () => {
       );
 
       const mockFetch = jest.fn().mockResolvedValue('fresh data');
-      const result = await performanceOptimizer.fetchWithCache('expired_key', mockFetch);
+      const result = await performanceOptimizer.fetchWithCache('expired_key', mockFetch, 
+        { key: 'expired_key', duration: 300000 });
 
       expect(result).toBe('fresh data');
       expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -181,7 +176,8 @@ describe('Performance Optimization Integration Tests', () => {
         'cache_other'
       ]);
 
-      await performanceOptimizer.clearCache('news');
+      // clearCache doesn't take arguments, clears all cache
+      await performanceOptimizer.clearCache();
 
       expect(mockAsyncStorage.multiRemove).toHaveBeenCalledWith([
         'cache_news_1',
@@ -196,7 +192,8 @@ describe('Performance Optimization Integration Tests', () => {
       const errorHandler = require('./errorHandler').errorHandler;
 
       await expect(
-        performanceOptimizer.fetchWithCache('error_key', mockFetch)
+        performanceOptimizer.fetchWithCache('error_key', mockFetch, 
+          { key: 'error_key', duration: 300000 })
       ).rejects.toThrow('API Error');
 
       expect(errorHandler).toHaveBeenCalled();
@@ -206,7 +203,8 @@ describe('Performance Optimization Integration Tests', () => {
       mockAsyncStorage.getItem.mockResolvedValue('invalid json');
       const mockFetch = jest.fn().mockResolvedValue('fresh data');
 
-      const result = await performanceOptimizer.fetchWithCache('corrupted_key', mockFetch);
+      const result = await performanceOptimizer.fetchWithCache('corrupted_key', mockFetch, 
+        { key: 'corrupted_key', duration: 300000 });
 
       expect(result).toBe('fresh data');
       expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('cache_corrupted_key');
@@ -221,7 +219,7 @@ describe('Performance Optimization Integration Tests', () => {
       await performanceOptimizer.fetchWithCache('perf_test', async () => {
         await new Promise(resolve => setTimeout(resolve, 100)); // Simulate API delay
         return 'data';
-      });
+      }, { key: 'perf_test', duration: 300000 });
 
       const firstCallTime = Date.now() - startTime;
 
@@ -229,7 +227,7 @@ describe('Performance Optimization Integration Tests', () => {
       const cacheStartTime = Date.now();
       await performanceOptimizer.fetchWithCache('perf_test', async () => {
         return 'data';
-      });
+      }, { key: 'perf_test', duration: 300000 });
 
       const cacheCallTime = Date.now() - cacheStartTime;
 

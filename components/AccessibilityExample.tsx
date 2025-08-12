@@ -7,14 +7,14 @@ import {
   AccessibleBody, 
   AccessibleCaption 
 } from './AccessibleText';
-import { useAccessibility } from '@/utils/accessibility';
+import { useAccessibility } from '../utils/accessibility';
 import { 
   generateAccessibilityLabel, 
   generateAccessibilityHint,
   createAccessibilityState,
   useAccessibilityAnnouncements 
-} from '@/utils/accessibility';
-import { colors } from '@/constants/theme';
+} from '../utils/accessibility';
+import { colors } from '../constants/theme';
 
 /**
  * Example component demonstrating accessibility features

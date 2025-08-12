@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "desist",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -19,23 +18,13 @@
       "EXPO_PUBLIC_GOOGLE_PLACES_API_KEY": "AIzaSyAfi0WKfQ7L9UM9VNNqlOnj9jpU7sL1iX4"
     },
     "ios": {
-      "supportsTablet": true,
-      "jsEngine": "hermes",
-      "infoPlist": {
-        "NSCameraUsageDescription": "This app needs access to the camera for recording video.",
-        "NSMicrophoneUsageDescription": "This app needs access to the microphone for recording audio.",
-        "UIBackgroundModes": ["remote-notification"]
-      },
-      "bundleIdentifier": "com.ahmedashraf-dev.desist"
+      "supportsTablet": true
     },
     "android": {
-      "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#1B2D45",
-        "backgroundImage": "./assets/images/adaptive-icon.png"
-      },
-      "package": "com.ahmedashraf_dev.desist"
+        "backgroundColor": "#1B2D45"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -48,9 +37,6 @@
     },
     "plugins": [
       "expo-router"
-    ],
-    "extra": {
-      "EXPO_PUBLIC_GOOGLE_PLACES_API_KEY": "AIzaSyAfi0WKfQ7L9UM9VNNqlOnj9jpU7sL1iX4"
-    },
+    ]
   }
 }

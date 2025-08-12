@@ -13,10 +13,10 @@ import {
   Alert,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
-import { performanceOptimizer } from '@/utils/performanceOptimizer';
-import { getAttorneys, type Attorney } from '@/lib/attorneys';
+import { performanceOptimizer } from '../../utils/performanceOptimizer';
+import { searchAttorneys, type Attorney } from '../../lib/attorneys';
 
 type LegalHelpState = {
   searchQuery: string;
@@ -153,9 +153,9 @@ export default function LegalHelpScreen() {
       
       const attorneys = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
         // Fetch real attorney data from multiple sources
-        const realAttorneys = await getAttorneys(
-          location.coords.latitude,
-          location.coords.longitude,
+        const locationString = `${location.coords.latitude},${location.coords.longitude}`;
+        const realAttorneys = await searchAttorneys(
+          locationString,
           searchRadius
         );
         
@@ -291,9 +291,12 @@ export default function LegalHelpScreen() {
 
     // Apply consultation fee filter
     if (state.filters.maxConsultationFee !== undefined) {
-      filtered = filtered.filter(attorney =>
-        (attorney.consultationFee || 0) <= state.filters.maxConsultationFee!
-      );
+      filtered = filtered.filter(attorney => {
+        const fee = typeof attorney.consultationFee === 'number' 
+          ? attorney.consultationFee 
+          : parseFloat(attorney.consultationFee?.toString() || '0');
+        return fee <= state.filters.maxConsultationFee!;
+      });
     }
 
     // Apply languages filter
@@ -556,7 +559,7 @@ export default function LegalHelpScreen() {
             </View>
             <View style={styles.locationContainer}>
               <MaterialIcons name="location-on" size={14} color={colors.text.muted} />
-              <Text style={styles.distanceText}>{attorney.location}</Text>
+              <Text style={styles.distanceText}>{attorney.location.address}</Text>
               {state.userLocation && attorney.lat && attorney.lng && (
                 <Text style={styles.distanceIndicator}>
                   {(calculateDistance(
@@ -609,7 +612,8 @@ export default function LegalHelpScreen() {
                  attorney.feeStructure.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Text>
             </View>
-            {attorney.consultationFee !== undefined && attorney.consultationFee > 0 && (
+            {attorney.consultationFee !== undefined && 
+             (typeof attorney.consultationFee === 'number' ? attorney.consultationFee : parseFloat(attorney.consultationFee?.toString() || '0')) > 0 && (
               <View style={styles.infoItem}>
                 <MaterialIcons name="receipt" size={14} color={colors.text.muted} />
                 <Text style={styles.infoText}>${attorney.consultationFee} consultation</Text>
@@ -629,7 +633,7 @@ export default function LegalHelpScreen() {
             </View>
             <View style={styles.infoItem}>
               <MaterialIcons name="cases" size={14} color={colors.text.muted} />
-              <Text style={styles.infoText}>{attorney.cases} cases</Text>
+              <Text style={styles.infoText}>{attorney.cases?.length || 0} cases</Text>
             </View>
           </View>
 

@@ -87,8 +87,7 @@ class UserSettingsManager {
           updated_at: new Date().toISOString()
         })
         .select()
-        .single()
-        .headers(headers);
+        .single();
 
       if (error) throw error;
 

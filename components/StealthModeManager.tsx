@@ -74,7 +74,7 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
       setCurrentScreen(settings.cover_story_screen);
 
       // Navigate to cover story screen
-      router.replace(`/stealth-${settings.cover_story_screen}`);
+      router.replace(`/stealth-${settings.cover_story_screen}` as any);
     } catch (error) {
       console.error('Error activating stealth mode:', error);
       throw error;

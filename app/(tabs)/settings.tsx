@@ -5,14 +5,14 @@ import * as Notifications from 'expo-notifications';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../../constants/theme';
 import { useFocusEffect } from '@react-navigation/native';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
-import { AccessibleButton } from '@/components/AccessibleButton';
-import { AccessibleText, AccessibleHeading, AccessibleBody } from '@/components/AccessibleText';
-import { useAccessibility } from '@/utils/accessibility';
-import { generateAccessibilityLabel, generateAccessibilityHint } from '@/utils/accessibility';
+import { AccessibleButton } from '../../components/AccessibleButton';
+import { AccessibleText, AccessibleHeading, AccessibleBody } from '../../components/AccessibleText';
+import { useAccessibility } from '../../utils/accessibility';
+import { generateAccessibilityLabel, generateAccessibilityHint } from '../../utils/accessibility';
 
 interface Incident {
   id: string;

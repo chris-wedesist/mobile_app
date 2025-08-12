@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Text, StyleSheet, TextStyle, TextProps } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors } from '../constants/theme';
 
 // Accessible text props interface
 interface AccessibleTextProps extends TextProps {

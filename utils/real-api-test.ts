@@ -1,4 +1,4 @@
-import { getAttorneys } from '@/lib/attorneys';
+import { searchAttorneys } from '../lib/attorneys';
 import { searchStateBarAttorneys, hasStateBarAPI } from '@/lib/stateBarAPI';
 import { searchLSCAttorneys, hasLegalAidOrganization } from '@/lib/legalAidAPI';
 import { searchACLUAttorneys, hasCivilRightsOrganization } from '@/lib/civilRightsAPI';
@@ -92,13 +92,13 @@ export const testRealAPIIntegration = async (): Promise<void> => {
   }
   
   // Test 3: Test main getAttorneys function
-  console.log('\n📋 Test 3: Testing Main getAttorneys Function');
+  console.log('\n📋 Test 3: Testing Main searchAttorneys Function');
   for (const location of testLocations.slice(0, 2)) { // Test first 2 locations
     totalTests++;
     try {
-      console.log(`\n🔍 Testing getAttorneys for ${location.name}...`);
+      console.log(`\n🔍 Testing searchAttorneys for ${location.name}...`);
       
-      const attorneys = await getAttorneys(location.lat, location.lng, 25);
+      const attorneys = await searchAttorneys(`${location.lat},${location.lng}`, 25);
       
       console.log(`  📊 Total attorneys found: ${attorneys.length}`);
       
@@ -140,7 +140,7 @@ export const testRealAPIIntegration = async (): Promise<void> => {
     // Test with a location that might not have many attorneys
     const testLat = 45.5231;
     const testLng = -122.6765; // Portland, OR
-    const attorneys = await getAttorneys(testLat, testLng, 25);
+    const attorneys = await searchAttorneys(`${testLat},${testLng}`, 25);
     
     // Check that all attorneys have proper verification
     const unverifiedAttorneys = attorneys.filter(attorney => !attorney.verified);

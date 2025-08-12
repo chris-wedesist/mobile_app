@@ -27,7 +27,7 @@ export async function biometricVerify(prompt: string = 'Confirm your identity') 
       fallbackLabel: 'Enter Passcode',
     });
 
-    return { success: result.success, error: result.error };
+    return { success: result.success, error: result.success ? null : 'Authentication failed' };
   } catch (error) {
     console.error('Biometric authentication error:', error);
     return { success: false, error: 'Authentication failed' };
@@ -89,7 +89,7 @@ export function BiometricAuth({
       if (result.success) {
         onSuccess?.();
       } else {
-        setError(result.error ? `Authentication failed: ${result.error}` : 'Authentication cancelled');
+        setError('Authentication cancelled');
         onFail?.();
       }
     } catch (error) {
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '100%',
     maxWidth: 400,
-    ...shadows.lg,
+    ...shadows.large,
   },
   modalHeader: {
     flexDirection: 'row',

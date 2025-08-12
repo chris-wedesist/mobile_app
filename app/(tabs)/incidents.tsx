@@ -3,10 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Platform, RefreshCo
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
 import WebView from 'react-native-webview';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../../constants/theme';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
-import { performanceOptimizer } from '@/utils/performanceOptimizer';
 
 const supabase = createClient(
   'https://example.supabase.co',
@@ -64,7 +63,7 @@ export default function IncidentsScreen() {
   const [radius, setRadius] = useState(DEFAULT_RADIUS); // Radius in kilometers
   const [showRadiusControl, setShowRadiusControl] = useState(false);
   const [customRadius, setCustomRadius] = useState(DEFAULT_RADIUS.toString());
-  const refreshInterval = useRef<NodeJS.Timeout>();
+  const refreshInterval = useRef<NodeJS.Timeout | undefined>(undefined);
   const mapRef = useRef<WebView>(null);
   const { newIncident } = useLocalSearchParams();
 
@@ -162,56 +161,49 @@ export default function IncidentsScreen() {
 
   const fetchIncidents = async (userLocation: Location.LocationObject) => {
     try {  
-      const cacheKey = `incidents_${userLocation.coords.latitude?.toString() || '0'}_${userLocation.coords.longitude?.toString() || '0'}_${radius}`;
-      
-      const incidents = await performanceOptimizer.fetchWithCache(cacheKey, async () => {
-        // Generate test data with the current radius
-        const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0, radius);
+      // Generate test data with the current radius
+      const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0, radius);
 
-        // Calculate distances for each incident
-        const incidentsWithDistance = data.map(incident => {
-          try {
-            // Get coordinates directly from the incident
-            const latitude = parseFloat(incident.latitude);
-            const longitude = parseFloat(incident.longitude);
+      // Calculate distances for each incident
+      const incidentsWithDistance = data.map(incident => {
+        try {
+          // Get coordinates directly from the incident
+          const latitude = parseFloat(incident.latitude);
+          const longitude = parseFloat(incident.longitude);
 
-            if (isNaN(latitude) || isNaN(longitude)) {
-              console.warn('Invalid coordinates:', incident);
-              return { ...incident, distance: 0 };
-            }
-
-            // Calculate distance
-            const distance = calculateDistance(
-              userLocation.coords.latitude,
-              userLocation.coords.longitude,
-              latitude,
-              longitude
-            );
-
-            return {
-              ...incident,
-              latitude,
-              longitude,
-              distance
-            };
-          } catch (error) {
-            console.error('Error processing incident:', error);
+          if (isNaN(latitude) || isNaN(longitude)) {
+            console.warn('Invalid coordinates:', incident);
             return { ...incident, distance: 0 };
           }
-        });
 
-        // Filter incidents within the specified radius
-        const radiusInMeters = radius * 1000;
-        const filteredIncidents = incidentsWithDistance.filter(incident => 
-          (incident.distance || 0) <= radiusInMeters
-        );
+          // Calculate distance
+          const distance = calculateDistance(
+            userLocation.coords.latitude,
+            userLocation.coords.longitude,
+            latitude,
+            longitude
+          );
 
-        // Sort incidents by distance
-        return filteredIncidents.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-      }, {
-        key: cacheKey,
-        duration: 2 * 60 * 1000 // 2 minutes cache for location-based data
+          return {
+            ...incident,
+            latitude,
+            longitude,
+            distance
+          };
+        } catch (error) {
+          console.error('Error processing incident:', error);
+          return { ...incident, distance: 0 };
+        }
       });
+
+      // Filter incidents within the specified radius
+      const radiusInMeters = radius * 1000;
+      const filteredIncidents = incidentsWithDistance.filter(incident => 
+        (incident.distance || 0) <= radiusInMeters
+      );
+
+      // Sort incidents by distance
+      const incidents = filteredIncidents.sort((a, b) => (a.distance || 0) - (b.distance || 0));
       
       setIncidents(incidents);
       setIsConnected(true);

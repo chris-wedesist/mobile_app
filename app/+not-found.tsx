@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '@/constants/theme';
+import { colors } from '../constants/theme';
 
 export default function NotFoundScreen() {
   return (

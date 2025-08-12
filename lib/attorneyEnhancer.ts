@@ -195,7 +195,12 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
       /chinese/i, /japanese/i, /korean/i, /vietnamese/i, /arabic/i,
       /russian/i, /polish/i, /greek/i, /hebrew/i, /hindi/i,
     ];
-    enhancedData.languages = languagePatterns.filter(pattern => pattern.test(html));
+    enhancedData.languages = languagePatterns
+      .map(pattern => {
+        const match = html.match(pattern);
+        return match ? match[0] : null;
+      })
+      .filter(lang => lang !== null) as string[];
 
     // Extract specializations
     const specializationPatterns = [
@@ -206,7 +211,12 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
       /racial\s*justice/i, /criminal\s*justice/i, /prisoners\s*rights/i,
       /environmental\s*justice/i, /immigrant\s*rights/i,
     ];
-    enhancedData.specializations = specializationPatterns.filter(pattern => pattern.test(html));
+    enhancedData.specializations = specializationPatterns
+      .map(pattern => {
+        const match = html.match(pattern);
+        return match ? match[0] : null;
+      })
+      .filter(spec => spec !== null) as string[];
 
     return enhancedData;
 
@@ -239,7 +249,7 @@ export async function enhanceAttorneysWithWebData(attorneys: Attorney[]): Promis
           enhancedAttorneys.push({
             ...attorney,
             website: websiteUrl,
-            enhancedData,
+            enhancedData: enhancedData as any,
           });
         } else {
           enhancedAttorneys.push({

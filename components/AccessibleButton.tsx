@@ -10,7 +10,7 @@ import {
   AccessibilityInfo,
   Platform
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors } from '../constants/theme';
 
 // Button props interface with accessibility support
 interface AccessibleButtonProps {

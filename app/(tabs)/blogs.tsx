@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Linking } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors } from '../../constants/theme';
 import { useEffect, useState } from 'react';
-import { getNews, NewsItem } from '@/lib/news';
+import { getNews, NewsItem } from '../../lib/news';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -23,7 +23,8 @@ export default function BlogsScreen() {
   const loadNews = async () => {
     try {
       setLoading(true);
-      const newsItems = await getNews(page, ITEMS_PER_PAGE, selectedCategory === 'all' ? undefined : selectedCategory);
+      const response = await getNews();
+      const newsItems = response.data || [];
       if (newsItems.length === 0) {
         setHasMore(false);
       } else {

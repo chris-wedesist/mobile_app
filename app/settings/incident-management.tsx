@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { downloadIncidentFromCloud, permanentlyDeleteIncidentFromCloud } from '@/utils/incident-storage';
-import { BiometricAuth } from '@/components/BiometricAuth';
-import { colors, radius, shadows } from '@/constants/theme';
+import { downloadIncidentFromCloud, permanentlyDeleteIncidentFromCloud } from '../../utils/incident-storage';
+import { BiometricAuth } from '../../components/BiometricAuth';
+import { colors, radius, shadows } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type CloudIncident = {
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
-    ...shadows.lg,
+    ...shadows.large,
   },
   biometricTitle: {
     fontSize: 20,

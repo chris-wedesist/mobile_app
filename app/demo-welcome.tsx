@@ -1,71 +1,71 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 
 export default function DemoWelcomeScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.container as ViewStyle}>
+      <View style={styles.header as ViewStyle}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={styles.backButton as ViewStyle}
           onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Skip Demo</Text>
+          <Text style={styles.backButtonText as TextStyle}>Skip Demo</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.imageContainer}>
+      <View style={styles.content as ViewStyle}>
+        <View style={styles.imageContainer as ViewStyle}>
           <Image
             source={{ uri: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg' }}
-            style={styles.image}
+            style={styles.image as ImageStyle}
             resizeMode="cover"
           />
-          <View style={styles.overlay} />
-          <View style={styles.iconContainer}>
+          <View style={styles.overlay as ViewStyle} />
+          <View style={styles.iconContainer as ViewStyle}>
             <MaterialIcons name="shield" size={64} color={colors.accent} />
           </View>
         </View>
 
-        <View style={styles.textContent}>
-          <Text style={styles.title}>Welcome to DESIST!</Text>
-          <Text style={styles.subtitle}>Your Digital Safety Companion</Text>
+        <View style={styles.textContent as ViewStyle}>
+          <Text style={styles.title as TextStyle}>Welcome to DESIST!</Text>
+          <Text style={styles.subtitle as TextStyle}>Your Digital Safety Companion</Text>
           
-          <View style={styles.featureList}>
-            <View style={styles.featureItem}>
-              <View style={styles.featureDot} />
-              <Text style={styles.featureText}>
+          <View style={styles.featureList as ViewStyle}>
+            <View style={styles.featureItem as ViewStyle}>
+              <View style={styles.featureDot as ViewStyle} />
+              <Text style={styles.featureText as TextStyle}>
                 Quick emergency recording and alerts
               </Text>
             </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureDot} />
-              <Text style={styles.featureText}>
+            <View style={styles.featureItem as ViewStyle}>
+              <View style={styles.featureDot as ViewStyle} />
+              <Text style={styles.featureText as TextStyle}>
                 Instant stealth mode activation
               </Text>
             </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureDot} />
-              <Text style={styles.featureText}>
+            <View style={styles.featureItem as ViewStyle}>
+              <View style={styles.featureDot as ViewStyle} />
+              <Text style={styles.featureText as TextStyle}>
                 Secure evidence preservation
               </Text>
             </View>
           </View>
 
-          <Text style={styles.description}>
+          <Text style={styles.description as TextStyle}>
             Let's walk through a guided demo to ensure you're ready to use DESIST! 
             when it matters most. We'll test all emergency features in a safe environment.
           </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.startButton}
+          style={styles.startButton as ViewStyle}
           onPress={() => router.push('/test-panic-flow')}>
-          <Text style={styles.startButtonText}>Start Mission Demo</Text>
+          <Text style={styles.startButtonText as TextStyle}>Start Mission Demo</Text>
           <MaterialIcons name="chevron-right" size={24} color={colors.text.primary} />
         </TouchableOpacity>
 
-        <Text style={styles.disclaimer}>
+        <Text style={styles.disclaimer as TextStyle}>
           Don't worry - no real alerts will be sent during the demo
         </Text>
       </View>

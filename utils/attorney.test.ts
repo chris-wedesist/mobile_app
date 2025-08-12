@@ -1,4 +1,4 @@
-import { getAttorneys } from '@/lib/attorneys';
+import { searchAttorneys } from '../lib/attorneys';
 
 describe('Attorney Data Fetching - U.S. Coverage', () => {
   const testLocations = [
@@ -33,7 +33,7 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
   test.each(testLocations)('should fetch attorneys for $name', async ({ name, lat, lng }) => {
     console.log(`🧪 Testing attorney fetching for ${name} (${lat}, ${lng})`);
     
-    const attorneys = await getAttorneys(lat, lng, 25);
+    const attorneys = await searchAttorneys(`${lat},${lng}`, 25);
     
     expect(attorneys).toBeDefined();
     expect(Array.isArray(attorneys)).toBe(true);
@@ -92,9 +92,9 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
     const lat = 40.7128; // New York City
     const lng = -74.0060;
     
-    const radius10 = await getAttorneys(lat, lng, 10);
-    const radius25 = await getAttorneys(lat, lng, 25);
-    const radius50 = await getAttorneys(lat, lng, 50);
+    const radius10 = await searchAttorneys(`${lat},${lng}`, 10);
+    const radius25 = await searchAttorneys(`${lat},${lng}`, 25);
+    const radius50 = await searchAttorneys(`${lat},${lng}`, 50);
     
     expect(radius10.length).toBeGreaterThan(0);
     expect(radius25.length).toBeGreaterThan(0);
@@ -109,7 +109,7 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
     const lat = 34.0522; // Los Angeles
     const lng = -118.2437;
     
-    const attorneys = await getAttorneys(lat, lng, 25);
+    const attorneys = await searchAttorneys(`${lat},${lng}`, 25);
     
     const civilRightsCount = attorneys.filter(a => 
       a.specialization === 'Civil Rights Law' || 
@@ -129,7 +129,7 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
     const lat = 41.8781; // Chicago
     const lng = -87.6298;
     
-    const attorneys = await getAttorneys(lat, lng, 25);
+    const attorneys = await searchAttorneys(`${lat},${lng}`, 25);
     const feeStructures = [...new Set(attorneys.map(a => a.feeStructure))];
     
     expect(feeStructures.length).toBeGreaterThan(1);
@@ -139,7 +139,7 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
 
   test('should handle edge cases and errors gracefully', async () => {
     // Test with invalid coordinates
-    const attorneys = await getAttorneys(999, 999, 25);
+    const attorneys = await searchAttorneys('999,999', 25);
     expect(attorneys).toBeDefined();
     expect(Array.isArray(attorneys)).toBe(true);
     expect(attorneys.length).toBeGreaterThan(0);
@@ -149,7 +149,7 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
     const lat = 29.7604; // Houston
     const lng = -95.3698;
     
-    const attorneys = await getAttorneys(lat, lng, 25);
+    const attorneys = await searchAttorneys(`${lat},${lng}`, 25);
     
     attorneys.forEach(attorney => {
       // At least one contact method should be available
@@ -174,7 +174,7 @@ describe('Attorney Data Fetching - U.S. Coverage', () => {
     const lat = 32.7157; // San Diego
     const lng = -117.1611;
     
-    const attorneys = await getAttorneys(lat, lng, 25);
+    const attorneys = await searchAttorneys(`${lat},${lng}`, 25);
     
     attorneys.forEach(attorney => {
       expect(typeof attorney.acceptsNewClients).toBe('boolean');

@@ -1,15 +1,12 @@
+// Learn more https://docs.expo.io/guides/customizing-metro
 const { getDefaultConfig } = require('expo/metro-config');
 
+/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-// Add support for expo-router
-config.resolver.platforms = ['ios', 'android', 'native', 'web'];
-
-// Handle environment variables
+// Add minimal Node.js polyfills for packages that need them (like react-native-svg)
 config.resolver.alias = {
-  ...config.resolver.alias,
-  // Ensure process.env is available
-  'process.env': 'process.env',
+  buffer: require.resolve('buffer'),
 };
 
-module.exports = config; 
+module.exports = config;

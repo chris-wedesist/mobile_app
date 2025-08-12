@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const supabase = createClient(

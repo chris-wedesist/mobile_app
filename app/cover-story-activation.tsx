@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '@/constants/theme';
-import { useStealthMode } from '@/components/StealthModeManager';
+import { colors, shadows, radius } from '../constants/theme';
+import { useStealthMode } from '../components/StealthModeManager';
 
 type CoverStoryType = {
   id: string;
@@ -46,7 +46,7 @@ export default function CoverStoryActivationScreen() {
       setError(null);
 
       await activate('manual');
-      router.push(`/stealth-${selectedStory}`);
+      router.push(`/stealth-${selectedStory}` as any);
     } catch (error) {
       console.error('Error activating cover story:', error);
       setError('Failed to activate cover story');

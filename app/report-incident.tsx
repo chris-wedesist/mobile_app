@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Alert, FlatList, Image, Modal, Dimensions } from 'react-native';
 import { router } from 'expo-router';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import { createClient } from '@supabase/supabase-js';
 import * as Location from 'expo-location';
 import { WebView } from 'react-native-webview';

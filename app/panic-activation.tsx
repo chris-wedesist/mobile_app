@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } 
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function PanicActivationScreen() {
@@ -15,7 +15,7 @@ export default function PanicActivationScreen() {
   const countdownAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const cameraRef = useRef<CameraView>(null);
-  const countdownInterval = useRef<NodeJS.Timeout | null>(null);
+  const countdownInterval = useRef<any>(null);
 
   useEffect(() => {
     startPulseAnimation();
@@ -223,7 +223,7 @@ export default function PanicActivationScreen() {
         <CameraView
           ref={cameraRef}
           style={styles.hiddenCamera}
-          type="back"
+          facing="back"
         />
       )}
     </View>

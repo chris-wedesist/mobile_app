@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated, Easing } from 'react-native';
-import { colors, shadows, radius } from '@/constants/theme';
+import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type BadgeUnlockModalProps = {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '90%',
     maxWidth: 400,
-    ...shadows.lg,
+    ...shadows.large,
   },
   confettiContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.accent}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.lg,
+    ...shadows.large,
   },
   award: {
     position: 'absolute',

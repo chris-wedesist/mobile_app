@@ -294,22 +294,4 @@ export const mockSecureStore = {
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
   isAvailableAsync: jest.fn(),
-};
-
-// Mock Sentry
-export const mockSentry = {
-  init: jest.fn(),
-  captureException: jest.fn(),
-  captureMessage: jest.fn(),
-  setUser: jest.fn(),
-  setTag: jest.fn(),
-  setContext: jest.fn(),
-  addBreadcrumb: jest.fn(),
-  Severity: {
-    Fatal: 'fatal',
-    Error: 'error',
-    Warning: 'warning',
-    Info: 'info',
-    Debug: 'debug',
-  },
 }; 

@@ -1,5 +1,5 @@
 // Simple test to verify attorney data fetching works for any U.S. location
-import { getAttorneys } from '@/lib/attorneys';
+import { searchAttorneys } from '../lib/attorneys';
 
 async function testAttorneyFetching() {
   console.log('🧪 Testing attorney data fetching for U.S. locations...\n');
@@ -26,7 +26,7 @@ async function testAttorneyFetching() {
     try {
       console.log(`📍 Testing ${location.name} (${location.lat}, ${location.lng})...`);
       
-      const attorneys = await getAttorneys(location.lat, location.lng, 25);
+      const attorneys = await searchAttorneys(`${location.lat},${location.lng}`, 25);
       
       // Basic validation
       if (!attorneys || !Array.isArray(attorneys)) {
