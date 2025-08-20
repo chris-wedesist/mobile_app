@@ -17,8 +17,8 @@ export const errorHandler = (error: unknown): string => {
     console.warn(`AppError [${error.code}]: ${error.message}`, error);
     return error.userMessage;
   }
-  
+
   // Log unexpected errors
   console.error('Unexpected error:', error);
   return 'An unexpected error occurred. Please try again later.';
-}; 
+};

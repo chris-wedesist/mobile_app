@@ -1,15 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
-import { router } from 'expo-router';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Location from 'expo-location';
-import { colors, shadows, radius } from '../constants/theme';
-import UserSettingsManager from '../components/UserSettingsManager';
-import UploadManager from '../components/UploadManager';
-import SMSManager from '../components/SMSManager';
-import AutoWipeManager from '../components/AutoWipeManager';
-import * as FileSystem from 'expo-file-system';
 import { MaterialIcons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
+import * as Location from 'expo-location';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import AutoWipeManager from '../components/AutoWipeManager';
+import { colors, radius, shadows } from '../constants/theme';
 
 type TestStep = {
   id: string;
@@ -29,31 +34,31 @@ export default function TestPanicFlowScreen() {
       title: 'Camera Recording',
       description: 'Testing emergency recording capability',
       icon: <MaterialIcons name="camera" size={24} color={colors.accent} />,
-      status: 'success'
+      status: 'success',
     },
     {
       id: 'upload',
       title: 'Secure Upload',
       description: 'Testing encrypted upload system',
       icon: <MaterialIcons name="upload" size={24} color={colors.accent} />,
-      status: 'success'
+      status: 'success',
     },
     {
       id: 'alert',
       title: 'Emergency Alerts',
       description: 'Testing alert system (notifications disabled)',
       icon: <MaterialIcons name="message" size={24} color={colors.accent} />,
-      status: 'success'
+      status: 'success',
     },
     {
       id: 'wipe',
       title: 'Auto-Wipe',
       description: 'Testing secure data removal',
       icon: <MaterialIcons name="delete" size={24} color={colors.accent} />,
-      status: 'running'
-    }
+      status: 'running',
+    },
   ]);
-  
+
   const [currentStep, setCurrentStep] = useState(3);
   const [testComplete, setTestComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +95,8 @@ export default function TestPanicFlowScreen() {
     if (Platform.OS === 'web') return;
 
     try {
-      const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: locationStatus } =
+        await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         throw new Error('Location permission is required for testing');
       }
@@ -107,10 +113,16 @@ export default function TestPanicFlowScreen() {
     }
   };
 
-  const updateStepStatus = (stepId: string, status: TestStep['status'], error?: string) => {
-    setTestSteps(prev => prev.map(step =>
-      step.id === stepId ? { ...step, status, error } : step
-    ));
+  const updateStepStatus = (
+    stepId: string,
+    status: TestStep['status'],
+    error?: string
+  ) => {
+    setTestSteps((prev) =>
+      prev.map((step) =>
+        step.id === stepId ? { ...step, status, error } : step
+      )
+    );
   };
 
   const testAutoWipe = async () => {
@@ -119,12 +131,12 @@ export default function TestPanicFlowScreen() {
 
       if (Platform.OS !== 'web') {
         const autoWipeManager = AutoWipeManager.getInstance();
-        
+
         // Create test file with random data
         const testUri = `${FileSystem.cacheDirectory}test-video.mp4`;
         const testData = new Uint8Array(1024 * 1024); // 1MB test file
         crypto.getRandomValues(testData);
-        
+
         await FileSystem.writeAsStringAsync(
           testUri,
           String.fromCharCode.apply(null, Array.from(testData)),
@@ -139,7 +151,7 @@ export default function TestPanicFlowScreen() {
 
         // Test wipe operation
         const wipeResult = await autoWipeManager.wipeLocalMedia(testUri);
-        
+
         if (!wipeResult) {
           throw new Error('Auto-wipe operation failed');
         }
@@ -155,13 +167,17 @@ export default function TestPanicFlowScreen() {
         }
       } else {
         // Simulate wipe for web
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         updateStepStatus('wipe', 'success');
         setTestComplete(true);
       }
     } catch (error) {
       console.error('Auto-wipe test failed:', error);
-      updateStepStatus('wipe', 'error', error instanceof Error ? error.message : 'Failed to test auto-wipe');
+      updateStepStatus(
+        'wipe',
+        'error',
+        error instanceof Error ? error.message : 'Failed to test auto-wipe'
+      );
       setError('Auto-wipe test failed');
     }
   };
@@ -194,8 +210,13 @@ export default function TestPanicFlowScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -212,23 +233,32 @@ export default function TestPanicFlowScreen() {
 
         {error && (
           <View style={styles.errorContainer}>
-            <MaterialIcons name="error-outline" color={colors.status.error} size={20} />
+            <MaterialIcons
+              name="error-outline"
+              color={colors.status.error}
+              size={20}
+            />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
 
         <View style={styles.stepsContainer}>
           {testSteps.map((step, index) => (
-            <View 
+            <View
               key={step.id}
               style={[
                 styles.stepCard,
-                index === currentStep && styles.activeStep
-              ]}>
+                index === currentStep && styles.activeStep,
+              ]}
+            >
               <View style={styles.stepHeader}>
                 <View style={styles.stepIcon}>
                   {step.status === 'success' ? (
-                    <MaterialIcons name="check" size={24} color={colors.status.success} />
+                    <MaterialIcons
+                      name="check"
+                      size={24}
+                      color={colors.status.success}
+                    />
                   ) : (
                     step.icon
                   )}
@@ -240,13 +270,11 @@ export default function TestPanicFlowScreen() {
                 <View
                   style={[
                     styles.statusDot,
-                    { backgroundColor: getStepStatusColor(step.status) }
+                    { backgroundColor: getStepStatusColor(step.status) },
                   ]}
                 />
               </View>
-              {step.error && (
-                <Text style={styles.stepError}>{step.error}</Text>
-              )}
+              {step.error && <Text style={styles.stepError}>{step.error}</Text>}
             </View>
           ))}
         </View>
@@ -263,25 +291,29 @@ export default function TestPanicFlowScreen() {
           <TouchableOpacity
             style={[
               styles.actionButton,
-              currentStep === 0 && styles.startButton
+              currentStep === 0 && styles.startButton,
             ]}
-            onPress={runNextStep}>
-            <Text style={styles.actionButtonText}>
-              Continue Test
-            </Text>
+            onPress={runNextStep}
+          >
+            <Text style={styles.actionButtonText}>Continue Test</Text>
           </TouchableOpacity>
         )}
 
         {testComplete && (
           <View style={styles.completeContainer}>
-            <MaterialIcons name="check" size={48} color={colors.status.success} />
+            <MaterialIcons
+              name="check"
+              size={48}
+              color={colors.status.success}
+            />
             <Text style={styles.completeText}>Test Complete</Text>
             <Text style={styles.completeDescription}>
               All emergency features are working correctly
             </Text>
             <TouchableOpacity
               style={styles.doneButton}
-              onPress={() => router.back()}>
+              onPress={() => router.back()}
+            >
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </View>

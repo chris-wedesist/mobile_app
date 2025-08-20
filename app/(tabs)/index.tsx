@@ -1,15 +1,26 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import NoHandsIcon from '../../components/NoHandsIcon';
 import { colors } from '../../constants/theme';
-import { useEffect, useState } from 'react';
-import { getNews, NewsItem, fetchNewsWithOptimization } from '../../lib/news';
-import { router } from 'expo-router';
-import { useLoadingState, useErrorState, StateManager } from '../../utils/stateManager';
+import { fetchNewsWithOptimization, NewsItem } from '../../lib/news';
+import {
+  StateManager,
+  useErrorState,
+  useLoadingState,
+} from '../../utils/stateManager';
 
 export default function HomeScreen() {
   const [localNews, setLocalNews] = useState<NewsItem[]>([]);
   const [nationalNews, setNationalNews] = useState<NewsItem[]>([]);
-  
+
   // Use state management for loading and error states
   const loading = useLoadingState('home_news');
   const error = useErrorState('home_news');
@@ -21,24 +32,28 @@ export default function HomeScreen() {
   const loadNews = async () => {
     try {
       console.log('Loading news with state management...');
-      
+
       // Use StateManager for fetching with integrated state management
-      const optimizedData = await StateManager.fetchWithState('home_news', async () => {
-        const result = await fetchNewsWithOptimization();
-        return {
-          local: result.local.slice(0, 2), // Only fetch 2 items for preview
-          national: result.national.slice(0, 2) // Only fetch 2 items for preview
-        };
-      }, {
-        key: 'home_news',
-        duration: 5 * 60 * 1000 // 5 minutes cache
-      });
-      
+      const optimizedData = await StateManager.fetchWithState(
+        'home_news',
+        async () => {
+          const result = await fetchNewsWithOptimization();
+          return {
+            local: result.local.slice(0, 2), // Only fetch 2 items for preview
+            national: result.national.slice(0, 2), // Only fetch 2 items for preview
+          };
+        },
+        {
+          key: 'home_news',
+          duration: 5 * 60 * 1000, // 5 minutes cache
+        }
+      );
+
       console.log('Loaded optimized news items:', {
         local: optimizedData.local.length,
-        national: optimizedData.national.length
+        national: optimizedData.national.length,
       });
-      
+
       setLocalNews(optimizedData.local);
       setNationalNews(optimizedData.national);
     } catch (error) {
@@ -54,18 +69,22 @@ export default function HomeScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        console.error("Cannot open URL: " + url);
+        console.error('Cannot open URL: ' + url);
       }
     } catch (error) {
-      console.error("Error opening URL:", error);
+      console.error('Error opening URL:', error);
     }
   };
 
-  const renderNewsSection = (title: string, news: NewsItem[], category: 'local' | 'national') => (
+  const renderNewsSection = (
+    title: string,
+    news: NewsItem[],
+    category: 'local' | 'national'
+  ) => (
     <View style={styles.newsSection}>
       <View style={styles.newsHeader}>
         <Text style={styles.newsTitle}>{title}</Text>
-        <Pressable 
+        <Pressable
           style={styles.viewAllButton}
           onPress={() => router.push(`/blogs?category=${category}`)}
         >
@@ -76,8 +95,8 @@ export default function HomeScreen() {
         <Text style={styles.loadingText}>Loading {category} news...</Text>
       ) : news.length > 0 ? (
         news.map((item) => (
-          <Pressable 
-            key={item.id} 
+          <Pressable
+            key={item.id}
             style={styles.newsCard}
             onPress={() => handleNewsPress(item.url)}
           >
@@ -110,7 +129,8 @@ export default function HomeScreen() {
         <Text style={styles.title}>Hands Off!</Text>
         <Text style={styles.subtitle}>Know your rights. Stay protected.</Text>
         <Text style={styles.description}>
-          Document incidents, store important documents, and access critical resources to protect your rights and safety.
+          Document incidents, store important documents, and access critical
+          resources to protect your rights and safety.
         </Text>
       </View>
 

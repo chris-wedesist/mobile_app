@@ -1,0 +1,7 @@
+"scripts": {
+  "start": "expo start",
+  "start-dev-client": "expo start --dev-client",
+  "start-lan": "REACT_NATIVE_PACKAGER_HOSTNAME='192.168.1.238' expo start --dev-client",
+  "start-clear": "expo start --dev-client --clear",
+  "start-tunnel": "expo start --dev-client --tunnel"
+}

@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Linking, Dimensions, Animated, Easing } from 'react-native';
-import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, shadows, radius } from '../constants/theme';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 let isEmergencyButtonMounted = false;
 
@@ -12,10 +20,10 @@ export default function EmergencyCallButton() {
   const [shouldRender, setShouldRender] = useState(false);
 
   const BUTTON_SIZE = 60;
-  
+
   // Initialize with a position that's visible on screen
   const [position, setPosition] = useState({ x: 20, y: 100 });
-  
+
   // Get screen dimensions
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
@@ -29,13 +37,13 @@ export default function EmergencyCallButton() {
     if (!isEmergencyButtonMounted) {
       isEmergencyButtonMounted = true;
       setShouldRender(true);
-      
+
       return () => {
         isEmergencyButtonMounted = false;
       };
     }
   }, []);
-  
+
   useEffect(() => {
     if (shouldRender) {
       loadPosition();
@@ -45,7 +53,9 @@ export default function EmergencyCallButton() {
 
   const loadPosition = async () => {
     try {
-      const savedPosition = await AsyncStorage.getItem('emergencyButtonPosition');
+      const savedPosition = await AsyncStorage.getItem(
+        'emergencyButtonPosition'
+      );
       if (savedPosition) {
         const { x, y } = JSON.parse(savedPosition);
         // Ensure position is within screen bounds
@@ -62,7 +72,8 @@ export default function EmergencyCallButton() {
     try {
       const settings = await AsyncStorage.getItem('emergencyButtonSettings');
       if (settings) {
-        const { requireLongPress: savedRequireLongPress } = JSON.parse(settings);
+        const { requireLongPress: savedRequireLongPress } =
+          JSON.parse(settings);
         setRequireLongPress(savedRequireLongPress !== false); // Default to true if not specified
       }
     } catch (error) {
@@ -72,7 +83,10 @@ export default function EmergencyCallButton() {
 
   const savePosition = async (x: number, y: number) => {
     try {
-      await AsyncStorage.setItem('emergencyButtonPosition', JSON.stringify({ x, y }));
+      await AsyncStorage.setItem(
+        'emergencyButtonPosition',
+        JSON.stringify({ x, y })
+      );
     } catch (error) {
       console.error('Error saving button position:', error);
     }
@@ -81,31 +95,31 @@ export default function EmergencyCallButton() {
   // Track the start position of the drag
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const onTouchStart = (e) => {
     const { pageX, pageY } = e.nativeEvent;
     setDragStart({ x: pageX, y: pageY });
     // Small delay before considering it a drag to allow for press detection
     setTimeout(() => setIsDragging(true), 100);
   };
-  
+
   const onTouchMove = (e) => {
     if (!isDragging) return;
-    
+
     const { pageX, pageY } = e.nativeEvent;
     const deltaX = pageX - dragStart.x;
     const deltaY = pageY - dragStart.y;
-    
+
     // Update position based on the drag
-    setPosition(prev => ({
+    setPosition((prev) => ({
       x: Math.min(Math.max(0, prev.x + deltaX), screenWidth - BUTTON_SIZE),
-      y: Math.min(Math.max(50, prev.y + deltaY), screenHeight - BUTTON_SIZE)
+      y: Math.min(Math.max(50, prev.y + deltaY), screenHeight - BUTTON_SIZE),
     }));
-    
+
     // Update the drag start position
     setDragStart({ x: pageX, y: pageY });
   };
-  
+
   const onTouchEnd = () => {
     if (isDragging) {
       // Save the final position
@@ -113,14 +127,14 @@ export default function EmergencyCallButton() {
       setIsDragging(false);
     }
   };
-  
+
   // If we shouldn't render (because another instance exists), return null
   if (!shouldRender) return null;
 
   const handlePressIn = () => {
     if (requireLongPress) {
       setIsLongPressing(true);
-      
+
       // Animate the progress indicator
       Animated.timing(progressAnim, {
         toValue: 1,
@@ -128,7 +142,7 @@ export default function EmergencyCallButton() {
         easing: Easing.linear,
         useNativeDriver: false,
       }).start();
-      
+
       // Set a timer for the long press
       longPressTimer.current = setTimeout(() => {
         makeEmergencyCall();
@@ -170,10 +184,7 @@ export default function EmergencyCallButton() {
 
   return (
     <View
-      style={[
-        styles.container,
-        { left: position.x, top: position.y }
-      ]}
+      style={[styles.container, { left: position.x, top: position.y }]}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -185,22 +196,22 @@ export default function EmergencyCallButton() {
         activeOpacity={0.7}
       >
         {isLongPressing && requireLongPress && (
-          <Animated.View 
+          <Animated.View
             style={[
               styles.progressOverlay,
               {
                 height: progressAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: ['0%', '100%']
-                })
-              }
-            ]} 
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
           />
         )}
-        <MaterialIcons 
-          name="phone" 
-          size={28} 
-          color={colors.text.primary} 
+        <MaterialIcons
+          name="phone"
+          size={28}
+          color={colors.text.primary}
           style={styles.icon}
         />
       </TouchableOpacity>
@@ -234,5 +245,5 @@ const styles = StyleSheet.create({
   },
   icon: {
     zIndex: 2, // Ensure icon stays above the progress overlay
-  }
-}); 
+  },
+});

@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from '../hooks/useTranslation';
+import * as React from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../constants/theme';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LanguageSelectorProps {
   visible: boolean;
@@ -17,13 +17,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   visible,
   onClose,
 }) => {
-  const { 
-    t, 
-    switchLanguage, 
-    getLanguages, 
-    getLanguageName, 
-    currentLanguage 
-  } = useTranslation();
+  const { t, switchLanguage, getLanguages, getLanguageName, currentLanguage } =
+    useTranslation();
 
   const handleLanguageSelect = async (language: string) => {
     await switchLanguage(language);
@@ -44,7 +39,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           <View style={styles.header}>
             <Text style={styles.title}>{t('settings.language')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialIcons name="close" size={24} color={colors.text.primary} />
+              <MaterialIcons
+                name="close"
+                size={24}
+                color={colors.text.primary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -54,21 +53,23 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 key={language}
                 style={[
                   styles.languageItem,
-                  currentLanguage === language && styles.selectedLanguage
+                  currentLanguage === language && styles.selectedLanguage,
                 ]}
                 onPress={() => handleLanguageSelect(language)}
               >
-                <Text style={[
-                  styles.languageText,
-                  currentLanguage === language && styles.selectedLanguageText
-                ]}>
+                <Text
+                  style={[
+                    styles.languageText,
+                    currentLanguage === language && styles.selectedLanguageText,
+                  ]}
+                >
                   {getLanguageName(language)}
                 </Text>
                 {currentLanguage === language && (
-                  <MaterialIcons 
-                    name="check" 
-                    size={20} 
-                    color={colors.primary} 
+                  <MaterialIcons
+                    name="check"
+                    size={20}
+                    color={colors.primary}
                   />
                 )}
               </TouchableOpacity>
@@ -139,4 +140,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LanguageSelector; 
+export default LanguageSelector;

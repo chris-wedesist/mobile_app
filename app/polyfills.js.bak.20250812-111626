@@ -1,0 +1,230 @@
+// EXPO SDK 53 POLYFILLS - RUNTIME ERROR FIX
+// Addressing: "Cannot read property 'decode' of undefined" and "main has not been registered"
+
+// === CRITICAL: Fix global before any imports ===
+if (typeof global === 'undefined') {
+  if (typeof globalThis !== 'undefined') {
+    global = globalThis;
+  } else if (typeof window !== 'undefined') {
+    global = window;
+  } else {
+    global = {};
+  }
+}
+
+// Ensure globalThis is properly set
+if (typeof globalThis === 'undefined') {
+  globalThis = global;
+}
+
+// Ensure window is properly set for React Native
+if (typeof window === 'undefined') {
+  global.window = global;
+}
+
+// === STEP 1: Critical TextEncoder/TextDecoder polyfills ===
+// These MUST exist before any module tries to use them
+(function setupTextPolyfills() {
+  let TextEncoder_exists = false;
+  let TextDecoder_exists = false;
+  
+  try {
+    TextEncoder_exists = typeof global.TextEncoder === 'function' && global.TextEncoder;
+    TextDecoder_exists = typeof global.TextDecoder === 'function' && global.TextDecoder;
+  } catch (e) {
+    // Ignore errors
+  }
+
+  if (!TextEncoder_exists || !TextDecoder_exists) {
+    // Ultra-robust TextEncoder implementation
+    class TextEncoderPolyfill {
+      constructor(encoding = 'utf-8') {
+        this.encoding = encoding;
+      }
+
+      encode(input = '') {
+        const str = String(input || '');
+        const result = new Uint8Array(str.length * 3); // Over-allocate
+        let resultIndex = 0;
+        
+        for (let i = 0; i < str.length; i++) {
+          const code = str.charCodeAt(i);
+          
+          if (code < 0x80) {
+            result[resultIndex++] = code;
+          } else if (code < 0x800) {
+            result[resultIndex++] = 0xc0 | (code >> 6);
+            result[resultIndex++] = 0x80 | (code & 0x3f);
+          } else if (code < 0xd800 || code >= 0xe000) {
+            result[resultIndex++] = 0xe0 | (code >> 12);
+            result[resultIndex++] = 0x80 | ((code >> 6) & 0x3f);
+            result[resultIndex++] = 0x80 | (code & 0x3f);
+          } else {
+            // Surrogate pair
+            i++;
+            if (i < str.length) {
+              const hi = code;
+              const lo = str.charCodeAt(i);
+              const codePoint = 0x10000 + (((hi & 0x3ff) << 10) | (lo & 0x3ff));
+              result[resultIndex++] = 0xf0 | (codePoint >> 18);
+              result[resultIndex++] = 0x80 | ((codePoint >> 12) & 0x3f);
+              result[resultIndex++] = 0x80 | ((codePoint >> 6) & 0x3f);
+              result[resultIndex++] = 0x80 | (codePoint & 0x3f);
+            }
+          }
+        }
+        
+        return result.slice(0, resultIndex);
+      }
+    }
+
+    // Ultra-robust TextDecoder implementation
+    class TextDecoderPolyfill {
+      constructor(encoding = 'utf-8', options = {}) {
+        this.encoding = encoding;
+        this.fatal = options.fatal || false;
+        this.ignoreBOM = options.ignoreBOM || false;
+      }
+
+      decode(input, options = {}) {
+        if (!input) return '';
+        
+        // Handle different input types
+        let bytes;
+        try {
+          if (input instanceof Uint8Array) {
+            bytes = input;
+          } else if (input instanceof ArrayBuffer) {
+            bytes = new Uint8Array(input);
+          } else if (Array.isArray(input)) {
+            bytes = new Uint8Array(input);
+          } else if (input.buffer) {
+            bytes = new Uint8Array(input.buffer);
+          } else {
+            return String(input);
+          }
+        } catch (e) {
+          return String(input || '');
+        }
+
+        let result = '';
+        let i = 0;
+        
+        while (i < bytes.length) {
+          try {
+            let byte1 = bytes[i++];
+            
+            if (byte1 < 0x80) {
+              result += String.fromCharCode(byte1);
+            } else if ((byte1 & 0xe0) === 0xc0) {
+              if (i >= bytes.length) break;
+              let byte2 = bytes[i++];
+              result += String.fromCharCode(((byte1 & 0x1f) << 6) | (byte2 & 0x3f));
+            } else if ((byte1 & 0xf0) === 0xe0) {
+              if (i + 1 >= bytes.length) break;
+              let byte2 = bytes[i++];
+              let byte3 = bytes[i++];
+              result += String.fromCharCode(((byte1 & 0x0f) << 12) | ((byte2 & 0x3f) << 6) | (byte3 & 0x3f));
+            } else if ((byte1 & 0xf8) === 0xf0) {
+              if (i + 2 >= bytes.length) break;
+              let byte2 = bytes[i++];
+              let byte3 = bytes[i++];
+              let byte4 = bytes[i++];
+              let codePoint = ((byte1 & 0x07) << 18) | ((byte2 & 0x3f) << 12) | ((byte3 & 0x3f) << 6) | (byte4 & 0x3f);
+              codePoint -= 0x10000;
+              result += String.fromCharCode(0xd800 + (codePoint >> 10), 0xdc00 + (codePoint & 0x3ff));
+            } else {
+              // Skip invalid bytes
+              continue;
+            }
+          } catch (e) {
+            // Skip problematic bytes
+            continue;
+          }
+        }
+        
+        return result;
+      }
+    }
+
+    // Set polyfills with error protection
+    try {
+      if (!TextEncoder_exists) {
+        global.TextEncoder = TextEncoderPolyfill;
+        if (typeof window !== 'undefined') window.TextEncoder = TextEncoderPolyfill;
+        if (typeof globalThis !== 'undefined') globalThis.TextEncoder = TextEncoderPolyfill;
+      }
+      
+      if (!TextDecoder_exists) {
+        global.TextDecoder = TextDecoderPolyfill;
+        if (typeof window !== 'undefined') window.TextDecoder = TextDecoderPolyfill;
+        if (typeof globalThis !== 'undefined') globalThis.TextDecoder = TextDecoderPolyfill;
+      }
+    } catch (e) {
+      console.warn('Failed to set TextEncoder/TextDecoder polyfills:', e);
+    }
+  }
+})();
+
+// === STEP 2: Buffer polyfill ===
+if (!global.Buffer) {
+  try {
+    const bufferModule = require('buffer');
+    if (bufferModule && bufferModule.Buffer) {
+      global.Buffer = bufferModule.Buffer;
+    }
+  } catch (e) {
+    // Fallback Buffer polyfill
+    global.Buffer = {
+      from: function(data) {
+        if (typeof data === 'string') {
+          return new global.TextEncoder().encode(data);
+        }
+        return new Uint8Array(data || []);
+      },
+      isBuffer: function(obj) {
+        return obj instanceof Uint8Array || obj instanceof ArrayBuffer;
+      }
+    };
+  }
+}
+
+// === STEP 3: Process environment ===
+if (!global.process || typeof global.process !== 'object') {
+  global.process = {
+    env: {
+      NODE_ENV: (typeof __DEV__ !== 'undefined' && __DEV__) ? 'development' : 'production',
+    },
+    version: 'v18.0.0',
+    versions: { node: '18.0.0' },
+    platform: 'react-native',
+    nextTick: function(callback) {
+      if (typeof setImmediate !== 'undefined') {
+        setImmediate(callback);
+      } else {
+        setTimeout(callback, 0);
+      }
+    }
+  };
+}
+
+// === STEP 4: Navigator object ===
+if (!global.navigator) {
+  global.navigator = {
+    userAgent: 'React Native Expo',
+    platform: 'react-native'
+  };
+}
+
+// === STEP 5: Console safety ===
+if (!global.console || typeof global.console !== 'object') {
+  const noop = function() {};
+  global.console = {
+    log: noop,
+    error: noop,
+    warn: noop,
+    info: noop,
+    debug: noop,
+    trace: noop
+  };
+}

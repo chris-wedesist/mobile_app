@@ -3,9 +3,9 @@ import { searchAttorneys } from '../lib/attorneys';
 
 async function testAttorneyFetching() {
   console.log('🧪 Testing attorney data fetching for U.S. locations...\n');
-  
+
   const testLocations = [
-    { name: 'New York City', lat: 40.7128, lng: -74.0060 },
+    { name: 'New York City', lat: 40.7128, lng: -74.006 },
     { name: 'Los Angeles', lat: 34.0522, lng: -118.2437 },
     { name: 'Chicago', lat: 41.8781, lng: -87.6298 },
     { name: 'Houston', lat: 29.7604, lng: -95.3698 },
@@ -24,80 +24,96 @@ async function testAttorneyFetching() {
 
   for (const location of testLocations) {
     try {
-      console.log(`📍 Testing ${location.name} (${location.lat}, ${location.lng})...`);
-      
-      const attorneys = await searchAttorneys(`${location.lat},${location.lng}`, 25);
-      
+      console.log(
+        `📍 Testing ${location.name} (${location.lat}, ${location.lng})...`
+      );
+
+      const attorneys = await searchAttorneys(
+        `${location.lat},${location.lng}`,
+        25
+      );
+
       // Basic validation
       if (!attorneys || !Array.isArray(attorneys)) {
         console.log(`❌ ${location.name}: No attorneys returned`);
         allTestsPassed = false;
         continue;
       }
-      
+
       if (attorneys.length === 0) {
         console.log(`❌ ${location.name}: No attorneys found`);
         allTestsPassed = false;
         continue;
       }
-      
+
       // Validate attorney data structure
-      const validAttorneys = attorneys.filter(attorney => {
-        return attorney.id && 
-               attorney.name && 
-               attorney.specialization && 
-               attorney.lat && 
-               attorney.lng &&
-               attorney.feeStructure &&
-               attorney.firmSize &&
-               attorney.experienceYears &&
-               attorney.availability;
+      const validAttorneys = attorneys.filter((attorney) => {
+        return (
+          attorney.id &&
+          attorney.name &&
+          attorney.specialization &&
+          attorney.lat &&
+          attorney.lng &&
+          attorney.feeStructure &&
+          attorney.firmSize &&
+          attorney.experienceYears &&
+          attorney.availability
+        );
       });
-      
+
       if (validAttorneys.length !== attorneys.length) {
         console.log(`❌ ${location.name}: Invalid attorney data structure`);
         allTestsPassed = false;
         continue;
       }
-      
+
       // Check for civil rights specializations
-      const civilRightsCount = attorneys.filter(a => 
-        a.specialization === 'Civil Rights Law' || 
-        a.specialization === 'Immigration Law' ||
-        a.specialization === 'Constitutional Law' ||
-        a.specialization === 'Police Misconduct'
+      const civilRightsCount = attorneys.filter(
+        (a) =>
+          a.specialization === 'Civil Rights Law' ||
+          a.specialization === 'Immigration Law' ||
+          a.specialization === 'Constitutional Law' ||
+          a.specialization === 'Police Misconduct'
       ).length;
-      
+
       const civilRightsPercentage = (civilRightsCount / attorneys.length) * 100;
-      
-      console.log(`✅ ${location.name}: Found ${attorneys.length} attorneys (${civilRightsPercentage.toFixed(1)}% civil rights)`);
-      
+
+      console.log(
+        `✅ ${location.name}: Found ${
+          attorneys.length
+        } attorneys (${civilRightsPercentage.toFixed(1)}% civil rights)`
+      );
+
       // Show sample attorney
       const sampleAttorney = attorneys[0];
-      console.log(`   Sample: ${sampleAttorney.name} - ${sampleAttorney.specialization} (${sampleAttorney.feeStructure})`);
-      
+      console.log(
+        `   Sample: ${sampleAttorney.name} - ${sampleAttorney.specialization} (${sampleAttorney.feeStructure})`
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       console.log(`❌ ${location.name}: Error - ${errorMessage}`);
       allTestsPassed = false;
     }
   }
-  
+
   console.log('\n📊 Test Summary:');
   if (allTestsPassed) {
-    console.log('✅ All location tests passed! Attorney data fetching works for any U.S. location.');
+    console.log(
+      '✅ All location tests passed! Attorney data fetching works for any U.S. location.'
+    );
   } else {
     console.log('❌ Some location tests failed. Check the implementation.');
   }
-  
+
   return allTestsPassed;
 }
 
 // Run the test if this file is executed directly
 if (typeof require !== 'undefined' && require.main === module) {
-  testAttorneyFetching().then(success => {
+  testAttorneyFetching().then((success) => {
     process.exit(success ? 0 : 1);
   });
 }
 
-export { testAttorneyFetching }; 
+export { testAttorneyFetching };

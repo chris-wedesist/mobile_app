@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, Animated, Platform, BackHandler } from 'react-native';
-import { useWindowDimensions } from 'react-native';
-import CoverStoryNotes from './CoverStoryNotes';
 import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import {
+  Animated,
+  BackHandler,
+  Platform,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
+import CoverStoryNotes from './CoverStoryNotes';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -39,7 +44,10 @@ export default function CoverStoryManager() {
     if (Platform.OS === 'web') {
       window.addEventListener('keydown', handleCoverStory);
     } else {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        handleBackButton
+      );
     }
 
     return () => {
@@ -71,7 +79,7 @@ export default function CoverStoryManager() {
       toValue: 0,
       useNativeDriver: true,
       tension: 65,
-      friction: 11
+      friction: 11,
     }).start();
   };
 
@@ -81,21 +89,24 @@ export default function CoverStoryManager() {
       toValue: height,
       useNativeDriver: true,
       tension: 65,
-      friction: 11
+      friction: 11,
     }).start(() => setIsActive(false));
   };
 
   const logCoverStoryEvent = async (action: 'activated' | 'deactivated') => {
     try {
-      await supabase.from('cover_story_events').insert([{
-        action,
-        timestamp: new Date().toISOString(),
-        platform: Platform.OS,
-        metadata: {
-          screen_dimensions: { width, height },
-          activation_method: action === 'activated' ? 'keyboard_shortcut' : 'escape_key'
-        }
-      }]);
+      await supabase.from('cover_story_events').insert([
+        {
+          action,
+          timestamp: new Date().toISOString(),
+          platform: Platform.OS,
+          metadata: {
+            screen_dimensions: { width, height },
+            activation_method:
+              action === 'activated' ? 'keyboard_shortcut' : 'escape_key',
+          },
+        },
+      ]);
     } catch (error) {
       console.error('Error logging cover story event:', error);
     }
@@ -112,7 +123,8 @@ export default function CoverStoryManager() {
           height,
           transform: [{ translateY: slideAnim }],
         },
-      ]}>
+      ]}
+    >
       <CoverStoryNotes />
     </Animated.View>
   );

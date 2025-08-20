@@ -1,24 +1,24 @@
-import * as React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from '../hooks/useTranslation';
-import { LanguageSelector } from './LanguageSelector';
-import { AccessibleButton } from './AccessibleButton';
-import { AccessibleText, AccessibleHeading, AccessibleBody } from './AccessibleText';
+import * as React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../constants/theme';
+import { useTranslation } from '../hooks/useTranslation';
+import { AccessibleButton } from './AccessibleButton';
+import {
+  AccessibleBody,
+  AccessibleHeading,
+  AccessibleText,
+} from './AccessibleText';
+import { LanguageSelector } from './LanguageSelector';
 
 /**
  * Example component demonstrating internationalization features
  * Shows how to use translations, language switching, and language detection
  */
 export default function InternationalizationExample() {
-  const { 
-    t, 
-    currentLanguage, 
-    getLanguageName, 
-    switchLanguage 
-  } = useTranslation();
-  
+  const { t, currentLanguage, getLanguageName, switchLanguage } =
+    useTranslation();
+
   const [showLanguageSelector, setShowLanguageSelector] = React.useState(false);
 
   const handleLanguageChange = async (language: string) => {
@@ -32,7 +32,7 @@ export default function InternationalizationExample() {
       </AccessibleHeading>
 
       <AccessibleBody style={styles.description}>
-        This screen demonstrates the internationalization features including 
+        This screen demonstrates the internationalization features including
         language switching, translation usage, and language detection.
       </AccessibleBody>
 
@@ -41,7 +41,7 @@ export default function InternationalizationExample() {
         <AccessibleText variant="subheading" style={styles.sectionTitle}>
           Current Language
         </AccessibleText>
-        
+
         <View style={styles.languageInfo}>
           <MaterialIcons name="language" size={24} color={colors.primary} />
           <AccessibleBody style={styles.languageText}>
@@ -55,36 +55,42 @@ export default function InternationalizationExample() {
         <AccessibleText variant="subheading" style={styles.sectionTitle}>
           Quick Language Switch
         </AccessibleText>
-        
+
         <View style={styles.languageButtons}>
           <AccessibleButton
             onPress={() => handleLanguageChange('en')}
-            style={[
-              styles.languageButton,
-              currentLanguage === 'en' && styles.activeLanguageButton
-            ] as any}
+            style={
+              [
+                styles.languageButton,
+                currentLanguage === 'en' && styles.activeLanguageButton,
+              ] as any
+            }
             accessibilityLabel={`Switch to ${getLanguageName('en')}`}
           >
             {getLanguageName('en')}
           </AccessibleButton>
-          
+
           <AccessibleButton
             onPress={() => handleLanguageChange('es')}
-            style={[
-              styles.languageButton,
-              currentLanguage === 'es' && styles.activeLanguageButton
-            ] as any}
+            style={
+              [
+                styles.languageButton,
+                currentLanguage === 'es' && styles.activeLanguageButton,
+              ] as any
+            }
             accessibilityLabel={`Switch to ${getLanguageName('es')}`}
           >
             {getLanguageName('es')}
           </AccessibleButton>
-          
+
           <AccessibleButton
             onPress={() => handleLanguageChange('fr')}
-            style={[
-              styles.languageButton,
-              currentLanguage === 'fr' && styles.activeLanguageButton
-            ] as any}
+            style={
+              [
+                styles.languageButton,
+                currentLanguage === 'fr' && styles.activeLanguageButton,
+              ] as any
+            }
             accessibilityLabel={`Switch to ${getLanguageName('fr')}`}
           >
             {getLanguageName('fr')}
@@ -97,7 +103,7 @@ export default function InternationalizationExample() {
         <AccessibleText variant="subheading" style={styles.sectionTitle}>
           Advanced Language Selection
         </AccessibleText>
-        
+
         <AccessibleButton
           onPress={() => setShowLanguageSelector(true)}
           style={styles.selectorButton}
@@ -115,36 +121,60 @@ export default function InternationalizationExample() {
         <AccessibleText variant="subheading" style={styles.sectionTitle}>
           Translation Examples
         </AccessibleText>
-        
+
         <View style={styles.translationGrid}>
           <View style={styles.translationItem}>
-            <AccessibleText style={styles.translationKey}>common.welcome</AccessibleText>
-            <AccessibleText style={styles.translationValue}>{t('common.welcome')}</AccessibleText>
+            <AccessibleText style={styles.translationKey}>
+              common.welcome
+            </AccessibleText>
+            <AccessibleText style={styles.translationValue}>
+              {t('common.welcome')}
+            </AccessibleText>
           </View>
-          
+
           <View style={styles.translationItem}>
-            <AccessibleText style={styles.translationKey}>common.loading</AccessibleText>
-            <AccessibleText style={styles.translationValue}>{t('common.loading')}</AccessibleText>
+            <AccessibleText style={styles.translationKey}>
+              common.loading
+            </AccessibleText>
+            <AccessibleText style={styles.translationValue}>
+              {t('common.loading')}
+            </AccessibleText>
           </View>
-          
+
           <View style={styles.translationItem}>
-            <AccessibleText style={styles.translationKey}>navigation.home</AccessibleText>
-            <AccessibleText style={styles.translationValue}>{t('navigation.home')}</AccessibleText>
+            <AccessibleText style={styles.translationKey}>
+              navigation.home
+            </AccessibleText>
+            <AccessibleText style={styles.translationValue}>
+              {t('navigation.home')}
+            </AccessibleText>
           </View>
-          
+
           <View style={styles.translationItem}>
-            <AccessibleText style={styles.translationKey}>auth.login</AccessibleText>
-            <AccessibleText style={styles.translationValue}>{t('auth.login')}</AccessibleText>
+            <AccessibleText style={styles.translationKey}>
+              auth.login
+            </AccessibleText>
+            <AccessibleText style={styles.translationValue}>
+              {t('auth.login')}
+            </AccessibleText>
           </View>
-          
+
           <View style={styles.translationItem}>
-            <AccessibleText style={styles.translationKey}>settings.general</AccessibleText>
-            <AccessibleText style={styles.translationValue}>{t('settings.general')}</AccessibleText>
+            <AccessibleText style={styles.translationKey}>
+              settings.general
+            </AccessibleText>
+            <AccessibleText style={styles.translationValue}>
+              {t('settings.general')}
+            </AccessibleText>
           </View>
-          
+
           <View style={styles.translationItem}>
-            <AccessibleText style={styles.translationKey}>incidents.report_incident</AccessibleText>
-            <AccessibleText style={styles.translationValue}>{t('incidents.report_incident')}</AccessibleText>
+            <AccessibleText style={styles.translationKey}>
+              incidents.report_incident
+            </AccessibleText>
+            <AccessibleText style={styles.translationValue}>
+              {t('incidents.report_incident')}
+            </AccessibleText>
           </View>
         </View>
       </View>
@@ -154,16 +184,22 @@ export default function InternationalizationExample() {
         <AccessibleText variant="subheading" style={styles.sectionTitle}>
           Navigation Examples
         </AccessibleText>
-        
+
         <View style={styles.navigationGrid}>
-          {['home', 'profile', 'settings', 'incidents', 'legal_help'].map((item) => (
-            <View key={item} style={styles.navigationItem}>
-              <MaterialIcons name="navigate-next" size={16} color={colors.text.muted} />
-              <AccessibleText style={styles.navigationText}>
-                {t(`navigation.${item}`)}
-              </AccessibleText>
-            </View>
-          ))}
+          {['home', 'profile', 'settings', 'incidents', 'legal_help'].map(
+            (item) => (
+              <View key={item} style={styles.navigationItem}>
+                <MaterialIcons
+                  name="navigate-next"
+                  size={16}
+                  color={colors.text.muted}
+                />
+                <AccessibleText style={styles.navigationText}>
+                  {t(`navigation.${item}`)}
+                </AccessibleText>
+              </View>
+            )
+          )}
         </View>
       </View>
 
@@ -279,4 +315,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text.primary,
   },
-}); 
+});

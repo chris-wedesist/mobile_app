@@ -1,0 +1,94 @@
+{
+  "models": [
+    {
+      "title": "GPT-4",
+      "provider": "openai",
+      "model": "gpt-4-turbo-preview",
+      "apiKey": "YOUR_OPENAI_API_KEY"
+    },
+    {
+      "title": "Claude 3",
+      "provider": "anthropic",
+      "model": "claude-3-sonnet-20240229",
+      "apiKey": "YOUR_ANTHROPIC_API_KEY"
+    }
+  ],
+  "contextProviders": [
+    {
+      "name": "code",
+      "params": {}
+    },
+    {
+      "name": "docs",
+      "params": {}
+    },
+    {
+      "name": "diff",
+      "params": {}
+    },
+    {
+      "name": "terminal",
+      "params": {}
+    },
+    {
+      "name": "problems",
+      "params": {}
+    },
+    {
+      "name": "folder",
+      "params": {}
+    },
+    {
+      "name": "codebase",
+      "params": {}
+    }
+  ],
+  "slashCommands": [
+    {
+      "name": "edit",
+      "description": "Edit code in the current file"
+    },
+    {
+      "name": "comment",
+      "description": "Write comments for the selected code"
+    },
+    {
+      "name": "share",
+      "description": "Export this conversation"
+    },
+    {
+      "name": "cmd",
+      "description": "Run a shell command"
+    },
+    {
+      "name": "commit",
+      "description": "Generate a git commit message"
+    }
+  ],
+  "customCommands": [
+    {
+      "name": "refactor",
+      "prompt": "Refactor the selected code to improve readability, maintainability, and performance while preserving functionality. Focus on React Native and TypeScript best practices.",
+      "description": "Refactor code with React Native best practices"
+    },
+    {
+      "name": "debug",
+      "prompt": "Analyze the selected code for potential bugs, performance issues, and suggest improvements. Pay special attention to React Native specific issues like memory leaks, state management, and navigation problems.",
+      "description": "Debug React Native code"
+    },
+    {
+      "name": "test",
+      "prompt": "Generate comprehensive unit tests for the selected code using Jest and React Native Testing Library. Include edge cases and error scenarios.",
+      "description": "Generate React Native tests"
+    },
+    {
+      "name": "optimize",
+      "prompt": "Optimize the selected React Native code for performance, focusing on re-renders, memory usage, and bundle size. Suggest modern React Native patterns and hooks.",
+      "description": "Optimize React Native performance"
+    }
+  ],
+  "allowAnonymousTelemetry": false,
+  "embeddingsProvider": {
+    "provider": "transformers.js"
+  }
+}

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
-import { WebView } from 'react-native-webview';
-import * as Location from 'expo-location';
 import { createClient } from '@supabase/supabase-js';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { colors, radius, shadows } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -26,7 +26,8 @@ type Incident = {
 
 export default function MapIncidentsScreen() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObject | null>(null);
   const webViewRef = useRef<WebView>(null);
   const router = useRouter();
 
@@ -34,7 +35,10 @@ export default function MapIncidentsScreen() {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required to view incidents on the map.');
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to view incidents on the map.'
+        );
         return;
       }
 
@@ -64,7 +68,9 @@ export default function MapIncidentsScreen() {
             incident.location.longitude
           ),
         }))
-        .filter((incident: Incident) => incident.distance && incident.distance <= 5);
+        .filter(
+          (incident: Incident) => incident.distance && incident.distance <= 5
+        );
 
       setIncidents(incidentsWithDistance);
     } catch (error) {
@@ -73,14 +79,21 @@ export default function MapIncidentsScreen() {
     }
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const R = 6371; // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
   };
@@ -107,13 +120,14 @@ export default function MapIncidentsScreen() {
   };
 
   const generateMapHtml = () => {
-    const center = userLocation 
+    const center = userLocation
       ? [userLocation.coords.longitude, userLocation.coords.latitude]
       : [-122.4324, 37.78825];
 
-    const markers = incidents.map(incident => {
-      const color = getMarkerColor(incident.type);
-      return `L.marker([${incident.location.latitude}, ${incident.location.longitude}], {
+    const markers = incidents
+      .map((incident) => {
+        const color = getMarkerColor(incident.type);
+        return `L.marker([${incident.location.latitude}, ${incident.location.longitude}], {
         icon: L.divIcon({
           className: 'custom-div-icon',
           html: "<div style='background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;'></div>",
@@ -121,7 +135,8 @@ export default function MapIncidentsScreen() {
           iconAnchor: [10, 10]
         })
       }).bindPopup('<b>${incident.type}</b><br>${incident.description}');`;
-    }).join('\n');
+      })
+      .join('\n');
 
     return `
       <!DOCTYPE html>
@@ -159,10 +174,7 @@ export default function MapIncidentsScreen() {
         javaScriptEnabled={true}
         domStorageEnabled={true}
       />
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Text style={styles.backButtonText}>Back to List</Text>
       </TouchableOpacity>
     </View>
@@ -189,4 +201,4 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-}); 
+});

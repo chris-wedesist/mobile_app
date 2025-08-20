@@ -1,18 +1,25 @@
-import { View, Text, StyleSheet, TouchableOpacity, Switch, TextInput, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { useState, useEffect, useCallback } from 'react';
-import * as Notifications from 'expo-notifications';
-import * as Location from 'expo-location';
+import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../../constants/theme';
 import { useFocusEffect } from '@react-navigation/native';
 import { createClient } from '@supabase/supabase-js';
-import { MaterialIcons } from '@expo/vector-icons';
-import { AccessibleButton } from '../../components/AccessibleButton';
-import { AccessibleText, AccessibleHeading, AccessibleBody } from '../../components/AccessibleText';
+import { BlurView } from 'expo-blur';
+import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
 import { useAccessibility } from '../../utils/accessibility';
-import { generateAccessibilityLabel, generateAccessibilityHint } from '../../utils/accessibility';
 
 interface Incident {
   id: string;
@@ -24,11 +31,13 @@ interface Incident {
 
 const supabase = createClient(
   String('https://tscvzrxnxadnvgnsdrqx.supabase.co'!),
-  String('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!),
+  String(
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!
+  ),
   {
     realtime: {
       params: {
-        eventsPerSecond: "10",
+        eventsPerSecond: '10',
       },
     },
   }
@@ -58,7 +67,7 @@ export default function SettingsScreen() {
           shouldPlaySound: true,
           shouldSetBadge: true,
           shouldShowBanner: true,
-          shouldShowList: true
+          shouldShowList: true,
         }),
       });
     };
@@ -73,7 +82,8 @@ export default function SettingsScreen() {
     const setupIncidentNotifications = async () => {
       try {
         // Get user's location
-        const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
+        const { status: locationStatus } =
+          await Location.getForegroundPermissionsAsync();
         if (locationStatus !== 'granted') {
           console.log('Location permission not granted');
           return;
@@ -84,7 +94,9 @@ export default function SettingsScreen() {
 
         // Get user's notification radius from settings
         const settingsStr = await AsyncStorage.getItem('notification_settings');
-        const settings = settingsStr ? JSON.parse(settingsStr) : { notification_radius: 50 };
+        const settings = settingsStr
+          ? JSON.parse(settingsStr)
+          : { notification_radius: 50 };
         const radius = settings.notification_radius;
 
         // Subscribe to new incidents
@@ -92,7 +104,7 @@ export default function SettingsScreen() {
           .from('incidents')
           .on('INSERT', async (payload: { new: Incident }) => {
             const newIncident = payload.new;
-            
+
             // Calculate distance between user and incident
             const distance = calculateDistance(
               latitude,
@@ -107,9 +119,9 @@ export default function SettingsScreen() {
                 content: {
                   title: 'New Incident Nearby',
                   body: `${newIncident.title} - ${distance.toFixed(1)} km away`,
-                  data: { 
+                  data: {
                     type: 'incident',
-                    incidentId: newIncident.id 
+                    incidentId: newIncident.id,
                   },
                 },
                 trigger: null, // Show immediately
@@ -133,20 +145,27 @@ export default function SettingsScreen() {
   }, []);
 
   // Helper function to calculate distance between two points
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
     const R = 6371; // Earth's radius in km
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
   const toRad = (value: number) => {
-    return value * Math.PI / 180;
+    return (value * Math.PI) / 180;
   };
 
   useFocusEffect(
@@ -168,11 +187,13 @@ export default function SettingsScreen() {
   };
 
   const checkPermissions = async () => {
-    const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
+    const { status: locationStatus } =
+      await Location.getForegroundPermissionsAsync();
     setLocationEnabled(locationStatus === 'granted');
 
     if (Platform.OS !== 'web') {
-      const { status: notificationStatus } = await Notifications.getPermissionsAsync();
+      const { status: notificationStatus } =
+        await Notifications.getPermissionsAsync();
       setNotifications(notificationStatus === 'granted');
     }
   };
@@ -182,7 +203,10 @@ export default function SettingsScreen() {
       const contact = await AsyncStorage.getItem('emergencyContact');
       const message = await AsyncStorage.getItem('emergencyMessage');
       setEmergencyContact(contact || '');
-      setEmergencyMessage(message || 'EMERGENCY: I need immediate assistance. My location is attached.');
+      setEmergencyMessage(
+        message ||
+          'EMERGENCY: I need immediate assistance. My location is attached.'
+      );
     } catch (error) {
       console.error('Error loading emergency settings:', error);
     }
@@ -210,14 +234,18 @@ export default function SettingsScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <Text style={styles.title}>Settings</Text>
-        
+
         <View style={styles.securitySection}>
           <View style={styles.securityHeader}>
             <MaterialIcons name="security" size={20} color={colors.accent} />
@@ -226,12 +254,19 @@ export default function SettingsScreen() {
               <Text style={styles.betaText}>COMING SOON</Text>
             </View>
           </View>
-          <Text style={styles.securitySubtitle}>Advanced protection features coming soon</Text>
+          <Text style={styles.securitySubtitle}>
+            Advanced protection features coming soon
+          </Text>
 
           <BlurView intensity={80} style={styles.securityBlurWrapper}>
             <View style={styles.stealthModeContainer}>
               <View style={styles.stealthModeContent}>
-                <MaterialIcons name="visibility" size={24} color={colors.accent} style={styles.blurredIcon} />
+                <MaterialIcons
+                  name="visibility"
+                  size={24}
+                  color={colors.accent}
+                  style={styles.blurredIcon}
+                />
                 <View style={styles.stealthModeTextContainer}>
                   <View style={styles.stealthModeTitleRow}>
                     <Text style={styles.stealthModeTitle}>Stealth Mode</Text>
@@ -246,7 +281,12 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.additionalFeature}>
-                <MaterialIcons name="fingerprint" size={24} color={colors.accent} style={styles.blurredIcon} />
+                <MaterialIcons
+                  name="fingerprint"
+                  size={24}
+                  color={colors.accent}
+                  style={styles.blurredIcon}
+                />
                 <View style={styles.stealthModeTextContainer}>
                   <View style={styles.stealthModeTitleRow}>
                     <Text style={styles.stealthModeTitle}>Biometric Lock</Text>
@@ -261,7 +301,12 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.additionalFeature}>
-                <MaterialIcons name="vpn-key" size={24} color={colors.accent} style={styles.blurredIcon} />
+                <MaterialIcons
+                  name="vpn-key"
+                  size={24}
+                  color={colors.accent}
+                  style={styles.blurredIcon}
+                />
                 <View style={styles.stealthModeTextContainer}>
                   <View style={styles.stealthModeTitleRow}>
                     <Text style={styles.stealthModeTitle}>Panic Mode</Text>
@@ -277,19 +322,25 @@ export default function SettingsScreen() {
             </View>
           </BlurView>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recording</Text>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <MaterialIcons name="video-label" size={24} color={colors.accent} />
+              <MaterialIcons
+                name="video-label"
+                size={24}
+                color={colors.accent}
+              />
               <Text style={styles.settingText}>High Quality Recording</Text>
             </View>
             <Switch
               value={highQuality}
               onValueChange={setHighQuality}
               trackColor={{ false: colors.text.muted, true: colors.accent }}
-              thumbColor={highQuality ? colors.text.primary : colors.text.secondary}
+              thumbColor={
+                highQuality ? colors.text.primary : colors.text.secondary
+              }
             />
           </View>
 
@@ -302,7 +353,9 @@ export default function SettingsScreen() {
               value={enableSound}
               onValueChange={setEnableSound}
               trackColor={{ false: colors.text.muted, true: colors.accent }}
-              thumbColor={enableSound ? colors.text.primary : colors.text.secondary}
+              thumbColor={
+                enableSound ? colors.text.primary : colors.text.secondary
+              }
             />
           </View>
         </View>
@@ -328,19 +381,27 @@ export default function SettingsScreen() {
                 multiline
                 numberOfLines={3}
               />
-              <TouchableOpacity style={styles.saveButton} onPress={saveEmergencySettings}>
-                <Text style={styles.saveButtonText}>Save Emergency Contact</Text>
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={saveEmergencySettings}
+              >
+                <Text style={styles.saveButtonText}>
+                  Save Emergency Contact
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.emergencyContactButton}
-              onPress={() => router.push('/emergency-setup')}>
+              onPress={() => router.push('/emergency-setup')}
+            >
               <View style={styles.settingInfo}>
                 <MaterialIcons name="phone" size={24} color={colors.accent} />
                 <View>
                   <Text style={styles.settingText}>
-                    {emergencyContact ? 'Edit Emergency Contact' : 'Set Up Emergency Contact'}
+                    {emergencyContact
+                      ? 'Edit Emergency Contact'
+                      : 'Set Up Emergency Contact'}
                   </Text>
                   {emergencyContact && (
                     <Text style={styles.messagePreview} numberOfLines={1}>
@@ -349,7 +410,16 @@ export default function SettingsScreen() {
                   )}
                 </View>
               </View>
-              <Text style={[styles.configureText, emergencyContact && { position: 'absolute', right: 0, top: 15}]}>
+              <Text
+                style={[
+                  styles.configureText,
+                  emergencyContact && {
+                    position: 'absolute',
+                    right: 0,
+                    top: 15,
+                  },
+                ]}
+              >
                 {emergencyContact ? 'Edit' : 'Configure'}
               </Text>
             </TouchableOpacity>
@@ -360,37 +430,49 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Notifications</Text>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <MaterialIcons name="notifications" size={24} color={colors.accent} />
+              <MaterialIcons
+                name="notifications"
+                size={24}
+                color={colors.accent}
+              />
               <Text style={styles.settingText}>Push Notifications</Text>
             </View>
-            <TouchableOpacity onPress={() => router.push('/notification-settings')}>
+            <TouchableOpacity
+              onPress={() => router.push('/notification-settings')}
+            >
               <Text style={styles.configureText}>Configure</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.settingItem}
             onPress={async () => {
               try {
                 // Check notification permissions
-                const { status: existingStatus } = await Notifications.getPermissionsAsync();
+                const { status: existingStatus } =
+                  await Notifications.getPermissionsAsync();
                 let finalStatus = existingStatus;
-                
+
                 // If permission not granted, request it
                 if (existingStatus !== 'granted') {
                   console.log('Requesting notification permissions...');
-                  const { status } = await Notifications.requestPermissionsAsync();
+                  const { status } =
+                    await Notifications.requestPermissionsAsync();
                   finalStatus = status;
                 }
 
                 // If still not granted, show error
                 if (finalStatus !== 'granted') {
                   console.error('Notification permission not granted');
-                  alert('Please enable notifications in your device settings to receive test notifications.');
+                  alert(
+                    'Please enable notifications in your device settings to receive test notifications.'
+                  );
                   return;
                 }
 
-                console.log('Scheduling test notification for 3 seconds from now...');
+                console.log(
+                  'Scheduling test notification for 3 seconds from now...'
+                );
                 await Notifications.scheduleNotificationAsync({
                   content: {
                     title: 'Test Notification',
@@ -404,11 +486,18 @@ export default function SettingsScreen() {
                 console.log('Test notification scheduled successfully!');
               } catch (error) {
                 console.error('Error scheduling test notification:', error);
-                alert('Failed to schedule notification. Please check console for details.');
+                alert(
+                  'Failed to schedule notification. Please check console for details.'
+                );
               }
-            }}>
+            }}
+          >
             <View style={styles.settingInfo}>
-              <MaterialIcons name="notifications" size={24} color={colors.accent} />
+              <MaterialIcons
+                name="notifications"
+                size={24}
+                color={colors.accent}
+              />
               <Text style={styles.settingText}>Test Notification</Text>
             </View>
             <Text style={styles.configureText}>Send Test</Text>
@@ -416,20 +505,30 @@ export default function SettingsScreen() {
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <MaterialIcons name="notifications" size={24} color={colors.accent} />
+              <MaterialIcons
+                name="notifications"
+                size={24}
+                color={colors.accent}
+              />
               <Text style={styles.settingText}>Incident Alerts</Text>
             </View>
             <Switch
               value={incidentAlerts}
               onValueChange={toggleIncidentAlerts}
               trackColor={{ false: colors.text.muted, true: colors.accent }}
-              thumbColor={incidentAlerts ? colors.text.primary : colors.text.secondary}
+              thumbColor={
+                incidentAlerts ? colors.text.primary : colors.text.secondary
+              }
             />
           </View>
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <MaterialIcons name="location-on" size={24} color={colors.accent} />
+              <MaterialIcons
+                name="location-on"
+                size={24}
+                color={colors.accent}
+              />
               <Text style={styles.settingText}>Location Services</Text>
             </View>
             <Switch
@@ -440,16 +539,19 @@ export default function SettingsScreen() {
                 }
               }}
               trackColor={{ false: colors.text.muted, true: colors.accent }}
-              thumbColor={locationEnabled ? colors.text.primary : colors.text.secondary}
+              thumbColor={
+                locationEnabled ? colors.text.primary : colors.text.secondary
+              }
             />
           </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Advanced</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.advancedItem}
-            onPress={() => router.push('/settings-history')}>
+            onPress={() => router.push('/settings-history')}
+          >
             <View style={styles.advancedItemContent}>
               <MaterialIcons name="history" size={24} color={colors.accent} />
               <View>
@@ -466,7 +568,9 @@ export default function SettingsScreen() {
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>About DESIST!</Text>
           <Text style={styles.infoText}>Version 1.0.0</Text>
-          <Text style={styles.infoText}>© 2024 DESIST!. All rights reserved.</Text>
+          <Text style={styles.infoText}>
+            © 2024 DESIST!. All rights reserved.
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

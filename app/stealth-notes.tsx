@@ -1,10 +1,20 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  GestureHandlerRootView,
+  LongPressGestureHandler,
+} from 'react-native-gesture-handler';
 import { useStealthMode } from '../components/StealthModeManager';
 import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '../constants/theme';
-import { MaterialIcons } from '@expo/vector-icons';
 
 type Note = {
   id: string;
@@ -18,28 +28,32 @@ const DEFAULT_NOTES: Note[] = [
   {
     id: '1',
     title: 'Shopping List',
-    content: '- Milk\n- Bread\n- Eggs\n- Coffee\n- Bananas\n- Apples\n- Chicken\n- Rice',
+    content:
+      '- Milk\n- Bread\n- Eggs\n- Coffee\n- Bananas\n- Apples\n- Chicken\n- Rice',
     timestamp: Date.now() - 86400000, // 1 day ago
-    starred: true
+    starred: true,
   },
   {
     id: '2',
     title: 'Meeting Notes',
-    content: 'Team sync:\n- Project updates\n- Timeline review\n- Action items\n\nFollow up with Sarah about design review\nSchedule next sprint planning',
-    timestamp: Date.now() - 172800000 // 2 days ago
+    content:
+      'Team sync:\n- Project updates\n- Timeline review\n- Action items\n\nFollow up with Sarah about design review\nSchedule next sprint planning',
+    timestamp: Date.now() - 172800000, // 2 days ago
   },
   {
     id: '3',
     title: 'Ideas',
-    content: '1. New app features\n2. Blog post topics\n3. Weeken plans\n4. Gift ideas for mom\n5. Books to read',
-    timestamp: Date.now() - 259200000 // 3 days ago
+    content:
+      '1. New app features\n2. Blog post topics\n3. Weeken plans\n4. Gift ideas for mom\n5. Books to read',
+    timestamp: Date.now() - 259200000, // 3 days ago
   },
   {
     id: '4',
     title: 'Reminders',
-    content: '- Call dentist\n- Renew subscription\n- Pay rent\n- Schedule car maintenance\n- Return library books',
-    timestamp: Date.now() - 345600000 // 4 days ago
-  }
+    content:
+      '- Call dentist\n- Renew subscription\n- Pay rent\n- Schedule car maintenance\n- Return library books',
+    timestamp: Date.now() - 345600000, // 4 days ago
+  },
 ];
 
 export default function StealthNotesScreen() {
@@ -47,7 +61,7 @@ export default function StealthNotesScreen() {
   const [notes, setNotes] = useState<Note[]>(DEFAULT_NOTES);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-  
+
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   useStealthAutoTimeout(10);
 
@@ -60,17 +74,15 @@ export default function StealthNotesScreen() {
       id: Date.now().toString(),
       title: 'New Note',
       content: '',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    setNotes(prev => [newNote, ...prev]);
+    setNotes((prev) => [newNote, ...prev]);
     setSelectedNote(newNote);
   };
 
   const updateNote = (id: string, updates: Partial<Note>) => {
-    const updatedNotes = notes.map(note =>
-      note.id === id
-        ? { ...note, ...updates, timestamp: Date.now() }
-        : note
+    const updatedNotes = notes.map((note) =>
+      note.id === id ? { ...note, ...updates, timestamp: Date.now() } : note
     );
     setNotes(updatedNotes);
     if (selectedNote?.id === id) {
@@ -79,7 +91,7 @@ export default function StealthNotesScreen() {
   };
 
   const deleteNote = (id: string) => {
-    const updatedNotes = notes.filter(note => note.id !== id);
+    const updatedNotes = notes.filter((note) => note.id !== id);
     setNotes(updatedNotes);
     if (selectedNote?.id === id) {
       setSelectedNote(null);
@@ -87,7 +99,7 @@ export default function StealthNotesScreen() {
   };
 
   const toggleStar = (id: string) => {
-    const note = notes.find(n => n.id === id);
+    const note = notes.find((n) => n.id === id);
     if (note) {
       updateNote(id, { starred: !note.starred });
     }
@@ -101,22 +113,26 @@ export default function StealthNotesScreen() {
     });
   };
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchQuery.toLowerCase())
-  ).sort((a, b) => {
-    // Sort starred notes first, then by timestamp
-    if (a.starred && !b.starred) return -1;
-    if (!a.starred && b.starred) return 1;
-    return b.timestamp - a.timestamp;
-  });
+  const filteredNotes = notes
+    .filter(
+      (note) =>
+        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.content.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Sort starred notes first, then by timestamp
+      if (a.starred && !b.starred) return -1;
+      if (!a.starred && b.starred) return 1;
+      return b.timestamp - a.timestamp;
+    });
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <LongPressGestureHandler
         minDurationMs={3000}
         onHandlerStateChange={({ nativeEvent }) => {
-          if (nativeEvent.state === 4) { // 4 = ACTIVE (long press triggered)
+          if (nativeEvent.state === 4) {
+            // 4 = ACTIVE (long press triggered)
             handleLongPress();
           }
         }}
@@ -143,30 +159,31 @@ export default function StealthNotesScreen() {
           <View style={styles.contentContainer}>
             <View style={styles.sidebar}>
               <Text style={styles.notesCount}>{notes.length} Notes</Text>
-              
-              <TouchableOpacity 
-                style={styles.newNoteButton} 
+
+              <TouchableOpacity
+                style={styles.newNoteButton}
                 onPress={createNote}
               >
                 <MaterialIcons name="add" size={20} color="#fff" />
                 <Text style={styles.newNoteText}>New Note</Text>
               </TouchableOpacity>
-              
+
               <ScrollView style={styles.notesList}>
-                {filteredNotes.map(note => (
+                {filteredNotes.map((note) => (
                   <TouchableOpacity
                     key={note.id}
                     style={[
                       styles.noteItem,
-                      selectedNote?.id === note.id && styles.selectedNoteItem
+                      selectedNote?.id === note.id && styles.selectedNoteItem,
                     ]}
                     onPress={() => setSelectedNote(note)}
                   >
                     <View style={styles.noteItemHeader}>
-                      <Text 
+                      <Text
                         style={[
                           styles.noteItemTitle,
-                          selectedNote?.id === note.id && styles.selectedNoteItemTitle
+                          selectedNote?.id === note.id &&
+                            styles.selectedNoteItemTitle,
                         ]}
                         numberOfLines={1}
                       >
@@ -194,7 +211,9 @@ export default function StealthNotesScreen() {
                     <TextInput
                       style={styles.titleInput}
                       value={selectedNote.title}
-                      onChangeText={(text) => updateNote(selectedNote.id, { title: text })}
+                      onChangeText={(text) =>
+                        updateNote(selectedNote.id, { title: text })
+                      }
                       placeholder="Note title"
                       placeholderTextColor="#999"
                     />
@@ -205,8 +224,8 @@ export default function StealthNotesScreen() {
                       >
                         <MaterialIcons
                           size={20}
-                          color={selectedNote.starred ? "#FFB800" : "#999"}
-                          fill={selectedNote.starred ? "#FFB800" : "none"}
+                          color={selectedNote.starred ? '#FFB800' : '#999'}
+                          fill={selectedNote.starred ? '#FFB800' : 'none'}
                         />
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -220,7 +239,9 @@ export default function StealthNotesScreen() {
                   <TextInput
                     style={styles.contentInput}
                     value={selectedNote.content}
-                    onChangeText={(text) => updateNote(selectedNote.id, { content: text })}
+                    onChangeText={(text) =>
+                      updateNote(selectedNote.id, { content: text })
+                    }
                     placeholder="Start writing..."
                     placeholderTextColor="#999"
                     multiline
@@ -229,7 +250,9 @@ export default function StealthNotesScreen() {
                 </>
               ) : (
                 <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateText}>Select a note or create a new one</Text>
+                  <Text style={styles.emptyStateText}>
+                    Select a note or create a new one
+                  </Text>
                 </View>
               )}
             </View>

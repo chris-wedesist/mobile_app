@@ -35,11 +35,20 @@ describe('PerformanceOptimizer', () => {
 
       // Simulate parallel fetching with Promise.all
       const [events, posts, stats] = await Promise.all([
-        performanceOptimizer.fetchWithCache('events', mockFetch1, { key: 'events', duration: 300000 }),
-        performanceOptimizer.fetchWithCache('posts', mockFetch2, { key: 'posts', duration: 300000 }),
-        performanceOptimizer.fetchWithCache('stats', mockFetch3, { key: 'stats', duration: 300000 })
+        performanceOptimizer.fetchWithCache('events', mockFetch1, {
+          key: 'events',
+          duration: 300000,
+        }),
+        performanceOptimizer.fetchWithCache('posts', mockFetch2, {
+          key: 'posts',
+          duration: 300000,
+        }),
+        performanceOptimizer.fetchWithCache('stats', mockFetch3, {
+          key: 'stats',
+          duration: 300000,
+        }),
       ]);
-      
+
       const result = { events, posts, stats };
 
       expect(result).toEqual({
@@ -59,8 +68,14 @@ describe('PerformanceOptimizer', () => {
 
       await expect(
         Promise.all([
-          performanceOptimizer.fetchWithCache('events', mockFetch1, { key: 'events', duration: 300000 }),
-          performanceOptimizer.fetchWithCache('posts', mockFetch2, { key: 'posts', duration: 300000 })
+          performanceOptimizer.fetchWithCache('events', mockFetch1, {
+            key: 'events',
+            duration: 300000,
+          }),
+          performanceOptimizer.fetchWithCache('posts', mockFetch2, {
+            key: 'posts',
+            duration: 300000,
+          }),
         ])
       ).rejects.toThrow('Fetch failed');
     });
@@ -79,8 +94,11 @@ describe('PerformanceOptimizer', () => {
         })
       );
 
-      const result = await performanceOptimizer.fetchWithCache('test-key', mockFetch, 
-        { key: 'test-key', duration: 300000 });
+      const result = await performanceOptimizer.fetchWithCache(
+        'test-key',
+        mockFetch,
+        { key: 'test-key', duration: 300000 }
+      );
 
       expect(result).toBe('cached data');
       expect(mockFetch).not.toHaveBeenCalled();
@@ -98,20 +116,26 @@ describe('PerformanceOptimizer', () => {
         })
       );
 
-      const result = await performanceOptimizer.fetchWithCache('test-key', mockFetch, 
-        { key: 'test-key', duration: 300000 });
+      const result = await performanceOptimizer.fetchWithCache(
+        'test-key',
+        mockFetch,
+        { key: 'test-key', duration: 300000 }
+      );
 
       expect(result).toBe('fresh data');
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('cache_test-key');
+      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith(
+        'cache_test-key'
+      );
     });
 
     it('should handle pending requests', async () => {
       let resolvePromise: (value: string) => void;
-      const mockFetch = jest.fn().mockImplementation(() => 
-        new Promise<string>(resolve => {
-          resolvePromise = resolve;
-        })
+      const mockFetch = jest.fn().mockImplementation(
+        () =>
+          new Promise<string>((resolve) => {
+            resolvePromise = resolve;
+          })
       );
 
       // Mock no cached data
@@ -122,15 +146,21 @@ describe('PerformanceOptimizer', () => {
       (performanceOptimizer as any).pendingRequests.clear();
 
       // Start first request
-      const promise1 = performanceOptimizer.fetchWithCache('test-key', mockFetch, 
-        { key: 'test-key', duration: 300000 });
-      
+      const promise1 = performanceOptimizer.fetchWithCache(
+        'test-key',
+        mockFetch,
+        { key: 'test-key', duration: 300000 }
+      );
+
       // Wait a bit to ensure the first request has started
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       // Start second request while first is still pending
-      const promise2 = performanceOptimizer.fetchWithCache('test-key', mockFetch, 
-        { key: 'test-key', duration: 300000 });
+      const promise2 = performanceOptimizer.fetchWithCache(
+        'test-key',
+        mockFetch,
+        { key: 'test-key', duration: 300000 }
+      );
 
       // The fetch function should be called once for the first request
       // The second request should reuse the pending promise
@@ -152,12 +182,17 @@ describe('PerformanceOptimizer', () => {
       // Mock corrupted cached data
       mockAsyncStorage.getItem.mockResolvedValue('invalid json');
 
-      const result = await performanceOptimizer.fetchWithCache('test-key', mockFetch, 
-        { key: 'test-key', duration: 300000 });
+      const result = await performanceOptimizer.fetchWithCache(
+        'test-key',
+        mockFetch,
+        { key: 'test-key', duration: 300000 }
+      );
 
       expect(result).toBe('fresh data');
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('cache_test-key');
+      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith(
+        'cache_test-key'
+      );
     });
   });
 
@@ -171,10 +206,16 @@ describe('PerformanceOptimizer', () => {
 
       // Simulate batch operations with Promise.all
       const [events, posts] = await Promise.all([
-        performanceOptimizer.fetchWithCache('events', mockFetch1, { key: 'events', duration: 300000 }),
-        performanceOptimizer.fetchWithCache('posts', mockFetch2, { key: 'posts', duration: 300000 })
+        performanceOptimizer.fetchWithCache('events', mockFetch1, {
+          key: 'events',
+          duration: 300000,
+        }),
+        performanceOptimizer.fetchWithCache('posts', mockFetch2, {
+          key: 'posts',
+          duration: 300000,
+        }),
       ]);
-      
+
       const result = { events, posts };
 
       expect(result).toEqual({
@@ -189,15 +230,26 @@ describe('PerformanceOptimizer', () => {
 
   describe('clearCache', () => {
     it('should clear all cache when no pattern is provided', async () => {
-      mockAsyncStorage.getAllKeys.mockResolvedValue(['cache_key1', 'cache_key2', 'other_key']);
+      mockAsyncStorage.getAllKeys.mockResolvedValue([
+        'cache_key1',
+        'cache_key2',
+        'other_key',
+      ]);
 
       await performanceOptimizer.clearCache();
 
-      expect(mockAsyncStorage.multiRemove).toHaveBeenCalledWith(['cache_key1', 'cache_key2']);
+      expect(mockAsyncStorage.multiRemove).toHaveBeenCalledWith([
+        'cache_key1',
+        'cache_key2',
+      ]);
     });
 
     it('should clear all cache', async () => {
-      mockAsyncStorage.getAllKeys.mockResolvedValue(['cache_news_1', 'cache_news_2', 'cache_other']);
+      mockAsyncStorage.getAllKeys.mockResolvedValue([
+        'cache_news_1',
+        'cache_news_2',
+        'cache_other',
+      ]);
 
       await performanceOptimizer.clearCache();
 
@@ -205,4 +257,4 @@ describe('PerformanceOptimizer', () => {
       expect(mockAsyncStorage.clear).toHaveBeenCalled();
     });
   });
-}); 
+});

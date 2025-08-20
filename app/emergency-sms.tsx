@@ -1,9 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../constants/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 type AlertStatus = {
   id: string;
@@ -21,22 +29,26 @@ export default function EmergencyAlertScreen() {
       title: 'Emergency SMS',
       description: 'Sending alert message',
       icon: <MaterialIcons name="message" size={24} color={colors.accent} />,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'location',
       title: 'Location Sharing',
       description: 'Sending current location',
-      icon: <MaterialIcons name="location-pin" size={24} color={colors.accent} />,
-      status: 'pending'
+      icon: (
+        <MaterialIcons name="location-pin" size={24} color={colors.accent} />
+      ),
+      status: 'pending',
     },
     {
       id: 'notification',
       title: 'Push Notification',
       description: 'Sending emergency notification',
-      icon: <MaterialIcons name="notifications" size={24} color={colors.accent} />,
-      status: 'pending'
-    }
+      icon: (
+        <MaterialIcons name="notifications" size={24} color={colors.accent} />
+      ),
+      status: 'pending',
+    },
   ]);
 
   const [isComplete, setIsComplete] = useState(false);
@@ -77,27 +89,30 @@ export default function EmergencyAlertScreen() {
     ).start();
   };
 
-  const updateAlertStatus = (alertId: string, status: AlertStatus['status']) => {
-    setAlertStatuses(prev => prev.map(alert =>
-      alert.id === alertId ? { ...alert, status } : alert
-    ));
+  const updateAlertStatus = (
+    alertId: string,
+    status: AlertStatus['status']
+  ) => {
+    setAlertStatuses((prev) =>
+      prev.map((alert) => (alert.id === alertId ? { ...alert, status } : alert))
+    );
   };
 
   const simulateAlerts = async () => {
     try {
       // Simulate SMS alert
       updateAlertStatus('sms', 'sending');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       updateAlertStatus('sms', 'sent');
 
       // Simulate location sharing
       updateAlertStatus('location', 'sending');
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       updateAlertStatus('location', 'sent');
 
       // Simulate push notification
       updateAlertStatus('notification', 'sending');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       updateAlertStatus('notification', 'sent');
 
       setIsComplete(true);
@@ -133,7 +148,8 @@ export default function EmergencyAlertScreen() {
             {
               transform: [{ scale: pulseAnim }],
             },
-          ]}>
+          ]}
+        >
           <MaterialIcons name="message" color={colors.accent} size={32} />
         </Animated.View>
         <Text style={styles.headerText}>Sending Alerts</Text>
@@ -151,12 +167,10 @@ export default function EmergencyAlertScreen() {
         </View>
 
         <View style={styles.alertsList}>
-          {alertStatuses.map(alert => (
+          {alertStatuses.map((alert) => (
             <View key={alert.id} style={styles.alertCard}>
               <View style={styles.alertHeader}>
-                <View style={styles.alertIcon}>
-                  {alert.icon}
-                </View>
+                <View style={styles.alertIcon}>{alert.icon}</View>
                 <View style={styles.alertInfo}>
                   <Text style={styles.alertTitle}>{alert.title}</Text>
                   <Text style={styles.alertDescription}>
@@ -166,20 +180,24 @@ export default function EmergencyAlertScreen() {
                 <View
                   style={[
                     styles.statusDot,
-                    { backgroundColor: getStatusColor(alert.status) }
+                    { backgroundColor: getStatusColor(alert.status) },
                   ]}
                 />
               </View>
-              
+
               <View style={styles.statusBar}>
                 <View
                   style={[
                     styles.statusProgress,
                     {
-                      width: alert.status === 'sent' ? '100%' : 
-                             alert.status === 'sending' ? '60%' : '0%',
-                      backgroundColor: getStatusColor(alert.status)
-                    }
+                      width:
+                        alert.status === 'sent'
+                          ? '100%'
+                          : alert.status === 'sending'
+                          ? '60%'
+                          : '0%',
+                      backgroundColor: getStatusColor(alert.status),
+                    },
                   ]}
                 />
               </View>
@@ -189,16 +207,28 @@ export default function EmergencyAlertScreen() {
 
         {isComplete && (
           <View style={styles.completeContainer}>
-            <MaterialIcons name="shield" size={48} color={colors.status.success} />
+            <MaterialIcons
+              name="shield"
+              size={48}
+              color={colors.status.success}
+            />
             <Text style={styles.completeTitle}>Alerts Sent</Text>
             <Text style={styles.completeDescription}>
-              Your emergency contact has been notified and will receive your location updates
+              Your emergency contact has been notified and will receive your
+              location updates
             </Text>
             <TouchableOpacity
               style={styles.continueButton}
-              onPress={handleContinue}>
-              <Text style={styles.continueButtonText}>Continue to Cover Story</Text>
-              <MaterialIcons name="chevron-right" size={20} color={colors.text.primary} />
+              onPress={handleContinue}
+            >
+              <Text style={styles.continueButtonText}>
+                Continue to Cover Story
+              </Text>
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={colors.text.primary}
+              />
             </TouchableOpacity>
           </View>
         )}

@@ -1,11 +1,23 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Linking, Alert, Modal, Dimensions } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, shadows, radius } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
+import { useEffect, useState } from 'react';
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Linking,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
 
 type Document = {
   id: string;
@@ -16,13 +28,13 @@ type Document = {
 
 const DOCUMENT_TYPES = [
   "Driver's License",
-  "Passport",
-  "Green Card",
-  "Immigration Documents",
-  "Court Documents",
-  "Birth Certificate",
-  "Social Security Card",
-  "Other ID"
+  'Passport',
+  'Green Card',
+  'Immigration Documents',
+  'Court Documents',
+  'Birth Certificate',
+  'Social Security Card',
+  'Other ID',
 ];
 
 export default function DocumentsScreen() {
@@ -68,7 +80,10 @@ export default function DocumentsScreen() {
 
         const updatedDocuments = [...documents, newDocument];
         setDocuments(updatedDocuments);
-        await AsyncStorage.setItem('userDocuments', JSON.stringify(updatedDocuments));
+        await AsyncStorage.setItem(
+          'userDocuments',
+          JSON.stringify(updatedDocuments)
+        );
         setSelectedType('');
       }
     } catch (error) {
@@ -79,9 +94,12 @@ export default function DocumentsScreen() {
 
   const deleteDocument = async (id: string) => {
     try {
-      const updatedDocuments = documents.filter(doc => doc.id !== id);
+      const updatedDocuments = documents.filter((doc) => doc.id !== id);
       setDocuments(updatedDocuments);
-      await AsyncStorage.setItem('userDocuments', JSON.stringify(updatedDocuments));
+      await AsyncStorage.setItem(
+        'userDocuments',
+        JSON.stringify(updatedDocuments)
+      );
     } catch (error) {
       console.error('Error deleting document:', error);
       alert('Failed to delete document. Please try again.');
@@ -97,7 +115,7 @@ export default function DocumentsScreen() {
       }
 
       const fileExtension = uri.split('.').pop()?.toLowerCase();
-      
+
       if (['jpg', 'jpeg', 'png'].includes(fileExtension || '')) {
         setSelectedImage(uri);
         return;
@@ -107,7 +125,7 @@ export default function DocumentsScreen() {
         const tempFile = `${FileSystem.cacheDirectory}temp.pdf`;
         await FileSystem.copyAsync({
           from: uri,
-          to: tempFile
+          to: tempFile,
         });
         await Linking.openURL(tempFile);
         return;
@@ -136,21 +154,29 @@ export default function DocumentsScreen() {
 
       await FileSystem.copyAsync({
         from: uri,
-        to: fileUri
+        to: fileUri,
       });
 
       await Sharing.shareAsync(fileUri, {
-        mimeType: fileExtension === 'pdf' ? 'application/pdf' : 
-                  ['jpg', 'jpeg'].includes(fileExtension || '') ? 'image/jpeg' :
-                  fileExtension === 'png' ? 'image/png' : 'application/octet-stream',
+        mimeType:
+          fileExtension === 'pdf'
+            ? 'application/pdf'
+            : ['jpg', 'jpeg'].includes(fileExtension || '')
+            ? 'image/jpeg'
+            : fileExtension === 'png'
+            ? 'image/png'
+            : 'application/octet-stream',
         dialogTitle: `Download ${type}`,
-        UTI: fileExtension === 'pdf' ? 'com.adobe.pdf' : 'public.image'
+        UTI: fileExtension === 'pdf' ? 'com.adobe.pdf' : 'public.image',
       });
 
       Alert.alert('Success', 'Document downloaded successfully');
     } catch (error) {
       console.error('Error downloading document:', error);
-      Alert.alert('Error', 'Could not download the document. Please try again.');
+      Alert.alert(
+        'Error',
+        'Could not download the document. Please try again.'
+      );
     }
   };
 
@@ -165,7 +191,7 @@ export default function DocumentsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Documents</Text>
-      
+
       <View style={styles.securityNote}>
         <MaterialIcons name="lock" size={20} color={colors.accent} />
         <Text style={styles.securityText}>
@@ -175,11 +201,12 @@ export default function DocumentsScreen() {
 
       <View style={styles.uploadSection}>
         <Text style={styles.sectionTitle}>Upload New Document</Text>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.typeScroll}
-          contentContainerStyle={styles.typeContainer}>
+          contentContainerStyle={styles.typeContainer}
+        >
           {DOCUMENT_TYPES.map((type) => (
             <TouchableOpacity
               key={type}
@@ -187,39 +214,44 @@ export default function DocumentsScreen() {
                 styles.typeButton,
                 selectedType === type && styles.selectedTypeButton,
               ]}
-              onPress={() => setSelectedType(type)}>
-              <MaterialIcons 
-                name="insert-drive-file" 
-                size={16} 
-                color={selectedType === type ? colors.text.primary : colors.text.muted} 
+              onPress={() => setSelectedType(type)}
+            >
+              <MaterialIcons
+                name="insert-drive-file"
+                size={16}
+                color={
+                  selectedType === type
+                    ? colors.text.primary
+                    : colors.text.muted
+                }
               />
               <Text
                 style={[
                   styles.typeButtonText,
                   selectedType === type && styles.selectedTypeButtonText,
-                ]}>
+                ]}
+              >
                 {type}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <TouchableOpacity 
-          style={styles.uploadButton}
-          onPress={pickDocument}>
+        <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
           <MaterialIcons name="upload" size={24} color={colors.text.primary} />
           <Text style={styles.uploadButtonText}>Upload Document</Text>
         </TouchableOpacity>
       </View>
 
       <Text style={styles.sectionTitle}>Your Documents</Text>
-      <ScrollView style={styles.documentList} contentContainerStyle={styles.documentListContent}>
+      <ScrollView
+        style={styles.documentList}
+        contentContainerStyle={styles.documentListContent}
+      >
         {documents.length === 0 ? (
           <View style={styles.emptyState}>
             <MaterialIcons name="shield" size={48} color={colors.text.muted} />
-            <Text style={styles.emptyStateText}>
-              No documents uploaded yet
-            </Text>
+            <Text style={styles.emptyStateText}>No documents uploaded yet</Text>
             <Text style={styles.emptyStateSubtext}>
               Add your important documents to keep them secure and accessible
             </Text>
@@ -240,24 +272,39 @@ export default function DocumentsScreen() {
               <View style={styles.documentActions}>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => viewDocument(doc.uri)}>
-                  <MaterialIcons name="visibility" size={20} color={colors.accent} />
+                  onPress={() => viewDocument(doc.uri)}
+                >
+                  <MaterialIcons
+                    name="visibility"
+                    size={20}
+                    color={colors.accent}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => downloadDocument(doc.uri, doc.type)}>
-                  <MaterialIcons name="file-download" size={20} color={colors.accent} />
+                  onPress={() => downloadDocument(doc.uri, doc.type)}
+                >
+                  <MaterialIcons
+                    name="file-download"
+                    size={20}
+                    color={colors.accent}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => deleteDocument(doc.id)}>
-                  <MaterialIcons name="delete" size={20} color={colors.accent} />
+                  onPress={() => deleteDocument(doc.id)}
+                >
+                  <MaterialIcons
+                    name="delete"
+                    size={20}
+                    color={colors.accent}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
           ))
         )}
-        
+
         {/* Add spacer at the bottom to account for tab bar */}
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -269,7 +316,7 @@ export default function DocumentsScreen() {
         animationType="fade"
       >
         <View style={styles.modalContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.modalCloseButton}
             onPress={() => setSelectedImage(null)}
           >

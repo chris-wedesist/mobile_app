@@ -1,8 +1,19 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { useUser, useTheme, useLanguage, useUserActions, useThemeActions, useLanguageActions } from '../utils/store';
-import { useAppState, useLoadingState, useErrorState } from '../utils/stateManager';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../constants/theme';
+import {
+  useAppState,
+  useErrorState,
+  useLoadingState,
+} from '../utils/stateManager';
+import {
+  useLanguage,
+  useLanguageActions,
+  useTheme,
+  useThemeActions,
+  useUser,
+  useUserActions,
+} from '../utils/store';
 
 /**
  * Example component demonstrating state management usage
@@ -13,12 +24,12 @@ export default function StateManagementExample() {
   const user = useUser();
   const theme = useTheme();
   const language = useLanguage();
-  
+
   // Action hooks
   const { setUser, clearUser } = useUserActions();
   const { setTheme, toggleTheme } = useThemeActions();
   const { setLanguage } = useLanguageActions();
-  
+
   // Extended state hooks
   const { isLoading, error, isOnline, isInitialized } = useAppState();
   const loadingState = useLoadingState('example');
@@ -41,17 +52,37 @@ export default function StateManagementExample() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff' }]}>
-      <Text style={[styles.title, { color: theme === 'dark' ? '#ffffff' : '#000000' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff' },
+      ]}
+    >
+      <Text
+        style={[
+          styles.title,
+          { color: theme === 'dark' ? '#ffffff' : '#000000' },
+        ]}
+      >
         State Management Example
       </Text>
-      
+
       {/* User State */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme === 'dark' ? '#ffffff' : '#000000' }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+          ]}
+        >
           User State
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           {user ? `Logged in as: ${user.name}` : 'No user logged in'}
         </Text>
         <View style={styles.buttonRow}>
@@ -66,10 +97,20 @@ export default function StateManagementExample() {
 
       {/* Theme State */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme === 'dark' ? '#ffffff' : '#000000' }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+          ]}
+        >
           Theme State
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           Current theme: {theme}
         </Text>
         <Pressable style={styles.button} onPress={handleToggleTheme}>
@@ -79,20 +120,39 @@ export default function StateManagementExample() {
 
       {/* Language State */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme === 'dark' ? '#ffffff' : '#000000' }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+          ]}
+        >
           Language State
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           Current language: {language}
         </Text>
         <View style={styles.buttonRow}>
-          <Pressable style={styles.button} onPress={() => handleSetLanguage('en')}>
+          <Pressable
+            style={styles.button}
+            onPress={() => handleSetLanguage('en')}
+          >
             <Text style={styles.buttonText}>English</Text>
           </Pressable>
-          <Pressable style={styles.button} onPress={() => handleSetLanguage('es')}>
+          <Pressable
+            style={styles.button}
+            onPress={() => handleSetLanguage('es')}
+          >
             <Text style={styles.buttonText}>Español</Text>
           </Pressable>
-          <Pressable style={styles.button} onPress={() => handleSetLanguage('fr')}>
+          <Pressable
+            style={styles.button}
+            onPress={() => handleSetLanguage('fr')}
+          >
             <Text style={styles.buttonText}>Français</Text>
           </Pressable>
         </View>
@@ -100,16 +160,36 @@ export default function StateManagementExample() {
 
       {/* App State */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme === 'dark' ? '#ffffff' : '#000000' }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+          ]}
+        >
           App State
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           Online: {isOnline ? 'Yes' : 'No'}
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           Initialized: {isInitialized ? 'Yes' : 'No'}
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           Loading: {isLoading ? 'Yes' : 'No'}
         </Text>
         {error && (
@@ -121,10 +201,20 @@ export default function StateManagementExample() {
 
       {/* Loading and Error States */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme === 'dark' ? '#ffffff' : '#000000' }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+          ]}
+        >
           Component States
         </Text>
-        <Text style={[styles.text, { color: theme === 'dark' ? '#cccccc' : '#333333' }]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+          ]}
+        >
           Component Loading: {loadingState ? 'Yes' : 'No'}
         </Text>
         {errorState && (
@@ -185,4 +275,4 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 5,
   },
-}); 
+});

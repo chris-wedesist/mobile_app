@@ -1,10 +1,22 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
-import { useEffect, useState } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { downloadIncidentFromCloud, permanentlyDeleteIncidentFromCloud } from '../../utils/incident-storage';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { BiometricAuth } from '../../components/BiometricAuth';
 import { colors, radius, shadows } from '../../constants/theme';
-import { MaterialIcons } from '@expo/vector-icons';
+import {
+  downloadIncidentFromCloud,
+  permanentlyDeleteIncidentFromCloud,
+} from '../../utils/incident-storage';
 
 type CloudIncident = {
   id: string;
@@ -19,7 +31,10 @@ export default function IncidentManagementScreen() {
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showBiometricAuth, setShowBiometricAuth] = useState(false);
-  const [pendingAction, setPendingAction] = useState<{ type: 'restore' | 'delete'; id: string } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'restore' | 'delete';
+    id: string;
+  } | null>(null);
   const userId = 'mock-user-id'; // In a real app, this would come from authentication
 
   useEffect(() => {
@@ -30,36 +45,44 @@ export default function IncidentManagementScreen() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // In a real app, this would fetch from Supabase or another cloud storage
       // For demo purposes, we'll use mock data
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       const mockIncidents: CloudIncident[] = [
         {
           id: 'incident-1',
           description: 'Police checkpoint on Main Street',
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2 days ago
+          created_at: new Date(
+            Date.now() - 1000 * 60 * 60 * 24 * 2
+          ).toISOString(), // 2 days ago
           size: '24.5 MB',
         },
         {
           id: 'incident-2',
           description: 'ICE activity near community center',
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), // 5 days ago
+          created_at: new Date(
+            Date.now() - 1000 * 60 * 60 * 24 * 5
+          ).toISOString(), // 5 days ago
           size: '18.2 MB',
         },
         {
           id: 'incident-3',
           description: 'Checkpoint documentation',
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(), // 7 days ago
+          created_at: new Date(
+            Date.now() - 1000 * 60 * 60 * 24 * 7
+          ).toISOString(), // 7 days ago
           size: '32.1 MB',
         },
       ];
-      
+
       setIncidents(mockIncidents);
     } catch (err) {
       console.error('Error fetching cloud incidents:', err);
-      setError('Failed to load cloud incidents. Please check your connection and try again.');
+      setError(
+        'Failed to load cloud incidents. Please check your connection and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -87,7 +110,7 @@ export default function IncidentManagementScreen() {
     try {
       setProcessingId(id);
       const result = await downloadIncidentFromCloud(userId, id);
-      
+
       if (result.success) {
         Alert.alert('Success', 'Incident restored to your device');
       } else {
@@ -120,9 +143,9 @@ export default function IncidentManagementScreen() {
     try {
       setProcessingId(id);
       const result = await permanentlyDeleteIncidentFromCloud(userId, id);
-      
+
       if (result.success) {
-        setIncidents(prev => prev.filter(incident => incident.id !== id));
+        setIncidents((prev) => prev.filter((incident) => incident.id !== id));
         Alert.alert('Success', 'Incident permanently deleted');
       } else {
         Alert.alert('Error', result.error || 'Failed to delete incident');
@@ -150,7 +173,10 @@ export default function IncidentManagementScreen() {
   const handleBiometricFail = () => {
     setShowBiometricAuth(false);
     setPendingAction(null);
-    Alert.alert('Authentication Failed', 'Biometric authentication is required for this action');
+    Alert.alert(
+      'Authentication Failed',
+      'Biometric authentication is required for this action'
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -165,25 +191,29 @@ export default function IncidentManagementScreen() {
   const renderIncident = ({ item }: { item: CloudIncident }) => (
     <View style={styles.incidentCard}>
       <View style={styles.cardContent}>
-        <Text style={styles.incidentTitle}>{item.description || `Incident ${item.id}`}</Text>
-        
+        <Text style={styles.incidentTitle}>
+          {item.description || `Incident ${item.id}`}
+        </Text>
+
         <View style={styles.metaContainer}>
           <View style={styles.metaItem}>
-            <MaterialIcons name="access-time" size={16} color={colors.text.muted} />
+            <MaterialIcons
+              name="access-time"
+              size={16}
+              color={colors.text.muted}
+            />
             <Text style={styles.metaText}>{formatDate(item.created_at)}</Text>
           </View>
-          
-          {item.size && (
-            <Text style={styles.sizeText}>{item.size}</Text>
-          )}
+
+          {item.size && <Text style={styles.sizeText}>{item.size}</Text>}
         </View>
       </View>
-      
+
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={[
             styles.actionButton,
-            processingId === item.id && styles.actionButtonDisabled
+            processingId === item.id && styles.actionButtonDisabled,
           ]}
           onPress={() => handleRestore(item.id)}
           disabled={processingId === item.id}
@@ -191,16 +221,20 @@ export default function IncidentManagementScreen() {
           {processingId === item.id ? (
             <ActivityIndicator size="small" color={colors.text.primary} />
           ) : (
-            <MaterialIcons name="file-download" size={20} color={colors.text.primary} />
+            <MaterialIcons
+              name="file-download"
+              size={20}
+              color={colors.text.primary}
+            />
           )}
           <Text style={styles.actionText}>Restore</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.actionButton,
             styles.deleteButton,
-            processingId === item.id && styles.actionButtonDisabled
+            processingId === item.id && styles.actionButtonDisabled,
           ]}
           onPress={() => handlePermanentDelete(item.id)}
           disabled={processingId === item.id}
@@ -215,8 +249,15 @@ export default function IncidentManagementScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" size={24} color={colors.text.primary} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            size={24}
+            color={colors.text.primary}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Cloud Incidents</Text>
@@ -225,7 +266,8 @@ export default function IncidentManagementScreen() {
       <View style={styles.warningBanner}>
         <MaterialIcons name="warning" size={20} color={colors.status.warning} />
         <Text style={styles.warningText}>
-          Incidents are stored in the cloud for 30 days, then automatically deleted
+          Incidents are stored in the cloud for 30 days, then automatically
+          deleted
         </Text>
       </View>
 
@@ -237,16 +279,24 @@ export default function IncidentManagementScreen() {
       ) : error ? (
         <View style={styles.centeredContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={fetchCloudIncidents}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={fetchCloudIncidents}
+          >
             <Text style={styles.retryText}>Retry</Text>
           </TouchableOpacity>
         </View>
       ) : incidents.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="error-outline" size={64} color={colors.text.muted} />
+          <MaterialIcons
+            name="error-outline"
+            size={64}
+            color={colors.text.muted}
+          />
           <Text style={styles.emptyTitle}>No Cloud Incidents</Text>
           <Text style={styles.emptyText}>
-            Incidents that you upload will be securely stored in the cloud and appear here.
+            Incidents that you upload will be securely stored in the cloud and
+            appear here.
           </Text>
         </View>
       ) : (
@@ -264,12 +314,16 @@ export default function IncidentManagementScreen() {
           <View style={styles.biometricContainer}>
             <Text style={styles.biometricTitle}>Authentication Required</Text>
             <Text style={styles.biometricText}>
-              Please authenticate to {pendingAction?.type === 'restore' ? 'restore' : 'delete'} this incident
+              Please authenticate to{' '}
+              {pendingAction?.type === 'restore' ? 'restore' : 'delete'} this
+              incident
             </Text>
             <BiometricAuth
               onSuccess={handleBiometricSuccess}
               onFail={handleBiometricFail}
-              promptMessage={`Authenticate to ${pendingAction?.type === 'restore' ? 'restore' : 'delete'} incident`}
+              promptMessage={`Authenticate to ${
+                pendingAction?.type === 'restore' ? 'restore' : 'delete'
+              } incident`}
             />
           </View>
         </View>
@@ -455,7 +509,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
-    ...shadows.large,
+    ...shadows.lg,
   },
   biometricTitle: {
     fontSize: 20,

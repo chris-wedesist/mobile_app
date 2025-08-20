@@ -1,20 +1,20 @@
 import * as React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { AccessibleButton } from './AccessibleButton';
-import { 
-  AccessibleText, 
-  AccessibleHeading, 
-  AccessibleBody, 
-  AccessibleCaption 
-} from './AccessibleText';
-import { useAccessibility } from '../utils/accessibility';
-import { 
-  generateAccessibilityLabel, 
-  generateAccessibilityHint,
-  createAccessibilityState,
-  useAccessibilityAnnouncements 
-} from '../utils/accessibility';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { colors } from '../constants/theme';
+import {
+  createAccessibilityState,
+  generateAccessibilityHint,
+  generateAccessibilityLabel,
+  useAccessibility,
+  useAccessibilityAnnouncements,
+} from '../utils/accessibility';
+import { AccessibleButton } from './AccessibleButton';
+import {
+  AccessibleBody,
+  AccessibleCaption,
+  AccessibleHeading,
+  AccessibleText,
+} from './AccessibleText';
 
 /**
  * Example component demonstrating accessibility features
@@ -22,15 +22,16 @@ import { colors } from '../constants/theme';
  */
 export default function AccessibilityExample() {
   const accessibilityConfig = useAccessibility();
-  const { announce, announceSuccess, announceError } = useAccessibilityAnnouncements();
-  
+  const { announce, announceSuccess, announceError } =
+    useAccessibilityAnnouncements();
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [buttonState, setButtonState] = React.useState('idle');
 
   const handleAccessibleButtonPress = () => {
     setIsLoading(true);
     announce('Processing button press', 'polite');
-    
+
     // Simulate async operation
     setTimeout(() => {
       setIsLoading(false);
@@ -54,8 +55,8 @@ export default function AccessibilityExample() {
       </AccessibleHeading>
 
       <AccessibleBody style={styles.description}>
-        This screen demonstrates various accessibility features including screen reader support, 
-        dynamic text sizing, and proper accessibility labels.
+        This screen demonstrates various accessibility features including screen
+        reader support, dynamic text sizing, and proper accessibility labels.
       </AccessibleBody>
 
       {/* Accessibility Status */}
@@ -63,13 +64,15 @@ export default function AccessibilityExample() {
         <AccessibleText variant="subheading" style={styles.sectionTitle}>
           Accessibility Status
         </AccessibleText>
-        
+
         <AccessibleBody>
-          Screen Reader: {accessibilityConfig.screenReaderEnabled ? 'Enabled' : 'Disabled'}
+          Screen Reader:{' '}
+          {accessibilityConfig.screenReaderEnabled ? 'Enabled' : 'Disabled'}
         </AccessibleBody>
-        
+
         <AccessibleBody>
-          Reduce Motion: {accessibilityConfig.reduceMotionEnabled ? 'Enabled' : 'Disabled'}
+          Reduce Motion:{' '}
+          {accessibilityConfig.reduceMotionEnabled ? 'Enabled' : 'Disabled'}
         </AccessibleBody>
       </View>
 
@@ -82,8 +85,13 @@ export default function AccessibilityExample() {
         <AccessibleButton
           onPress={handleAccessibleButtonPress}
           isLoading={isLoading}
-          accessibilityLabel={generateAccessibilityLabel('Demo Button', 'Press')}
-          accessibilityHint={generateAccessibilityHint('test accessibility features')}
+          accessibilityLabel={generateAccessibilityLabel(
+            'Demo Button',
+            'Press'
+          )}
+          accessibilityHint={generateAccessibilityHint(
+            'test accessibility features'
+          )}
           style={styles.button}
         >
           Test Accessible Button
@@ -129,7 +137,8 @@ export default function AccessibilityExample() {
         </AccessibleHeading>
 
         <AccessibleBody style={styles.textExample}>
-          This is body text that supports dynamic text sizing and screen reader navigation.
+          This is body text that supports dynamic text sizing and screen reader
+          navigation.
         </AccessibleBody>
 
         <AccessibleCaption style={styles.textExample}>
@@ -153,9 +162,7 @@ export default function AccessibilityExample() {
           Accessibility States
         </AccessibleText>
 
-        <AccessibleBody>
-          Button State: {buttonState}
-        </AccessibleBody>
+        <AccessibleBody>Button State: {buttonState}</AccessibleBody>
 
         <AccessibleBody>
           Loading State: {isLoading ? 'Loading...' : 'Idle'}
@@ -177,11 +184,13 @@ export default function AccessibilityExample() {
         </AccessibleBody>
 
         <AccessibleBody>
-          With Context: {generateAccessibilityLabel('Submit Button', 'Press', 'to save form')}
+          With Context:{' '}
+          {generateAccessibilityLabel('Submit Button', 'Press', 'to save form')}
         </AccessibleBody>
 
         <AccessibleBody>
-          Hint: {generateAccessibilityHint('save form', 'Form will be submitted')}
+          Hint:{' '}
+          {generateAccessibilityHint('save form', 'Form will be submitted')}
         </AccessibleBody>
       </View>
 
@@ -196,11 +205,13 @@ export default function AccessibilityExample() {
         </AccessibleBody>
 
         <AccessibleBody>
-          Busy State: {JSON.stringify(createAccessibilityState(false, false, true))}
+          Busy State:{' '}
+          {JSON.stringify(createAccessibilityState(false, false, true))}
         </AccessibleBody>
 
         <AccessibleBody>
-          Selected State: {JSON.stringify(createAccessibilityState(false, true))}
+          Selected State:{' '}
+          {JSON.stringify(createAccessibilityState(false, true))}
         </AccessibleBody>
       </View>
     </ScrollView>
@@ -253,4 +264,4 @@ const styles = StyleSheet.create({
   textExample: {
     marginBottom: 10,
   },
-}); 
+});

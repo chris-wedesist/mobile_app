@@ -1,11 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Platform, RefreshControl, Dimensions, ScrollView, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { createClient } from '@supabase/supabase-js';
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Platform,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import WebView from 'react-native-webview';
-import { colors, shadows, radius } from '../../constants/theme';
-import { createClient } from '@supabase/supabase-js';
-import { MaterialIcons } from '@expo/vector-icons';
+import { colors, radius, shadows } from '../../constants/theme';
 
 const supabase = createClient(
   'https://example.supabase.co',
@@ -13,8 +25,19 @@ const supabase = createClient(
 );
 
 // Test data generator
-const generateTestData = (count: number, userLat: number, userLng: number, radiusKm: number) => {
-  const types = ['ICE Activity', 'Border Patrol Activity', 'Checkpoint', 'Raid in Progress', 'Suspicious Vehicle'];
+const generateTestData = (
+  count: number,
+  userLat: number,
+  userLng: number,
+  radiusKm: number
+) => {
+  const types = [
+    'ICE Activity',
+    'Border Patrol Activity',
+    'Checkpoint',
+    'Raid in Progress',
+    'Suspicious Vehicle',
+  ];
   const incidents = [];
 
   for (let i = 0; i < count; i++) {
@@ -26,10 +49,14 @@ const generateTestData = (count: number, userLat: number, userLng: number, radiu
     incidents.push({
       id: `test-${i}`,
       type: types[Math.floor(Math.random() * types.length)],
-      description: `Test incident ${i + 1} - ${types[Math.floor(Math.random() * types.length)]} reported in the area.`,
+      description: `Test incident ${i + 1} - ${
+        types[Math.floor(Math.random() * types.length)]
+      } reported in the area.`,
       location: `POINT(${lng} ${lat})`,
       status: 'active',
-      created_at: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24).toISOString(), // Random time in last 24 hours
+      created_at: new Date(
+        Date.now() - Math.random() * 1000 * 60 * 60 * 24
+      ).toISOString(), // Random time in last 24 hours
       latitude: lat,
       longitude: lng,
     });
@@ -55,7 +82,9 @@ const DEFAULT_RADIUS = 5; // 5km default
 
 export default function IncidentsScreen() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
@@ -80,7 +109,7 @@ export default function IncidentsScreen() {
     if (newIncident) {
       try {
         const incident = JSON.parse(newIncident as string);
-        setIncidents(prev => [incident, ...prev]);
+        setIncidents((prev) => [incident, ...prev]);
       } catch (error) {
         console.error('Error parsing new incident:', error);
       }
@@ -94,18 +123,23 @@ export default function IncidentsScreen() {
     }
   }, [radius, location]);
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     // Convert coordinates to radians
     const R = 6371e3; // Earth's radius in meters
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c; // Distance in meters
   };
@@ -123,15 +157,15 @@ export default function IncidentsScreen() {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 0,
-        distanceInterval: 0
+        distanceInterval: 0,
       });
-      
+
       console.log('Got user location:', {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        accuracy: location.coords.accuracy
+        accuracy: location.coords.accuracy,
       });
-      
+
       setLocation(location);
       await fetchIncidents(location);
 
@@ -140,7 +174,7 @@ export default function IncidentsScreen() {
           const newLocation = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.BestForNavigation,
             timeInterval: 0,
-            distanceInterval: 0
+            distanceInterval: 0,
           });
           setLocation(newLocation);
           await fetchIncidents(newLocation);
@@ -152,7 +186,9 @@ export default function IncidentsScreen() {
       }, REFRESH_INTERVAL) as unknown as NodeJS.Timeout;
     } catch (error) {
       console.error('Setup error:', error);
-      setError('Failed to get your location. Please check your settings and try again.');
+      setError(
+        'Failed to get your location. Please check your settings and try again.'
+      );
       setIsConnected(false);
     } finally {
       setIsLoading(false);
@@ -160,12 +196,17 @@ export default function IncidentsScreen() {
   };
 
   const fetchIncidents = async (userLocation: Location.LocationObject) => {
-    try {  
+    try {
       // Generate test data with the current radius
-      const data = generateTestData(10, userLocation.coords.latitude || 0, userLocation.coords.longitude || 0, radius);
+      const data = generateTestData(
+        10,
+        userLocation.coords.latitude || 0,
+        userLocation.coords.longitude || 0,
+        radius
+      );
 
       // Calculate distances for each incident
-      const incidentsWithDistance = data.map(incident => {
+      const incidentsWithDistance = data.map((incident) => {
         try {
           // Get coordinates directly from the incident
           const latitude = parseFloat(incident.latitude);
@@ -188,7 +229,7 @@ export default function IncidentsScreen() {
             ...incident,
             latitude,
             longitude,
-            distance
+            distance,
           };
         } catch (error) {
           console.error('Error processing incident:', error);
@@ -198,13 +239,15 @@ export default function IncidentsScreen() {
 
       // Filter incidents within the specified radius
       const radiusInMeters = radius * 1000;
-      const filteredIncidents = incidentsWithDistance.filter(incident => 
-        (incident.distance || 0) <= radiusInMeters
+      const filteredIncidents = incidentsWithDistance.filter(
+        (incident) => (incident.distance || 0) <= radiusInMeters
       );
 
       // Sort incidents by distance
-      const incidents = filteredIncidents.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-      
+      const incidents = filteredIncidents.sort(
+        (a, b) => (a.distance || 0) - (b.distance || 0)
+      );
+
       setIncidents(incidents);
       setIsConnected(true);
       setError(null);
@@ -239,15 +282,20 @@ export default function IncidentsScreen() {
       setRadius(newRadius);
       setShowRadiusControl(false);
     } else {
-      Alert.alert('Invalid Radius', 'Please enter a radius between 1 and 50 kilometers.');
+      Alert.alert(
+        'Invalid Radius',
+        'Please enter a radius between 1 and 50 kilometers.'
+      );
     }
   };
 
   const formatTimeAgo = (timestamp: string) => {
     const now = new Date();
     const time = new Date(timestamp);
-    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - time.getTime()) / (1000 * 60)
+    );
+
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
@@ -265,14 +313,26 @@ export default function IncidentsScreen() {
     >
       <View style={styles.incidentHeader}>
         <Text style={styles.incidentType}>{item.type}</Text>
-        <Text style={styles.incidentTime}>{formatTimeAgo(item.created_at)}</Text>
+        <Text style={styles.incidentTime}>
+          {formatTimeAgo(item.created_at)}
+        </Text>
       </View>
       <Text style={styles.incidentDescription}>{item.description}</Text>
       <View style={styles.incidentFooter}>
         <Text style={styles.incidentDistance}>
           {formatDistance(item.distance || 0)} away
         </Text>
-        <View style={[styles.statusIndicator, { backgroundColor: item.status === 'active' ? colors.accent : colors.text.secondary }]} />
+        <View
+          style={[
+            styles.statusIndicator,
+            {
+              backgroundColor:
+                item.status === 'active'
+                  ? colors.accent
+                  : colors.text.secondary,
+            },
+          ]}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -289,7 +349,7 @@ export default function IncidentsScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.title}>Nearby Incidents</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.radiusButton}
             onPress={() => setShowRadiusControl(!showRadiusControl)}
           >
@@ -297,25 +357,33 @@ export default function IncidentsScreen() {
             <Text style={styles.radiusText}>{radius}km</Text>
           </TouchableOpacity>
         </View>
-        
+
         {showRadiusControl && (
           <View style={styles.radiusControl}>
             <View style={styles.radiusIncrement}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.radiusButton}
                 onPress={() => adjustRadius(-1)}
               >
-                <MaterialIcons name="remove" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="remove"
+                  size={20}
+                  color={colors.text.primary}
+                />
               </TouchableOpacity>
               <Text style={styles.radiusLabel}>Radius: {radius}km</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.radiusButton}
                 onPress={() => adjustRadius(1)}
               >
-                <MaterialIcons name="add" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="add"
+                  size={20}
+                  color={colors.text.primary}
+                />
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.customRadius}>
               <TextInput
                 style={styles.radiusInput}
@@ -325,7 +393,7 @@ export default function IncidentsScreen() {
                 keyboardType="numeric"
                 maxLength={2}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.applyButton}
                 onPress={applyCustomRadius}
               >
@@ -339,8 +407,14 @@ export default function IncidentsScreen() {
       {/* Connection status */}
       {!isConnected && (
         <View style={styles.connectionWarning}>
-                     <MaterialIcons name="wifi-off" size={16} color={colors.status.warning} />
-           <Text style={styles.connectionText}>Offline mode - showing cached data</Text>
+          <MaterialIcons
+            name="wifi-off"
+            size={16}
+            color={colors.status.warning}
+          />
+          <Text style={styles.connectionText}>
+            Offline mode - showing cached data
+          </Text>
         </View>
       )}
 
@@ -372,9 +446,17 @@ export default function IncidentsScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="location-off" size={48} color={colors.text.secondary} />
-              <Text style={styles.emptyText}>No incidents found within {radius}km</Text>
-              <Text style={styles.emptySubtext}>Try adjusting the radius or check back later</Text>
+              <MaterialIcons
+                name="location-off"
+                size={48}
+                color={colors.text.secondary}
+              />
+              <Text style={styles.emptyText}>
+                No incidents found within {radius}km
+              </Text>
+              <Text style={styles.emptySubtext}>
+                Try adjusting the radius or check back later
+              </Text>
             </View>
           }
         />
@@ -385,13 +467,13 @@ export default function IncidentsScreen() {
         style={styles.mapToggle}
         onPress={() => setShowMap(!showMap)}
       >
-        <MaterialIcons 
-          name={showMap ? "list" : "map"} 
-          size={24} 
-          color={colors.primary} 
+        <MaterialIcons
+          name={showMap ? 'list' : 'map'}
+          size={24}
+          color={colors.primary}
         />
         <Text style={styles.mapToggleText}>
-          {showMap ? "List View" : "Map View"}
+          {showMap ? 'List View' : 'Map View'}
         </Text>
       </TouchableOpacity>
 
@@ -476,7 +558,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderWidth: 1,
-         borderColor: colors.text.muted,
+    borderColor: colors.text.muted,
   },
   radiusInput: {
     flex: 1,
@@ -510,7 +592,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   connectionText: {
-         color: colors.status.warning,
+    color: colors.status.warning,
     fontSize: 14,
     fontFamily: 'Inter-Medium',
   },

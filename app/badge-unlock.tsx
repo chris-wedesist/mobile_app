@@ -1,9 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, ScrollView } from 'react-native';
-import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 export default function BadgeUnlockScreen() {
   const [isCompleting, setIsCompleting] = useState(false);
@@ -43,7 +52,7 @@ export default function BadgeUnlockScreen() {
     try {
       console.log('Completing badge unlock...');
       setIsCompleting(true);
-      
+
       // Save onboarding completion status
       await AsyncStorage.setItem('onboarding_completed', 'true');
       await AsyncStorage.setItem('founding_protector_badge', 'awarded');
@@ -56,7 +65,7 @@ export default function BadgeUnlockScreen() {
     } catch (error) {
       console.error('Error completing badge unlock:', error);
       setIsCompleting(false);
-      
+
       // Fallback navigation in case of error
       setTimeout(() => {
         router.replace('/(tabs)');
@@ -76,15 +85,18 @@ export default function BadgeUnlockScreen() {
           style={[
             styles.badgeContainer,
             {
-              transform: [
-                { scale: scaleAnim },
-                { rotate: spin },
-              ],
+              transform: [{ scale: scaleAnim }, { rotate: spin }],
             },
-          ]}>
+          ]}
+        >
           <View style={styles.badge}>
             <MaterialIcons name="shield" size={64} color={colors.accent} />
-            <MaterialIcons name="verified" size={32} color={colors.status.success} style={styles.award} />
+            <MaterialIcons
+              name="verified"
+              size={32}
+              color={colors.status.success}
+              style={styles.award}
+            />
           </View>
         </Animated.View>
 
@@ -93,18 +105,19 @@ export default function BadgeUnlockScreen() {
             styles.textContent,
             {
               opacity: opacityAnim,
-              transform: [{
-                translateY: opacityAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
+              transform: [
+                {
+                  translateY: opacityAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                },
+              ],
             },
-          ]}>
+          ]}
+        >
           <Text style={styles.title}>🎖️ You Are A Founding Protector!</Text>
-          <Text style={styles.subtitle}>
-            Welcome to the DESIST! community
-          </Text>
+          <Text style={styles.subtitle}>Welcome to the DESIST! community</Text>
 
           <View style={styles.benefitsContainer}>
             <View style={styles.benefitCard}>
@@ -135,8 +148,9 @@ export default function BadgeUnlockScreen() {
           <View style={styles.messageCard}>
             <Text style={styles.messageTitle}>Thank You</Text>
             <Text style={styles.messageText}>
-              Your commitment to personal and community safety helps make our spaces 
-              safer for everyone. You're now ready to use DESIST! whenever needed.
+              Your commitment to personal and community safety helps make our
+              spaces safer for everyone. You're now ready to use DESIST!
+              whenever needed.
             </Text>
           </View>
         </Animated.View>
@@ -147,11 +161,14 @@ export default function BadgeUnlockScreen() {
             isCompleting && styles.continueButtonDisabled,
           ]}
           onPress={handleContinue}
-          disabled={isCompleting}>
-          <Text style={styles.continueButtonText}>
-            Continue to App
-          </Text>
-          <MaterialIcons name="chevron-right" size={20} color={colors.text.primary} />
+          disabled={isCompleting}
+        >
+          <Text style={styles.continueButtonText}>Continue to App</Text>
+          <MaterialIcons
+            name="chevron-right"
+            size={20}
+            color={colors.text.primary}
+          />
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -179,7 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.accent}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.large,
+    ...shadows.lg,
   },
   award: {
     position: 'absolute',

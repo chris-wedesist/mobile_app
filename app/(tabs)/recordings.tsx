@@ -1,26 +1,26 @@
-import { useState, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Share,
-  Platform,
-  TextInput,
-  ActivityIndicator,
-  RefreshControl,
-  ImageStyle,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { createClient } from '@supabase/supabase-js';
 import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '../../constants/theme';
-import { MaterialIcons } from '@expo/vector-icons';
+import { useCallback, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ImageStyle,
+  Platform,
+  RefreshControl,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -53,7 +53,9 @@ export default function RecordingsScreen() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedRecording, setSelectedRecording] = useState<string | null>(null);
+  const [selectedRecording, setSelectedRecording] = useState<string | null>(
+    null
+  );
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
@@ -84,7 +86,7 @@ export default function RecordingsScreen() {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setComments(prev => ({ ...prev, [recordingId]: data || [] }));
+      setComments((prev) => ({ ...prev, [recordingId]: data || [] }));
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
@@ -112,8 +114,8 @@ export default function RecordingsScreen() {
         .eq('id', recording.id);
 
       // Update local state
-      setRecordings(prev =>
-        prev.map(r =>
+      setRecordings((prev) =>
+        prev.map((r) =>
           r.id === recording.id ? { ...r, share_count: r.share_count + 1 } : r
         )
       );
@@ -135,7 +137,9 @@ export default function RecordingsScreen() {
       } else {
         // For mobile, download to device using expo-file-system
         const callback = (downloadProgress: any) => {
-          const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+          const progress =
+            downloadProgress.totalBytesWritten /
+            downloadProgress.totalBytesExpectedToWrite;
           // Update UI with progress if needed
         };
 
@@ -160,9 +164,11 @@ export default function RecordingsScreen() {
         .eq('id', recording.id);
 
       // Update local state
-      setRecordings(prev =>
-        prev.map(r =>
-          r.id === recording.id ? { ...r, download_count: r.download_count + 1 } : r
+      setRecordings((prev) =>
+        prev.map((r) =>
+          r.id === recording.id
+            ? { ...r, download_count: r.download_count + 1 }
+            : r
         )
       );
     } catch (error) {
@@ -189,7 +195,7 @@ export default function RecordingsScreen() {
       if (error) throw error;
 
       // Update local state
-      setComments(prev => ({
+      setComments((prev) => ({
         ...prev,
         [recordingId]: [...(prev[recordingId] || []), data],
       }));
@@ -220,54 +226,93 @@ export default function RecordingsScreen() {
             if (!isSelected) {
               fetchComments(item.id);
             }
-          }}>
+          }}
+        >
           <Image
             source={{ uri: item.thumbnail_url }}
             style={styles.thumbnail as ImageStyle}
           />
           <View style={styles.playButton as ViewStyle}>
-            <MaterialIcons name="play-arrow" size={24} color={colors.text.primary} />
+            <MaterialIcons
+              name="play-arrow"
+              size={24}
+              color={colors.text.primary}
+            />
           </View>
         </TouchableOpacity>
 
         <View style={styles.recordingInfo as ViewStyle}>
           <Text style={styles.title as TextStyle}>{item.title}</Text>
-          <Text style={styles.description as TextStyle}>{item.description}</Text>
+          <Text style={styles.description as TextStyle}>
+            {item.description}
+          </Text>
 
           <View style={styles.stats as ViewStyle}>
             <View style={styles.stat as ViewStyle}>
-              <MaterialIcons name="visibility" size={16} color={colors.text.muted} />
-              <Text style={styles.statText as TextStyle}>{item.view_count}</Text>
+              <MaterialIcons
+                name="visibility"
+                size={16}
+                color={colors.text.muted}
+              />
+              <Text style={styles.statText as TextStyle}>
+                {item.view_count}
+              </Text>
             </View>
             <View style={styles.stat as ViewStyle}>
               <MaterialIcons name="share" size={16} color={colors.text.muted} />
-              <Text style={styles.statText as TextStyle}>{item.share_count}</Text>
+              <Text style={styles.statText as TextStyle}>
+                {item.share_count}
+              </Text>
             </View>
             <View style={styles.stat as ViewStyle}>
-              <MaterialIcons name="file-download" size={16} color={colors.text.muted} />
-              <Text style={styles.statText as TextStyle}>{item.download_count}</Text>
+              <MaterialIcons
+                name="file-download"
+                size={16}
+                color={colors.text.muted}
+              />
+              <Text style={styles.statText as TextStyle}>
+                {item.download_count}
+              </Text>
             </View>
           </View>
 
           <View style={styles.actions as ViewStyle}>
             <TouchableOpacity
               style={styles.actionButton as ViewStyle}
-              onPress={() => handleShare(item)}>
-              <MaterialIcons name="share" size={20} color={colors.text.primary} />
+              onPress={() => handleShare(item)}
+            >
+              <MaterialIcons
+                name="share"
+                size={20}
+                color={colors.text.primary}
+              />
               <Text style={styles.actionText as TextStyle}>Share</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.actionButton as ViewStyle}
-              onPress={() => handleDownload(item)}>
-              <MaterialIcons name="file-download" size={20} color={colors.text.primary} />
+              onPress={() => handleDownload(item)}
+            >
+              <MaterialIcons
+                name="file-download"
+                size={20}
+                color={colors.text.primary}
+              />
               <Text style={styles.actionText as TextStyle}>Download</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton as ViewStyle, { opacity: item.youtube_url ? 0.5 : 1 }]}
-              disabled={!!item.youtube_url}>
-              <MaterialIcons name="upload" size={20} color={colors.text.primary} />
+              style={[
+                styles.actionButton as ViewStyle,
+                { opacity: item.youtube_url ? 0.5 : 1 },
+              ]}
+              disabled={!!item.youtube_url}
+            >
+              <MaterialIcons
+                name="upload"
+                size={20}
+                color={colors.text.primary}
+              />
               <Text style={styles.actionText as TextStyle}>
                 {item.youtube_url ? 'Uploaded' : 'Upload to YT'}
               </Text>
@@ -281,26 +326,41 @@ export default function RecordingsScreen() {
               if (!isSelected) {
                 fetchComments(item.id);
               }
-            }}>
+            }}
+          >
             <View style={styles.commentsHeaderLeft as ViewStyle}>
-              <MaterialIcons name="message" size={20} color={colors.text.muted} />
+              <MaterialIcons
+                name="message"
+                size={20}
+                color={colors.text.muted}
+              />
               <Text style={styles.commentsCount as TextStyle}>
                 {recordingComments.length} Comments
               </Text>
             </View>
             {isSelected ? (
-              <MaterialIcons name="expand-less" size={20} color={colors.text.muted} />
+              <MaterialIcons
+                name="expand-less"
+                size={20}
+                color={colors.text.muted}
+              />
             ) : (
-              <MaterialIcons name="expand-more" size={20} color={colors.text.muted} />
+              <MaterialIcons
+                name="expand-more"
+                size={20}
+                color={colors.text.muted}
+              />
             )}
           </TouchableOpacity>
 
           {isSelected && (
             <View style={styles.commentsSection as ViewStyle}>
               <View style={styles.commentsList as ViewStyle}>
-                {recordingComments.map(comment => (
+                {recordingComments.map((comment) => (
                   <View key={comment.id} style={styles.comment as ViewStyle}>
-                    <Text style={styles.commentContent as TextStyle}>{comment.content}</Text>
+                    <Text style={styles.commentContent as TextStyle}>
+                      {comment.content}
+                    </Text>
                     <Text style={styles.commentTime as TextStyle}>
                       {new Date(comment.created_at).toLocaleDateString()}
                     </Text>
@@ -323,11 +383,19 @@ export default function RecordingsScreen() {
                     { opacity: commentLoading || !newComment.trim() ? 0.5 : 1 },
                   ]}
                   onPress={() => handleComment(item.id)}
-                  disabled={commentLoading || !newComment.trim()}>
+                  disabled={commentLoading || !newComment.trim()}
+                >
                   {commentLoading ? (
-                    <ActivityIndicator color={colors.text.primary} size="small" />
+                    <ActivityIndicator
+                      color={colors.text.primary}
+                      size="small"
+                    />
                   ) : (
-                    <MaterialIcons name="send" size={20} color={colors.text.primary} />
+                    <MaterialIcons
+                      name="send"
+                      size={20}
+                      color={colors.text.primary}
+                    />
                   )}
                 </TouchableOpacity>
               </View>
@@ -352,7 +420,7 @@ export default function RecordingsScreen() {
       <FlatList
         data={recordings}
         renderItem={renderRecording}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list as ViewStyle}
         refreshControl={
           <RefreshControl

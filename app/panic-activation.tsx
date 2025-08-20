@@ -1,16 +1,26 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
-import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
-import { colors, shadows, radius } from '../constants/theme';
-import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 export default function PanicActivationScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [isActivating, setIsActivating] = useState(false);
   const [countdown, setCountdown] = useState(5);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [isRecording, setIsRecording] = useState(false);
   const countdownAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -50,7 +60,8 @@ export default function PanicActivationScreen() {
     if (Platform.OS === 'web') return;
 
     try {
-      const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: locationStatus } =
+        await Location.requestForegroundPermissionsAsync();
       if (locationStatus !== 'granted') {
         throw new Error('Location permission is required');
       }
@@ -83,7 +94,7 @@ export default function PanicActivationScreen() {
 
     // Update countdown every second
     countdownInterval.current = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(countdownInterval.current!);
           triggerPanicMode();
@@ -132,19 +143,22 @@ export default function PanicActivationScreen() {
             style={[
               styles.countdownProgress,
               {
-                transform: [{
-                  scale: countdownAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0],
-                  })
-                }],
-              }
+                transform: [
+                  {
+                    scale: countdownAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [1, 0],
+                    }),
+                  },
+                ],
+              },
             ]}
           />
           <Text style={styles.countdownText}>{countdown}</Text>
           <TouchableOpacity
             style={styles.cancelButton}
-            onPress={cancelActivation}>
+            onPress={cancelActivation}
+          >
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -153,8 +167,13 @@ export default function PanicActivationScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -166,21 +185,18 @@ export default function PanicActivationScreen() {
             {
               transform: [{ scale: pulseAnim }],
             },
-          ]}>
+          ]}
+        >
           <MaterialIcons name="error" color={colors.status.error} size={64} />
         </Animated.View>
 
         <Text style={styles.title}>Emergency Mode</Text>
-        <Text style={styles.description}>
-          Activating emergency mode will:
-        </Text>
+        <Text style={styles.description}>Activating emergency mode will:</Text>
 
         <View style={styles.featureList}>
           <View style={styles.featureItem}>
             <MaterialIcons name="camera" size={24} color={colors.accent} />
-            <Text style={styles.featureText}>
-              Start secure video recording
-            </Text>
+            <Text style={styles.featureText}>Start secure video recording</Text>
           </View>
 
           <View style={styles.featureItem}>
@@ -208,10 +224,11 @@ export default function PanicActivationScreen() {
         <TouchableOpacity
           style={[
             styles.activateButton,
-            isActivating && styles.activateButtonActive
+            isActivating && styles.activateButtonActive,
           ]}
           onPress={handleActivation}
-          disabled={isActivating}>
+          disabled={isActivating}
+        >
           <MaterialIcons name="error" color={colors.text.primary} size={24} />
           <Text style={styles.activateButtonText}>
             {isActivating ? 'ACTIVATING...' : 'ACTIVATE EMERGENCY MODE'}
@@ -220,11 +237,7 @@ export default function PanicActivationScreen() {
       </View>
 
       {Platform.OS !== 'web' && (
-        <CameraView
-          ref={cameraRef}
-          style={styles.hiddenCamera}
-          facing="back"
-        />
+        <CameraView ref={cameraRef} style={styles.hiddenCamera} facing="back" />
       )}
     </View>
   );

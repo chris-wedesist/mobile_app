@@ -1,8 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 type UploadStatus = {
   id: string;
@@ -20,22 +28,22 @@ export default function RecordingBackupScreen() {
       title: 'Recording Evidence',
       description: 'Capturing video and audio',
       progress: 0,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'encryption',
       title: 'Encrypting Data',
       description: 'Securing your evidence',
       progress: 0,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'upload',
       title: 'Secure Upload',
       description: 'Transferring to secure storage',
       progress: 0,
-      status: 'pending'
-    }
+      status: 'pending',
+    },
   ]);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -79,30 +87,34 @@ export default function RecordingBackupScreen() {
 
     // Simulate upload progress
     await updateProgress('upload', 4000);
-    
+
     // Mark as complete
     setIsComplete(true);
   };
 
   const updateProgress = (stepId: string, duration: number): Promise<void> => {
     return new Promise((resolve) => {
-      setUploadStatuses(prev => prev.map(status =>
-        status.id === stepId ? { ...status, status: 'uploading' } : status
-      ));
+      setUploadStatuses((prev) =>
+        prev.map((status) =>
+          status.id === stepId ? { ...status, status: 'uploading' } : status
+        )
+      );
 
       const interval = setInterval(() => {
-        setUploadStatuses(prev => prev.map(status => {
-          if (status.id === stepId) {
-            const newProgress = Math.min(status.progress + 2, 100);
-            if (newProgress === 100) {
-              clearInterval(interval);
-              resolve();
-              return { ...status, progress: newProgress, status: 'complete' };
+        setUploadStatuses((prev) =>
+          prev.map((status) => {
+            if (status.id === stepId) {
+              const newProgress = Math.min(status.progress + 2, 100);
+              if (newProgress === 100) {
+                clearInterval(interval);
+                resolve();
+                return { ...status, progress: newProgress, status: 'complete' };
+              }
+              return { ...status, progress: newProgress };
             }
-            return { ...status, progress: newProgress };
-          }
-          return status;
-        }));
+            return status;
+          })
+        );
       }, duration / 50);
     });
   };
@@ -133,8 +145,13 @@ export default function RecordingBackupScreen() {
             {
               transform: [{ scale: pulseAnim }],
             },
-          ]}>
-          <MaterialIcons name="video-label" color={colors.status.error} size={32} />
+          ]}
+        >
+          <MaterialIcons
+            name="video-label"
+            color={colors.status.error}
+            size={32}
+          />
         </Animated.View>
         <Text style={styles.headerText}>Recording in Progress</Text>
       </View>
@@ -149,22 +166,39 @@ export default function RecordingBackupScreen() {
       <View style={styles.content}>
         <View style={styles.statusList}>
           {uploadStatuses.map((status, index) => (
-            <View 
+            <View
               key={status.id}
               style={[
                 styles.statusCard,
-                index === currentStep && styles.activeCard
-              ]}>
+                index === currentStep && styles.activeCard,
+              ]}
+            >
               <View style={styles.statusHeader}>
                 <View style={styles.statusIcon}>
                   {status.status === 'complete' ? (
-                    <MaterialIcons name="check" size={24} color={colors.status.success} />
+                    <MaterialIcons
+                      name="check"
+                      size={24}
+                      color={colors.status.success}
+                    />
                   ) : status.id === 'recording' ? (
-                    <MaterialIcons name="video-label" size={24} color={colors.accent} />
+                    <MaterialIcons
+                      name="video-label"
+                      size={24}
+                      color={colors.accent}
+                    />
                   ) : status.id === 'encryption' ? (
-                    <MaterialIcons name="shield" size={24} color={colors.accent} />
+                    <MaterialIcons
+                      name="shield"
+                      size={24}
+                      color={colors.accent}
+                    />
                   ) : (
-                    <MaterialIcons name="upload" size={24} color={colors.accent} />
+                    <MaterialIcons
+                      name="upload"
+                      size={24}
+                      color={colors.accent}
+                    />
                   )}
                 </View>
                 <View style={styles.statusInfo}>
@@ -173,20 +207,18 @@ export default function RecordingBackupScreen() {
                     {status.description}
                   </Text>
                 </View>
-                <Text style={styles.progressText}>
-                  {status.progress}%
-                </Text>
+                <Text style={styles.progressText}>{status.progress}%</Text>
               </View>
-              
+
               <View style={styles.progressBarContainer}>
-                <View 
+                <View
                   style={[
                     styles.progressBar,
-                    { 
+                    {
                       width: `${status.progress}%`,
-                      backgroundColor: getStatusColor(status.status)
-                    }
-                  ]} 
+                      backgroundColor: getStatusColor(status.status),
+                    },
+                  ]}
                 />
               </View>
 
@@ -199,14 +231,19 @@ export default function RecordingBackupScreen() {
 
         {isComplete && (
           <View style={styles.completeContainer}>
-            <MaterialIcons name="verified" size={48} color={colors.status.success} />
+            <MaterialIcons
+              name="verified"
+              size={48}
+              color={colors.status.success}
+            />
             <Text style={styles.completeText}>Evidence Secured</Text>
             <Text style={styles.completeDescription}>
               Your recording has been safely encrypted and stored
             </Text>
             <TouchableOpacity
               style={styles.continueButton}
-              onPress={handleContinue}>
+              onPress={handleContinue}
+            >
               <Text style={styles.continueButtonText}>Continue</Text>
             </TouchableOpacity>
           </View>

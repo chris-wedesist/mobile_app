@@ -9,7 +9,7 @@ const supabase = createClient(
 
 class UploadManager {
   private static instance: UploadManager;
-  
+
   private constructor() {}
 
   public static getInstance(): UploadManager {
@@ -24,28 +24,33 @@ class UploadManager {
       // Upload media to Supabase Storage
       const fileName = `panic-${Date.now()}.mp4`;
       const filePath = `public/${fileName}`;
-      
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('recordings')
-        .upload(filePath, await FileSystem.readAsStringAsync(mediaUri, {
-          encoding: FileSystem.EncodingType.Base64
-        }));
+        .upload(
+          filePath,
+          await FileSystem.readAsStringAsync(mediaUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          })
+        );
 
       if (uploadError) throw uploadError;
 
       // Get public URL for the uploaded media
-      const { data: { publicURL } } = supabase.storage
-        .from('recordings')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicURL },
+      } = supabase.storage.from('recordings').getPublicUrl(filePath);
 
       // Create panic event record
       const { data: panicEvent, error: panicError } = await supabase
         .from('panic_events')
-        .insert([{
-          location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-          media_urls: [publicURL],
-          status: 'active'
-        }])
+        .insert([
+          {
+            location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
+            media_urls: [publicURL],
+            status: 'active',
+          },
+        ])
         .select()
         .single();
 
@@ -54,12 +59,14 @@ class UploadManager {
       // Create safe encounter record for community awareness
       const { data: encounter, error: encounterError } = await supabase
         .from('safe_encounters')
-        .insert([{
-          encounter_type: 'police_interaction',
-          description: 'Panic event recorded',
-          media_url: publicURL,
-          location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-        }])
+        .insert([
+          {
+            encounter_type: 'police_interaction',
+            description: 'Panic event recorded',
+            media_url: publicURL,
+            location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
+          },
+        ])
         .select()
         .single();
 
@@ -68,7 +75,7 @@ class UploadManager {
       return {
         panicEvent,
         encounter,
-        mediaUrl: publicURL
+        mediaUrl: publicURL,
       };
     } catch (error) {
       console.error('Error uploading panic event:', error);
@@ -88,29 +95,34 @@ class UploadManager {
       // Upload media to Supabase Storage
       const fileName = `encounter-${Date.now()}.mp4`;
       const filePath = `public/${fileName}`;
-      
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('recordings')
-        .upload(filePath, await FileSystem.readAsStringAsync(mediaUri, {
-          encoding: FileSystem.EncodingType.Base64
-        }));
+        .upload(
+          filePath,
+          await FileSystem.readAsStringAsync(mediaUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          })
+        );
 
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicURL } } = supabase.storage
-        .from('recordings')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicURL },
+      } = supabase.storage.from('recordings').getPublicUrl(filePath);
 
       // Create safe encounter record
       const { data: encounter, error: encounterError } = await supabase
         .from('safe_encounters')
-        .insert([{
-          encounter_type: details.type,
-          description: details.description,
-          media_url: publicURL,
-          location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-        }])
+        .insert([
+          {
+            encounter_type: details.type,
+            description: details.description,
+            media_url: publicURL,
+            location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
+          },
+        ])
         .select()
         .single();
 
@@ -118,7 +130,7 @@ class UploadManager {
 
       return {
         encounter,
-        mediaUrl: publicURL
+        mediaUrl: publicURL,
       };
     } catch (error) {
       console.error('Error uploading safe encounter:', error);
@@ -142,33 +154,38 @@ class UploadManager {
       if (mediaUri) {
         const fileName = `story-${Date.now()}.mp4`;
         const filePath = `public/${fileName}`;
-        
+
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('stories')
-          .upload(filePath, await FileSystem.readAsStringAsync(mediaUri, {
-            encoding: FileSystem.EncodingType.Base64
-          }));
+          .upload(
+            filePath,
+            await FileSystem.readAsStringAsync(mediaUri, {
+              encoding: FileSystem.EncodingType.Base64,
+            })
+          );
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicURL: url } } = supabase.storage
-          .from('stories')
-          .getPublicUrl(filePath);
-          
+        const {
+          data: { publicURL: url },
+        } = supabase.storage.from('stories').getPublicUrl(filePath);
+
         publicUrl = url;
       }
 
       // Create hero story record
       const { data: story, error: storyError } = await supabase
         .from('hero_stories')
-        .insert([{
-          title: details.title,
-          story: details.story,
-          media_url: publicUrl,
-          category: details.category,
-          tags: details.tags,
-          status: 'pending'
-        }])
+        .insert([
+          {
+            title: details.title,
+            story: details.story,
+            media_url: publicUrl,
+            category: details.category,
+            tags: details.tags,
+            status: 'pending',
+          },
+        ])
         .select()
         .single();
 
@@ -176,7 +193,7 @@ class UploadManager {
 
       return {
         story,
-        mediaUrl: publicUrl
+        mediaUrl: publicUrl,
       };
     } catch (error) {
       console.error('Error uploading hero story:', error);

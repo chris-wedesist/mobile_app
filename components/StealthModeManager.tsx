@@ -1,7 +1,7 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { Platform } from 'react-native';
-import { router } from 'expo-router';
 import { createClient } from '@supabase/supabase-js';
+import { router } from 'expo-router';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -24,7 +24,11 @@ const StealthModeContext = createContext<StealthModeContextType>({
   toggle: async () => {},
 });
 
-export function StealthModeProvider({ children }: { children: React.ReactNode }) {
+export function StealthModeProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isActive, setIsActive] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<string | null>(null);
 
@@ -66,8 +70,8 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
         p_trigger_type: trigger,
         p_metadata: {
           device_info: Platform.constants,
-          activation_method: trigger
-        }
+          activation_method: trigger,
+        },
       });
 
       setIsActive(true);
@@ -88,8 +92,8 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
         p_trigger_type: trigger,
         p_metadata: {
           deactivation_method: trigger,
-          device_info: Platform.constants
-        }
+          device_info: Platform.constants,
+        },
       });
 
       setIsActive(false);
@@ -112,14 +116,15 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
   };
 
   return (
-    <StealthModeContext.Provider 
-      value={{ 
-        isActive, 
+    <StealthModeContext.Provider
+      value={{
+        isActive,
         currentScreen,
         activate,
         deactivate,
-        toggle
-      }}>
+        toggle,
+      }}
+    >
       {children}
     </StealthModeContext.Provider>
   );

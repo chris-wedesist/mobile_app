@@ -1,0 +1,39 @@
+// EXPO SDK 53 ENTRY POINT - RUNTIME ERROR FIX
+// Addressing: "main has not been registered" and "decode undefined" errors
+
+// STEP 1: Load polyfills ABSOLUTELY FIRST
+import './app/polyfills';
+
+// STEP 2: Import React for fallback component
+import React from 'react';
+
+// STEP 3: Import and register with expo-router for SDK 53
+import { registerRootComponent } from 'expo';
+
+// STEP 4: Import the proper Expo Router root component
+// This should work for both development and production
+let ExpoRoot;
+try {
+  // Try the standard expo-router entry first
+  ExpoRoot = require('expo-router/entry').default;
+} catch (e) {
+  try {
+    // Fallback to build entry if available
+    ExpoRoot = require('expo-router/build/qualified-entry').App;
+  } catch (e2) {
+    // Final fallback to manual registration
+    const { Stack } = require('expo-router');
+    ExpoRoot = () => React.createElement(Stack);
+  }
+}
+
+// STEP 5: Register the component with proper error handling
+try {
+  registerRootComponent(ExpoRoot);
+} catch (error) {
+  console.error('Failed to register root component:', error);
+  
+  // Emergency fallback registration
+  const { AppRegistry } = require('react-native');
+  AppRegistry.registerComponent('main', () => ExpoRoot);
+}

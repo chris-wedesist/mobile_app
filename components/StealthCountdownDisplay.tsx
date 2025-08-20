@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useStealthCountdown } from '../hooks/useStealthCountdown';
-import { colors, radius, shadows } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
+import { useStealthCountdown } from '../hooks/useStealthCountdown';
 
 type StealthCountdownDisplayProps = {
   initialMinutes?: number;
@@ -19,27 +19,24 @@ export default function StealthCountdownDisplay({
   autoDeactivate = false,
   showControls = true,
   size = 'md',
-  variant = 'standard'
+  variant = 'standard',
 }: StealthCountdownDisplayProps) {
-  const {
-    formattedTime,
-    percentRemaining,
-    isPaused,
-    pause,
-    resume,
-    addTime
-  } = useStealthCountdown({
-    initialMinutes,
-    onComplete,
-    autoDeactivate
-  });
+  const { formattedTime, percentRemaining, isPaused, pause, resume, addTime } =
+    useStealthCountdown({
+      initialMinutes,
+      onComplete,
+      autoDeactivate,
+    });
 
   // Determine styles based on size
   const getFontSize = () => {
     switch (size) {
-      case 'sm': return 14;
-      case 'lg': return 24;
-      default: return 18;
+      case 'sm':
+        return 14;
+      case 'lg':
+        return 24;
+      default:
+        return 18;
     }
   };
 
@@ -54,8 +51,17 @@ export default function StealthCountdownDisplay({
   if (variant === 'minimal') {
     return (
       <View style={styles.minimalContainer}>
-        <MaterialIcons name="schedule" size={getFontSize()} color={getTimeColor()} />
-        <Text style={[styles.minimalTime, { fontSize: getFontSize(), color: getTimeColor() }]}>
+        <MaterialIcons
+          name="schedule"
+          size={getFontSize()}
+          color={getTimeColor()}
+        />
+        <Text
+          style={[
+            styles.minimalTime,
+            { fontSize: getFontSize(), color: getTimeColor() },
+          ]}
+        >
           {formattedTime}
         </Text>
       </View>
@@ -70,38 +76,56 @@ export default function StealthCountdownDisplay({
           <MaterialIcons name="schedule" size={24} color={colors.accent} />
           <Text style={styles.prominentTime}>{formattedTime}</Text>
         </View>
-        
+
         <View style={styles.progressBarContainer}>
-          <View 
+          <View
             style={[
-              styles.progressBar, 
-              { width: `${percentRemaining}%`, backgroundColor: getTimeColor() }
-            ]} 
+              styles.progressBar,
+              {
+                width: `${percentRemaining}%`,
+                backgroundColor: getTimeColor(),
+              },
+            ]}
           />
         </View>
-        
+
         {showControls && (
           <View style={styles.prominentControls}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.prominentButton}
               onPress={() => addTime(-1)}
-              disabled={percentRemaining <= 10}>
-              <MaterialIcons name="remove" size={16} color={colors.text.primary} />
+              disabled={percentRemaining <= 10}
+            >
+              <MaterialIcons
+                name="remove"
+                size={16}
+                color={colors.text.primary}
+              />
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.prominentPlayPauseButton}
-              onPress={isPaused ? resume : pause}>
+              onPress={isPaused ? resume : pause}
+            >
               {isPaused ? (
-                <MaterialIcons name="play-arrow" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="play-arrow"
+                  size={20}
+                  color={colors.text.primary}
+                />
               ) : (
-                <MaterialIcons name="pause" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="pause"
+                  size={20}
+                  color={colors.text.primary}
+                />
               )}
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.prominentButton}
-              onPress={() => addTime(1)}>
+              onPress={() => addTime(1)}
+            >
               <MaterialIcons name="add" size={16} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
@@ -114,34 +138,58 @@ export default function StealthCountdownDisplay({
   return (
     <View style={styles.container}>
       <View style={styles.timeContainer}>
-        <MaterialIcons name="schedule" size={getFontSize()} color={colors.text.muted} />
-        <Text style={[styles.time, { fontSize: getFontSize(), color: getTimeColor() }]}>
+        <MaterialIcons
+          name="schedule"
+          size={getFontSize()}
+          color={colors.text.muted}
+        />
+        <Text
+          style={[
+            styles.time,
+            { fontSize: getFontSize(), color: getTimeColor() },
+          ]}
+        >
           {formattedTime}
         </Text>
       </View>
-      
+
       {showControls && (
         <View style={styles.controls}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.controlButton}
             onPress={() => addTime(-1)}
-            disabled={percentRemaining <= 10}>
-            <MaterialIcons name="remove" size={14} color={colors.text.primary} />
+            disabled={percentRemaining <= 10}
+          >
+            <MaterialIcons
+              name="remove"
+              size={14}
+              color={colors.text.primary}
+            />
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.playPauseButton}
-            onPress={isPaused ? resume : pause}>
+            onPress={isPaused ? resume : pause}
+          >
             {isPaused ? (
-              <MaterialIcons name="play-arrow" size={16} color={colors.text.primary} />
+              <MaterialIcons
+                name="play-arrow"
+                size={16}
+                color={colors.text.primary}
+              />
             ) : (
-              <MaterialIcons name="pause" size={16} color={colors.text.primary} />
+              <MaterialIcons
+                name="pause"
+                size={16}
+                color={colors.text.primary}
+              />
             )}
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.controlButton}
-            onPress={() => addTime(1)}>
+            onPress={() => addTime(1)}
+          >
             <MaterialIcons name="add" size={14} color={colors.text.primary} />
           </TouchableOpacity>
         </View>
@@ -190,7 +238,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  
+
   // Minimal variant styles
   minimalContainer: {
     flexDirection: 'row',
@@ -200,7 +248,7 @@ const styles = StyleSheet.create({
   minimalTime: {
     fontWeight: '600',
   },
-  
+
   // Prominent variant styles
   prominentContainer: {
     backgroundColor: colors.secondary,

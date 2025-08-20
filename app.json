@@ -15,15 +15,33 @@
       "**/*"
     ],
     "extra": {
-      "EXPO_PUBLIC_GOOGLE_PLACES_API_KEY": "AIzaSyAfi0WKfQ7L9UM9VNNqlOnj9jpU7sL1iX4"
+      "EXPO_PUBLIC_GOOGLE_PLACES_API_KEY": "AIzaSyAfi0WKfQ7L9UM9VNNqlOnj9jpU7sL1iX4",
+      "router": {},
+      "eas": {
+        "projectId": "6cc97a1a-a22a-45d8-bec2-4410bb0a41e5"
+      }
+    },
+    "developmentClient": {
+      "silentLaunch": true
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wedesist.desist",
+      "runtimeVersion": {
+        "policy": "sdkVersion"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.wedesist.desist",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1B2D45"
+      },
+      "runtimeVersion": {
+        "policy": "sdkVersion"
       }
     },
     "web": {
@@ -37,6 +55,12 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/6cc97a1a-a22a-45d8-bec2-4410bb0a41e5"
+    },
+    "jsEngine": "hermes"
   }
 }

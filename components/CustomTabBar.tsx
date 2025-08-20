@@ -1,7 +1,14 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-import { useRouter, usePathname } from 'expo-router';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../constants/theme';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { usePathname, useRouter } from 'expo-router';
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 const isNarrowScreen = width < 768;
@@ -22,11 +29,11 @@ const tabs = [
 export default function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname();
-  
+
   const getTabRoute = (tabName: string) => {
     return `/(tabs)/${tabName}`;
   };
-  
+
   const isActive = (tabName: string) => {
     const route = getTabRoute(tabName);
     return pathname === route || pathname.startsWith(route + '/');
@@ -50,47 +57,57 @@ export default function CustomTabBar() {
     // Two-tier layout for narrow screens
     const firstRow = tabs.slice(0, 4);
     const secondRow = tabs.slice(4);
-    
+
     return (
       <View style={styles.container}>
         <View style={styles.twoTierContainer}>
           <View style={styles.tabRow}>
-            {firstRow.map(tab => (
+            {firstRow.map((tab) => (
               <TouchableOpacity
                 key={tab.name}
-                style={[styles.tabButton, isActive(tab.name) && styles.activeTabButton]}
-                onPress={() => navigateToTab(tab.name)}>
+                style={[
+                  styles.tabButton,
+                  isActive(tab.name) && styles.activeTabButton,
+                ]}
+                onPress={() => navigateToTab(tab.name)}
+              >
                 {renderIcon(
                   tab.icon,
                   24,
                   isActive(tab.name) ? colors.accent : colors.text.muted
                 )}
-                <Text 
+                <Text
                   style={[
-                    styles.tabLabel, 
-                    isActive(tab.name) && styles.activeTabLabel
-                  ]}>
+                    styles.tabLabel,
+                    isActive(tab.name) && styles.activeTabLabel,
+                  ]}
+                >
                   {tab.title}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
           <View style={styles.tabRow}>
-            {secondRow.map(tab => (
+            {secondRow.map((tab) => (
               <TouchableOpacity
                 key={tab.name}
-                style={[styles.tabButton, isActive(tab.name) && styles.activeTabButton]}
-                onPress={() => navigateToTab(tab.name)}>
+                style={[
+                  styles.tabButton,
+                  isActive(tab.name) && styles.activeTabButton,
+                ]}
+                onPress={() => navigateToTab(tab.name)}
+              >
                 {renderIcon(
                   tab.icon,
                   24,
                   isActive(tab.name) ? colors.accent : colors.text.muted
                 )}
-                <Text 
+                <Text
                   style={[
-                    styles.tabLabel, 
-                    isActive(tab.name) && styles.activeTabLabel
-                  ]}>
+                    styles.tabLabel,
+                    isActive(tab.name) && styles.activeTabLabel,
+                  ]}
+                >
                   {tab.title}
                 </Text>
               </TouchableOpacity>
@@ -100,29 +117,35 @@ export default function CustomTabBar() {
       </View>
     );
   }
-  
+
   // Scrollable layout for wider screens
   return (
     <View style={styles.container}>
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}>
-        {tabs.map(tab => (
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.name}
-            style={[styles.scrollableTabButton, isActive(tab.name) && styles.activeScrollableTabButton]}
-            onPress={() => navigateToTab(tab.name)}>
+            style={[
+              styles.scrollableTabButton,
+              isActive(tab.name) && styles.activeScrollableTabButton,
+            ]}
+            onPress={() => navigateToTab(tab.name)}
+          >
             {renderIcon(
               tab.icon,
               28,
               isActive(tab.name) ? colors.accent : colors.text.muted
             )}
-            <Text 
+            <Text
               style={[
-                styles.scrollableTabLabel, 
-                isActive(tab.name) && styles.activeTabLabel
-              ]}>
+                styles.scrollableTabLabel,
+                isActive(tab.name) && styles.activeTabLabel,
+              ]}
+            >
               {tab.title}
             </Text>
           </TouchableOpacity>

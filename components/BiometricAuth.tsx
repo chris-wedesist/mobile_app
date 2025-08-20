@@ -1,8 +1,15 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Modal } from 'react-native';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { colors, radius, shadows } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { useState } from 'react';
+import {
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 type BiometricAuthProps = {
   onSuccess?: () => void;
@@ -13,13 +20,18 @@ type BiometricAuthProps = {
   disableDeviceFallback?: boolean;
 };
 
-export async function biometricVerify(prompt: string = 'Confirm your identity') {
+export async function biometricVerify(
+  prompt: string = 'Confirm your identity'
+) {
   try {
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
     const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
     if (!hasHardware || !isEnrolled) {
-      return { success: false, error: 'Biometric authentication not available' };
+      return {
+        success: false,
+        error: 'Biometric authentication not available',
+      };
     }
 
     const result = await LocalAuthentication.authenticateAsync({
@@ -27,7 +39,10 @@ export async function biometricVerify(prompt: string = 'Confirm your identity') 
       fallbackLabel: 'Enter Passcode',
     });
 
-    return { success: result.success, error: result.success ? null : 'Authentication failed' };
+    return {
+      success: result.success,
+      error: result.success ? null : 'Authentication failed',
+    };
   } catch (error) {
     console.error('Biometric authentication error:', error);
     return { success: false, error: 'Authentication failed' };
@@ -45,14 +60,24 @@ export function BiometricAuth({
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [biometricType, setBiometricType] = useState<LocalAuthentication.AuthenticationType | null>(null);
+  const [biometricType, setBiometricType] =
+    useState<LocalAuthentication.AuthenticationType | null>(null);
 
   const checkBiometricType = async () => {
     try {
-      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-        setBiometricType(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION);
-      } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+      const types =
+        await LocalAuthentication.supportedAuthenticationTypesAsync();
+      if (
+        types.includes(
+          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+        )
+      ) {
+        setBiometricType(
+          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+        );
+      } else if (
+        types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)
+      ) {
         setBiometricType(LocalAuthentication.AuthenticationType.FINGERPRINT);
       }
     } catch (error) {
@@ -112,7 +137,10 @@ export function BiometricAuth({
   };
 
   const getBiometricIcon = () => {
-    if (biometricType === LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION) {
+    if (
+      biometricType ===
+      LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+    ) {
       return <MaterialIcons name="face" size={32} color={colors.accent} />;
     }
     return <MaterialIcons name="fingerprint" size={32} color={colors.accent} />;
@@ -121,7 +149,10 @@ export function BiometricAuth({
   return (
     <View>
       <TouchableOpacity
-        style={[styles.authButton, isAuthenticating && styles.authButtonDisabled]}
+        style={[
+          styles.authButton,
+          isAuthenticating && styles.authButtonDisabled,
+        ]}
         onPress={authenticate}
         disabled={isAuthenticating}
       >
@@ -157,12 +188,17 @@ export function BiometricAuth({
                 style={styles.closeButton}
                 onPress={() => handleWebAuth(false)}
               >
-                <MaterialIcons name="close" size={24} color={colors.text.muted} />
+                <MaterialIcons
+                  name="close"
+                  size={24}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
             </View>
 
             <Text style={styles.modalMessage}>
-              Biometric authentication is not available on web. This is a simulation.
+              Biometric authentication is not available on web. This is a
+              simulation.
             </Text>
 
             <View style={styles.modalButtons}>

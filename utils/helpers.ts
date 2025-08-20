@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import { TIME, VALIDATION_RULES } from '@/constants/app';
+import { Platform } from 'react-native';
 
 /**
  * Debounce function to limit the rate at which a function can fire
@@ -52,10 +52,11 @@ export function formatDate(
     day: 'numeric',
   }
 ): string {
-  const dateObj = typeof date === 'string' || typeof date === 'number' 
-    ? new Date(date) 
-    : date;
-  
+  const dateObj =
+    typeof date === 'string' || typeof date === 'number'
+      ? new Date(date)
+      : date;
+
   return new Intl.DateTimeFormat('en-US', options).format(dateObj);
 }
 
@@ -73,10 +74,11 @@ export function formatTime(
     hour12: true,
   }
 ): string {
-  const dateObj = typeof date === 'string' || typeof date === 'number' 
-    ? new Date(date) 
-    : date;
-  
+  const dateObj =
+    typeof date === 'string' || typeof date === 'number'
+      ? new Date(date)
+      : date;
+
   return new Intl.DateTimeFormat('en-US', options).format(dateObj);
 }
 
@@ -86,10 +88,11 @@ export function formatTime(
  * @returns Relative time string
  */
 export function formatRelativeTime(date: Date | string | number): string {
-  const dateObj = typeof date === 'string' || typeof date === 'number' 
-    ? new Date(date) 
-    : date;
-  
+  const dateObj =
+    typeof date === 'string' || typeof date === 'number'
+      ? new Date(date)
+      : date;
+
   const now = new Date();
   const diffInMs = now.getTime() - dateObj.getTime();
   const diffInSeconds = Math.floor(diffInMs / TIME.SECOND);
@@ -131,7 +134,8 @@ export function formatFileSize(bytes: number): string {
  * @returns Random string
  */
 export function generateRandomString(length: number): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -162,8 +166,9 @@ export function capitalize(str: string): string {
  * @returns Title case string
  */
 export function toTitleCase(str: string): string {
-  return str.replace(/\w\S*/g, (txt) => 
-    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  return str.replace(
+    /\w\S*/g,
+    (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
   );
 }
 
@@ -174,7 +179,11 @@ export function toTitleCase(str: string): string {
  * @param suffix - Suffix to add (default: '...')
  * @returns Truncated text
  */
-export function truncateText(text: string, maxLength: number, suffix: string = '...'): string {
+export function truncateText(
+  text: string,
+  maxLength: number,
+  suffix: string = '...'
+): string {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength - suffix.length) + suffix;
 }
@@ -194,8 +203,10 @@ export function isValidEmail(email: string): boolean {
  * @returns True if valid
  */
 export function isValidPassword(password: string): boolean {
-  return VALIDATION_RULES.password.pattern.test(password) && 
-         password.length >= VALIDATION_RULES.password.minLength;
+  return (
+    VALIDATION_RULES.password.pattern.test(password) &&
+    password.length >= VALIDATION_RULES.password.minLength
+  );
 }
 
 /**
@@ -213,9 +224,11 @@ export function isValidPhone(phone: string): boolean {
  * @returns True if valid
  */
 export function isValidName(name: string): boolean {
-  return VALIDATION_RULES.name.pattern.test(name) && 
-         name.length >= VALIDATION_RULES.name.minLength && 
-         name.length <= VALIDATION_RULES.name.maxLength;
+  return (
+    VALIDATION_RULES.name.pattern.test(name) &&
+    name.length >= VALIDATION_RULES.name.minLength &&
+    name.length <= VALIDATION_RULES.name.maxLength
+  );
 }
 
 /**
@@ -226,7 +239,7 @@ export function isValidName(name: string): boolean {
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') return obj;
   if (obj instanceof Date) return new Date(obj.getTime()) as T;
-  if (obj instanceof Array) return obj.map(item => deepClone(item)) as T;
+  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as T;
   if (typeof obj === 'object') {
     const clonedObj = {} as T;
     for (const key in obj) {
@@ -275,7 +288,7 @@ export function getPlatformValue<T>(
  * @returns Promise that resolves after specified time
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -291,19 +304,19 @@ export async function retryWithBackoff<T>(
   baseDelay: number = 1000
 ): Promise<T> {
   let lastError: Error;
-  
+
   for (let i = 0; i <= maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error as Error;
       if (i === maxRetries) break;
-      
+
       const delay = baseDelay * Math.pow(2, i);
       await sleep(delay);
     }
   }
-  
+
   throw lastError!;
 }
 
@@ -313,9 +326,9 @@ export async function retryWithBackoff<T>(
  */
 export async function checkOnlineStatus(): Promise<boolean> {
   try {
-    const response = await fetch('https://www.google.com', { 
+    const response = await fetch('https://www.google.com', {
       method: 'HEAD',
-      mode: 'no-cors'
+      mode: 'no-cors',
     });
     return true;
   } catch {
@@ -356,12 +369,14 @@ export function calculateDistance(
   lon2: number
 ): number {
   const R = 6371; // Earth's radius in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
-} 
+}

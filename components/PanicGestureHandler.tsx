@@ -1,12 +1,12 @@
-import { useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Location from 'expo-location';
-import * as FileSystem from 'expo-file-system';
-import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import { CameraView } from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
+import * as Location from 'expo-location';
 import * as SMS from 'expo-sms';
+import { useRef, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -43,7 +43,7 @@ export default function PanicGestureHandler() {
 
   const stopRecording = async () => {
     if (!cameraRef.current || !isRecording) return;
-    
+
     try {
       await cameraRef.current.stopRecording();
     } catch (error) {
@@ -65,26 +65,31 @@ export default function PanicGestureHandler() {
       const filePath = `public/${fileName}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('recordings')
-        .upload(filePath, await FileSystem.readAsStringAsync(recording.uri, {
-          encoding: FileSystem.EncodingType.Base64
-        }));
+        .upload(
+          filePath,
+          await FileSystem.readAsStringAsync(recording.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          })
+        );
 
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicURL } } = supabase.storage
-        .from('recordings')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicURL },
+      } = supabase.storage.from('recordings').getPublicUrl(filePath);
 
       // Create safe encounter record
       const { data: encounterData, error: encounterError } = await supabase
         .from('safe_encounters')
-        .insert([{
-          encounter_type: 'police_interaction',
-          description: 'Panic gesture triggered recording',
-          media_url: publicURL,
-          location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-        }])
+        .insert([
+          {
+            encounter_type: 'police_interaction',
+            description: 'Panic gesture triggered recording',
+            media_url: publicURL,
+            location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
+          },
+        ])
         .select()
         .single();
 
@@ -95,7 +100,6 @@ export default function PanicGestureHandler() {
 
       // Optional: Auto-wipe local recording
       await FileSystem.deleteAsync(recording.uri);
-
     } catch (error) {
       console.error('Error handling recording:', error);
     }
@@ -105,7 +109,7 @@ export default function PanicGestureHandler() {
     try {
       const emergencyContact = await AsyncStorage.getItem('emergencyContact');
       const emergencyMessage = await AsyncStorage.getItem('emergencyMessage');
-      
+
       if (!emergencyContact) return;
 
       if (Platform.OS !== 'web') {
@@ -129,7 +133,7 @@ export default function PanicGestureHandler() {
       if (now - lastTapTime.current > TAP_INTERVAL) {
         tapCount.current = 0;
       }
-      
+
       tapCount.current += 1;
       lastTapTime.current = now;
 
@@ -154,11 +158,7 @@ export default function PanicGestureHandler() {
   return (
     <GestureDetector gesture={gesture}>
       <View style={StyleSheet.absoluteFill}>
-        <CameraView
-          ref={cameraRef}
-          style={styles.hiddenCamera}
-          facing="back"
-        />
+        <CameraView ref={cameraRef} style={styles.hiddenCamera} facing="back" />
       </View>
     </GestureDetector>
   );

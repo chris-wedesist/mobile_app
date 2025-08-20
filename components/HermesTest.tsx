@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../constants/theme';
 
 /**
@@ -14,7 +14,7 @@ export const HermesTest: React.FC = () => {
     try {
       // Test array methods
       const testArray = [1, 2, 3];
-      const doubled = testArray.map(x => x * 2);
+      const doubled = testArray.map((x) => x * 2);
       console.log('Array test passed:', doubled);
 
       // Test object methods
@@ -26,7 +26,7 @@ export const HermesTest: React.FC = () => {
       const testAsync = async () => {
         return 'async test passed';
       };
-      testAsync().then(result => {
+      testAsync().then((result) => {
         console.log('Async test passed:', result);
       });
 
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HermesTest; 
+export default HermesTest;

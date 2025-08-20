@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 const supabase = createClient(
@@ -21,7 +21,7 @@ class UserSettingsManager {
   private settings: UserSettings | null = null;
   private settingsKey = 'user_settings';
   private appVersion = '1.0.0'; // Should be dynamically fetched in a real app
-  
+
   private constructor() {}
 
   public static getInstance(): UserSettingsManager {
@@ -55,7 +55,7 @@ class UserSettingsManager {
       return settings;
     } catch (error) {
       console.error('Error loading settings:', error);
-      
+
       // Return default settings if nothing is available
       const defaultSettings: UserSettings = {
         stealth_mode_enabled: false,
@@ -63,7 +63,7 @@ class UserSettingsManager {
         panic_gesture_type: 'triple_power_press',
         auto_upload_enabled: true,
         auto_wipe_after_upload: false,
-        emergency_sms_enabled: true
+        emergency_sms_enabled: true,
       };
 
       this.settings = defaultSettings;
@@ -76,7 +76,7 @@ class UserSettingsManager {
       // Set app platform for audit logging
       const headers = {
         'X-Client-Info': Platform.OS,
-        'X-App-Version': this.appVersion
+        'X-App-Version': this.appVersion,
       };
 
       // Update Supabase
@@ -84,7 +84,7 @@ class UserSettingsManager {
         .from('user_settings')
         .update({
           ...updates,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -93,7 +93,10 @@ class UserSettingsManager {
 
       // Update local cache
       this.settings = updatedSettings;
-      await AsyncStorage.setItem(this.settingsKey, JSON.stringify(updatedSettings));
+      await AsyncStorage.setItem(
+        this.settingsKey,
+        JSON.stringify(updatedSettings)
+      );
 
       return updatedSettings;
     } catch (error) {
@@ -106,7 +109,7 @@ class UserSettingsManager {
     try {
       const settings = await this.loadSettings();
       const newValue = !settings.stealth_mode_enabled;
-      
+
       await this.updateSettings({ stealth_mode_enabled: newValue });
       return newValue;
     } catch (error) {
@@ -137,7 +140,7 @@ class UserSettingsManager {
     try {
       const settings = await this.loadSettings();
       const newValue = !settings.auto_upload_enabled;
-      
+
       await this.updateSettings({ auto_upload_enabled: newValue });
       return newValue;
     } catch (error) {
@@ -150,7 +153,7 @@ class UserSettingsManager {
     try {
       const settings = await this.loadSettings();
       const newValue = !settings.auto_wipe_after_upload;
-      
+
       await this.updateSettings({ auto_wipe_after_upload: newValue });
       return newValue;
     } catch (error) {
@@ -163,7 +166,7 @@ class UserSettingsManager {
     try {
       const settings = await this.loadSettings();
       const newValue = !settings.emergency_sms_enabled;
-      
+
       await this.updateSettings({ emergency_sms_enabled: newValue });
       return newValue;
     } catch (error) {

@@ -1,10 +1,17 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
-import StealthCountdownDisplay from '../components/StealthCountdownDisplay';
-import { useStealthCountdown } from '../hooks/useStealthCountdown';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import StealthCountdownDisplay from '../components/StealthCountdownDisplay';
+import { colors, radius, shadows } from '../constants/theme';
+import { useStealthCountdown } from '../hooks/useStealthCountdown';
 
 type DemoSection = {
   id: string;
@@ -16,30 +23,34 @@ const DEMO_SECTIONS: DemoSection[] = [
   {
     id: 'countdown',
     title: 'Auto-Exit Countdown',
-    description: 'Stealth mode automatically exits after a set time period to ensure you don\'t accidentally leave it active.'
+    description:
+      "Stealth mode automatically exits after a set time period to ensure you don't accidentally leave it active.",
   },
   {
     id: 'gesture',
     title: 'Exit Gestures',
-    description: 'Long-press anywhere on the screen for 3 seconds to exit stealth mode immediately.'
+    description:
+      'Long-press anywhere on the screen for 3 seconds to exit stealth mode immediately.',
   },
   {
     id: 'appearance',
     title: 'Authentic Appearance',
-    description: 'Each cover story looks and functions like a real app, with realistic content and interactions.'
+    description:
+      'Each cover story looks and functions like a real app, with realistic content and interactions.',
   },
   {
     id: 'security',
     title: 'Security Features',
-    description: 'All stealth mode activations and exits are logged securely for your reference in settings history.'
-  }
+    description:
+      'All stealth mode activations and exits are logged securely for your reference in settings history.',
+  },
 ];
 
 export default function StealthModeDemoScreen() {
   const [selectedSection, setSelectedSection] = useState<string>('countdown');
   const { formattedTime, percentRemaining } = useStealthCountdown({
     initialMinutes: 10,
-    autoDeactivate: false
+    autoDeactivate: false,
   });
 
   return (
@@ -47,8 +58,13 @@ export default function StealthModeDemoScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -60,19 +76,21 @@ export default function StealthModeDemoScreen() {
         </View>
 
         <Text style={styles.description}>
-          Stealth mode allows you to quickly disguise the app as something innocent if you need privacy or are being observed.
+          Stealth mode allows you to quickly disguise the app as something
+          innocent if you need privacy or are being observed.
         </Text>
 
         <View style={styles.demoContainer}>
           <View style={styles.countdownSection}>
             <Text style={styles.sectionTitle}>Auto-Exit Countdown</Text>
-            <StealthCountdownDisplay 
+            <StealthCountdownDisplay
               initialMinutes={10}
               variant="prominent"
               showControls={true}
             />
             <Text style={styles.countdownDescription}>
-              For safety, stealth mode automatically exits after the countdown reaches zero.
+              For safety, stealth mode automatically exits after the countdown
+              reaches zero.
             </Text>
           </View>
 
@@ -84,15 +102,27 @@ export default function StealthModeDemoScreen() {
                 <Text style={styles.coverStoryName}>Notes App</Text>
               </View>
               <View style={styles.coverStoryCard}>
-                <MaterialIcons name="calculate" size={32} color={colors.accent} />
+                <MaterialIcons
+                  name="calculate"
+                  size={32}
+                  color={colors.accent}
+                />
                 <Text style={styles.coverStoryName}>Calculator</Text>
               </View>
               <View style={styles.coverStoryCard}>
-                <MaterialIcons name="event-note" size={32} color={colors.accent} />
+                <MaterialIcons
+                  name="event-note"
+                  size={32}
+                  color={colors.accent}
+                />
                 <Text style={styles.coverStoryName}>Calendar</Text>
               </View>
               <View style={styles.coverStoryCard}>
-                <MaterialIcons name="insert-drive-file" size={32} color={colors.accent} />
+                <MaterialIcons
+                  name="insert-drive-file"
+                  size={32}
+                  color={colors.accent}
+                />
                 <Text style={styles.coverStoryName}>Document</Text>
               </View>
             </View>
@@ -101,17 +131,21 @@ export default function StealthModeDemoScreen() {
           <View style={styles.featuresSection}>
             <Text style={styles.sectionTitle}>Key Features</Text>
             <View style={styles.featuresList}>
-              {DEMO_SECTIONS.map(section => (
+              {DEMO_SECTIONS.map((section) => (
                 <TouchableOpacity
                   key={section.id}
                   style={[
                     styles.featureItem,
-                    selectedSection === section.id && styles.selectedFeatureItem
+                    selectedSection === section.id &&
+                      styles.selectedFeatureItem,
                   ]}
-                  onPress={() => setSelectedSection(section.id)}>
+                  onPress={() => setSelectedSection(section.id)}
+                >
                   <Text style={styles.featureTitle}>{section.title}</Text>
                   {selectedSection === section.id && (
-                    <Text style={styles.featureDescription}>{section.description}</Text>
+                    <Text style={styles.featureDescription}>
+                      {section.description}
+                    </Text>
                   )}
                 </TouchableOpacity>
               ))}
@@ -122,24 +156,34 @@ export default function StealthModeDemoScreen() {
             <Text style={styles.sectionTitle}>How to Activate</Text>
             <View style={styles.activationMethod}>
               <View style={styles.activationIcon}>
-                <MaterialIcons name="visibility" size={24} color={colors.accent} />
+                <MaterialIcons
+                  name="visibility"
+                  size={24}
+                  color={colors.accent}
+                />
               </View>
               <View style={styles.activationDetails}>
                 <Text style={styles.activationTitle}>Settings Menu</Text>
                 <Text style={styles.activationDescription}>
-                  Go to Settings → Cover Story to configure and activate stealth mode
+                  Go to Settings → Cover Story to configure and activate stealth
+                  mode
                 </Text>
               </View>
             </View>
-            
+
             <View style={styles.activationMethod}>
               <View style={styles.activationIcon}>
-                <MaterialIcons name="schedule" size={24} color={colors.accent} />
+                <MaterialIcons
+                  name="schedule"
+                  size={24}
+                  color={colors.accent}
+                />
               </View>
               <View style={styles.activationDetails}>
                 <Text style={styles.activationTitle}>Quick Gesture</Text>
                 <Text style={styles.activationDescription}>
-                  Triple-tap the status bar to instantly activate your default cover story
+                  Triple-tap the status bar to instantly activate your default
+                  cover story
                 </Text>
               </View>
             </View>
@@ -147,7 +191,8 @@ export default function StealthModeDemoScreen() {
 
           <TouchableOpacity
             style={styles.tryButton}
-            onPress={() => router.push('/stealth-mode')}>
+            onPress={() => router.push('/stealth-mode')}
+          >
             <Text style={styles.tryButtonText}>Try Stealth Mode</Text>
           </TouchableOpacity>
         </View>

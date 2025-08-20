@@ -1,7 +1,7 @@
 export const NewsStatus = {
   DISABLED: 'DISABLED',
   ERROR: 'ERROR',
-  SUCCESS: 'SUCCESS'
+  SUCCESS: 'SUCCESS',
 };
 
 export interface NewsItem {
@@ -21,7 +21,7 @@ export const getNews = async () => {
   return {
     status: NewsStatus.DISABLED,
     data: [],
-    message: 'News feature is currently unavailable'
+    message: 'News feature is currently unavailable',
   };
 };
 
@@ -30,7 +30,7 @@ export const getNewsItems = async () => {
   return {
     status: NewsStatus.DISABLED,
     data: [],
-    message: 'News feature is currently unavailable'
+    message: 'News feature is currently unavailable',
   };
 };
 
@@ -40,7 +40,7 @@ export const fetchNewsWithOptimization = async () => {
     status: NewsStatus.DISABLED,
     local: [],
     national: [],
-    message: 'News feature is currently unavailable'
+    message: 'News feature is currently unavailable',
   };
 };
 
@@ -49,6 +49,6 @@ export const getArticleDetails = async (id: string) => {
   return {
     status: NewsStatus.DISABLED,
     data: null,
-    message: 'News feature is currently unavailable'
+    message: 'News feature is currently unavailable',
   };
-}; 
+};

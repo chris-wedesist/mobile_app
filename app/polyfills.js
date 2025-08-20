@@ -7,7 +7,10 @@
 import 'react-native-get-random-values';
 
 // STEP 2: Buffer Polyfill for packages like react-native-svg
-if (typeof globalThis !== 'undefined' && typeof globalThis.Buffer === 'undefined') {
+if (
+  typeof globalThis !== 'undefined' &&
+  typeof globalThis.Buffer === 'undefined'
+) {
   try {
     const { Buffer } = require('buffer');
     globalThis.Buffer = Buffer;

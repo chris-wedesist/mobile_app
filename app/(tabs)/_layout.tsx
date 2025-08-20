@@ -1,5 +1,5 @@
-import { View } from 'react-native';
 import { Tabs } from 'expo-router';
+import { View } from 'react-native';
 import CustomTabBar from '../../components/CustomTabBar';
 import EmergencyCallButton from '../../components/EmergencyCallButton';
 
@@ -15,7 +15,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            href: "/",
+            href: '/',
           }}
         />
         <Tabs.Screen name="record" />

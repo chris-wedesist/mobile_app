@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import BadgeUnlockModal from './BadgeUnlockModal';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import BadgeUnlockModal from './BadgeUnlockModal';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -29,7 +29,8 @@ const BADGES: Badge[] = [
   {
     id: 'founding_protector',
     name: 'Founding Protector',
-    description: 'One of the first to join DESIST! and complete safety training',
+    description:
+      'One of the first to join DESIST! and complete safety training',
     icon: <MaterialIcons name="shield" size={32} color="#EA5455" />,
     requirements: {
       type: 'onboarding',
@@ -61,7 +62,7 @@ const BADGES: Badge[] = [
 class BadgeManager {
   private static instance: BadgeManager;
   private modalCallback?: (badge: Badge) => void;
-  
+
   private constructor() {}
 
   public static getInstance(): BadgeManager {
@@ -77,7 +78,7 @@ class BadgeManager {
 
   async checkBadgeEligibility(eventType: string, value: number): Promise<void> {
     try {
-      const badge = BADGES.find(b => b.requirements.type === eventType);
+      const badge = BADGES.find((b) => b.requirements.type === eventType);
       if (!badge) return;
 
       const isAwarded = await AsyncStorage.getItem(`${badge.id}_badge`);
@@ -102,7 +103,7 @@ class BadgeManager {
         metadata: {
           awarded_at: new Date().toISOString(),
           requirements_met: badge.requirements,
-        }
+        },
       });
 
       // Show celebration modal
@@ -118,10 +119,14 @@ class BadgeManager {
     try {
       switch (eventType) {
         case 'invites':
-          const inviteCount = await AsyncStorage.getItem('successful_invite_count');
+          const inviteCount = await AsyncStorage.getItem(
+            'successful_invite_count'
+          );
           return parseInt(inviteCount || '0', 10);
         case 'verified_incidents':
-          const incidentCount = await AsyncStorage.getItem('verified_incident_count');
+          const incidentCount = await AsyncStorage.getItem(
+            'verified_incident_count'
+          );
           return parseInt(incidentCount || '0', 10);
         default:
           return 0;
@@ -177,13 +182,14 @@ export function useBadgeManager() {
   }, []);
 
   return {
-    BadgeUnlockModal: showModal && currentBadge ? (
-      <BadgeUnlockModal
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        badge={{...currentBadge, unlocked: true}}
-      />
-    ) : null,
+    BadgeUnlockModal:
+      showModal && currentBadge ? (
+        <BadgeUnlockModal
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+          badge={{ ...currentBadge, unlocked: true }}
+        />
+      ) : null,
     manager: BadgeManager.getInstance(),
   };
 }

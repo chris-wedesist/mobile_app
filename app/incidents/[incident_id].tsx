@@ -1,13 +1,25 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Platform } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useState, useEffect, useRef } from 'react';
-import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
-import { colors, radius, shadows } from '../../constants/theme';
-import { deleteIncidentFromDevice, uploadIncidentToCloud } from '../../utils/incident-storage';
-import { BiometricAuth } from '../../components/BiometricAuth';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { router, useLocalSearchParams } from 'expo-router';
+import * as Sharing from 'expo-sharing';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { BiometricAuth } from '../../components/BiometricAuth';
+import { colors, radius, shadows } from '../../constants/theme';
+import {
+  deleteIncidentFromDevice,
+  uploadIncidentToCloud,
+} from '../../utils/incident-storage';
 
 type Incident = {
   id: string;
@@ -30,7 +42,9 @@ export default function IncidentDetailScreen() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showBiometricAuth, setShowBiometricAuth] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'delete' | 'share' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'delete' | 'share' | null>(
+    null
+  );
   const videoRef = useRef<Video>(null);
 
   useEffect(() => {
@@ -41,7 +55,7 @@ export default function IncidentDetailScreen() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // In a real app, this would fetch the incident details from storage
       // For demo purposes, we'll create a mock incident
       const mockIncident: Incident = {
@@ -55,7 +69,7 @@ export default function IncidentDetailScreen() {
         created_at: new Date().toISOString(),
         uploaded: Math.random() > 0.5, // Randomly set as uploaded or not
       };
-      
+
       setIncident(mockIncident);
     } catch (err) {
       console.error('Error loading incident details:', err);
@@ -92,12 +106,17 @@ export default function IncidentDetailScreen() {
           onPress: async () => {
             try {
               if (!incident_id) return;
-              
-              const result = await deleteIncidentFromDevice(incident_id as string);
+
+              const result = await deleteIncidentFromDevice(
+                incident_id as string
+              );
               if (result.success) {
                 router.replace('/incidents');
               } else {
-                Alert.alert('Error', result.error || 'Failed to delete incident');
+                Alert.alert(
+                  'Error',
+                  result.error || 'Failed to delete incident'
+                );
               }
             } catch (error) {
               console.error('Error deleting incident:', error);
@@ -111,7 +130,7 @@ export default function IncidentDetailScreen() {
 
   const handleShare = async () => {
     if (!incident) return;
-    
+
     setPendingAction('share');
     if (Platform.OS === 'web') {
       performShare();
@@ -123,7 +142,7 @@ export default function IncidentDetailScreen() {
   const performShare = async () => {
     try {
       if (!incident) return;
-      
+
       if (Platform.OS === 'web') {
         // Web sharing
         if (navigator.share) {
@@ -133,7 +152,10 @@ export default function IncidentDetailScreen() {
             url: incident.videoUri,
           });
         } else {
-          Alert.alert('Sharing not supported', 'Sharing is not supported in this browser');
+          Alert.alert(
+            'Sharing not supported',
+            'Sharing is not supported in this browser'
+          );
         }
       } else {
         // Native sharing
@@ -141,7 +163,10 @@ export default function IncidentDetailScreen() {
         if (isAvailable) {
           await Sharing.shareAsync(incident.videoUri);
         } else {
-          Alert.alert('Sharing not available', 'Sharing is not available on this device');
+          Alert.alert(
+            'Sharing not available',
+            'Sharing is not available on this device'
+          );
         }
       }
     } catch (error) {
@@ -152,13 +177,15 @@ export default function IncidentDetailScreen() {
 
   const handleUpload = async () => {
     if (!incident || incident.uploaded) return;
-    
+
     try {
       setIsUploading(true);
       const result = await uploadIncidentToCloud(incident.id);
-      
+
       if (result.success) {
-        setIncident(prev => prev ? { ...prev, uploaded: true, cloud_url: result.url } : null);
+        setIncident((prev) =>
+          prev ? { ...prev, uploaded: true, cloud_url: result.url } : null
+        );
         Alert.alert('Success', 'Incident uploaded successfully');
       } else {
         Alert.alert('Error', result.error || 'Failed to upload incident');
@@ -184,7 +211,10 @@ export default function IncidentDetailScreen() {
   const handleBiometricFail = () => {
     setShowBiometricAuth(false);
     setPendingAction(null);
-    Alert.alert('Authentication Failed', 'Biometric authentication is required for this action');
+    Alert.alert(
+      'Authentication Failed',
+      'Biometric authentication is required for this action'
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -213,7 +243,10 @@ export default function IncidentDetailScreen() {
         <MaterialIcons name="error" size={64} color={colors.status.error} />
         <Text style={styles.errorTitle}>Error Loading Incident</Text>
         <Text style={styles.errorText}>{error || 'Incident not found'}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -222,10 +255,20 @@ export default function IncidentDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <MaterialIcons
+              name="arrow-back"
+              size={24}
+              color={colors.text.primary}
+            />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
         </View>
@@ -249,38 +292,48 @@ export default function IncidentDetailScreen() {
           <Text style={styles.incidentTitle}>
             {incident.description || `Incident ${incident.id.substring(0, 8)}`}
           </Text>
-          
+
           <View style={styles.metaContainer}>
             <View style={styles.metaItem}>
-              <MaterialIcons name="access-time" size={16} color={colors.text.muted} />
+              <MaterialIcons
+                name="access-time"
+                size={16}
+                color={colors.text.muted}
+              />
               <Text style={styles.metaText}>
                 Recorded on {formatDate(incident.created_at)}
               </Text>
             </View>
-            
+
             {incident.location && (
               <View style={styles.metaItem}>
-                <MaterialIcons name="location-on" size={16} color={colors.text.muted} />
+                <MaterialIcons
+                  name="location-on"
+                  size={16}
+                  color={colors.text.muted}
+                />
                 <Text style={styles.metaText}>
-                  Location: {incident.location.latitude.toFixed(6)}, {incident.location.longitude.toFixed(6)}
+                  Location: {incident.location.latitude.toFixed(6)},{' '}
+                  {incident.location.longitude.toFixed(6)}
                 </Text>
               </View>
             )}
           </View>
 
           <View style={styles.actionsContainer}>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={handleShare}
-            >
-              <MaterialIcons name="share" size={20} color={colors.text.primary} />
+            <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+              <MaterialIcons
+                name="share"
+                size={20}
+                color={colors.text.primary}
+              />
               <Text style={styles.actionText}>Share</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[
                 styles.actionButton,
-                incident.uploaded && styles.actionButtonDisabled
+                incident.uploaded && styles.actionButtonDisabled,
               ]}
               onPress={handleUpload}
               disabled={incident.uploaded || isUploading}
@@ -288,18 +341,30 @@ export default function IncidentDetailScreen() {
               {isUploading ? (
                 <ActivityIndicator size="small" color={colors.text.primary} />
               ) : (
-                <MaterialIcons name="upload" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="upload"
+                  size={20}
+                  color={colors.text.primary}
+                />
               )}
               <Text style={styles.actionText}>
-                {isUploading ? 'Uploading...' : incident.uploaded ? 'Uploaded' : 'Upload'}
+                {isUploading
+                  ? 'Uploading...'
+                  : incident.uploaded
+                  ? 'Uploaded'
+                  : 'Upload'}
               </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton]}
               onPress={handleDelete}
             >
-              <MaterialIcons name="delete" size={20} color={colors.text.primary} />
+              <MaterialIcons
+                name="delete"
+                size={20}
+                color={colors.text.primary}
+              />
               <Text style={styles.actionText}>Delete</Text>
             </TouchableOpacity>
           </View>
@@ -311,12 +376,15 @@ export default function IncidentDetailScreen() {
           <View style={styles.biometricContainer}>
             <Text style={styles.biometricTitle}>Authentication Required</Text>
             <Text style={styles.biometricText}>
-              Please authenticate to {pendingAction === 'delete' ? 'delete' : 'share'} this incident
+              Please authenticate to{' '}
+              {pendingAction === 'delete' ? 'delete' : 'share'} this incident
             </Text>
             <BiometricAuth
               onSuccess={handleBiometricSuccess}
               onFail={handleBiometricFail}
-              promptMessage={`Authenticate to ${pendingAction === 'delete' ? 'delete' : 'share'} incident`}
+              promptMessage={`Authenticate to ${
+                pendingAction === 'delete' ? 'delete' : 'share'
+              } incident`}
             />
           </View>
         </View>
@@ -461,7 +529,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
-    ...shadows.large,
+    ...shadows.lg,
   },
   biometricTitle: {
     fontSize: 20,

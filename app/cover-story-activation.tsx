@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch } from 'react-native';
-import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../constants/theme';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useStealthMode } from '../components/StealthModeManager';
+import { colors, radius, shadows } from '../constants/theme';
 
 type CoverStoryType = {
   id: string;
@@ -17,7 +25,8 @@ const COVER_STORIES: CoverStoryType[] = [
     id: 'notes',
     name: 'Notes App',
     icon: <MaterialIcons name="notes" size={24} color={colors.accent} />,
-    description: 'Transform into a simple notes application with realistic content.',
+    description:
+      'Transform into a simple notes application with realistic content.',
   },
   {
     id: 'browser',
@@ -30,7 +39,7 @@ const COVER_STORIES: CoverStoryType[] = [
     name: 'Calculator',
     icon: <MaterialIcons name="calculate" size={24} color={colors.accent} />,
     description: 'Show a functional calculator interface.',
-  }
+  },
 ];
 
 export default function CoverStoryActivationScreen() {
@@ -60,8 +69,13 @@ export default function CoverStoryActivationScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -73,7 +87,8 @@ export default function CoverStoryActivationScreen() {
         </View>
 
         <Text style={styles.description}>
-          Quickly disguise DESIST! as another app if you feel unsafe or are being watched.
+          Quickly disguise DESIST! as another app if you feel unsafe or are
+          being watched.
         </Text>
 
         {error && (
@@ -86,26 +101,29 @@ export default function CoverStoryActivationScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Choose Cover Story</Text>
           <View style={styles.storiesGrid}>
-            {COVER_STORIES.map(story => (
+            {COVER_STORIES.map((story) => (
               <TouchableOpacity
                 key={story.id}
                 style={[
                   styles.storyOption,
-                  selectedStory === story.id && styles.selectedStory
+                  selectedStory === story.id && styles.selectedStory,
                 ]}
-                onPress={() => setSelectedStory(story.id)}>
+                onPress={() => setSelectedStory(story.id)}
+              >
                 <View style={styles.storyHeader}>
                   {story.icon}
                   {selectedStory === story.id && (
                     <View style={styles.checkmark}>
-                      <MaterialIcons name="check" size={16} color={colors.text.primary} />
+                      <MaterialIcons
+                        name="check"
+                        size={16}
+                        color={colors.text.primary}
+                      />
                     </View>
                   )}
                 </View>
                 <Text style={styles.storyName}>{story.name}</Text>
-                <Text style={styles.storyDescription}>
-                  {story.description}
-                </Text>
+                <Text style={styles.storyDescription}>{story.description}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -114,7 +132,12 @@ export default function CoverStoryActivationScreen() {
         <View style={styles.section}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <MaterialIcons name="visibility" size={24} color={colors.accent} /> // use correct icon names
+              <MaterialIcons
+                name="visibility"
+                size={24}
+                color={colors.accent}
+              />{' '}
+              // use correct icon names
               <View>
                 <Text style={styles.settingTitle}>Auto-Activate</Text>
                 <Text style={styles.settingDescription}>
@@ -126,7 +149,9 @@ export default function CoverStoryActivationScreen() {
               value={autoActivate}
               onValueChange={setAutoActivate}
               trackColor={{ false: colors.text.muted, true: colors.accent }}
-              thumbColor={autoActivate ? colors.text.primary : colors.text.secondary}
+              thumbColor={
+                autoActivate ? colors.text.primary : colors.text.secondary
+              }
             />
           </View>
         </View>
@@ -134,18 +159,24 @@ export default function CoverStoryActivationScreen() {
         <TouchableOpacity
           style={[
             styles.activateButton,
-            isActivating && styles.activateButtonDisabled
+            isActivating && styles.activateButtonDisabled,
           ]}
           onPress={handleActivation}
-          disabled={isActivating}>
-          <MaterialIcons name="visibility" size={24} color={colors.text.primary} />
+          disabled={isActivating}
+        >
+          <MaterialIcons
+            name="visibility"
+            size={24}
+            color={colors.text.primary}
+          />
           <Text style={styles.activateButtonText}>
             {isActivating ? 'Activating...' : 'Activate Cover Story'}
           </Text>
         </TouchableOpacity>
 
         <Text style={styles.tip}>
-          Tip: Press and hold the volume down button for 3 seconds to exit cover story mode
+          Tip: Press and hold the volume down button for 3 seconds to exit cover
+          story mode
         </Text>
       </ScrollView>
     </View>

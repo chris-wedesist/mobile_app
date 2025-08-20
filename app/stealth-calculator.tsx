@@ -1,10 +1,19 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '../components/StealthModeManager';
-import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useState } from 'react';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  GestureHandlerRootView,
+  LongPressGestureHandler,
+} from 'react-native-gesture-handler';
+import { useStealthMode } from '../components/StealthModeManager';
+import { colors, radius, shadows } from '../constants/theme';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
 
 type Operation = '+' | '-' | '×' | '÷' | '=' | null;
 
@@ -14,7 +23,7 @@ export default function StealthCalculatorScreen() {
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<Operation>(null);
   const [clearNext, setClearNext] = useState(false);
-  
+
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   useStealthAutoTimeout(10);
 
@@ -90,15 +99,19 @@ export default function StealthCalculatorScreen() {
     onPress: () => void,
     style?: object
   ) => (
-    <TouchableOpacity
-      style={[styles.button, style]}
-      onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
       {typeof content === 'string' ? (
-        <Text style={[
-          styles.buttonText,
-          style === styles.operationButton && styles.operationButtonText
-        ]}>{content}</Text>
-      ) : content}
+        <Text
+          style={[
+            styles.buttonText,
+            style === styles.operationButton && styles.operationButtonText,
+          ]}
+        >
+          {content}
+        </Text>
+      ) : (
+        content
+      )}
     </TouchableOpacity>
   );
 
@@ -107,7 +120,8 @@ export default function StealthCalculatorScreen() {
       <LongPressGestureHandler
         minDurationMs={3000}
         onHandlerStateChange={({ nativeEvent }) => {
-          if (nativeEvent.state === 4) { // 4 = ACTIVE (long press triggered)
+          if (nativeEvent.state === 4) {
+            // 4 = ACTIVE (long press triggered)
             handleLongPress();
           }
         }}
@@ -125,35 +139,66 @@ export default function StealthCalculatorScreen() {
           <View style={styles.buttonGrid}>
             <View style={styles.row}>
               {renderButton('C', handleClear, styles.clearButton)}
-              {renderButton(<MaterialIcons name="backspace" size={24} color={colors.text.primary} />, handleDelete)}
-              {renderButton(<MaterialIcons name="close" size={24} color={colors.accent} />, () => handleOperation('÷'), styles.operationButton)}
+              {renderButton(
+                <MaterialIcons
+                  name="backspace"
+                  size={24}
+                  color={colors.text.primary}
+                />,
+                handleDelete
+              )}
+              {renderButton(
+                <MaterialIcons name="close" size={24} color={colors.accent} />,
+                () => handleOperation('÷'),
+                styles.operationButton
+              )}
             </View>
 
             <View style={styles.row}>
               {renderButton('7', () => handleNumber('7'))}
               {renderButton('8', () => handleNumber('8'))}
               {renderButton('9', () => handleNumber('9'))}
-              {renderButton(<MaterialIcons name="close" size={24} color={colors.accent} />, () => handleOperation('×'), styles.operationButton)}
+              {renderButton(
+                <MaterialIcons name="close" size={24} color={colors.accent} />,
+                () => handleOperation('×'),
+                styles.operationButton
+              )}
             </View>
 
             <View style={styles.row}>
               {renderButton('4', () => handleNumber('4'))}
               {renderButton('5', () => handleNumber('5'))}
               {renderButton('6', () => handleNumber('6'))}
-              {renderButton(<MaterialIcons name="remove" size={24} color={colors.accent} />, () => handleOperation('-'), styles.operationButton)}
+              {renderButton(
+                <MaterialIcons name="remove" size={24} color={colors.accent} />,
+                () => handleOperation('-'),
+                styles.operationButton
+              )}
             </View>
 
             <View style={styles.row}>
               {renderButton('1', () => handleNumber('1'))}
               {renderButton('2', () => handleNumber('2'))}
               {renderButton('3', () => handleNumber('3'))}
-              {renderButton(<MaterialIcons name="add" size={24} color={colors.accent} />, () => handleOperation('+'), styles.operationButton)}
+              {renderButton(
+                <MaterialIcons name="add" size={24} color={colors.accent} />,
+                () => handleOperation('+'),
+                styles.operationButton
+              )}
             </View>
 
             <View style={styles.row}>
               {renderButton('0', () => handleNumber('0'), styles.zeroButton)}
               {renderButton('.', handleDecimal)}
-              {renderButton(<MaterialIcons name="equalizer" size={24} color={colors.text.primary} />, () => handleOperation('='), styles.equalsButton)}
+              {renderButton(
+                <MaterialIcons
+                  name="equalizer"
+                  size={24}
+                  color={colors.text.primary}
+                />,
+                () => handleOperation('='),
+                styles.equalsButton
+              )}
             </View>
           </View>
         </View>

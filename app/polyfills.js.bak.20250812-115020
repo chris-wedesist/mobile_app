@@ -1,0 +1,73 @@
+// ========================================================================
+// Hermes-safe polyfills for Expo Go (load as the very first import)
+// ========================================================================
+
+// Provide a web-like global.self (some libs assume self exists)
+if (typeof globalThis !== 'undefined' && typeof globalThis.self === 'undefined') {
+  globalThis.self = globalThis;
+}
+
+// Basic process/env shim (usually provided by RN, but ensure it's there early)
+if (typeof globalThis.process === 'undefined') {
+  // @ts-ignore
+  globalThis.process = { env: {} };
+} else {
+  // Ensure env exists
+  // @ts-ignore
+  globalThis.process.env = globalThis.process.env || {};
+}
+
+// Identify runtime for libraries that check navigator.product
+if (typeof globalThis.navigator === 'undefined') {
+  // @ts-ignore
+  globalThis.navigator = {};
+}
+// @ts-ignore
+if (!globalThis.navigator.product) globalThis.navigator.product = 'ReactNative';
+
+// Crypto: getRandomValues (needed by many libs and web crypto polyfills)
+import 'react-native-get-random-values';
+
+// URL / URLSearchParams (widely needed by tooling)
+import 'react-native-url-polyfill/auto';
+
+// Base64 helpers (atob/btoa)
+import { encode as __btoa, decode as __atob } from 'base-64';
+if (typeof globalThis.btoa === 'undefined') globalThis.btoa = __btoa;
+if (typeof globalThis.atob === 'undefined') globalThis.atob = __atob;
+
+// Buffer polyfill (used by various libs)
+if (typeof globalThis.Buffer === 'undefined') {
+  try {
+    const { Buffer } = require('buffer');
+    globalThis.Buffer = Buffer;
+  } catch {
+    console.warn('Buffer polyfill not available');
+  }
+}
+
+// TextEncoder/TextDecoder polyfill (Hermes-friendly)
+// Use fastestsmallesttextencoderdecoder instead of fast-text-encoding
+try {
+  if (typeof globalThis.TextEncoder === 'undefined' || typeof globalThis.TextDecoder === 'undefined') {
+    const enc = require('fastestsmallesttextencoderdecoder');
+    if (enc && (enc.TextEncoder || enc['TextEncoder'])) {
+      // Some bundlers export as props, ensure both set
+      globalThis.TextEncoder = enc.TextEncoder || enc['TextEncoder'];
+    }
+    if (enc && (enc.TextDecoder || enc['TextDecoder'])) {
+      globalThis.TextDecoder = enc.TextDecoder || enc['TextDecoder'];
+    }
+    if (typeof globalThis.TextEncoder === 'undefined' || typeof globalThis.TextDecoder === 'undefined') {
+      console.warn('TextEncoder/TextDecoder polyfill could not be initialized');
+    }
+  }
+} catch (e) {
+  console.warn('Failed to initialize TextEncoder/TextDecoder polyfill:', e);
+}
+
+// Ensure globalThis.window references globalThis (avoid web-target checks failing)
+if (typeof globalThis.window === 'undefined') {
+  // @ts-ignore
+  globalThis.window = globalThis;
+}

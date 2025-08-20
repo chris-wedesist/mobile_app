@@ -1,16 +1,22 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../constants/theme';
 
 export default function NotFoundScreen() {
   return (
     <View style={styles.container}>
-      <MaterialIcons name="error-outline" size={80} color={colors.status.error} />
+      <MaterialIcons
+        name="error-outline"
+        size={80}
+        color={colors.status.error}
+      />
       <Text style={styles.title}>Oops!</Text>
-      <Text style={styles.message}>We couldn't find the page you're looking for.</Text>
-      <TouchableOpacity 
-        style={styles.button} 
+      <Text style={styles.message}>
+        We couldn't find the page you're looking for.
+      </Text>
+      <TouchableOpacity
+        style={styles.button}
         onPress={() => {
           console.log('Navigating to home from not found screen');
           router.replace('/(tabs)');

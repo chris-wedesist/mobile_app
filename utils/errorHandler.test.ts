@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { errorHandler, AppError } from './errorHandler';
+import { AppError, errorHandler } from './errorHandler';
 
 // Updated tests for simplified error handler (without Sentry)
 describe('errorHandler', () => {
@@ -20,7 +20,12 @@ describe('errorHandler', () => {
   });
 
   it('returns userMessage for AppError and logs to console', () => {
-    const error = new AppError('Internal error', 'E123', 'high', 'Something went wrong!');
+    const error = new AppError(
+      'Internal error',
+      'E123',
+      'high',
+      'Something went wrong!'
+    );
     const result = errorHandler(error);
     expect(result).toBe('Something went wrong!');
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -32,7 +37,9 @@ describe('errorHandler', () => {
   it('returns default message and logs to console for unknown error', () => {
     const error = new Error('Unknown');
     const result = errorHandler(error);
-    expect(result).toBe('An unexpected error occurred. Please try again later.');
+    expect(result).toBe(
+      'An unexpected error occurred. Please try again later.'
+    );
     expect(consoleErrorSpy).toHaveBeenCalledWith('Unexpected error:', error);
   });
-}); 
+});

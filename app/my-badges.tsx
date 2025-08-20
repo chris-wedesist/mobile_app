@@ -1,9 +1,16 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../constants/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 type Badge = {
   id: string;
@@ -23,7 +30,8 @@ export default function MyBadgesScreen() {
     {
       id: 'founding_protector',
       name: 'Founding Protector',
-      description: 'One of the first to join DESIST! and complete safety training',
+      description:
+        'One of the first to join DESIST! and complete safety training',
       icon: <MaterialIcons name="shield" size={32} color={colors.accent} />,
       unlockedAt: null,
       requirements: 'Complete the safety mission demo',
@@ -44,7 +52,9 @@ export default function MyBadgesScreen() {
       id: 'emergency_sentinel',
       name: 'Emergency Sentinel',
       description: 'Actively contributing to community safety awareness',
-      icon: <MaterialIcons name="notifications" size={32} color={colors.accent} />,
+      icon: (
+        <MaterialIcons name="notifications" size={32} color={colors.accent} />
+      ),
       unlockedAt: null,
       requirements: 'Report 5 verified incidents',
       progress: {
@@ -63,41 +73,51 @@ export default function MyBadgesScreen() {
   const loadBadgeStatus = async () => {
     try {
       // Load badge statuses
-      const foundingProtector = await AsyncStorage.getItem('founding_protector_badge');
+      const foundingProtector = await AsyncStorage.getItem(
+        'founding_protector_badge'
+      );
       const shieldBuilder = await AsyncStorage.getItem('shield_builder_badge');
       const inviteCount = await AsyncStorage.getItem('successful_invite_count');
-      const incidentCount = await AsyncStorage.getItem('verified_incident_count');
+      const incidentCount = await AsyncStorage.getItem(
+        'verified_incident_count'
+      );
 
-      setBadges(prev => prev.map(badge => {
-        switch (badge.id) {
-          case 'founding_protector':
-            return {
-              ...badge,
-              unlockedAt: foundingProtector === 'awarded' ? new Date().toISOString() : null,
-            };
-          case 'shield_builder':
-            const invites = parseInt(inviteCount || '0', 10);
-            return {
-              ...badge,
-              unlockedAt: shieldBuilder === 'awarded' ? new Date().toISOString() : null,
-              progress: {
-                current: invites,
-                total: 3,
-              },
-            };
-          case 'emergency_sentinel':
-            const incidents = parseInt(incidentCount || '0', 10);
-            return {
-              ...badge,
-              progress: {
-                current: incidents,
-                total: 5,
-              },
-            };
-          default:
-            return badge;
-        }
-      }));
+      setBadges((prev) =>
+        prev.map((badge) => {
+          switch (badge.id) {
+            case 'founding_protector':
+              return {
+                ...badge,
+                unlockedAt:
+                  foundingProtector === 'awarded'
+                    ? new Date().toISOString()
+                    : null,
+              };
+            case 'shield_builder':
+              const invites = parseInt(inviteCount || '0', 10);
+              return {
+                ...badge,
+                unlockedAt:
+                  shieldBuilder === 'awarded' ? new Date().toISOString() : null,
+                progress: {
+                  current: invites,
+                  total: 3,
+                },
+              };
+            case 'emergency_sentinel':
+              const incidents = parseInt(incidentCount || '0', 10);
+              return {
+                ...badge,
+                progress: {
+                  current: incidents,
+                  total: 5,
+                },
+              };
+            default:
+              return badge;
+          }
+        })
+      );
     } catch (error) {
       console.error('Error loading badge status:', error);
     } finally {
@@ -105,13 +125,17 @@ export default function MyBadgesScreen() {
     }
   };
 
-  const unlockedCount = badges.filter(badge => badge.unlockedAt).length;
+  const unlockedCount = badges.filter((badge) => badge.unlockedAt).length;
 
   const renderProgress = (badge: Badge) => {
     if (badge.unlockedAt) {
       return (
         <View style={styles.unlockedStatus}>
-          <MaterialIcons name="verified" size={16} color={colors.status.success} />
+          <MaterialIcons
+            name="verified"
+            size={16}
+            color={colors.status.success}
+          />
           <Text style={styles.unlockedText}>Unlocked</Text>
         </View>
       );
@@ -121,23 +145,26 @@ export default function MyBadgesScreen() {
       return (
         <View style={styles.progressContainer}>
           <View style={styles.badgeProgressBar}>
-            <View 
+            <View
               style={[
                 styles.badgeProgressFill,
-                { width: `${(badge.progress.current / badge.progress.total) * 100}%` }
+                {
+                  width: `${
+                    (badge.progress.current / badge.progress.total) * 100
+                  }%`,
+                },
               ]}
             />
           </View>
           <Text style={styles.progressText}>
-            {badge.progress.current}/{badge.progress.total} {badge.id === 'shield_builder' ? 'invites' : 'incidents'}
+            {badge.progress.current}/{badge.progress.total}{' '}
+            {badge.id === 'shield_builder' ? 'invites' : 'incidents'}
           </Text>
         </View>
       );
     }
 
-    return (
-      <Text style={styles.requirementText}>{badge.requirements}</Text>
-    );
+    return <Text style={styles.requirementText}>{badge.requirements}</Text>;
   };
 
   return (
@@ -145,8 +172,13 @@ export default function MyBadgesScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -160,10 +192,10 @@ export default function MyBadgesScreen() {
         <View style={styles.progressCard}>
           <Text style={styles.progressTitle}>Badge Progress</Text>
           <View style={styles.progressBar}>
-            <View 
+            <View
               style={[
                 styles.progressFill,
-                { width: `${(unlockedCount / badges.length) * 100}%` }
+                { width: `${(unlockedCount / badges.length) * 100}%` },
               ]}
             />
           </View>
@@ -173,33 +205,32 @@ export default function MyBadgesScreen() {
         </View>
 
         <View style={styles.badgesGrid}>
-          {badges.map(badge => (
-            <View 
+          {badges.map((badge) => (
+            <View
               key={badge.id}
               style={[
                 styles.badgeCard,
-                badge.unlockedAt && styles.unlockedBadge
-              ]}>
+                badge.unlockedAt && styles.unlockedBadge,
+              ]}
+            >
               <View style={styles.badgeHeader}>
-                <View style={styles.badgeIcon}>
-                  {badge.icon}
-                </View>
+                <View style={styles.badgeIcon}>{badge.icon}</View>
                 {!badge.unlockedAt && (
-                  <MaterialIcons name="lock" size={20} color={colors.text.muted} />
+                  <MaterialIcons
+                    name="lock"
+                    size={20}
+                    color={colors.text.muted}
+                  />
                 )}
               </View>
               <Text style={styles.badgeName}>{badge.name}</Text>
-              <Text style={styles.badgeDescription}>
-                {badge.description}
-              </Text>
+              <Text style={styles.badgeDescription}>{badge.description}</Text>
               {renderProgress(badge)}
             </View>
           ))}
         </View>
 
-        <Text style={styles.comingSoon}>
-          More badges coming soon...
-        </Text>
+        <Text style={styles.comingSoon}>More badges coming soon...</Text>
       </ScrollView>
     </View>
   );

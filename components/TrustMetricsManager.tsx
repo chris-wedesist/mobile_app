@@ -7,7 +7,7 @@ const supabase = createClient(
 
 class TrustMetricsManager {
   private static instance: TrustMetricsManager;
-  
+
   private constructor() {}
 
   public static getInstance(): TrustMetricsManager {
@@ -59,8 +59,8 @@ class TrustMetricsManager {
         details: {
           encounter_type: encounter.encounter_type,
           verification_method: 'community',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
 
       return metrics;
@@ -72,8 +72,7 @@ class TrustMetricsManager {
 
   async getTrustMetricsSummary() {
     try {
-      const { data, error } = await supabase
-        .rpc('get_trust_metrics_summary');
+      const { data, error } = await supabase.rpc('get_trust_metrics_summary');
 
       if (error) throw error;
       return data;
@@ -111,11 +110,12 @@ class TrustMetricsManager {
       if (encounterError) throw encounterError;
 
       // First get current metrics
-      const { data: currentFlaggedMetrics, error: fetchFlaggedError } = await supabase
-        .from('trust_metrics')
-        .select('total_flagged')
-        .eq('id', encounter.user_id)
-        .single();
+      const { data: currentFlaggedMetrics, error: fetchFlaggedError } =
+        await supabase
+          .from('trust_metrics')
+          .select('total_flagged')
+          .eq('id', encounter.user_id)
+          .single();
 
       if (fetchFlaggedError) throw fetchFlaggedError;
 
@@ -141,8 +141,8 @@ class TrustMetricsManager {
         details: {
           reason,
           encounter_type: encounter.encounter_type,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
 
       return metrics;

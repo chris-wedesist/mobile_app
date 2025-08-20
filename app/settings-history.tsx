@@ -1,16 +1,31 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
-import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { createClient } from '@supabase/supabase-js';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!
 );
 
-type SettingFilter = 'all' | 'stealth_mode' | 'cover_story' | 'panic_gesture' | 'auto_upload' | 'auto_wipe' | 'emergency_sms';
+type SettingFilter =
+  | 'all'
+  | 'stealth_mode'
+  | 'cover_story'
+  | 'panic_gesture'
+  | 'auto_upload'
+  | 'auto_wipe'
+  | 'emergency_sms';
 type TimeRange = 7 | 30 | 90 | 365;
 
 type AuditLogEntry = {
@@ -30,7 +45,9 @@ export default function SettingsHistoryScreen() {
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedEntries, setExpandedEntries] = useState<Record<string, boolean>>({});
+  const [expandedEntries, setExpandedEntries] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     fetchAuditLog();
@@ -68,9 +85,9 @@ export default function SettingsHistoryScreen() {
   };
 
   const toggleExpand = (id: string) => {
-    setExpandedEntries(prev => ({
+    setExpandedEntries((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
@@ -81,63 +98,100 @@ export default function SettingsHistoryScreen() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const formatSettingName = (setting: string) => {
     return setting
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'web':
-        return <MaterialIcons name="public" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons name="public" size={16} color={colors.text.muted} />
+        );
       case 'ios':
-        return <MaterialIcons name="phone-iphone" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons
+            name="phone-iphone"
+            size={16}
+            color={colors.text.muted}
+          />
+        );
       case 'android':
-        return <MaterialIcons name="phone-iphone" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons
+            name="phone-iphone"
+            size={16}
+            color={colors.text.muted}
+          />
+        );
       default:
-        return <MaterialIcons name="smartphone" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons
+            name="smartphone"
+            size={16}
+            color={colors.text.muted}
+          />
+        );
     }
   };
 
   const getFilterLabel = (filter: SettingFilter) => {
     switch (filter) {
-      case 'all': return 'All Settings';
-      default: return formatSettingName(filter);
+      case 'all':
+        return 'All Settings';
+      default:
+        return formatSettingName(filter);
     }
   };
 
   const getTimeRangeLabel = (days: TimeRange) => {
     switch (days) {
-      case 7: return 'Last 7 days';
-      case 30: return 'Last 30 days';
-      case 90: return 'Last 3 months';
-      case 365: return 'Last year';
+      case 7:
+        return 'Last 7 days';
+      case 30:
+        return 'Last 30 days';
+      case 90:
+        return 'Last 3 months';
+      case 365:
+        return 'Last year';
     }
   };
 
   const renderValueChange = (oldValue: any, newValue: any, setting: string) => {
     // Handle boolean settings
-    if (typeof oldValue?.enabled === 'boolean' && typeof newValue?.enabled === 'boolean') {
+    if (
+      typeof oldValue?.enabled === 'boolean' &&
+      typeof newValue?.enabled === 'boolean'
+    ) {
       return (
         <Text style={styles.valueChangeText}>
           <Text style={styles.valueChangeLabel}>Changed from </Text>
-          <Text style={{ 
-            color: oldValue.enabled ? colors.status.success : colors.status.error,
-            fontWeight: '600'
-          }}>
+          <Text
+            style={{
+              color: oldValue.enabled
+                ? colors.status.success
+                : colors.status.error,
+              fontWeight: '600',
+            }}
+          >
             {oldValue.enabled ? 'Enabled' : 'Disabled'}
           </Text>
           <Text style={styles.valueChangeLabel}> to </Text>
-          <Text style={{ 
-            color: newValue.enabled ? colors.status.success : colors.status.error,
-            fontWeight: '600'
-          }}>
+          <Text
+            style={{
+              color: newValue.enabled
+                ? colors.status.success
+                : colors.status.error,
+              fontWeight: '600',
+            }}
+          >
             {newValue.enabled ? 'Enabled' : 'Disabled'}
           </Text>
         </Text>
@@ -164,9 +218,13 @@ export default function SettingsHistoryScreen() {
     return (
       <View>
         <Text style={styles.valueChangeLabel}>Previous value:</Text>
-        <Text style={styles.valueChangeText}>{JSON.stringify(oldValue, null, 2)}</Text>
+        <Text style={styles.valueChangeText}>
+          {JSON.stringify(oldValue, null, 2)}
+        </Text>
         <Text style={styles.valueChangeLabel}>New value:</Text>
-        <Text style={styles.valueChangeText}>{JSON.stringify(newValue, null, 2)}</Text>
+        <Text style={styles.valueChangeText}>
+          {JSON.stringify(newValue, null, 2)}
+        </Text>
       </View>
     );
   };
@@ -176,8 +234,13 @@ export default function SettingsHistoryScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="arrow-back"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -195,25 +258,43 @@ export default function SettingsHistoryScreen() {
         <View style={styles.filtersContainer}>
           <View style={styles.filterSection}>
             <View style={styles.filterHeader}>
-              <MaterialIcons name="filter-list" size={16} color={colors.text.muted} />
+              <MaterialIcons
+                name="filter-list"
+                size={16}
+                color={colors.text.muted}
+              />
               <Text style={styles.filterTitle}>Filter by Setting</Text>
             </View>
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.filterOptions}>
-              {(['all', 'stealth_mode', 'cover_story', 'panic_gesture', 'auto_upload', 'auto_wipe', 'emergency_sms'] as SettingFilter[]).map(filter => (
+              contentContainerStyle={styles.filterOptions}
+            >
+              {(
+                [
+                  'all',
+                  'stealth_mode',
+                  'cover_story',
+                  'panic_gesture',
+                  'auto_upload',
+                  'auto_wipe',
+                  'emergency_sms',
+                ] as SettingFilter[]
+              ).map((filter) => (
                 <TouchableOpacity
                   key={filter}
                   style={[
                     styles.filterChip,
-                    selectedFilter === filter && styles.activeFilterChip
+                    selectedFilter === filter && styles.activeFilterChip,
                   ]}
-                  onPress={() => setSelectedFilter(filter)}>
-                  <Text style={[
-                    styles.filterChipText,
-                    selectedFilter === filter && styles.activeFilterChipText
-                  ]}>
+                  onPress={() => setSelectedFilter(filter)}
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      selectedFilter === filter && styles.activeFilterChipText,
+                    ]}
+                  >
                     {getFilterLabel(filter)}
                   </Text>
                 </TouchableOpacity>
@@ -227,18 +308,21 @@ export default function SettingsHistoryScreen() {
               <Text style={styles.filterTitle}>Time Range</Text>
             </View>
             <View style={styles.timeRangeOptions}>
-              {([7, 30, 90, 365] as TimeRange[]).map(days => (
+              {([7, 30, 90, 365] as TimeRange[]).map((days) => (
                 <TouchableOpacity
                   key={days}
                   style={[
                     styles.timeRangeChip,
-                    timeRange === days && styles.activeTimeRangeChip
+                    timeRange === days && styles.activeTimeRangeChip,
                   ]}
-                  onPress={() => setTimeRange(days)}>
-                  <Text style={[
-                    styles.timeRangeChipText,
-                    timeRange === days && styles.activeTimeRangeChipText
-                  ]}>
+                  onPress={() => setTimeRange(days)}
+                >
+                  <Text
+                    style={[
+                      styles.timeRangeChipText,
+                      timeRange === days && styles.activeTimeRangeChipText,
+                    ]}
+                  >
                     {getTimeRangeLabel(days)}
                   </Text>
                 </TouchableOpacity>
@@ -249,7 +333,7 @@ export default function SettingsHistoryScreen() {
 
         <View style={styles.logContainer}>
           <Text style={styles.logTitle}>Change History</Text>
-          
+
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.accent} />
@@ -257,15 +341,26 @@ export default function SettingsHistoryScreen() {
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
-              <MaterialIcons name="error" size={24} color={colors.status.error} />
+              <MaterialIcons
+                name="error"
+                size={24}
+                color={colors.status.error}
+              />
               <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={fetchAuditLog}>
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={fetchAuditLog}
+              >
                 <Text style={styles.retryText}>Retry</Text>
               </TouchableOpacity>
             </View>
           ) : auditLog.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="history" size={48} color={colors.text.muted} />
+              <MaterialIcons
+                name="history"
+                size={48}
+                color={colors.text.muted}
+              />
               <Text style={styles.emptyText}>No settings changes found</Text>
               <Text style={styles.emptySubtext}>
                 Changes to your settings will appear here
@@ -273,8 +368,8 @@ export default function SettingsHistoryScreen() {
             </View>
           ) : (
             <ScrollView style={styles.logList}>
-              {auditLog.map(entry => (
-                <TouchableOpacity 
+              {auditLog.map((entry) => (
+                <TouchableOpacity
                   key={entry.id}
                   style={styles.logEntry}
                   onPress={() => toggleExpand(entry.id)}
@@ -288,31 +383,57 @@ export default function SettingsHistoryScreen() {
                       </Text>
                     </View>
                     <View style={styles.logMeta}>
-                      <MaterialIcons name="schedule" size={14} color={colors.text.muted} />
-                      <Text style={styles.timestamp}>{formatDate(entry.changed_at)}</Text>
+                      <MaterialIcons
+                        name="schedule"
+                        size={14}
+                        color={colors.text.muted}
+                      />
+                      <Text style={styles.timestamp}>
+                        {formatDate(entry.changed_at)}
+                      </Text>
                       {expandedEntries[entry.id] ? (
-                        <MaterialIcons name="expand-less" size={16} color={colors.text.muted} />
+                        <MaterialIcons
+                          name="expand-less"
+                          size={16}
+                          color={colors.text.muted}
+                        />
                       ) : (
-                        <MaterialIcons name="expand-more" size={16} color={colors.text.muted} />
+                        <MaterialIcons
+                          name="expand-more"
+                          size={16}
+                          color={colors.text.muted}
+                        />
                       )}
                     </View>
                   </View>
 
-                  {renderValueChange(entry.old_value, entry.new_value, entry.setting_changed)}
+                  {renderValueChange(
+                    entry.old_value,
+                    entry.new_value,
+                    entry.setting_changed
+                  )}
 
                   {expandedEntries[entry.id] && (
                     <View style={styles.logDetails}>
                       <View style={styles.metadataContainer}>
                         <Text style={styles.metadataLabel}>Source:</Text>
-                        <Text style={styles.metadataValue}>{entry.change_source || 'App'}</Text>
-                        
+                        <Text style={styles.metadataValue}>
+                          {entry.change_source || 'App'}
+                        </Text>
+
                         <Text style={styles.metadataLabel}>Platform:</Text>
-                        <Text style={styles.metadataValue}>{entry.platform}</Text>
-                        
+                        <Text style={styles.metadataValue}>
+                          {entry.platform}
+                        </Text>
+
                         {entry.metadata?.app_version && (
                           <>
-                            <Text style={styles.metadataLabel}>App Version:</Text>
-                            <Text style={styles.metadataValue}>{entry.metadata.app_version}</Text>
+                            <Text style={styles.metadataLabel}>
+                              App Version:
+                            </Text>
+                            <Text style={styles.metadataValue}>
+                              {entry.metadata.app_version}
+                            </Text>
                           </>
                         )}
                       </View>

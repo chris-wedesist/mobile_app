@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { forwardRef } from 'react';
-import { 
-  TouchableOpacity, 
-  Text, 
-  ActivityIndicator, 
-  StyleSheet, 
-  ViewStyle, 
-  TextStyle,
+import {
   AccessibilityInfo,
-  Platform
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
 } from 'react-native';
 import { colors } from '../constants/theme';
 
@@ -36,40 +36,45 @@ interface AccessibleButtonProps {
 }
 
 // Forward ref for proper accessibility focus management
-export const AccessibleButton = forwardRef<React.ElementRef<typeof TouchableOpacity>, AccessibleButtonProps>(
-  ({ 
-    children, 
-    isLoading = false, 
-    disabled = false,
-    onPress,
-    style,
-    textStyle,
-    accessibilityLabel,
-    accessibilityHint,
-    accessibilityRole = 'button',
-    accessibilityState,
-    accessible = true,
-    accessibilityLiveRegion = 'polite',
-    importantForAccessibility = 'yes',
-    ...props 
-  }, ref) => {
-    
+export const AccessibleButton = forwardRef<
+  React.ElementRef<typeof TouchableOpacity>,
+  AccessibleButtonProps
+>(
+  (
+    {
+      children,
+      isLoading = false,
+      disabled = false,
+      onPress,
+      style,
+      textStyle,
+      accessibilityLabel,
+      accessibilityHint,
+      accessibilityRole = 'button',
+      accessibilityState,
+      accessible = true,
+      accessibilityLiveRegion = 'polite',
+      importantForAccessibility = 'yes',
+      ...props
+    },
+    ref
+  ) => {
     // Determine if button should be disabled
     const isDisabled = isLoading || disabled;
-    
+
     // Generate accessibility label if not provided
     const getAccessibilityLabel = () => {
       if (accessibilityLabel) return accessibilityLabel;
-      
+
       // Extract text from children for default accessibility label
       if (typeof children === 'string') {
         return children;
       }
-      
+
       // For complex children, provide a default
       return 'Button';
     };
-    
+
     // Generate accessibility hint for loading state
     const getAccessibilityHint = () => {
       if (isLoading) {
@@ -77,35 +82,31 @@ export const AccessibleButton = forwardRef<React.ElementRef<typeof TouchableOpac
       }
       return accessibilityHint;
     };
-    
+
     // Handle press with accessibility feedback
     const handlePress = () => {
       if (isDisabled) return;
-      
+
       // Provide haptic feedback on iOS
       if (Platform.OS === 'ios') {
         // Note: Would need react-native-haptic-feedback for full implementation
         console.log('Haptic feedback would trigger here');
       }
-      
+
       // Announce button press to screen readers
       if (accessible) {
         AccessibilityInfo.announceForAccessibility('Button pressed');
       }
-      
+
       onPress?.();
     };
-    
+
     return (
       <TouchableOpacity
         ref={ref}
         onPress={handlePress}
         disabled={isDisabled}
-        style={[
-          styles.button,
-          isDisabled && styles.disabled,
-          style
-        ]}
+        style={[styles.button, isDisabled && styles.disabled, style]}
         accessible={accessible}
         accessibilityLabel={getAccessibilityLabel()}
         accessibilityHint={getAccessibilityHint()}
@@ -113,7 +114,7 @@ export const AccessibleButton = forwardRef<React.ElementRef<typeof TouchableOpac
         accessibilityState={{
           disabled: isDisabled,
           busy: isLoading,
-          ...accessibilityState
+          ...accessibilityState,
         }}
         accessibilityLiveRegion={accessibilityLiveRegion}
         importantForAccessibility={importantForAccessibility}
@@ -121,19 +122,15 @@ export const AccessibleButton = forwardRef<React.ElementRef<typeof TouchableOpac
       >
         {isLoading ? (
           <>
-            <ActivityIndicator 
-              size="small" 
-              color="#ffffff" 
+            <ActivityIndicator
+              size="small"
+              color="#ffffff"
               style={styles.loader}
             />
-            <Text style={[styles.loadingText, textStyle]}>
-              Loading...
-            </Text>
+            <Text style={[styles.loadingText, textStyle]}>Loading...</Text>
           </>
         ) : (
-          <Text style={[styles.text, textStyle]}>
-            {children}
-          </Text>
+          <Text style={[styles.text, textStyle]}>{children}</Text>
         )}
       </TouchableOpacity>
     );
@@ -171,10 +168,10 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginRight: 8,
-  }
+  },
 });
 
 // Set display name for debugging
 AccessibleButton.displayName = 'AccessibleButton';
 
-export default AccessibleButton; 
+export default AccessibleButton;

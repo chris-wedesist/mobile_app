@@ -1,17 +1,30 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
-import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '../components/StealthModeManager';
-import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useState } from 'react';
+import {
+  Image,
+  ImageStyle,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  GestureHandlerRootView,
+  LongPressGestureHandler,
+} from 'react-native-gesture-handler';
+import { useStealthMode } from '../components/StealthModeManager';
+import { colors, radius, shadows } from '../constants/theme';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
 
 export default function StealthBrowserScreen() {
   const { deactivate } = useStealthMode();
   const [url, setUrl] = useState('https://example.com');
   const [isLoading, setIsLoading] = useState(false);
   const [isSecure, setIsSecure] = useState(true);
-  
+
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   useStealthAutoTimeout(10);
 
@@ -29,7 +42,8 @@ export default function StealthBrowserScreen() {
       <LongPressGestureHandler
         minDurationMs={3000}
         onHandlerStateChange={({ nativeEvent }) => {
-          if (nativeEvent.state === 4) { // 4 = ACTIVE (long press triggered)
+          if (nativeEvent.state === 4) {
+            // 4 = ACTIVE (long press triggered)
             handleLongPress();
           }
         }}
@@ -39,21 +53,39 @@ export default function StealthBrowserScreen() {
           <View style={styles.toolbar}>
             <View style={styles.navigationButtons}>
               <TouchableOpacity style={styles.navButton}>
-                <MaterialIcons name="chevron-left" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="chevron-left"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.navButton}>
-                <MaterialIcons name="chevron-right" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="chevron-right"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.navButton, isLoading && styles.activeButton]}
-                onPress={handleRefresh}>
-                <MaterialIcons name="refresh" size={20} color={isLoading ? colors.accent : colors.text.muted} />
+                onPress={handleRefresh}
+              >
+                <MaterialIcons
+                  name="refresh"
+                  size={20}
+                  color={isLoading ? colors.accent : colors.text.muted}
+                />
               </TouchableOpacity>
             </View>
 
             <View style={styles.addressBar}>
               {isSecure && (
-                <MaterialIcons name="lock-outline" size={16} color={colors.status.success} style={styles.lockIcon} />
+                <MaterialIcons
+                  name="lock-outline"
+                  size={16}
+                  color={colors.status.success}
+                  style={styles.lockIcon}
+                />
               )}
               <TextInput
                 style={styles.urlInput}
@@ -64,16 +96,28 @@ export default function StealthBrowserScreen() {
                 autoCorrect={false}
               />
               <TouchableOpacity style={styles.starButton}>
-                <MaterialIcons name="star" size={16} color={colors.text.muted} />
+                <MaterialIcons
+                  name="star"
+                  size={16}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
             </View>
 
             <View style={styles.toolbarActions}>
               <TouchableOpacity style={styles.actionButton}>
-                <MaterialIcons name="share" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="share"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionButton}>
-                <MaterialIcons name="menu" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="menu"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -83,12 +127,16 @@ export default function StealthBrowserScreen() {
             <View style={styles.page}>
               <View style={styles.header}>
                 <Image
-                  source={{ uri: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg' }}
+                  source={{
+                    uri: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
+                  }}
                   style={styles.headerImage as ImageStyle}
                 />
                 <View style={styles.overlay} />
                 <Text style={styles.headerTitle}>Welcome to Example</Text>
-                <Text style={styles.headerSubtitle}>Your trusted source for information</Text>
+                <Text style={styles.headerSubtitle}>
+                  Your trusted source for information
+                </Text>
               </View>
 
               <View style={styles.section}>
@@ -97,14 +145,19 @@ export default function StealthBrowserScreen() {
                   {[1, 2, 3, 4].map((i) => (
                     <View key={i} style={styles.card}>
                       <Image
-                        source={{ uri: `https://images.pexels.com/photos/${3184465 + i}/pexels-photo-${3184465 + i}.jpeg` }}
+                        source={{
+                          uri: `https://images.pexels.com/photos/${
+                            3184465 + i
+                          }/pexels-photo-${3184465 + i}.jpeg`,
+                        }}
                         style={styles.cardImage as ImageStyle}
                       />
                       <View style={styles.cardContent}>
                         <Text style={styles.cardTitle}>Article Title {i}</Text>
                         <Text style={styles.cardDescription}>
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                          Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                          Lorem ipsum dolor sit amet, consectetur adipiscing
+                          elit. Sed do eiusmod tempor incididunt ut labore et
+                          dolore magna aliqua.
                         </Text>
                         <Text style={styles.cardMeta}>5 min read • Today</Text>
                       </View>
@@ -117,22 +170,24 @@ export default function StealthBrowserScreen() {
                 <Text style={styles.sectionTitle}>Featured Content</Text>
                 <View style={styles.featuredContent}>
                   <Text style={styles.paragraph}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
-                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
-                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                    ullamco laboris nisi ut aliquip ex ea commodo consequat.
                   </Text>
                   <Text style={styles.paragraph}>
-                    Duis aute irure dolor in reprehenderit in voluptate velit esse 
-                    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
-                    cupidatat non proident, sunt in culpa qui officia deserunt mollit 
-                    anim id est laborum.
+                    Duis aute irure dolor in reprehenderit in voluptate velit
+                    esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+                    occaecat cupidatat non proident, sunt in culpa qui officia
+                    deserunt mollit anim id est laborum.
                   </Text>
                 </View>
               </View>
 
               <View style={styles.footer}>
-                <Text style={styles.footerText}>© 2024 Example.com. All rights reserved.</Text>
+                <Text style={styles.footerText}>
+                  © 2024 Example.com. All rights reserved.
+                </Text>
               </View>
             </View>
           </ScrollView>

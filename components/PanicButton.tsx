@@ -1,13 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Platform, Animated, Easing, TouchableOpacity } from 'react-native';
+import { colors, radius, shadows } from '@/constants/theme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { createClient } from '@supabase/supabase-js';
+import * as ExpoAV from 'expo-av';
 import * as Location from 'expo-location';
 import * as SMS from 'expo-sms';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import * as ExpoAV from 'expo-av';
-import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '@/constants/theme';
-import { MaterialIcons } from '@expo/vector-icons';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -24,7 +30,9 @@ export default function PanicButton() {
   const [countdownAnim] = useState(new Animated.Value(0));
   const soundRef = useRef<ExpoAV.Audio.Sound | null>(null);
   const countdownInterval = useRef<number | null>(null);
-  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(
+    null
+  );
   const lastAlertTime = useRef<number>(0);
   const ALERT_INTERVAL = 60000; // Minimum time between alerts (1 minute)
 
@@ -80,11 +88,13 @@ export default function PanicButton() {
 
   const loadSound = async () => {
     if (Platform.OS === 'web') return;
-    
+
     try {
       const { sound } = await ExpoAV.Audio.Sound.createAsync(
-        { uri: 'https://assets.mixkit.co/active_storage/sfx/2894/2894-preview.mp3' },
-        { 
+        {
+          uri: 'https://assets.mixkit.co/active_storage/sfx/2894/2894-preview.mp3',
+        },
+        {
           isLooping: true,
           volume: volume,
           shouldPlay: false,
@@ -136,9 +146,10 @@ export default function PanicButton() {
       if (!contacts || contacts.length === 0) return;
 
       const locationUrl = `https://maps.google.com/?q=${location.coords.latitude},${location.coords.longitude}`;
-      
+
       for (const contact of contacts) {
-        const message = contact.custom_message || 
+        const message =
+          contact.custom_message ||
           `EMERGENCY: I need immediate assistance. My location: ${locationUrl}`;
 
         if (Platform.OS !== 'web') {
@@ -149,14 +160,16 @@ export default function PanicButton() {
         }
 
         // Log panic event to Supabase
-        await supabase.from('panic_events').insert([{
-          location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-          emergency_alerts_sent: {
-            contact: contact.contact_name,
-            timestamp: new Date().toISOString(),
-            message
-          }
-        }]);
+        await supabase.from('panic_events').insert([
+          {
+            location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
+            emergency_alerts_sent: {
+              contact: contact.contact_name,
+              timestamp: new Date().toISOString(),
+              message,
+            },
+          },
+        ]);
       }
     } catch (error) {
       console.error('Error sending emergency alert:', error);
@@ -189,12 +202,12 @@ export default function PanicButton() {
       if (!soundRef.current) {
         await loadSound();
       }
-      
+
       if (!soundRef.current) {
         console.error('Sound not loaded');
         return;
       }
-      
+
       await soundRef.current.setVolumeAsync(volume);
       await soundRef.current.playAsync();
       setIsAlarmActive(true);
@@ -234,7 +247,7 @@ export default function PanicButton() {
     setIsPressed(true);
     const requiredTime = isAlarmActive ? 3 : 5;
     setCountdown(requiredTime);
-    
+
     Animated.timing(countdownAnim, {
       toValue: 1,
       duration: requiredTime * 1000,
@@ -243,7 +256,7 @@ export default function PanicButton() {
     }).start();
 
     countdownInterval.current = setInterval(() => {
-      setCountdown(prev => Math.max(0, prev - 1));
+      setCountdown((prev) => Math.max(0, prev - 1));
     }, 1000);
 
     const timer = setTimeout(async () => {
@@ -279,13 +292,15 @@ export default function PanicButton() {
               style={[
                 styles.countdownProgress,
                 {
-                  transform: [{
-                    scale: countdownAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 0],
-                    })
-                  }],
-                }
+                  transform: [
+                    {
+                      scale: countdownAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 0],
+                      }),
+                    },
+                  ],
+                },
               ]}
             />
             <Text style={styles.countdownText}>{countdown}</Text>
@@ -297,8 +312,14 @@ export default function PanicButton() {
         <View style={styles.container}>
           {isAlarmActive && (
             <View style={styles.volumeContainer}>
-              <MaterialIcons name="volume-up" color={colors.text.primary} size={20} />
-              <Text style={styles.volumeText}>Volume: {Math.round(volume * 100)}%</Text>
+              <MaterialIcons
+                name="volume-up"
+                color={colors.text.primary}
+                size={20}
+              />
+              <Text style={styles.volumeText}>
+                Volume: {Math.round(volume * 100)}%
+              </Text>
             </View>
           )}
           <Animated.View
@@ -308,8 +329,11 @@ export default function PanicButton() {
                 transform: [{ scale: pulseAnim }],
                 opacity: isPressed ? 0 : 0.5,
               },
-            ]}>
-            <View style={[styles.button, isAlarmActive && styles.buttonActive]} />
+            ]}
+          >
+            <View
+              style={[styles.button, isAlarmActive && styles.buttonActive]}
+            />
           </Animated.View>
           <TouchableOpacity
             style={[
@@ -319,13 +343,17 @@ export default function PanicButton() {
             ]}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            activeOpacity={0.8}>
+            activeOpacity={0.8}
+          >
             <MaterialIcons name="error" color={colors.text.primary} size={32} />
             <Text style={styles.text}>
-              {isPressed 
-                ? `Hold ${isAlarmActive ? '3s' : '5s'} to ${isAlarmActive ? 'Stop' : 'Trigger'}`
-                : isAlarmActive ? 'ALARM ACTIVE' : 'Panic Button'
-              }
+              {isPressed
+                ? `Hold ${isAlarmActive ? '3s' : '5s'} to ${
+                    isAlarmActive ? 'Stop' : 'Trigger'
+                  }`
+                : isAlarmActive
+                ? 'ALARM ACTIVE'
+                : 'Panic Button'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -341,13 +369,15 @@ export default function PanicButton() {
             style={[
               styles.countdownProgress,
               {
-                transform: [{
-                  scale: countdownAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0],
-                  })
-                }],
-              }
+                transform: [
+                  {
+                    scale: countdownAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [1, 0],
+                    }),
+                  },
+                ],
+              },
             ]}
           />
           <Text style={styles.countdownText}>{countdown}</Text>
@@ -359,8 +389,14 @@ export default function PanicButton() {
       <View style={styles.container}>
         {isAlarmActive && (
           <View style={styles.volumeContainer}>
-            <MaterialIcons name="volume-up" color={colors.text.primary} size={20} />
-            <Text style={styles.volumeText}>Volume: {Math.round(volume * 100)}%</Text>
+            <MaterialIcons
+              name="volume-up"
+              color={colors.text.primary}
+              size={20}
+            />
+            <Text style={styles.volumeText}>
+              Volume: {Math.round(volume * 100)}%
+            </Text>
           </View>
         )}
         <Animated.View
@@ -370,24 +406,29 @@ export default function PanicButton() {
               transform: [{ scale: pulseAnim }],
               opacity: isPressed ? 0 : 0.5,
             },
-          ]}>
+          ]}
+        >
           <View style={[styles.button, isAlarmActive && styles.buttonActive]} />
         </Animated.View>
         <TouchableOpacity
           style={[
             styles.button,
             isPressed && styles.buttonPressed,
-            isAlarmActive && styles.buttonActive
+            isAlarmActive && styles.buttonActive,
           ]}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          activeOpacity={1}>
+          activeOpacity={1}
+        >
           <MaterialIcons name="error" color={colors.text.primary} size={32} />
           <Text style={styles.text}>
-            {isPressed 
-              ? `Hold ${isAlarmActive ? '3s' : '5s'} to ${isAlarmActive ? 'Stop' : 'Trigger'}`
-              : isAlarmActive ? 'ALARM ACTIVE' : 'Panic Button'
-            }
+            {isPressed
+              ? `Hold ${isAlarmActive ? '3s' : '5s'} to ${
+                  isAlarmActive ? 'Stop' : 'Trigger'
+                }`
+              : isAlarmActive
+              ? 'ALARM ACTIVE'
+              : 'Panic Button'}
           </Text>
         </TouchableOpacity>
       </View>

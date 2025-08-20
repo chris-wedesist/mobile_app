@@ -1,9 +1,16 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
-import { listLocalIncidents } from '../../utils/incident-storage';
-import { colors, radius, shadows } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
+import { listLocalIncidents } from '../../utils/incident-storage';
 
 type Incident = {
   id: string;
@@ -66,20 +73,32 @@ export default function IncidentListScreen() {
           </Text>
           <View style={styles.metaContainer}>
             <View style={styles.metaItem}>
-              <MaterialIcons name="access-time" size={14} color={colors.text.muted} />
+              <MaterialIcons
+                name="access-time"
+                size={14}
+                color={colors.text.muted}
+              />
               <Text style={styles.metaText}>{formatDate(item.created_at)}</Text>
             </View>
             {item.location && (
               <View style={styles.metaItem}>
-                <MaterialIcons name="location-on" size={14} color={colors.text.muted} />
+                <MaterialIcons
+                  name="location-on"
+                  size={14}
+                  color={colors.text.muted}
+                />
                 <Text style={styles.metaText}>Location recorded</Text>
               </View>
             )}
           </View>
         </View>
-        <MaterialIcons name="chevron-right" size={20} color={colors.text.muted} />
+        <MaterialIcons
+          name="chevron-right"
+          size={20}
+          color={colors.text.muted}
+        />
       </View>
-      
+
       {item.uploaded && (
         <View style={styles.uploadedBadge}>
           <Text style={styles.uploadedText}>Uploaded</Text>
@@ -117,12 +136,17 @@ export default function IncidentListScreen() {
 
       {incidents.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="video-label" size={64} color={colors.text.muted} />
+          <MaterialIcons
+            name="video-label"
+            size={64}
+            color={colors.text.muted}
+          />
           <Text style={styles.emptyTitle}>No Incidents Recorded</Text>
           <Text style={styles.emptyText}>
-            Recorded incidents will appear here. Use the Record tab to document new incidents.
+            Recorded incidents will appear here. Use the Record tab to document
+            new incidents.
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.recordButton}
             onPress={() => router.push('/(tabs)/record')}
           >

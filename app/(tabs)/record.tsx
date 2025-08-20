@@ -1,13 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, Alert, ActivityIndicator, AppState } from 'react-native';
-import { useCameraPermissions, CameraView } from 'expo-camera';
-import { colors, shadows, radius } from '../../constants/theme';
-import { Audio } from 'expo-av';
-import { createClient } from '@supabase/supabase-js';
-import { router } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { createClient } from '@supabase/supabase-js';
+import { Audio } from 'expo-av';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  AppState,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -70,7 +79,7 @@ export default function RecordScreen() {
 
   // Handle app state changes
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active' &&
@@ -160,7 +169,10 @@ export default function RecordScreen() {
             We need your permission to use the camera for recording incidents.
             All recordings are encrypted and stored securely.
           </Text>
-          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={requestPermission}
+          >
             <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
         </View>
@@ -241,8 +253,8 @@ export default function RecordScreen() {
           {
             video_url: cloudinaryUrl,
             created_at: new Date().toISOString(),
-            status: 'completed'
-          }
+            status: 'completed',
+          },
         ])
         .select()
         .single();
@@ -251,9 +263,14 @@ export default function RecordScreen() {
 
       try {
         const existingRecordings = await AsyncStorage.getItem('userRecordings');
-        const recordings = existingRecordings ? JSON.parse(existingRecordings) : [];
+        const recordings = existingRecordings
+          ? JSON.parse(existingRecordings)
+          : [];
         recordings.push(data.id);
-        await AsyncStorage.setItem('userRecordings', JSON.stringify(recordings));
+        await AsyncStorage.setItem(
+          'userRecordings',
+          JSON.stringify(recordings)
+        );
       } catch (storageError) {
         console.error('Error saving to local storage:', storageError);
       }
@@ -276,7 +293,7 @@ export default function RecordScreen() {
 
       setIsRecording(true);
       recordingStartTime.current = Date.now();
-      
+
       console.log('Starting camera recording...');
       recordingPromise.current = cameraRef.current.recordAsync({
         maxDuration: 300,
@@ -288,7 +305,10 @@ export default function RecordScreen() {
       setIsRecording(false);
       recordingPromise.current = null;
       recordingStartTime.current = null;
-      Alert.alert('Recording Failed', 'Unable to start recording. Please try again.');
+      Alert.alert(
+        'Recording Failed',
+        'Unable to start recording. Please try again.'
+      );
     }
   };
 
@@ -311,7 +331,7 @@ export default function RecordScreen() {
 
       if (duration < 2000) {
         console.log('Recording too short, waiting...');
-        await new Promise(resolve => setTimeout(resolve, 2000 - duration));
+        await new Promise((resolve) => setTimeout(resolve, 2000 - duration));
       }
 
       console.log('Stopping camera recording...');
@@ -320,13 +340,13 @@ export default function RecordScreen() {
       if (recordingPromise.current) {
         console.log('Waiting for recording promise...');
         const video = await recordingPromise.current;
-        
+
         if (!video?.uri) {
           throw new Error('No video URI returned');
         }
 
         console.log('Video recorded successfully:', video.uri);
-        
+
         // Upload to Cloudinary
         const cloudinaryUrl = await uploadToCloudinary(video.uri);
         console.log('Video uploaded to Cloudinary:', cloudinaryUrl);
@@ -358,9 +378,15 @@ export default function RecordScreen() {
   const handlePressIn = () => {
     console.log('Button pressed, isRecording:', isRecording);
     if (isRecording) {
-      const recordingDuration = recordingStartTime.current ? Date.now() - recordingStartTime.current : 0;
-      console.log('Current recording duration for long press:', recordingDuration, 'ms');
-      
+      const recordingDuration = recordingStartTime.current
+        ? Date.now() - recordingStartTime.current
+        : 0;
+      console.log(
+        'Current recording duration for long press:',
+        recordingDuration,
+        'ms'
+      );
+
       if (recordingDuration < 3000) {
         console.log('Recording too short, ignoring long press');
         return;
@@ -383,7 +409,7 @@ export default function RecordScreen() {
       }).start();
 
       countdownInterval.current = setInterval(() => {
-        setCountdown(prev => {
+        setCountdown((prev) => {
           console.log('Countdown:', prev - 1);
           return Math.max(0, prev - 1);
         });
@@ -419,7 +445,7 @@ export default function RecordScreen() {
 
   const handleAutoSave = async () => {
     if (isStoppingRef.current || !isRecording) return;
-    
+
     try {
       console.log('Starting auto-save process...');
       setIsProcessing(true);
@@ -428,7 +454,7 @@ export default function RecordScreen() {
       const duration = Date.now() - (recordingStartTime.current ?? Date.now());
       if (duration < 2000) {
         console.log('Recording too short, waiting...');
-        await new Promise(resolve => setTimeout(resolve, 2000 - duration));
+        await new Promise((resolve) => setTimeout(resolve, 2000 - duration));
       }
 
       if (cameraRef.current) {
@@ -437,7 +463,7 @@ export default function RecordScreen() {
 
         if (recordingPromise.current) {
           const video = await recordingPromise.current;
-          
+
           if (!video?.uri) {
             throw new Error('No video URI returned');
           }
@@ -451,7 +477,10 @@ export default function RecordScreen() {
       }
     } catch (error) {
       console.error('Error during auto-save:', error);
-      Alert.alert('Auto-Save Failed', 'Failed to save recording automatically. Please try recording again.');
+      Alert.alert(
+        'Auto-Save Failed',
+        'Failed to save recording automatically. Please try recording again.'
+      );
     } finally {
       // Reset states
       setIsRecording(false);
@@ -475,21 +504,32 @@ export default function RecordScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.cameraContainer}>
-        <CameraView 
-          ref={cameraRef} 
-          style={styles.camera} 
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
           mode="video"
           videoStabilizationMode="standard"
-          active={true}>
-          <View style={[styles.overlay, isLongPressing && styles.overlayActive]}>
+          active={true}
+        >
+          <View
+            style={[styles.overlay, isLongPressing && styles.overlayActive]}
+          >
             {(isProcessing || isUploading || isSaving) && (
               <View style={styles.loadingOverlay}>
                 <View style={styles.loadingContent}>
                   <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                    <MaterialIcons name="cached" size={48} color={colors.accent} />
+                    <MaterialIcons
+                      name="cached"
+                      size={48}
+                      color={colors.accent}
+                    />
                   </Animated.View>
                   <Text style={styles.loadingText}>
-                    {isSaving ? 'Saving...' : isUploading ? 'Uploading...' : 'Processing...'}
+                    {isSaving
+                      ? 'Saving...'
+                      : isUploading
+                      ? 'Uploading...'
+                      : 'Processing...'}
                   </Text>
                   {isUploading && (
                     <Text style={styles.loadingSubtext}>
@@ -505,38 +545,52 @@ export default function RecordScreen() {
                   style={[
                     styles.countdownProgress,
                     {
-                      transform: [{
-                        scale: countdownAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 0],
-                        })
-                      }],
-                    }
+                      transform: [
+                        {
+                          scale: countdownAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 0],
+                          }),
+                        },
+                      ],
+                    },
                   ]}
                 />
                 <Text style={styles.countdownText}>{countdown}</Text>
               </View>
             )}
-            {isRecording && !isLongPressing && !isProcessing && !isUploading && !isSaving && (
-              <View style={styles.recordingIndicator}>
-                <View style={styles.recordingDot} />
-                <Text style={styles.recordingText}>Recording...</Text>
-              </View>
-            )}
+            {isRecording &&
+              !isLongPressing &&
+              !isProcessing &&
+              !isUploading &&
+              !isSaving && (
+                <View style={styles.recordingIndicator}>
+                  <View style={styles.recordingDot} />
+                  <Text style={styles.recordingText}>Recording...</Text>
+                </View>
+              )}
             <TouchableOpacity
               style={[
-                styles.recordButton, 
+                styles.recordButton,
                 isRecording && styles.recording,
-                (isProcessing || isUploading || isSaving) && styles.recordButtonDisabled
+                (isProcessing || isUploading || isSaving) &&
+                  styles.recordButtonDisabled,
               ]}
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
               disabled={isProcessing || isUploading || isSaving}
-              activeOpacity={1}>
-              <MaterialIcons name="video-label" color={isRecording ? colors.accent : colors.text.primary} size={32} />
+              activeOpacity={1}
+            >
+              <MaterialIcons
+                name="video-label"
+                color={isRecording ? colors.accent : colors.text.primary}
+                size={32}
+              />
               <Text style={styles.buttonText}>
-                {isRecording 
-                  ? (isLongPressing ? 'Hold to Save & Quit' : 'Recording...') 
+                {isRecording
+                  ? isLongPressing
+                    ? 'Hold to Save & Quit'
+                    : 'Recording...'
                   : 'Start Record'}
               </Text>
             </TouchableOpacity>

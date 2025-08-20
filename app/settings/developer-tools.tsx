@@ -1,9 +1,21 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
-import { colors, radius, shadows } from '../../constants/theme';
-import { generateSampleIncidents, clearSampleIncidents } from '../../utils/generate-sample-incidents';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
+import {
+  clearSampleIncidents,
+  generateSampleIncidents,
+} from '../../utils/generate-sample-incidents';
 
 export default function DeveloperToolsScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -14,15 +26,20 @@ export default function DeveloperToolsScreen() {
     try {
       setIsGenerating(true);
       setLastAction(null);
-      
+
       const result = await generateSampleIncidents(5);
-      
+
       if (result.success) {
-        setLastAction(`Successfully generated ${result.count} sample incidents`);
+        setLastAction(
+          `Successfully generated ${result.count} sample incidents`
+        );
         Alert.alert('Success', `Generated ${result.count} sample incidents`);
       } else {
         setLastAction(`Error: ${result.error}`);
-        Alert.alert('Error', result.error || 'Failed to generate sample incidents');
+        Alert.alert(
+          'Error',
+          result.error || 'Failed to generate sample incidents'
+        );
       }
     } catch (error) {
       console.error('Error generating samples:', error);
@@ -46,15 +63,21 @@ export default function DeveloperToolsScreen() {
             try {
               setIsClearing(true);
               setLastAction(null);
-              
+
               const result = await clearSampleIncidents();
-              
+
               if (result.success) {
                 setLastAction('Successfully cleared all sample incidents');
-                Alert.alert('Success', 'All sample incidents have been cleared');
+                Alert.alert(
+                  'Success',
+                  'All sample incidents have been cleared'
+                );
               } else {
                 setLastAction(`Error: ${result.error}`);
-                Alert.alert('Error', result.error || 'Failed to clear sample incidents');
+                Alert.alert(
+                  'Error',
+                  result.error || 'Failed to clear sample incidents'
+                );
               }
             } catch (error) {
               console.error('Error clearing samples:', error);
@@ -72,16 +95,30 @@ export default function DeveloperToolsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" size={24} color={colors.text.primary} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            size={24}
+            color={colors.text.primary}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Developer Tools</Text>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.warningBanner}>
-          <MaterialIcons name="warning" size={20} color={colors.status.warning} />
+          <MaterialIcons
+            name="warning"
+            size={20}
+            color={colors.status.warning}
+          />
           <Text style={styles.warningText}>
             These tools are for development and testing purposes only.
           </Text>
@@ -95,14 +132,21 @@ export default function DeveloperToolsScreen() {
 
           <View style={styles.toolsContainer}>
             <TouchableOpacity
-              style={[styles.toolButton, isGenerating && styles.toolButtonDisabled]}
+              style={[
+                styles.toolButton,
+                isGenerating && styles.toolButtonDisabled,
+              ]}
               onPress={handleGenerateSamples}
               disabled={isGenerating}
             >
               {isGenerating ? (
                 <ActivityIndicator size="small" color={colors.text.primary} />
               ) : (
-                <MaterialIcons name="add" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="add"
+                  size={20}
+                  color={colors.text.primary}
+                />
               )}
               <Text style={styles.toolButtonText}>
                 {isGenerating ? 'Generating...' : 'Generate Samples'}
@@ -110,14 +154,22 @@ export default function DeveloperToolsScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.toolButton, styles.dangerButton, isClearing && styles.toolButtonDisabled]}
+              style={[
+                styles.toolButton,
+                styles.dangerButton,
+                isClearing && styles.toolButtonDisabled,
+              ]}
               onPress={handleClearSamples}
               disabled={isClearing}
             >
               {isClearing ? (
                 <ActivityIndicator size="small" color={colors.text.primary} />
               ) : (
-                <MaterialIcons name="delete" size={20} color={colors.text.primary} />
+                <MaterialIcons
+                  name="delete"
+                  size={20}
+                  color={colors.text.primary}
+                />
               )}
               <Text style={styles.toolButtonText}>
                 {isClearing ? 'Clearing...' : 'Clear All Samples'}

@@ -1,0 +1,5 @@
+// Load polyfills BEFORE anything else to avoid runtime races in Hermes
+import './app/polyfills';
+
+// Start Expo Router entry (single time)
+import 'expo-router/entry';

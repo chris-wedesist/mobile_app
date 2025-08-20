@@ -1,6 +1,6 @@
+import { useStealthMode } from '@/components/StealthModeManager';
 import { useEffect } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { useStealthMode } from '@/components/StealthModeManager';
 
 /**
  * Hook to automatically exit stealth mode after a specified period of inactivity
@@ -8,21 +8,21 @@ import { useStealthMode } from '@/components/StealthModeManager';
  */
 export function useStealthAutoTimeout(timeoutMinutes = 5) {
   const { isActive, deactivate } = useStealthMode();
-  
+
   useEffect(() => {
     if (!isActive) return;
-    
+
     let timeoutId: any = null;
     let lastActivity = Date.now();
-    
+
     // Function to reset the timeout
     const resetTimeout = () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       lastActivity = Date.now();
-      
+
       timeoutId = setTimeout(() => {
         // Only deactivate if we've been inactive for the specified time
         const inactiveTime = Date.now() - lastActivity;
@@ -31,10 +31,10 @@ export function useStealthAutoTimeout(timeoutMinutes = 5) {
         }
       }, timeoutMinutes * 60 * 1000);
     };
-    
+
     // Set initial timeout
     resetTimeout();
-    
+
     // Handle app state changes (background/foreground)
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (nextAppState === 'active') {
@@ -48,26 +48,29 @@ export function useStealthAutoTimeout(timeoutMinutes = 5) {
         }
       }
     };
-    
+
     // Listen for app state changes
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
+
     // Listen for user interaction to reset the timeout
     const touchHandler = () => {
       resetTimeout();
     };
-    
+
     // Add touch event listener
     document.addEventListener('touchstart', touchHandler);
     document.addEventListener('mousemove', touchHandler);
     document.addEventListener('keydown', touchHandler);
-    
+
     return () => {
       // Clean up
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       subscription.remove();
       document.removeEventListener('touchstart', touchHandler);
       document.removeEventListener('mousemove', touchHandler);

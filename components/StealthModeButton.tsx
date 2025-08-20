@@ -1,7 +1,7 @@
-import { TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { useStealthMode } from './StealthModeManager';
-import { colors, radius, shadows } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
+import { useStealthMode } from './StealthModeManager';
 
 type StealthModeButtonProps = {
   variant?: 'icon' | 'full' | 'minimal';
@@ -9,18 +9,21 @@ type StealthModeButtonProps = {
   showLabel?: boolean;
 };
 
-export default function StealthModeButton({ 
+export default function StealthModeButton({
   variant = 'full',
   size = 'md',
-  showLabel = true
+  showLabel = true,
 }: StealthModeButtonProps) {
   const { isActive, toggle } = useStealthMode();
 
   const getSize = () => {
     switch (size) {
-      case 'sm': return 20;
-      case 'md': return 24;
-      case 'lg': return 32;
+      case 'sm':
+        return 20;
+      case 'md':
+        return 24;
+      case 'lg':
+        return 32;
     }
   };
 
@@ -29,15 +32,21 @@ export default function StealthModeButton({
   if (variant === 'icon') {
     return (
       <TouchableOpacity
-        style={[
-          styles.iconButton,
-          isActive && styles.iconButtonActive
-        ]}
-        onPress={() => toggle('manual')}>
+        style={[styles.iconButton, isActive && styles.iconButtonActive]}
+        onPress={() => toggle('manual')}
+      >
         {isActive ? (
-          <MaterialIcons name="visibility-off" size={iconSize} color={colors.text.primary} />
+          <MaterialIcons
+            name="visibility-off"
+            size={iconSize}
+            color={colors.text.primary}
+          />
         ) : (
-          <MaterialIcons name="visibility" size={iconSize} color={colors.text.primary} />
+          <MaterialIcons
+            name="visibility"
+            size={iconSize}
+            color={colors.text.primary}
+          />
         )}
       </TouchableOpacity>
     );
@@ -46,15 +55,21 @@ export default function StealthModeButton({
   if (variant === 'minimal') {
     return (
       <TouchableOpacity
-        style={[
-          styles.minimalButton,
-          isActive && styles.minimalButtonActive
-        ]}
-        onPress={() => toggle('manual')}>
+        style={[styles.minimalButton, isActive && styles.minimalButtonActive]}
+        onPress={() => toggle('manual')}
+      >
         {isActive ? (
-          <MaterialIcons name="visibility-off" size={iconSize} color={colors.text.primary} />
+          <MaterialIcons
+            name="visibility-off"
+            size={iconSize}
+            color={colors.text.primary}
+          />
         ) : (
-          <MaterialIcons name="visibility" size={iconSize} color={colors.text.primary} />
+          <MaterialIcons
+            name="visibility"
+            size={iconSize}
+            color={colors.text.primary}
+          />
         )}
         {showLabel && (
           <Text style={styles.minimalButtonText}>
@@ -67,15 +82,21 @@ export default function StealthModeButton({
 
   return (
     <TouchableOpacity
-      style={[
-        styles.button,
-        isActive && styles.buttonActive,
-      ]}
-      onPress={() => toggle('manual')}>
+      style={[styles.button, isActive && styles.buttonActive]}
+      onPress={() => toggle('manual')}
+    >
       {isActive ? (
-        <MaterialIcons name="visibility-off" size={iconSize} color={colors.text.primary} />
+        <MaterialIcons
+          name="visibility-off"
+          size={iconSize}
+          color={colors.text.primary}
+        />
       ) : (
-        <MaterialIcons name="visibility" size={iconSize} color={colors.text.primary} />
+        <MaterialIcons
+          name="visibility"
+          size={iconSize}
+          color={colors.text.primary}
+        />
       )}
       <Text style={styles.buttonText}>
         {isActive ? 'Exit Cover Mode' : 'Enter Cover Mode'}

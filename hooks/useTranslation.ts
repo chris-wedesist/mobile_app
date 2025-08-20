@@ -1,5 +1,10 @@
+import {
+  changeLanguage,
+  getCurrentLanguage,
+  getSupportedLanguages,
+  isLanguageSupported,
+} from '@/utils/i18n';
 import { useTranslation as useI18nTranslation } from 'react-i18next';
-import { changeLanguage, getCurrentLanguage, getSupportedLanguages, isLanguageSupported } from '@/utils/i18n';
 
 /**
  * Custom hook for translation with additional utilities
@@ -82,4 +87,4 @@ export const useTranslation = () => {
   };
 };
 
-export default useTranslation; 
+export default useTranslation;

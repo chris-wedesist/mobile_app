@@ -34,7 +34,7 @@ export const mockData = {
     description: 'This is a test incident description',
     location: {
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       address: '123 Test St',
       city: 'Test City',
       state: 'Test State',
@@ -80,21 +80,29 @@ export const mockData = {
 };
 
 // Async utilities for tests
-export const waitFor = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const waitFor = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-export const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+export const flushPromises = () =>
+  new Promise((resolve) => setImmediate(resolve));
 
 // Mock functions
 export const createMockFunction = <T extends (...args: any[]) => any>(
   returnValue?: any
 ): jest.MockedFunction<T> => {
-  return jest.fn().mockReturnValue(returnValue) as unknown as jest.MockedFunction<T>;
+  return jest
+    .fn()
+    .mockReturnValue(returnValue) as unknown as jest.MockedFunction<T>;
 };
 
-export const createMockAsyncFunction = <T extends (...args: any[]) => Promise<any>>(
+export const createMockAsyncFunction = <
+  T extends (...args: any[]) => Promise<any>
+>(
   returnValue?: any
 ): jest.MockedFunction<T> => {
-  return jest.fn().mockResolvedValue(returnValue) as unknown as jest.MockedFunction<T>;
+  return jest
+    .fn()
+    .mockResolvedValue(returnValue) as unknown as jest.MockedFunction<T>;
 };
 
 // Test assertions
@@ -294,4 +302,4 @@ export const mockSecureStore = {
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
   isAvailableAsync: jest.fn(),
-}; 
+};

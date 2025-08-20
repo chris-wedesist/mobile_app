@@ -1,9 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 export default function ShieldBuilderBadgeScreen() {
   const [isCompleting, setIsCompleting] = useState(false);
@@ -53,7 +61,7 @@ export default function ShieldBuilderBadgeScreen() {
   const handleContinue = async () => {
     try {
       setIsCompleting(true);
-      
+
       // Save badge award
       await AsyncStorage.setItem('shield_builder_badge', 'awarded');
 
@@ -77,15 +85,18 @@ export default function ShieldBuilderBadgeScreen() {
           style={[
             styles.badgeContainer,
             {
-              transform: [
-                { scale: scaleAnim },
-                { rotate: spin },
-              ],
+              transform: [{ scale: scaleAnim }, { rotate: spin }],
             },
-          ]}>
+          ]}
+        >
           <View style={styles.badge}>
             <MaterialIcons name="shield" size={64} color={colors.accent} />
-            <MaterialIcons name="verified" size={32} color={colors.status.success} style={styles.award} />
+            <MaterialIcons
+              name="verified"
+              size={32}
+              color={colors.status.success}
+              style={styles.award}
+            />
           </View>
         </Animated.View>
 
@@ -94,14 +105,17 @@ export default function ShieldBuilderBadgeScreen() {
             styles.textContent,
             {
               opacity: opacityAnim,
-              transform: [{
-                translateY: opacityAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
+              transform: [
+                {
+                  translateY: opacityAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                },
+              ],
             },
-          ]}>
+          ]}
+        >
           <Text style={styles.title}>🎖️ Shield Builder Badge Unlocked!</Text>
           <Text style={styles.subtitle}>
             You're growing the DESIST! community
@@ -136,8 +150,8 @@ export default function ShieldBuilderBadgeScreen() {
           <View style={styles.messageCard}>
             <Text style={styles.messageTitle}>Thank You</Text>
             <Text style={styles.messageText}>
-              By helping others join DESIST!, you're making our community stronger 
-              and safer. Keep building the movement!
+              By helping others join DESIST!, you're making our community
+              stronger and safer. Keep building the movement!
             </Text>
           </View>
         </Animated.View>
@@ -148,11 +162,14 @@ export default function ShieldBuilderBadgeScreen() {
             isCompleting && styles.continueButtonDisabled,
           ]}
           onPress={handleContinue}
-          disabled={isCompleting}>
-          <Text style={styles.continueButtonText}>
-            Continue
-          </Text>
-          <MaterialIcons name="chevron-right" size={20} color={colors.text.primary} />
+          disabled={isCompleting}
+        >
+          <Text style={styles.continueButtonText}>Continue</Text>
+          <MaterialIcons
+            name="chevron-right"
+            size={20}
+            color={colors.text.primary}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -180,7 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.accent}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.large,
+    ...shadows.lg,
   },
   award: {
     position: 'absolute',

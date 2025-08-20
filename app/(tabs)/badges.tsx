@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
-import { colors, shadows, radius } from '../../constants/theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import BadgeUnlockModal from '../../components/BadgeUnlockModal';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import BadgeUnlockModal from '../../components/BadgeUnlockModal';
+import { colors, radius, shadows } from '../../constants/theme';
 
 type Badge = {
   id: string;
@@ -24,7 +32,7 @@ const DEFAULT_BADGES: Badge[] = [
     name: 'Founding Protector',
     description: 'One of the first to join and complete safety training',
     icon: <MaterialIcons name="shield" size={32} color={colors.accent} />,
-    unlocked: false
+    unlocked: false,
   },
   {
     id: 'shield_builder',
@@ -34,31 +42,35 @@ const DEFAULT_BADGES: Badge[] = [
     unlocked: false,
     progress: {
       current: 0,
-      total: 3
-    }
+      total: 3,
+    },
   },
   {
     id: 'emergency_sentinel',
     name: 'Emergency Sentinel',
     description: 'Actively contributing to community safety awareness',
-    icon: <MaterialIcons name="notifications" size={32} color={colors.accent} />,
+    icon: (
+      <MaterialIcons name="notifications" size={32} color={colors.accent} />
+    ),
     unlocked: false,
     progress: {
       current: 0,
-      total: 5
-    }
+      total: 5,
+    },
   },
   {
     id: 'evidence_guardian',
     name: 'Evidence Guardian',
     description: 'Helping preserve crucial evidence for justice',
-    icon: <MaterialIcons name="insert-drive-file" size={32} color={colors.accent} />,
+    icon: (
+      <MaterialIcons name="insert-drive-file" size={32} color={colors.accent} />
+    ),
     unlocked: false,
     progress: {
       current: 0,
-      total: 10
-    }
-  }
+      total: 10,
+    },
+  },
 ];
 
 export default function BadgesScreen() {
@@ -76,7 +88,7 @@ export default function BadgesScreen() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Mock user settings data for demo purposes
       const mockUserSettings = {
         badge_founding_protector: true,
@@ -85,17 +97,22 @@ export default function BadgesScreen() {
         badge_evidence_guardian: false,
         successful_invite_count: 1,
         verified_incident_count: 2,
-        public_recordings_count: 3
+        public_recordings_count: 3,
       };
-      
+
       // Save to AsyncStorage for future use
-      await AsyncStorage.setItem('user_badges', JSON.stringify(mockUserSettings));
-      
+      await AsyncStorage.setItem(
+        'user_badges',
+        JSON.stringify(mockUserSettings)
+      );
+
       // Update badges state
       updateBadgesState(mockUserSettings);
     } catch (error) {
       console.error('Error loading badges:', error);
-      setError('Unable to load badges. Please check your connection and try again.');
+      setError(
+        'Unable to load badges. Please check your connection and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -103,24 +120,29 @@ export default function BadgesScreen() {
 
   const updateBadgesState = (userSettings: any) => {
     if (!userSettings) return;
-    
-    setBadges(prev => prev.map(badge => ({
-      ...badge,
-      unlocked: userSettings[`badge_${badge.id}`] || false,
-      progress: badge.progress ? {
-        ...badge.progress,
-        current: badge.id === 'shield_builder' 
-          ? (userSettings.successful_invite_count || 0)
-          : badge.id === 'emergency_sentinel'
-            ? (userSettings.verified_incident_count || 0)
-            : badge.id === 'evidence_guardian'
-              ? (userSettings.public_recordings_count || 0)
-              : 0
-      } : undefined
-    })));
+
+    setBadges((prev) =>
+      prev.map((badge) => ({
+        ...badge,
+        unlocked: userSettings[`badge_${badge.id}`] || false,
+        progress: badge.progress
+          ? {
+              ...badge.progress,
+              current:
+                badge.id === 'shield_builder'
+                  ? userSettings.successful_invite_count || 0
+                  : badge.id === 'emergency_sentinel'
+                  ? userSettings.verified_incident_count || 0
+                  : badge.id === 'evidence_guardian'
+                  ? userSettings.public_recordings_count || 0
+                  : 0,
+            }
+          : undefined,
+      }))
+    );
   };
 
-  const unlockedCount = badges.filter(badge => badge.unlocked).length;
+  const unlockedCount = badges.filter((badge) => badge.unlocked).length;
 
   const handleRetry = () => {
     loadBadges();
@@ -128,7 +150,10 @@ export default function BadgesScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.header}>
           <MaterialIcons name="verified" size={32} color={colors.accent} />
           <Text style={styles.title}>My Badges</Text>
@@ -151,10 +176,10 @@ export default function BadgesScreen() {
             <View style={styles.progressCard}>
               <Text style={styles.progressTitle}>Badge Progress</Text>
               <View style={styles.progressBar}>
-                <View 
+                <View
                   style={[
                     styles.progressFill,
-                    { width: `${(unlockedCount / badges.length) * 100}%` }
+                    { width: `${(unlockedCount / badges.length) * 100}%` },
                   ]}
                 />
               </View>
@@ -164,23 +189,26 @@ export default function BadgesScreen() {
             </View>
 
             <View style={styles.badgesGrid}>
-              {badges.map(badge => (
+              {badges.map((badge) => (
                 <TouchableOpacity
                   key={badge.id}
                   style={[
                     styles.badgeCard,
-                    badge.unlocked && styles.unlockedBadge
+                    badge.unlocked && styles.unlockedBadge,
                   ]}
                   onPress={() => {
                     setSelectedBadge(badge);
                     setShowUnlockModal(true);
-                  }}>
+                  }}
+                >
                   <View style={styles.badgeHeader}>
-                    <View style={styles.badgeIcon}>
-                      {badge.icon}
-                    </View>
+                    <View style={styles.badgeIcon}>{badge.icon}</View>
                     {!badge.unlocked && (
-                      <MaterialIcons name="lock" size={20} color={colors.text.muted} />
+                      <MaterialIcons
+                        name="lock"
+                        size={20}
+                        color={colors.text.muted}
+                      />
                     )}
                   </View>
                   <Text style={styles.badgeName}>{badge.name}</Text>
@@ -190,12 +218,17 @@ export default function BadgesScreen() {
                   {badge.progress && (
                     <View style={styles.progressContainer}>
                       <View style={styles.badgeProgressBar}>
-                        <View 
+                        <View
                           style={[
                             styles.badgeProgressFill,
-                            { 
-                              width: `${Math.min(100, (badge.progress.current / badge.progress.total) * 100)}%` 
-                            }
+                            {
+                              width: `${Math.min(
+                                100,
+                                (badge.progress.current /
+                                  badge.progress.total) *
+                                  100
+                              )}%`,
+                            },
                           ]}
                         />
                       </View>
@@ -208,12 +241,10 @@ export default function BadgesScreen() {
               ))}
             </View>
 
-            <Text style={styles.comingSoon}>
-              More badges coming soon...
-            </Text>
+            <Text style={styles.comingSoon}>More badges coming soon...</Text>
           </>
         )}
-        
+
         {/* Add spacer at the bottom to account for tab bar */}
         <View style={{ height: 100 }} />
       </ScrollView>

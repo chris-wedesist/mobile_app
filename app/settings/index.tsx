@@ -1,43 +1,69 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
-import { router } from 'expo-router';
-import { colors, radius, shadows } from '../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../../constants/theme';
 
 export default function SettingsIndexScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" size={24} color={colors.text.primary} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            size={24}
+            color={colors.text.primary}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Settings</Text>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          
+
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingIcon}>
               <MaterialIcons name="person" size={20} color={colors.accent} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Profile</Text>
-              <Text style={styles.settingDescription}>Manage your account information</Text>
+              <Text style={styles.settingDescription}>
+                Manage your account information
+              </Text>
             </View>
             <Text style={styles.settingAction}>Edit</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/notification-settings')}>
+            onPress={() => router.push('/notification-settings')}
+          >
             <View style={styles.settingIcon}>
-              <MaterialIcons name="notifications" size={20} color={colors.accent} />
+              <MaterialIcons
+                name="notifications"
+                size={20}
+                color={colors.accent}
+              />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Notifications</Text>
-              <Text style={styles.settingDescription}>Configure alert preferences</Text>
+              <Text style={styles.settingDescription}>
+                Configure alert preferences
+              </Text>
             </View>
             <Text style={styles.settingAction}>Configure</Text>
           </TouchableOpacity>
@@ -45,40 +71,56 @@ export default function SettingsIndexScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/stealth-mode')}>
+            onPress={() => router.push('/stealth-mode')}
+          >
             <View style={styles.settingIcon}>
-              <MaterialIcons name="visibility" size={20} color={colors.accent} />
+              <MaterialIcons
+                name="visibility"
+                size={20}
+                color={colors.accent}
+              />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Stealth Mode</Text>
-              <Text style={styles.settingDescription}>Configure app disguise options</Text>
+              <Text style={styles.settingDescription}>
+                Configure app disguise options
+              </Text>
             </View>
             <Text style={styles.settingAction}>Configure</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingIcon}>
               <MaterialIcons name="lock" size={20} color={colors.accent} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Privacy & Security</Text>
-              <Text style={styles.settingDescription}>Manage security settings</Text>
+              <Text style={styles.settingDescription}>
+                Manage security settings
+              </Text>
             </View>
             <Text style={styles.settingAction}>View</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/emergency-setup')}>
+            onPress={() => router.push('/emergency-setup')}
+          >
             <View style={styles.settingIcon}>
-              <MaterialIcons name="notifications" size={20} color={colors.accent} />
+              <MaterialIcons
+                name="notifications"
+                size={20}
+                color={colors.accent}
+              />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Emergency Contacts</Text>
-              <Text style={styles.settingDescription}>Manage emergency contacts and alerts</Text>
+              <Text style={styles.settingDescription}>
+                Manage emergency contacts and alerts
+              </Text>
             </View>
             <Text style={styles.settingAction}>Configure</Text>
           </TouchableOpacity>
@@ -86,16 +128,23 @@ export default function SettingsIndexScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data Management</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/settings/incident-management')}>
+            onPress={() => router.push('/settings/incident-management')}
+          >
             <View style={styles.settingIcon}>
-              <MaterialIcons name="video-label" size={20} color={colors.accent} />
+              <MaterialIcons
+                name="video-label"
+                size={20}
+                color={colors.accent}
+              />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Incident Management</Text>
-              <Text style={styles.settingDescription}>Manage cloud-stored incidents</Text>
+              <Text style={styles.settingDescription}>
+                Manage cloud-stored incidents
+              </Text>
             </View>
             <Text style={styles.settingAction}>View</Text>
           </TouchableOpacity>
@@ -103,16 +152,19 @@ export default function SettingsIndexScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Advanced</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/settings/developer-tools')}>
+            onPress={() => router.push('/settings/developer-tools')}
+          >
             <View style={styles.settingIcon}>
               <MaterialIcons name="build" size={20} color={colors.accent} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Developer Tools</Text>
-              <Text style={styles.settingDescription}>Testing and development options</Text>
+              <Text style={styles.settingDescription}>
+                Testing and development options
+              </Text>
             </View>
             <Text style={styles.settingAction}>View</Text>
           </TouchableOpacity>
@@ -121,7 +173,9 @@ export default function SettingsIndexScreen() {
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>About DESIST!</Text>
           <Text style={styles.infoText}>Version 1.0.0</Text>
-          <Text style={styles.infoText}>© 2024 DESIST!. All rights reserved.</Text>
+          <Text style={styles.infoText}>
+            © 2024 DESIST!. All rights reserved.
+          </Text>
         </View>
       </ScrollView>
     </View>

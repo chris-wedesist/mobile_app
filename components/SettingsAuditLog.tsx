@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Platform } from 'react-native';
-import { createClient } from '@supabase/supabase-js';
-import { colors, shadows, radius } from '../constants/theme';
-import { textStyles, cardStyles, layoutStyles } from '../constants/styles';
 import { MaterialIcons } from '@expo/vector-icons';
+import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { cardStyles, layoutStyles, textStyles } from '../constants/styles';
+import { colors, radius } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -32,12 +38,14 @@ export default function SettingsAuditLog({
   userId,
   daysAgo = 30,
   settingFilter,
-  maxEntries = 50
+  maxEntries = 50,
 }: SettingsAuditLogProps) {
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedEntries, setExpandedEntries] = useState<Record<string, boolean>>({});
+  const [expandedEntries, setExpandedEntries] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     fetchAuditLog();
@@ -81,9 +89,9 @@ export default function SettingsAuditLog({
   };
 
   const toggleExpand = (id: string) => {
-    setExpandedEntries(prev => ({
+    setExpandedEntries((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
@@ -94,47 +102,78 @@ export default function SettingsAuditLog({
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const formatSettingName = (setting: string) => {
     return setting
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'web':
-        return <MaterialIcons name="public" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons name="public" size={16} color={colors.text.muted} />
+        );
       case 'ios':
-        return <MaterialIcons name="phone-iphone" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons
+            name="phone-iphone"
+            size={16}
+            color={colors.text.muted}
+          />
+        );
       case 'android':
-        return <MaterialIcons name="phone-android" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons
+            name="phone-android"
+            size={16}
+            color={colors.text.muted}
+          />
+        );
       default:
-        return <MaterialIcons name="smartphone" size={16} color={colors.text.muted} />;
+        return (
+          <MaterialIcons
+            name="smartphone"
+            size={16}
+            color={colors.text.muted}
+          />
+        );
     }
   };
 
   const renderValueChange = (oldValue: any, newValue: any, setting: string) => {
     // Handle boolean settings
-    if (typeof oldValue?.enabled === 'boolean' && typeof newValue?.enabled === 'boolean') {
+    if (
+      typeof oldValue?.enabled === 'boolean' &&
+      typeof newValue?.enabled === 'boolean'
+    ) {
       return (
         <Text style={textStyles.body}>
           <Text style={textStyles.caption}>Changed from </Text>
-          <Text style={{ 
-            color: oldValue.enabled ? colors.status.success : colors.status.error,
-            fontWeight: '600'
-          }}>
+          <Text
+            style={{
+              color: oldValue.enabled
+                ? colors.status.success
+                : colors.status.error,
+              fontWeight: '600',
+            }}
+          >
             {oldValue.enabled ? 'Enabled' : 'Disabled'}
           </Text>
           <Text style={textStyles.caption}> to </Text>
-          <Text style={{ 
-            color: newValue.enabled ? colors.status.success : colors.status.error,
-            fontWeight: '600'
-          }}>
+          <Text
+            style={{
+              color: newValue.enabled
+                ? colors.status.success
+                : colors.status.error,
+              fontWeight: '600',
+            }}
+          >
             {newValue.enabled ? 'Enabled' : 'Disabled'}
           </Text>
         </Text>
@@ -172,7 +211,7 @@ export default function SettingsAuditLog({
     const isExpanded = expandedEntries[item.id] || false;
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.logEntry}
         onPress={() => toggleExpand(item.id)}
         activeOpacity={0.7}
@@ -185,31 +224,49 @@ export default function SettingsAuditLog({
             </Text>
           </View>
           <View style={styles.logMeta}>
-            <MaterialIcons name="schedule" size={14} color={colors.text.muted} />
+            <MaterialIcons
+              name="schedule"
+              size={14}
+              color={colors.text.muted}
+            />
             <Text style={styles.timestamp}>{formatDate(item.changed_at)}</Text>
             {isExpanded ? (
-              <MaterialIcons name="expand-less" size={16} color={colors.text.muted} />
+              <MaterialIcons
+                name="expand-less"
+                size={16}
+                color={colors.text.muted}
+              />
             ) : (
-              <MaterialIcons name="expand-more" size={16} color={colors.text.muted} />
+              <MaterialIcons
+                name="expand-more"
+                size={16}
+                color={colors.text.muted}
+              />
             )}
           </View>
         </View>
 
         {isExpanded && (
           <View style={styles.logDetails}>
-            {renderValueChange(item.old_value, item.new_value, item.setting_changed)}
-            
+            {renderValueChange(
+              item.old_value,
+              item.new_value,
+              item.setting_changed
+            )}
+
             <View style={styles.metadataContainer}>
               <Text style={styles.metadataLabel}>Source:</Text>
               <Text style={styles.metadataValue}>{item.change_source}</Text>
-              
+
               <Text style={styles.metadataLabel}>Platform:</Text>
               <Text style={styles.metadataValue}>{item.platform}</Text>
-              
+
               {item.metadata?.app_version && (
                 <>
                   <Text style={styles.metadataLabel}>App Version:</Text>
-                  <Text style={styles.metadataValue}>{item.metadata.app_version}</Text>
+                  <Text style={styles.metadataValue}>
+                    {item.metadata.app_version}
+                  </Text>
                 </>
               )}
             </View>
@@ -251,7 +308,7 @@ export default function SettingsAuditLog({
       <FlatList
         data={auditLog}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />

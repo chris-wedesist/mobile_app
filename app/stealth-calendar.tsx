@@ -1,10 +1,20 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
-import { useStealthMode } from '../components/StealthModeManager';
-import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  GestureHandlerRootView,
+  LongPressGestureHandler,
+} from 'react-native-gesture-handler';
+import { useStealthMode } from '../components/StealthModeManager';
+import { colors, radius, shadows } from '../constants/theme';
+import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
 
 type Event = {
   id: string;
@@ -16,8 +26,18 @@ type Event = {
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const SAMPLE_EVENTS: Event[] = [
@@ -26,35 +46,35 @@ const SAMPLE_EVENTS: Event[] = [
     title: 'Team Meeting',
     time: '10:00 AM',
     location: 'Conference Room A',
-    type: 'meeting'
+    type: 'meeting',
   },
   {
     id: '2',
     title: 'Lunch with Sarah',
     time: '12:30 PM',
     location: 'Cafe Downtown',
-    type: 'personal'
+    type: 'personal',
   },
   {
     id: '3',
     title: 'Project Review',
     time: '2:00 PM',
-    type: 'work'
+    type: 'work',
   },
   {
     id: '4',
     title: 'Gym Session',
     time: '5:30 PM',
     location: 'Fitness Center',
-    type: 'personal'
-  }
+    type: 'personal',
+  },
 ];
 
 export default function StealthCalendarScreen() {
   const { deactivate } = useStealthMode();
   const [currentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   useStealthAutoTimeout(10);
 
@@ -90,15 +110,19 @@ export default function StealthCalendarScreen() {
 
   const isToday = (day: number) => {
     const today = new Date();
-    return day === today.getDate() &&
-           currentDate.getMonth() === today.getMonth() &&
-           currentDate.getFullYear() === today.getFullYear();
+    return (
+      day === today.getDate() &&
+      currentDate.getMonth() === today.getMonth() &&
+      currentDate.getFullYear() === today.getFullYear()
+    );
   };
 
   const isSelected = (day: number) => {
-    return day === selectedDate.getDate() &&
-           currentDate.getMonth() === selectedDate.getMonth() &&
-           currentDate.getFullYear() === selectedDate.getFullYear();
+    return (
+      day === selectedDate.getDate() &&
+      currentDate.getMonth() === selectedDate.getMonth() &&
+      currentDate.getFullYear() === selectedDate.getFullYear()
+    );
   };
 
   const getEventTypeColor = (type: Event['type']) => {
@@ -119,7 +143,8 @@ export default function StealthCalendarScreen() {
       <LongPressGestureHandler
         minDurationMs={3000}
         onHandlerStateChange={({ nativeEvent }) => {
-          if (nativeEvent.state === 4) { // 4 = ACTIVE (long press triggered)
+          if (nativeEvent.state === 4) {
+            // 4 = ACTIVE (long press triggered)
             handleLongPress();
           }
         }}
@@ -129,7 +154,11 @@ export default function StealthCalendarScreen() {
           <View style={styles.header}>
             <View style={styles.monthSelector}>
               <TouchableOpacity style={styles.monthButton}>
-                <MaterialIcons name="chevron-left" size={24} color={colors.text.primary} />
+                <MaterialIcons
+                  name="chevron-left"
+                  size={24}
+                  color={colors.text.primary}
+                />
               </TouchableOpacity>
               <View style={styles.monthDisplay}>
                 <Text style={styles.monthText}>
@@ -137,7 +166,11 @@ export default function StealthCalendarScreen() {
                 </Text>
               </View>
               <TouchableOpacity style={styles.monthButton}>
-                <MaterialIcons name="chevron-right" size={24} color={colors.text.primary} />
+                <MaterialIcons
+                  name="chevron-right"
+                  size={24}
+                  color={colors.text.primary}
+                />
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.addButton}>
@@ -149,7 +182,7 @@ export default function StealthCalendarScreen() {
           <View style={styles.calendar}>
             {/* Weekday Headers */}
             <View style={styles.weekdays}>
-              {WEEKDAYS.map(day => (
+              {WEEKDAYS.map((day) => (
                 <View key={day} style={styles.weekday}>
                   <Text style={styles.weekdayText}>{day}</Text>
                 </View>
@@ -166,14 +199,26 @@ export default function StealthCalendarScreen() {
                     day && isToday(day) && styles.today,
                     day && isSelected(day) && styles.selected,
                   ]}
-                  onPress={() => day && setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))}>
+                  onPress={() =>
+                    day &&
+                    setSelectedDate(
+                      new Date(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        day
+                      )
+                    )
+                  }
+                >
                   {day && (
                     <>
-                      <Text style={[
-                        styles.dayText,
-                        isToday(day) && styles.todayText,
-                        isSelected(day) && styles.selectedText,
-                      ]}>
+                      <Text
+                        style={[
+                          styles.dayText,
+                          isToday(day) && styles.todayText,
+                          isSelected(day) && styles.selectedText,
+                        ]}
+                      >
                         {day}
                       </Text>
                       {day === selectedDate.getDate() && (
@@ -196,20 +241,35 @@ export default function StealthCalendarScreen() {
               {MONTHS[selectedDate.getMonth()]} {selectedDate.getDate()}
             </Text>
             <ScrollView style={styles.eventsList}>
-              {SAMPLE_EVENTS.map(event => (
+              {SAMPLE_EVENTS.map((event) => (
                 <View key={event.id} style={styles.eventCard}>
-                  <View style={[styles.eventType, { backgroundColor: getEventTypeColor(event.type) }]} />
+                  <View
+                    style={[
+                      styles.eventType,
+                      { backgroundColor: getEventTypeColor(event.type) },
+                    ]}
+                  />
                   <View style={styles.eventContent}>
                     <Text style={styles.eventTitle}>{event.title}</Text>
                     <View style={styles.eventDetails}>
                       <View style={styles.eventDetail}>
-                        <MaterialIcons name="schedule" size={16} color={colors.text.muted} />
+                        <MaterialIcons
+                          name="schedule"
+                          size={16}
+                          color={colors.text.muted}
+                        />
                         <Text style={styles.eventDetailText}>{event.time}</Text>
                       </View>
                       {event.location && (
                         <View style={styles.eventDetail}>
-                          <MaterialIcons name="location-on" size={16} color={colors.text.muted} />
-                          <Text style={styles.eventDetailText}>{event.location}</Text>
+                          <MaterialIcons
+                            name="location-on"
+                            size={16}
+                            color={colors.text.muted}
+                          />
+                          <Text style={styles.eventDetailText}>
+                            {event.location}
+                          </Text>
                         </View>
                       )}
                     </View>
@@ -328,7 +388,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.xlarge,
     borderTopRightRadius: radius.xlarge,
     padding: 20,
-    ...shadows.large,
+    ...shadows.lg,
   },
   eventsTitle: {
     fontSize: 20,

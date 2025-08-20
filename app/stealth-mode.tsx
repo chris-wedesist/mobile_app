@@ -1,8 +1,16 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch } from 'react-native';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 type CoverStoryType = {
   id: string;
@@ -16,7 +24,8 @@ const COVER_STORIES: CoverStoryType[] = [
     id: 'notes',
     name: 'Notes App',
     icon: <MaterialIcons name="notes" size={24} color={colors.accent} />,
-    description: 'Transform into a simple notes application with realistic content.',
+    description:
+      'Transform into a simple notes application with realistic content.',
   },
   {
     id: 'calculator',
@@ -35,7 +44,7 @@ const COVER_STORIES: CoverStoryType[] = [
     name: 'Web Browser',
     icon: <MaterialIcons name="web" size={24} color={colors.accent} />,
     description: 'Display a mock web browser interface.',
-  }
+  },
 ];
 
 export default function StealthModeScreen() {
@@ -51,11 +60,11 @@ export default function StealthModeScreen() {
       setError(null);
 
       // Simulate activation process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setIsActive(!isActive);
       setIsActivating(false);
-      
+
       if (!isActive) {
         // In a real app, this would activate the cover story
         alert(`Cover story activated: ${selectedStory}`);
@@ -72,8 +81,13 @@ export default function StealthModeScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+          onPress={() => router.back()}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            color={colors.text.primary}
+            size={24}
+          />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -85,7 +99,8 @@ export default function StealthModeScreen() {
         </View>
 
         <Text style={styles.description}>
-          Quickly disguise DESIST! as another app if you feel unsafe or are being watched.
+          Quickly disguise DESIST! as another app if you feel unsafe or are
+          being watched.
         </Text>
 
         {error && (
@@ -98,26 +113,29 @@ export default function StealthModeScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Choose Cover Story</Text>
           <View style={styles.storiesGrid}>
-            {COVER_STORIES.map(story => (
+            {COVER_STORIES.map((story) => (
               <TouchableOpacity
                 key={story.id}
                 style={[
                   styles.storyOption,
-                  selectedStory === story.id && styles.selectedStory
+                  selectedStory === story.id && styles.selectedStory,
                 ]}
-                onPress={() => setSelectedStory(story.id)}>
+                onPress={() => setSelectedStory(story.id)}
+              >
                 <View style={styles.storyHeader}>
                   {story.icon}
                   {selectedStory === story.id && (
                     <View style={styles.checkmark}>
-                      <MaterialIcons name="check" size={16} color={colors.text.primary} />
+                      <MaterialIcons
+                        name="check"
+                        size={16}
+                        color={colors.text.primary}
+                      />
                     </View>
                   )}
                 </View>
                 <Text style={styles.storyName}>{story.name}</Text>
-                <Text style={styles.storyDescription}>
-                  {story.description}
-                </Text>
+                <Text style={styles.storyDescription}>{story.description}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -126,7 +144,11 @@ export default function StealthModeScreen() {
         <View style={styles.section}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <MaterialIcons name="visibility" size={24} color={colors.accent} />
+              <MaterialIcons
+                name="visibility"
+                size={24}
+                color={colors.accent}
+              />
               <View>
                 <Text style={styles.settingTitle}>Auto-Activate</Text>
                 <Text style={styles.settingDescription}>
@@ -138,7 +160,9 @@ export default function StealthModeScreen() {
               value={autoActivate}
               onValueChange={setAutoActivate}
               trackColor={{ false: colors.text.muted, true: colors.accent }}
-              thumbColor={autoActivate ? colors.text.primary : colors.text.secondary}
+              thumbColor={
+                autoActivate ? colors.text.primary : colors.text.secondary
+              }
             />
           </View>
         </View>
@@ -147,22 +171,36 @@ export default function StealthModeScreen() {
           style={[
             styles.activateButton,
             isActivating && styles.activateButtonDisabled,
-            isActive && styles.activateButtonActive
+            isActive && styles.activateButtonActive,
           ]}
           onPress={handleActivation}
-          disabled={isActivating}>
+          disabled={isActivating}
+        >
           {isActive ? (
-            <MaterialIcons name="visibility-off" size={24} color={colors.text.primary} />
+            <MaterialIcons
+              name="visibility-off"
+              size={24}
+              color={colors.text.primary}
+            />
           ) : (
-            <MaterialIcons name="visibility" size={24} color={colors.text.primary} />
+            <MaterialIcons
+              name="visibility"
+              size={24}
+              color={colors.text.primary}
+            />
           )}
           <Text style={styles.activateButtonText}>
-            {isActivating ? 'Activating...' : isActive ? 'Exit Cover Story' : 'Activate Cover Story'}
+            {isActivating
+              ? 'Activating...'
+              : isActive
+              ? 'Exit Cover Story'
+              : 'Activate Cover Story'}
           </Text>
         </TouchableOpacity>
 
         <Text style={styles.tip}>
-          Tip: Press and hold the volume down button for 3 seconds to exit cover story mode
+          Tip: Press and hold the volume down button for 3 seconds to exit cover
+          story mode
         </Text>
       </ScrollView>
     </View>

@@ -1,8 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { colors, radius, shadows } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
@@ -18,25 +26,36 @@ const slides: OnboardingSlide[] = [
   {
     id: '1',
     title: 'Welcome to DESIST!',
-    description: 'Your personal safety companion that helps you document, protect, and respond to incidents.',
-    icon: <Image source={require('../assets/images/splash.png')} style={{height: 220, width: 220}} />
+    description:
+      'Your personal safety companion that helps you document, protect, and respond to incidents.',
+    icon: (
+      <Image
+        source={require('../assets/images/splash.png')}
+        style={{ height: 220, width: 220 }}
+      />
+    ),
   },
   {
     id: '2',
     title: 'Quick Emergency Response',
-    description: 'Access emergency features with one tap. Record incidents and alert trusted contacts instantly.',
+    description:
+      'Access emergency features with one tap. Record incidents and alert trusted contacts instantly.',
     icon: <MaterialIcons name="emergency" size={100} color={colors.accent} />,
   },
   {
     id: '3',
     title: 'Stealth Mode Protection',
-    description: 'Quickly disguise the app as something innocent if you need privacy or are being observed.',
-    icon: <MaterialIcons name="visibility-off" size={100} color={colors.accent} />,
+    description:
+      'Quickly disguise the app as something innocent if you need privacy or are being observed.',
+    icon: (
+      <MaterialIcons name="visibility-off" size={100} color={colors.accent} />
+    ),
   },
   {
     id: '4',
     title: 'Your Rights Matter',
-    description: 'Access legal resources and document incidents to protect your rights when it matters most.',
+    description:
+      'Access legal resources and document incidents to protect your rights when it matters most.',
     icon: <MaterialIcons name="gavel" size={100} color={colors.accent} />,
   },
 ];
@@ -49,9 +68,7 @@ export default function Onboarding() {
   const renderItem = ({ item }: { item: OnboardingSlide }) => {
     return (
       <View style={styles.slide}>
-        <View style={styles.iconContainer}>
-          {item.icon}
-        </View>
+        <View style={styles.iconContainer}>{item.icon}</View>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
       </View>
@@ -82,22 +99,22 @@ export default function Onboarding() {
     try {
       console.log('Completing onboarding...');
       setIsCompleting(true);
-      
+
       // Set onboarding as completed
       await AsyncStorage.setItem('onboarding_completed', 'true');
       console.log('Onboarding marked as completed');
-      
+
       // Award founding protector badge
       await AsyncStorage.setItem('founding_protector_badge', 'awarded');
       console.log('Founding protector badge awarded');
-      
+
       // Navigate directly to home screen instead of badge unlock
       console.log('Navigating to home screen');
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       setIsCompleting(false);
-      
+
       // Fallback navigation in case of error
       router.replace('/(tabs)');
     }
@@ -141,22 +158,29 @@ export default function Onboarding() {
             <TouchableOpacity
               style={styles.skipButton}
               onPress={handleSkip}
-              disabled={isCompleting}>
+              disabled={isCompleting}
+            >
               <Text style={styles.skipButtonText}>Skip</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNext}>
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
               <Text style={styles.nextButtonText}>Next</Text>
-              <MaterialIcons name="arrow-forward" size={20} color={colors.text.primary} />
+              <MaterialIcons
+                name="arrow-forward"
+                size={20}
+                color={colors.text.primary}
+              />
             </TouchableOpacity>
           </>
         ) : (
           <TouchableOpacity
-            style={[styles.getStartedButton, isCompleting && styles.disabledButton]}
+            style={[
+              styles.getStartedButton,
+              isCompleting && styles.disabledButton,
+            ]}
             onPress={handleComplete}
-            disabled={isCompleting}>
+            disabled={isCompleting}
+          >
             <Text style={styles.getStartedButtonText}>
               {isCompleting ? 'Getting Started...' : 'Get Started'}
             </Text>

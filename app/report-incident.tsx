@@ -1,13 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Alert, FlatList, Image, Modal, Dimensions } from 'react-native';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
-import { createClient } from '@supabase/supabase-js';
-import * as Location from 'expo-location';
-import { WebView } from 'react-native-webview';
-import { Video as ExpoVideo, ResizeMode } from 'expo-av';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import { Video as ExpoVideo, ResizeMode } from 'expo-av';
+import * as Location from 'expo-location';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { WebView } from 'react-native-webview';
+import { colors, radius, shadows } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -20,7 +34,7 @@ const INCIDENT_TYPES = [
   'Checkpoint',
   'Raid in Progress',
   'Suspicious Vehicle',
-  'Other Activity'
+  'Other Activity',
 ];
 
 const INCIDENT_DESCRIPTIONS = {
@@ -29,42 +43,42 @@ const INCIDENT_DESCRIPTIONS = {
     { label: 'Vehicle descriptions', type: 'text' },
     { label: 'Badge numbers (if visible)', type: 'text' },
     { label: 'Actions being taken', type: 'text' },
-    { label: 'Witnesses present', type: 'text' }
+    { label: 'Witnesses present', type: 'text' },
   ],
   'Border Patrol Activity': [
     { label: 'Number of agents', type: 'text' },
     { label: 'Vehicle descriptions', type: 'text' },
     { label: 'Actions being taken', type: 'text' },
-    { label: 'Checkpoint or mobile unit', type: 'text' }
+    { label: 'Checkpoint or mobile unit', type: 'text' },
   ],
-  'Checkpoint': [
+  Checkpoint: [
     { label: 'Checkpoint location', type: 'text' },
     { label: 'Type of checkpoint', type: 'text' },
     { label: 'Number of officers', type: 'text' },
     { label: 'Vehicle descriptions', type: 'text' },
-    { label: 'Specific activities observed', type: 'text' }
+    { label: 'Specific activities observed', type: 'text' },
   ],
   'Raid in Progress': [
     { label: 'Location of raid', type: 'text' },
     { label: 'Number of officers', type: 'text' },
     { label: 'Vehicle descriptions', type: 'text' },
     { label: 'Type of location (business/residence)', type: 'text' },
-    { label: 'Actions being taken', type: 'text' }
+    { label: 'Actions being taken', type: 'text' },
   ],
   'Suspicious Vehicle': [
     { label: 'Vehicle description', type: 'text' },
     { label: 'License plate (if visible)', type: 'text' },
     { label: 'Number of occupants', type: 'text' },
     { label: 'Observed behavior', type: 'text' },
-    { label: 'Direction of travel', type: 'text' }
+    { label: 'Direction of travel', type: 'text' },
   ],
   'Other Activity': [
     { label: 'Please describe the activity in detail', type: 'text' },
     { label: 'Location', type: 'text' },
     { label: 'Personnel involved', type: 'text' },
     { label: 'Vehicles present', type: 'text' },
-    { label: 'Actions observed', type: 'text' }
-  ]
+    { label: 'Actions observed', type: 'text' },
+  ],
 };
 
 type FormField = {
@@ -77,14 +91,18 @@ export default function ReportIncidentScreen() {
   const [selectedType, setSelectedType] = useState('');
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [address, setAddress] = useState<string>('');
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [showMap, setShowMap] = useState(false);
-  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObject | null>(null);
   const webViewRef = useRef<WebView>(null);
   const [recordings, setRecordings] = useState<any[]>([]);
-  console.log("🚀 ~ ReportIncidentScreen ~ recordings:", recordings)
+  console.log('🚀 ~ ReportIncidentScreen ~ recordings:', recordings);
   const [selectedVideos, setSelectedVideos] = useState<string[]>([]);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -105,14 +123,17 @@ export default function ReportIncidentScreen() {
         }
 
         const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High
+          accuracy: Location.Accuracy.High,
         });
         setUserLocation(location);
         setSelectedLocation({
           latitude: location.coords.latitude,
-          longitude: location.coords.longitude
+          longitude: location.coords.longitude,
         });
-        getAddressFromCoordinates(location.coords.latitude, location.coords.longitude);
+        getAddressFromCoordinates(
+          location.coords.latitude,
+          location.coords.longitude
+        );
       } catch (error) {
         console.error('Error getting location:', error);
         Alert.alert(
@@ -125,11 +146,11 @@ export default function ReportIncidentScreen() {
   }, []);
 
   const generateMapHtml = () => {
-    const center = selectedLocation 
+    const center = selectedLocation
       ? [selectedLocation.longitude, selectedLocation.latitude]
       : userLocation
-        ? [userLocation.coords.longitude, userLocation.coords.latitude]
-        : [0, 0];
+      ? [userLocation.coords.longitude, userLocation.coords.latitude]
+      : [0, 0];
 
     return `
       <!DOCTYPE html>
@@ -228,7 +249,7 @@ export default function ReportIncidentScreen() {
         console.log('Location selected:', data);
         setSelectedLocation({
           latitude: data.latitude,
-          longitude: data.longitude
+          longitude: data.longitude,
         });
         getAddressFromCoordinates(data.latitude, data.longitude);
         setShowMap(false);
@@ -244,7 +265,7 @@ export default function ReportIncidentScreen() {
       if (data.type === 'locationSelected') {
         setSelectedLocation({
           latitude: data.latitude,
-          longitude: data.longitude
+          longitude: data.longitude,
         });
         getAddressFromCoordinates(data.latitude, data.longitude);
         setShowMap(false);
@@ -263,7 +284,10 @@ export default function ReportIncidentScreen() {
     }
   }, [showMap]);
 
-  const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
+  const getAddressFromCoordinates = async (
+    latitude: number,
+    longitude: number
+  ) => {
     setIsLoadingAddress(true);
     try {
       const address = await Location.reverseGeocodeAsync({
@@ -276,7 +300,7 @@ export default function ReportIncidentScreen() {
           addr.street || addr.name,
           addr.city,
           addr.region,
-          addr.postalCode
+          addr.postalCode,
         ].filter(Boolean);
         setAddress(addressParts.join(', '));
       } else {
@@ -292,10 +316,13 @@ export default function ReportIncidentScreen() {
 
   const handleTypeSelect = (type: string) => {
     setSelectedType(type);
-    const fields = INCIDENT_DESCRIPTIONS[type as keyof typeof INCIDENT_DESCRIPTIONS]?.map(field => ({
-      ...field,
-      value: ''
-    })) || [];
+    const fields =
+      INCIDENT_DESCRIPTIONS[type as keyof typeof INCIDENT_DESCRIPTIONS]?.map(
+        (field) => ({
+          ...field,
+          value: '',
+        })
+      ) || [];
     setFormFields(fields);
   };
 
@@ -310,8 +337,10 @@ export default function ReportIncidentScreen() {
       setIsLoadingVideos(true);
 
       const userRecordingsStr = await AsyncStorage.getItem('userRecordings');
-      const userRecordingIds = userRecordingsStr ? JSON.parse(userRecordingsStr) : [];
-      
+      const userRecordingIds = userRecordingsStr
+        ? JSON.parse(userRecordingsStr)
+        : [];
+
       if (userRecordingIds.length === 0) {
         setRecordings([]);
         return;
@@ -334,9 +363,9 @@ export default function ReportIncidentScreen() {
   };
 
   const toggleVideoSelection = (videoUrl: string) => {
-    setSelectedVideos(prev => 
+    setSelectedVideos((prev) =>
       prev.includes(videoUrl)
-        ? prev.filter(url => url !== videoUrl)
+        ? prev.filter((url) => url !== videoUrl)
         : [...prev, videoUrl]
     );
   };
@@ -356,14 +385,14 @@ export default function ReportIncidentScreen() {
           {
             type: selectedType,
             description: formFields
-              .map(field => `${field.label}: ${field.value}`)
+              .map((field) => `${field.label}: ${field.value}`)
               .join('\n'),
             latitude: selectedLocation.latitude,
             longitude: selectedLocation.longitude,
             status: 'active',
             created_at: new Date().toISOString(),
-            video_urls: selectedVideos
-          }
+            video_urls: selectedVideos,
+          },
         ])
         .select()
         .single();
@@ -373,7 +402,7 @@ export default function ReportIncidentScreen() {
       Alert.alert('Success', 'Incident reported successfully');
       router.push({
         pathname: '/(tabs)/incidents',
-        params: { newIncident: JSON.stringify(data) }
+        params: { newIncident: JSON.stringify(data) },
       });
     } catch (error) {
       console.log('Error reporting incident:', error);
@@ -430,8 +459,17 @@ export default function ReportIncidentScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.videoInfo}>
-          <MaterialIcons name="video-label" size={20} color={isSelected ? '#fff' : '#666'} />
-          <Text style={[styles.videoItemText, isSelected && styles.selectedVideoItemText]}>
+          <MaterialIcons
+            name="video-label"
+            size={20}
+            color={isSelected ? '#fff' : '#666'}
+          />
+          <Text
+            style={[
+              styles.videoItemText,
+              isSelected && styles.selectedVideoItemText,
+            ]}
+          >
             Recording {new Date(item.created_at).toLocaleDateString()}
           </Text>
           {isSelected && (
@@ -453,36 +491,46 @@ export default function ReportIncidentScreen() {
     return (
       <View style={styles.videoPickerContainer}>
         <FlatList
-  data={recordings}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.videoPickerItem,
-        selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItem
-      ]}
-      onPress={() => toggleVideoSelection(item.video_url)}
-    >
-      <MaterialIcons name="video-label" size={20} color={selectedVideos.includes(item.video_url) ? '#fff' : '#666'} />
-      <Text style={[
-        styles.videoPickerItemText,
-        selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItemText
-      ]}>
-        Recording {new Date(item.created_at).toLocaleDateString()}
-      </Text>
-      {selectedVideos.includes(item.video_url) && (
-        <TouchableOpacity
-          style={styles.removeVideoButton}
-          onPress={() => toggleVideoSelection(item.video_url)}
-        >
-          <MaterialIcons name="close" size={16} color="#fff" />
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  )}
-  keyExtractor={(item) => item.id}
-  scrollEnabled={false}  // 🔧 Important: disable scrolling here
-  style={styles.videoPickerList}
-/>
+          data={recordings}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.videoPickerItem,
+                selectedVideos.includes(item.video_url) &&
+                  styles.selectedVideoPickerItem,
+              ]}
+              onPress={() => toggleVideoSelection(item.video_url)}
+            >
+              <MaterialIcons
+                name="video-label"
+                size={20}
+                color={
+                  selectedVideos.includes(item.video_url) ? '#fff' : '#666'
+                }
+              />
+              <Text
+                style={[
+                  styles.videoPickerItemText,
+                  selectedVideos.includes(item.video_url) &&
+                    styles.selectedVideoPickerItemText,
+                ]}
+              >
+                Recording {new Date(item.created_at).toLocaleDateString()}
+              </Text>
+              {selectedVideos.includes(item.video_url) && (
+                <TouchableOpacity
+                  style={styles.removeVideoButton}
+                  onPress={() => toggleVideoSelection(item.video_url)}
+                >
+                  <MaterialIcons name="close" size={16} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false} // 🔧 Important: disable scrolling here
+          style={styles.videoPickerList}
+        />
       </View>
     );
   };
@@ -493,15 +541,15 @@ export default function ReportIncidentScreen() {
     return (
       <View style={styles.selectedVideosContainer}>
         <Text style={styles.selectedVideosTitle}>Selected Videos</Text>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.selectedVideosScroll}
         >
           {selectedVideos.map((videoUrl, index) => {
-            const recording = recordings.find(r => r.video_url === videoUrl);
+            const recording = recordings.find((r) => r.video_url === videoUrl);
             if (!recording) return null;
-            
+
             return (
               <TouchableOpacity
                 key={index}
@@ -538,7 +586,8 @@ export default function ReportIncidentScreen() {
 
       <TouchableOpacity
         style={styles.legalRightsButton}
-        onPress={() => router.push('/legal-rights')}>
+        onPress={() => router.push('/legal-rights')}
+      >
         <MaterialIcons name="verified" size={20} color="#fff" />
         <Text style={styles.legalRightsText}>Know Your Rights</Text>
       </TouchableOpacity>
@@ -547,13 +596,22 @@ export default function ReportIncidentScreen() {
 
       <View style={styles.form}>
         <Text style={styles.label}>Select Location</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.locationButton}
           onPress={() => setShowMap(true)}
         >
-          <MaterialIcons name="location-on" size={20} color="#fff" style={styles.locationIcon} />
+          <MaterialIcons
+            name="location-on"
+            size={20}
+            color="#fff"
+            style={styles.locationIcon}
+          />
           {isLoadingAddress ? (
-            <ActivityIndicator color="#fff" size="small" style={styles.loadingIndicator} />
+            <ActivityIndicator
+              color="#fff"
+              size="small"
+              style={styles.loadingIndicator}
+            />
           ) : (
             <Text style={styles.locationText} numberOfLines={2}>
               {address || 'Tap to select location on map'}
@@ -602,17 +660,19 @@ export default function ReportIncidentScreen() {
                 styles.typeButton,
                 selectedType === type && styles.selectedTypeButton,
               ]}
-              onPress={() => handleTypeSelect(type)}>
-              <MaterialIcons 
-                name="error" 
-                size={16} 
-                color={selectedType === type ? '#fff' : '#666'} 
+              onPress={() => handleTypeSelect(type)}
+            >
+              <MaterialIcons
+                name="error"
+                size={16}
+                color={selectedType === type ? '#fff' : '#666'}
               />
               <Text
                 style={[
                   styles.typeButtonText,
                   selectedType === type && styles.selectedTypeButtonText,
-                ]}>
+                ]}
+              >
                 {type}
               </Text>
             </TouchableOpacity>
@@ -646,7 +706,9 @@ export default function ReportIncidentScreen() {
                 <MaterialIcons name="video-label" size={20} color="#fff" />
                 <Text style={styles.videoPickerButtonText}>
                   {selectedVideos.length > 0
-                    ? `${selectedVideos.length} video${selectedVideos.length > 1 ? 's' : ''} selected`
+                    ? `${selectedVideos.length} video${
+                        selectedVideos.length > 1 ? 's' : ''
+                      } selected`
                     : 'Select videos'}
                 </Text>
                 <MaterialIcons name="chevron-right" size={20} color="#fff" />
@@ -658,9 +720,13 @@ export default function ReportIncidentScreen() {
         )}
 
         <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton,
+            isSubmitting && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
-          disabled={isSubmitting}>
+          disabled={isSubmitting}
+        >
           <Text style={styles.submitButtonText}>
             {isSubmitting ? 'Submitting...' : 'Report Activity'}
           </Text>
@@ -944,9 +1010,9 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     height: Platform.select({
-      ios: Dimensions.get('window').width * (9/16),
-      android: Dimensions.get('window').width * (9/16),
-      default: Dimensions.get('window').height * 0.6
+      ios: Dimensions.get('window').width * (9 / 16),
+      android: Dimensions.get('window').width * (9 / 16),
+      default: Dimensions.get('window').height * 0.6,
     }),
     backgroundColor: '#000',
     borderRadius: 10,

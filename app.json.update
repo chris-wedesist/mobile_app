@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "developmentClient": {
+      "silentLaunch": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.wedesist.desist",
+      "runtimeVersion": {
+        "policy": "sdkVersion"
+      }
+    },
+    "android": {
+      "package": "com.wedesist.desist",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1B2D45"
+      },
+      "runtimeVersion": {
+        "policy": "sdkVersion"
+      }
+    },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/6cc97a1a-a22a-45d8-bec2-4410bb0a41e5"
+    },
+    "jsEngine": "hermes"
+  }
+}

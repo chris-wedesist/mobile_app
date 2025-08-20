@@ -1,16 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import EmergencyCallButton from '../components/EmergencyCallButton';
 import CustomSplashScreen from '../components/SplashScreen';
 import { colors } from '../constants/theme';
-import { View, Text } from 'react-native'
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
-import * as React from 'react';
 import { errorHandler } from '../utils/errorHandler';
 import { StateManager } from '../utils/stateManager';
 
@@ -51,7 +50,11 @@ if (sentryDsn && sentryDsn !== 'YOUR_SENTRY_DSN') {
 */
 
 // Global handler for unhandled promise rejections (Hermes compatible)
-if (typeof global !== 'undefined' && typeof global.process !== 'undefined' && global.process.on) {
+if (
+  typeof global !== 'undefined' &&
+  typeof global.process !== 'undefined' &&
+  global.process.on
+) {
   global.process.on('unhandledRejection', (reason: any) => {
     errorHandler(reason);
   });
@@ -80,9 +83,20 @@ class ErrorBoundary extends React.Component<any, ErrorBoundaryState> {
     if (this.state.hasError) {
       // Show a user-friendly error message
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
-          <Text style={{ color: '#fff', fontSize: 18, marginBottom: 16 }}>Something went wrong.</Text>
-          <Text style={{ color: '#fff', fontSize: 14 }}>{errorHandler(this.state.error)}</Text>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#000',
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 18, marginBottom: 16 }}>
+            Something went wrong.
+          </Text>
+          <Text style={{ color: '#fff', fontSize: 14 }}>
+            {errorHandler(this.state.error)}
+          </Text>
         </View>
       );
     }
@@ -99,7 +113,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     console.log('RootLayout mounted, checking first launch...');
-    
+
     // Initialize state management
     const initializeApp = async () => {
       try {
@@ -108,11 +122,11 @@ export default function RootLayout() {
       } catch (error) {
         console.error('Failed to initialize state management:', error);
       }
-      
+
       // Continue with existing initialization
       checkFirstLaunch();
     };
-    
+
     initializeApp();
 
     // Cleanup function to clear timeout if component unmounts
@@ -126,9 +140,11 @@ export default function RootLayout() {
   const checkFirstLaunch = async () => {
     try {
       console.log('Checking if onboarding is completed...');
-      const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
+      const onboardingCompleted = await AsyncStorage.getItem(
+        'onboarding_completed'
+      );
       console.log('Onboarding completed:', onboardingCompleted);
-      
+
       if (onboardingCompleted !== 'true') {
         console.log('Setting initial route to onboarding');
         setInitialRoute('/onboarding');
@@ -136,7 +152,7 @@ export default function RootLayout() {
         console.log('Setting initial route to tabs');
         setInitialRoute('/(tabs)');
       }
-      
+
       // Short timeout to ensure state updates properly
       timeoutRef.current = setTimeout(() => {
         console.log('Setting isReady to true');
@@ -175,20 +191,43 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack screenOptions={{ 
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.primary }
-        }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.primary },
+          }}
+        >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="emergency-setup" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="panic-activation" options={{ presentation: 'fullScreenModal' }} />
-          <Stack.Screen name="report-incident" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="legal-rights" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="stealth-mode" options={{ presentation: 'modal' }} />
+          <Stack.Screen
+            name="emergency-setup"
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name="panic-activation"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="report-incident"
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name="legal-rights"
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name="stealth-mode"
+            options={{ presentation: 'modal' }}
+          />
           <Stack.Screen name="incidents" options={{ headerShown: false }} />
           <Stack.Screen name="settings" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
-          <Stack.Screen name="badge-unlock" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen
+            name="onboarding"
+            options={{ headerShown: false, gestureEnabled: false }}
+          />
+          <Stack.Screen
+            name="badge-unlock"
+            options={{ headerShown: false, gestureEnabled: false }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="light" />

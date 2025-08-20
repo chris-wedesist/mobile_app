@@ -1,9 +1,17 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Linking } from 'react-native';
-import { colors } from '../../constants/theme';
-import { useEffect, useState } from 'react';
-import { getNews, NewsItem } from '../../lib/news';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { colors } from '../../constants/theme';
+import { getNews, NewsItem } from '../../lib/news';
 
 type LayoutType = 'row' | 'box';
 
@@ -16,9 +24,9 @@ export default function BlogsScreen() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [layout, setLayout] = useState<LayoutType>('row');
-  const [selectedCategory, setSelectedCategory] = useState<'local' | 'national' | 'all'>(
-    (category as 'local' | 'national') || 'all'
-  );
+  const [selectedCategory, setSelectedCategory] = useState<
+    'local' | 'national' | 'all'
+  >((category as 'local' | 'national') || 'all');
 
   const loadNews = async () => {
     try {
@@ -31,7 +39,7 @@ export default function BlogsScreen() {
         if (page === 1) {
           setNews(newsItems);
         } else {
-          setNews(prev => [...prev, ...newsItems]);
+          setNews((prev) => [...prev, ...newsItems]);
         }
         setHasMore(newsItems.length === ITEMS_PER_PAGE);
       }
@@ -59,12 +67,12 @@ export default function BlogsScreen() {
 
   const loadMore = () => {
     if (!loading && hasMore) {
-      setPage(prev => prev + 1);
+      setPage((prev) => prev + 1);
     }
   };
 
   const toggleLayout = () => {
-    setLayout(prev => prev === 'row' ? 'box' : 'row');
+    setLayout((prev) => (prev === 'row' ? 'box' : 'row'));
   };
 
   const handleCategoryChange = (newCategory: 'local' | 'national' | 'all') => {
@@ -77,18 +85,21 @@ export default function BlogsScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        console.error("Cannot open URL: " + url);
+        console.error('Cannot open URL: ' + url);
       }
     } catch (error) {
-      console.error("Error opening URL:", error);
+      console.error('Error opening URL:', error);
     }
   };
 
   const getCategoryTitle = () => {
     switch (selectedCategory) {
-      case 'local': return 'Local News';
-      case 'national': return 'National News';
-      default: return 'All News';
+      case 'local':
+        return 'Local News';
+      case 'national':
+        return 'National News';
+      default:
+        return 'All News';
     }
   };
 
@@ -98,72 +109,83 @@ export default function BlogsScreen() {
         <View style={styles.headerTop}>
           <Text style={styles.title}>{getCategoryTitle()}</Text>
           <Pressable onPress={toggleLayout} style={styles.layoutToggle}>
-            <Ionicons 
-              name={layout === 'row' ? 'grid-outline' : 'list-outline'} 
-              size={24} 
-              color={colors.text.primary} 
+            <Ionicons
+              name={layout === 'row' ? 'grid-outline' : 'list-outline'}
+              size={24}
+              color={colors.text.primary}
             />
           </Pressable>
         </View>
-        <Text style={styles.subtitle}>Stay informed about your rights and community</Text>
+        <Text style={styles.subtitle}>
+          Stay informed about your rights and community
+        </Text>
       </View>
 
       {/* Category Filter */}
       <View style={styles.categoryFilter}>
-        <Pressable 
+        <Pressable
           style={[
             styles.categoryButton,
-            selectedCategory === 'all' && styles.selectedCategory
+            selectedCategory === 'all' && styles.selectedCategory,
           ]}
           onPress={() => handleCategoryChange('all')}
         >
-          <Text style={[
-            styles.categoryText,
-            selectedCategory === 'all' && styles.selectedCategoryText
-          ]}>All</Text>
+          <Text
+            style={[
+              styles.categoryText,
+              selectedCategory === 'all' && styles.selectedCategoryText,
+            ]}
+          >
+            All
+          </Text>
         </Pressable>
-        <Pressable 
+        <Pressable
           style={[
             styles.categoryButton,
-            selectedCategory === 'local' && styles.selectedCategory
+            selectedCategory === 'local' && styles.selectedCategory,
           ]}
           onPress={() => handleCategoryChange('local')}
         >
-          <Text style={[
-            styles.categoryText,
-            selectedCategory === 'local' && styles.selectedCategoryText
-          ]}>Local</Text>
+          <Text
+            style={[
+              styles.categoryText,
+              selectedCategory === 'local' && styles.selectedCategoryText,
+            ]}
+          >
+            Local
+          </Text>
         </Pressable>
-        <Pressable 
+        <Pressable
           style={[
             styles.categoryButton,
-            selectedCategory === 'national' && styles.selectedCategory
+            selectedCategory === 'national' && styles.selectedCategory,
           ]}
           onPress={() => handleCategoryChange('national')}
         >
-          <Text style={[
-            styles.categoryText,
-            selectedCategory === 'national' && styles.selectedCategoryText
-          ]}>National</Text>
+          <Text
+            style={[
+              styles.categoryText,
+              selectedCategory === 'national' && styles.selectedCategoryText,
+            ]}
+          >
+            National
+          </Text>
         </Pressable>
       </View>
 
       <View style={layout === 'box' ? styles.boxContainer : undefined}>
         {news.map((item) => (
-          <Pressable 
-            key={item.id} 
-            style={[
-              styles.newsCard,
-              layout === 'box' && styles.newsCardBox
-            ]}
+          <Pressable
+            key={item.id}
+            style={[styles.newsCard, layout === 'box' && styles.newsCardBox]}
             onPress={() => handleNewsPress(item.url)}
           >
             <View style={styles.newsContent}>
               <Text style={styles.newsItemTitle}>{item.title}</Text>
-              <Text 
+              <Text
                 style={[
                   styles.newsItemDescription,
-                  layout === 'box' && styles.newsItemDescriptionBox
+                  layout === 'box' && styles.newsItemDescriptionBox,
                 ]}
                 numberOfLines={layout === 'box' ? 3 : undefined}
               >
@@ -191,10 +213,7 @@ export default function BlogsScreen() {
       )}
 
       {!loading && hasMore && (
-        <Pressable 
-          style={styles.loadMoreButton}
-          onPress={loadMore}
-        >
+        <Pressable style={styles.loadMoreButton} onPress={loadMore}>
           <Text style={styles.loadMoreText}>Load More</Text>
         </Pressable>
       )}
@@ -367,4 +386,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
   },
-}); 
+});

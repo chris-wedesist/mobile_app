@@ -1,7 +1,15 @@
-import { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated, Easing } from 'react-native';
-import { colors, shadows, radius } from '../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useEffect, useRef } from 'react';
+import {
+  Animated,
+  Easing,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 type BadgeUnlockModalProps = {
   visible: boolean;
@@ -18,21 +26,29 @@ type BadgeUnlockModalProps = {
   } | null;
 };
 
-export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnlockModalProps) {
+export default function BadgeUnlockModal({
+  visible,
+  onClose,
+  badge,
+}: BadgeUnlockModalProps) {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const confettiAnims = useRef(Array(20).fill(0).map(() => ({
-    position: new Animated.ValueXY({ x: 0, y: 0 }),
-    opacity: new Animated.Value(1),
-    rotation: new Animated.Value(0),
-  }))).current;
+  const confettiAnims = useRef(
+    Array(20)
+      .fill(0)
+      .map(() => ({
+        position: new Animated.ValueXY({ x: 0, y: 0 }),
+        opacity: new Animated.Value(1),
+        rotation: new Animated.Value(0),
+      }))
+  ).current;
 
   useEffect(() => {
     if (visible && badge) {
       // Reset animations
       scaleAnim.setValue(0);
       opacityAnim.setValue(0);
-      confettiAnims.forEach(anim => {
+      confettiAnims.forEach((anim) => {
         anim.position.setValue({ x: 0, y: 0 });
         anim.opacity.setValue(1);
         anim.rotation.setValue(0);
@@ -54,33 +70,35 @@ export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnloc
           useNativeDriver: true,
         }),
         // Only show confetti for unlocked badges
-        badge.unlocked ? Animated.parallel(
-          confettiAnims.map((anim, i) => {
-            const angle = (i / confettiAnims.length) * Math.PI * 2;
-            const radius = Math.random() * 200 + 100;
-            return Animated.parallel([
-              Animated.timing(anim.position, {
-                toValue: {
-                  x: Math.cos(angle) * radius,
-                  y: Math.sin(angle) * radius,
-                },
-                duration: 1000,
-                easing: Easing.out(Easing.cubic),
-                useNativeDriver: true,
-              }),
-              Animated.timing(anim.opacity, {
-                toValue: 0,
-                duration: 1000,
-                useNativeDriver: true,
-              }),
-              Animated.timing(anim.rotation, {
-                toValue: Math.random() * 4 - 2,
-                duration: 1000,
-                useNativeDriver: true,
-              }),
-            ]);
-          })
-        ) : Animated.delay(0),
+        badge.unlocked
+          ? Animated.parallel(
+              confettiAnims.map((anim, i) => {
+                const angle = (i / confettiAnims.length) * Math.PI * 2;
+                const radius = Math.random() * 200 + 100;
+                return Animated.parallel([
+                  Animated.timing(anim.position, {
+                    toValue: {
+                      x: Math.cos(angle) * radius,
+                      y: Math.sin(angle) * radius,
+                    },
+                    duration: 1000,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                  }),
+                  Animated.timing(anim.opacity, {
+                    toValue: 0,
+                    duration: 1000,
+                    useNativeDriver: true,
+                  }),
+                  Animated.timing(anim.rotation, {
+                    toValue: Math.random() * 4 - 2,
+                    duration: 1000,
+                    useNativeDriver: true,
+                  }),
+                ]);
+              })
+            )
+          : Animated.delay(0),
       ]).start();
     }
   }, [visible, badge]);
@@ -89,14 +107,18 @@ export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnloc
 
   const renderConfetti = () => {
     if (!badge.unlocked) return null;
-    
+
     return confettiAnims.map((anim, i) => (
       <Animated.View
         key={i}
         style={[
           styles.confetti,
           {
-            backgroundColor: [colors.accent, colors.status.success, colors.text.primary][i % 3],
+            backgroundColor: [
+              colors.accent,
+              colors.status.success,
+              colors.text.primary,
+            ][i % 3],
             transform: [
               { translateX: anim.position.x },
               { translateY: anim.position.y },
@@ -116,16 +138,21 @@ export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnloc
 
   const renderProgress = () => {
     if (!badge.progress) return null;
-    
+
     return (
       <View style={styles.progressSection}>
         <Text style={styles.progressTitle}>Progress</Text>
         <View style={styles.progressBar}>
           <View
             style={[
-              styles.progressFill, 
-              { width: `${Math.min(100, (badge.progress.current / badge.progress.total) * 100)}%` }
-            ]} 
+              styles.progressFill,
+              {
+                width: `${Math.min(
+                  100,
+                  (badge.progress.current / badge.progress.total) * 100
+                )}%`,
+              },
+            ]}
           />
         </View>
         <Text style={styles.progressText}>
@@ -140,13 +167,12 @@ export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnloc
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={styles.container}>
         <View style={styles.content}>
           {/* Confetti */}
-          <View style={styles.confettiContainer}>
-            {renderConfetti()}
-          </View>
+          <View style={styles.confettiContainer}>{renderConfetti()}</View>
 
           {/* Badge Icon */}
           <Animated.View
@@ -155,7 +181,8 @@ export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnloc
               {
                 transform: [{ scale: scaleAnim }],
               },
-            ]}>
+            ]}
+          >
             <View style={styles.badge}>
               {badge.icon}
               {badge.unlocked && (
@@ -169,26 +196,19 @@ export default function BadgeUnlockModal({ visible, onClose, badge }: BadgeUnloc
           </Animated.View>
 
           {/* Badge Info */}
-          <Animated.View
-            style={[
-              styles.textContent,
-              { opacity: opacityAnim },
-            ]}>
+          <Animated.View style={[styles.textContent, { opacity: opacityAnim }]}>
             <Text style={styles.title}>
-              {badge.unlocked ? '🎖️ Unlocked: ' : ''}{badge.name}
+              {badge.unlocked ? '🎖️ Unlocked: ' : ''}
+              {badge.name}
             </Text>
-            <Text style={styles.description}>
-              {badge.description}
-            </Text>
-            
+            <Text style={styles.description}>{badge.description}</Text>
+
             {renderProgress()}
           </Animated.View>
 
           {/* Action Button */}
           <Animated.View style={{ opacity: opacityAnim }}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={onClose}>
+            <TouchableOpacity style={styles.button} onPress={onClose}>
               <Text style={styles.buttonText}>
                 {badge.unlocked ? 'Awesome!' : 'Got it'}
               </Text>

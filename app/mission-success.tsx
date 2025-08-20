@@ -1,9 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, Image } from 'react-native';
-import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 
 export default function MissionSuccessScreen() {
   const [isAwarding, setIsAwarding] = useState(false);
@@ -42,7 +50,7 @@ export default function MissionSuccessScreen() {
   const handleComplete = async () => {
     try {
       setIsAwarding(true);
-      
+
       // Save badge award to storage
       await AsyncStorage.setItem('founding_protector_badge', 'awarded');
       await AsyncStorage.setItem('demo_completed', 'true');
@@ -66,15 +74,18 @@ export default function MissionSuccessScreen() {
           style={[
             styles.badgeContainer,
             {
-              transform: [
-                { scale: scaleAnim },
-                { rotate: spin },
-              ],
+              transform: [{ scale: scaleAnim }, { rotate: spin }],
             },
-          ]}>
+          ]}
+        >
           <View style={styles.badge}>
             <MaterialIcons name="shield" size={64} color={colors.accent} />
-            <MaterialIcons name="verified" size={32} color={colors.status.success} style={styles.award} />
+            <MaterialIcons
+              name="verified"
+              size={32}
+              color={colors.status.success}
+              style={styles.award}
+            />
           </View>
         </Animated.View>
 
@@ -83,14 +94,17 @@ export default function MissionSuccessScreen() {
             styles.textContent,
             {
               opacity: opacityAnim,
-              transform: [{
-                translateY: opacityAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
+              transform: [
+                {
+                  translateY: opacityAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                },
+              ],
             },
-          ]}>
+          ]}
+        >
           <Text style={styles.title}>Mission Complete!</Text>
           <Text style={styles.subtitle}>You're ready to protect yourself</Text>
 
@@ -117,8 +131,9 @@ export default function MissionSuccessScreen() {
           <View style={styles.messageCard}>
             <Text style={styles.messageTitle}>Founding Protector</Text>
             <Text style={styles.messageText}>
-              You've earned the Founding Protector badge for completing the safety mission. 
-              Your commitment to personal and community safety makes a difference.
+              You've earned the Founding Protector badge for completing the
+              safety mission. Your commitment to personal and community safety
+              makes a difference.
             </Text>
           </View>
         </Animated.View>
@@ -126,14 +141,19 @@ export default function MissionSuccessScreen() {
         <TouchableOpacity
           style={[
             styles.completeButton,
-            isAwarding && styles.completeButtonDisabled
+            isAwarding && styles.completeButtonDisabled,
           ]}
           onPress={handleComplete}
-          disabled={isAwarding}>
+          disabled={isAwarding}
+        >
           <Text style={styles.completeButtonText}>
             {isAwarding ? 'Completing...' : 'Start Protecting'}
           </Text>
-          <MaterialIcons name="chevron-right" size={20} color={colors.text.primary} />
+          <MaterialIcons
+            name="chevron-right"
+            size={20}
+            color={colors.text.primary}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -161,7 +181,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.accent}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.large,
+    ...shadows.lg,
   },
   award: {
     position: 'absolute',

@@ -1,10 +1,20 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SMS from 'expo-sms';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../constants/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import * as SMS from 'expo-sms';
+import { useEffect, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { colors, radius, shadows } from '../constants/theme';
 // Emergency contact type definition
 interface EmergencyContact {
   id: string;
@@ -17,7 +27,8 @@ export default function EmergencySetupScreen() {
   const [contact, setContact] = useState({
     name: '',
     phone: '',
-    customMessage: 'EMERGENCY: I need immediate assistance. My location will be shared when activated.',
+    customMessage:
+      'EMERGENCY: I need immediate assistance. My location will be shared when activated.',
   });
   const [smsEnabled, setSmsEnabled] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -33,13 +44,13 @@ export default function EmergencySetupScreen() {
       const name = await AsyncStorage.getItem('emergencyContactName');
       const phone = await AsyncStorage.getItem('emergencyContact');
       const message = await AsyncStorage.getItem('emergencyMessage');
-      
+
       setContact({
         name: name || '',
         phone: phone || '',
         customMessage: message || contact.customMessage,
       });
-      
+
       const smsEnabledValue = await AsyncStorage.getItem('emergencySmsEnabled');
       setSmsEnabled(smsEnabledValue !== 'false');
     } catch (error) {
@@ -61,8 +72,14 @@ export default function EmergencySetupScreen() {
 
       await AsyncStorage.setItem('emergencyContactName', contact.name);
       await AsyncStorage.setItem('emergencyContact', contact.phone);
-      await AsyncStorage.setItem('emergencyMessage', contact.customMessage || '');
-      await AsyncStorage.setItem('emergencySmsEnabled', smsEnabled ? 'true' : 'false');
+      await AsyncStorage.setItem(
+        'emergencyMessage',
+        contact.customMessage || ''
+      );
+      await AsyncStorage.setItem(
+        'emergencySmsEnabled',
+        smsEnabled ? 'true' : 'false'
+      );
 
       // Navigate back
       router.back();
@@ -87,7 +104,8 @@ export default function EmergencySetupScreen() {
         throw new Error('SMS is not available on this device');
       }
 
-      const testMessage = 'This is a test message from DESIST! Emergency System. No action required.';
+      const testMessage =
+        'This is a test message from DESIST! Emergency System. No action required.';
       await SMS.sendSMSAsync([contact.phone], testMessage);
     } catch (error) {
       console.error('Error sending test SMS:', error);
@@ -98,8 +116,8 @@ export default function EmergencySetupScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
@@ -107,8 +125,13 @@ export default function EmergencySetupScreen() {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}>
-            <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
+            onPress={() => router.back()}
+          >
+            <MaterialIcons
+              name="chevron-left"
+              color={colors.text.primary}
+              size={24}
+            />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
         </View>
@@ -120,12 +143,17 @@ export default function EmergencySetupScreen() {
           </View>
 
           <Text style={styles.description}>
-            Configure your emergency contact who will be notified when you activate emergency mode.
+            Configure your emergency contact who will be notified when you
+            activate emergency mode.
           </Text>
 
           {error && (
             <View style={styles.errorContainer}>
-              <MaterialIcons name="error" color={colors.status.error} size={20} />
+              <MaterialIcons
+                name="error"
+                color={colors.status.error}
+                size={20}
+              />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
@@ -136,7 +164,9 @@ export default function EmergencySetupScreen() {
               <TextInput
                 style={styles.input}
                 value={contact.name}
-                onChangeText={(text) => setContact(prev => ({ ...prev, name: text }))}
+                onChangeText={(text) =>
+                  setContact((prev) => ({ ...prev, name: text }))
+                }
                 placeholder="Enter contact name"
                 placeholderTextColor={colors.text.muted}
               />
@@ -148,7 +178,9 @@ export default function EmergencySetupScreen() {
               <TextInput
                 style={styles.input}
                 value={contact.phone}
-                onChangeText={(text) => setContact(prev => ({ ...prev, phone: text }))}
+                onChangeText={(text) =>
+                  setContact((prev) => ({ ...prev, phone: text }))
+                }
                 placeholder="Enter phone number"
                 placeholderTextColor={colors.text.muted}
                 keyboardType="phone-pad"
@@ -157,11 +189,17 @@ export default function EmergencySetupScreen() {
 
             <Text style={styles.label}>Emergency Message</Text>
             <View style={styles.messageContainer}>
-              <MaterialIcons name="message" size={20} color={colors.text.muted} />
+              <MaterialIcons
+                name="message"
+                size={20}
+                color={colors.text.muted}
+              />
               <TextInput
                 style={[styles.input, styles.messageInput]}
                 value={contact.customMessage}
-                onChangeText={(text) => setContact(prev => ({ ...prev, customMessage: text }))}
+                onChangeText={(text) =>
+                  setContact((prev) => ({ ...prev, customMessage: text }))
+                }
                 placeholder="Enter custom emergency message"
                 placeholderTextColor={colors.text.muted}
                 multiline
@@ -175,7 +213,9 @@ export default function EmergencySetupScreen() {
                 value={smsEnabled}
                 onValueChange={setSmsEnabled}
                 trackColor={{ false: colors.text.muted, true: colors.accent }}
-                thumbColor={smsEnabled ? colors.text.primary : colors.text.secondary}
+                thumbColor={
+                  smsEnabled ? colors.text.primary : colors.text.secondary
+                }
               />
             </View>
 
@@ -183,8 +223,13 @@ export default function EmergencySetupScreen() {
               <TouchableOpacity
                 style={[styles.testButton, testMode && styles.testButtonActive]}
                 onPress={handleTestMessage}
-                disabled={testMode}>
-                <MaterialIcons name="send" size={20} color={colors.text.primary} />
+                disabled={testMode}
+              >
+                <MaterialIcons
+                  name="send"
+                  size={20}
+                  color={colors.text.primary}
+                />
                 <Text style={styles.testButtonText}>
                   {testMode ? 'Sending Test...' : 'Send Test Message'}
                 </Text>
@@ -195,7 +240,8 @@ export default function EmergencySetupScreen() {
           <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={handleSave}
-            disabled={isSaving}>
+            disabled={isSaving}
+          >
             <Text style={styles.saveButtonText}>
               {isSaving ? 'Saving...' : 'Save Emergency Settings'}
             </Text>

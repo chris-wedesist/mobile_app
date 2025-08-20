@@ -56,9 +56,13 @@ const SCRAPING_CONFIG = {
 /**
  * Find attorney website using Google Search API
  */
-export async function findAttorneyWebsite(attorney: Attorney): Promise<string | null> {
+export async function findAttorneyWebsite(
+  attorney: Attorney
+): Promise<string | null> {
   if (!GOOGLE_SEARCH_CONFIG.API_KEY || !GOOGLE_SEARCH_CONFIG.ENGINE_ID) {
-    console.log('⚠️ Google Search API not configured - skipping website discovery');
+    console.log(
+      '⚠️ Google Search API not configured - skipping website discovery'
+    );
     return null;
   }
 
@@ -83,7 +87,7 @@ export async function findAttorneyWebsite(attorney: Attorney): Promise<string | 
     }
 
     const data = await response.json();
-    
+
     if (!data.items || data.items.length === 0) {
       return null;
     }
@@ -91,7 +95,6 @@ export async function findAttorneyWebsite(attorney: Attorney): Promise<string | 
     // Find the most relevant result (usually the first one)
     const bestResult = data.items[0];
     return bestResult.link || null;
-
   } catch (error) {
     console.log(`❌ Error finding website for ${attorney.name}:`, error);
     return null;
@@ -101,7 +104,9 @@ export async function findAttorneyWebsite(attorney: Attorney): Promise<string | 
 /**
  * Scrape attorney website for enhanced data
  */
-export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial<EnhancedAttorney['enhancedData']> | null> {
+export async function scrapeAttorneyWebsite(
+  websiteUrl: string
+): Promise<Partial<EnhancedAttorney['enhancedData']> | null> {
   try {
     const response = await fetch(websiteUrl, {
       headers: {
@@ -124,7 +129,9 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
       /no\s*cost\s*consultation/i,
       /free\s*consultation/i,
     ];
-    enhancedData.proBono = proBonoPatterns.some(pattern => pattern.test(html));
+    enhancedData.proBono = proBonoPatterns.some((pattern) =>
+      pattern.test(html)
+    );
 
     // Extract sliding scale information
     const slidingScalePatterns = [
@@ -133,21 +140,29 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
       /payment\s*plans/i,
       /flexible\s*pricing/i,
     ];
-    enhancedData.slidingScale = slidingScalePatterns.some(pattern => pattern.test(html));
+    enhancedData.slidingScale = slidingScalePatterns.some((pattern) =>
+      pattern.test(html)
+    );
 
     // Extract fee structure
     if (/hourly\s*rate/i.test(html)) {
       enhancedData.feeStructure = 'hourly';
     } else if (/flat\s*fee/i.test(html) || /fixed\s*price/i.test(html)) {
       enhancedData.feeStructure = 'flat-fee';
-    } else if (/contingency/i.test(html) || /no\s*fee\s*unless\s*we\s*win/i.test(html)) {
+    } else if (
+      /contingency/i.test(html) ||
+      /no\s*fee\s*unless\s*we\s*win/i.test(html)
+    ) {
       enhancedData.feeStructure = 'contingency';
     } else {
       enhancedData.feeStructure = 'mixed';
     }
 
     // Extract firm size indicators
-    if (/solo\s*practitioner/i.test(html) || /individual\s*practice/i.test(html)) {
+    if (
+      /solo\s*practitioner/i.test(html) ||
+      /individual\s*practice/i.test(html)
+    ) {
       enhancedData.firmSize = 'solo';
     } else if (/small\s*firm/i.test(html) || /boutique/i.test(html)) {
       enhancedData.firmSize = 'small';
@@ -169,7 +184,9 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
       /taking\s*new\s*cases/i,
       /open\s*to\s*new\s*clients/i,
     ];
-    enhancedData.acceptsNewClients = newClientPatterns.some(pattern => pattern.test(html));
+    enhancedData.acceptsNewClients = newClientPatterns.some((pattern) =>
+      pattern.test(html)
+    );
 
     // Extract emergency availability
     const emergencyPatterns = [
@@ -178,12 +195,17 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
       /after\s*hours/i,
       /urgent\s*legal\s*help/i,
     ];
-    enhancedData.emergencyAvailable = emergencyPatterns.some(pattern => pattern.test(html));
+    enhancedData.emergencyAvailable = emergencyPatterns.some((pattern) =>
+      pattern.test(html)
+    );
 
     // Extract consultation type
     if (/virtual\s*consultation/i.test(html) && /in\s*person/i.test(html)) {
       enhancedData.consultationType = 'both';
-    } else if (/virtual\s*consultation/i.test(html) || /video\s*consultation/i.test(html)) {
+    } else if (
+      /virtual\s*consultation/i.test(html) ||
+      /video\s*consultation/i.test(html)
+    ) {
       enhancedData.consultationType = 'virtual';
     } else if (/in\s*person/i.test(html) || /office\s*visit/i.test(html)) {
       enhancedData.consultationType = 'in-person';
@@ -191,35 +213,60 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
 
     // Extract languages
     const languagePatterns = [
-      /spanish/i, /french/i, /german/i, /italian/i, /portuguese/i,
-      /chinese/i, /japanese/i, /korean/i, /vietnamese/i, /arabic/i,
-      /russian/i, /polish/i, /greek/i, /hebrew/i, /hindi/i,
+      /spanish/i,
+      /french/i,
+      /german/i,
+      /italian/i,
+      /portuguese/i,
+      /chinese/i,
+      /japanese/i,
+      /korean/i,
+      /vietnamese/i,
+      /arabic/i,
+      /russian/i,
+      /polish/i,
+      /greek/i,
+      /hebrew/i,
+      /hindi/i,
     ];
     enhancedData.languages = languagePatterns
-      .map(pattern => {
+      .map((pattern) => {
         const match = html.match(pattern);
         return match ? match[0] : null;
       })
-      .filter(lang => lang !== null) as string[];
+      .filter((lang) => lang !== null) as string[];
 
     // Extract specializations
     const specializationPatterns = [
-      /civil\s*rights/i, /immigration/i, /constitutional/i, /police\s*misconduct/i,
-      /discrimination/i, /asylum/i, /deportation/i, /first\s*amendment/i,
-      /voting\s*rights/i, /employment\s*discrimination/i, /housing\s*discrimination/i,
-      /education\s*law/i, /disability\s*rights/i, /lgbtq/i, /women\s*rights/i,
-      /racial\s*justice/i, /criminal\s*justice/i, /prisoners\s*rights/i,
-      /environmental\s*justice/i, /immigrant\s*rights/i,
+      /civil\s*rights/i,
+      /immigration/i,
+      /constitutional/i,
+      /police\s*misconduct/i,
+      /discrimination/i,
+      /asylum/i,
+      /deportation/i,
+      /first\s*amendment/i,
+      /voting\s*rights/i,
+      /employment\s*discrimination/i,
+      /housing\s*discrimination/i,
+      /education\s*law/i,
+      /disability\s*rights/i,
+      /lgbtq/i,
+      /women\s*rights/i,
+      /racial\s*justice/i,
+      /criminal\s*justice/i,
+      /prisoners\s*rights/i,
+      /environmental\s*justice/i,
+      /immigrant\s*rights/i,
     ];
     enhancedData.specializations = specializationPatterns
-      .map(pattern => {
+      .map((pattern) => {
         const match = html.match(pattern);
         return match ? match[0] : null;
       })
-      .filter(spec => spec !== null) as string[];
+      .filter((spec) => spec !== null) as string[];
 
     return enhancedData;
-
   } catch (error) {
     console.log(`❌ Error scraping website ${websiteUrl}:`, error);
     return null;
@@ -229,9 +276,11 @@ export async function scrapeAttorneyWebsite(websiteUrl: string): Promise<Partial
 /**
  * Enhance attorneys with web data
  */
-export async function enhanceAttorneysWithWebData(attorneys: Attorney[]): Promise<EnhancedAttorney[]> {
+export async function enhanceAttorneysWithWebData(
+  attorneys: Attorney[]
+): Promise<EnhancedAttorney[]> {
   console.log(`🔍 Enhancing ${attorneys.length} attorneys with web data...`);
-  
+
   const enhancedAttorneys: EnhancedAttorney[] = [];
   let processedCount = 0;
   const maxConcurrent = 3; // Rate limiting
@@ -240,11 +289,11 @@ export async function enhanceAttorneysWithWebData(attorneys: Attorney[]): Promis
     try {
       // Find website
       const websiteUrl = await findAttorneyWebsite(attorney);
-      
+
       if (websiteUrl) {
         // Scrape website for enhanced data
         const enhancedData = await scrapeAttorneyWebsite(websiteUrl);
-        
+
         if (enhancedData) {
           enhancedAttorneys.push({
             ...attorney,
@@ -262,20 +311,25 @@ export async function enhanceAttorneysWithWebData(attorneys: Attorney[]): Promis
       }
 
       processedCount++;
-      console.log(`✅ Enhanced ${processedCount}/${attorneys.length}: ${attorney.name}`);
+      console.log(
+        `✅ Enhanced ${processedCount}/${attorneys.length}: ${attorney.name}`
+      );
 
       // Rate limiting
       if (processedCount % maxConcurrent === 0) {
-        await new Promise(resolve => setTimeout(resolve, GOOGLE_SEARCH_CONFIG.RATE_LIMIT_DELAY));
+        await new Promise((resolve) =>
+          setTimeout(resolve, GOOGLE_SEARCH_CONFIG.RATE_LIMIT_DELAY)
+        );
       }
-
     } catch (error) {
       console.log(`❌ Error enhancing ${attorney.name}:`, error);
       enhancedAttorneys.push(attorney);
     }
   }
 
-  console.log(`✅ Enhanced ${enhancedAttorneys.length} attorneys with web data`);
+  console.log(
+    `✅ Enhanced ${enhancedAttorneys.length} attorneys with web data`
+  );
   return enhancedAttorneys;
 }
 
@@ -297,7 +351,7 @@ export function filterEnhancedAttorneys(
     specializations?: string[];
   }
 ): EnhancedAttorney[] {
-  return attorneys.filter(attorney => {
+  return attorneys.filter((attorney) => {
     // Pro Bono filter
     if (filters.proBono && !attorney.enhancedData?.proBono) {
       return false;
@@ -310,16 +364,20 @@ export function filterEnhancedAttorneys(
 
     // Fee structure filter
     if (filters.feeStructure && filters.feeStructure.length > 0) {
-      if (!attorney.enhancedData?.feeStructure || 
-          !filters.feeStructure.includes(attorney.enhancedData.feeStructure)) {
+      if (
+        !attorney.enhancedData?.feeStructure ||
+        !filters.feeStructure.includes(attorney.enhancedData.feeStructure)
+      ) {
         return false;
       }
     }
 
     // Firm size filter
     if (filters.firmSize && filters.firmSize.length > 0) {
-      if (!attorney.enhancedData?.firmSize || 
-          !filters.firmSize.includes(attorney.enhancedData.firmSize)) {
+      if (
+        !attorney.enhancedData?.firmSize ||
+        !filters.firmSize.includes(attorney.enhancedData.firmSize)
+      ) {
         return false;
       }
     }
@@ -332,19 +390,29 @@ export function filterEnhancedAttorneys(
     }
 
     // New client acceptance filter
-    if (filters.acceptsNewClients && !attorney.enhancedData?.acceptsNewClients) {
+    if (
+      filters.acceptsNewClients &&
+      !attorney.enhancedData?.acceptsNewClients
+    ) {
       return false;
     }
 
     // Emergency availability filter
-    if (filters.emergencyAvailable && !attorney.enhancedData?.emergencyAvailable) {
+    if (
+      filters.emergencyAvailable &&
+      !attorney.enhancedData?.emergencyAvailable
+    ) {
       return false;
     }
 
     // Consultation type filter
     if (filters.consultationType && filters.consultationType.length > 0) {
-      if (!attorney.enhancedData?.consultationType || 
-          !filters.consultationType.includes(attorney.enhancedData.consultationType)) {
+      if (
+        !attorney.enhancedData?.consultationType ||
+        !filters.consultationType.includes(
+          attorney.enhancedData.consultationType
+        )
+      ) {
         return false;
       }
     }
@@ -353,9 +421,9 @@ export function filterEnhancedAttorneys(
     if (filters.languages && filters.languages.length > 0) {
       const attorneyLanguages = [
         ...(attorney.languages || []),
-        ...(attorney.enhancedData?.languages || [])
+        ...(attorney.enhancedData?.languages || []),
       ];
-      if (!filters.languages.some(lang => attorneyLanguages.includes(lang))) {
+      if (!filters.languages.some((lang) => attorneyLanguages.includes(lang))) {
         return false;
       }
     }
@@ -364,9 +432,13 @@ export function filterEnhancedAttorneys(
     if (filters.specializations && filters.specializations.length > 0) {
       const attorneySpecializations = [
         ...(attorney.specializations || []),
-        ...(attorney.enhancedData?.specializations || [])
+        ...(attorney.enhancedData?.specializations || []),
       ];
-      if (!filters.specializations.some(spec => attorneySpecializations.includes(spec))) {
+      if (
+        !filters.specializations.some((spec) =>
+          attorneySpecializations.includes(spec)
+        )
+      ) {
         return false;
       }
     }
@@ -388,24 +460,26 @@ export function sortEnhancedAttorneysByRelevance(
         if (a.enhancedData?.proBono && !b.enhancedData?.proBono) return -1;
         if (!a.enhancedData?.proBono && b.enhancedData?.proBono) return 1;
         break;
-      
+
       case 'slidingScale':
-        if (a.enhancedData?.slidingScale && !b.enhancedData?.slidingScale) return -1;
-        if (!a.enhancedData?.slidingScale && b.enhancedData?.slidingScale) return 1;
+        if (a.enhancedData?.slidingScale && !b.enhancedData?.slidingScale)
+          return -1;
+        if (!a.enhancedData?.slidingScale && b.enhancedData?.slidingScale)
+          return 1;
         break;
-      
+
       case 'experience':
         const expA = a.enhancedData?.experience || 0;
         const expB = b.enhancedData?.experience || 0;
         return expB - expA;
-      
+
       case 'distance':
       default:
         const distA = a.distance || 0;
         const distB = b.distance || 0;
         return distA - distB;
     }
-    
+
     return 0;
   });
 }
@@ -416,4 +490,4 @@ export default {
   enhanceAttorneysWithWebData,
   filterEnhancedAttorneys,
   sortEnhancedAttorneysByRelevance,
-}; 
+};
