@@ -1,68 +1,288 @@
-# DESIST! - Digital Emergency Safety & Incident Support Tool
+# 🛡️ DESIST Mobile App
 
-A comprehensive React Native application designed to empower communities with digital safety tools and incident reporting capabilities. Built with privacy and security at its core, DESIST! provides essential features for documenting, reporting, and responding to incidents while protecting user safety.
+**Digital Security & Privacy Mobile Application**
 
-![DESIST! App Banner](https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg)
+[![React Native](https://img.shields.io/badge/React%20Native-0.72-blue.svg)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK%2053-black.svg)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
-## 🛡️ Core Features
+---
 
-### Emergency Response
-- Quick-access panic button with location tracking
-- Automatic incident recording with secure storage
-- Emergency contact alert system
-- Stealth mode for safety in threatening situations
+## 🚨 **CRITICAL: Style Guide Mandatory**
 
-### Documentation & Evidence
-- Secure video/photo capture
-- Automatic cloud backup with encryption
-- Evidence preservation protocols
-- Secure document storage for legal papers
+**⚠️ BEFORE MAKING ANY CHANGES**: Read the **[Style Guide](./docs/STYLE_GUIDE.md)**
 
-### Community Safety
-- Real-time incident mapping
-- Anonymous reporting system
-- Community verification system
-- Trust-based reputation metrics
+**🎨 Design System**: All components must use the established design tokens from `/constants/theme.ts`
 
-### Legal Resources
-- Know Your Rights information
-- Legal procedure guides
-- Emergency legal contacts
-- Document templates
+**✅ Compliance Required**: Non-compliant code will be rejected
 
-## 🚀 Getting Started
+---
 
-### Prerequisites
+## 📚 Documentation
 
-- Node.js 18.x or higher
-- npm 9.x or higher
+### **🔴 MANDATORY READING**
+- **[📋 Style Guide](./docs/STYLE_GUIDE.md)** - Design system and coding standards
+- **[🔄 Developer Handover](./docs/DEVELOPER_HANDOVER.md)** - Complete project overview
+
+### **📖 Additional Resources**
+- **[🎨 Theme Constants](./constants/theme.ts)** - Design tokens and variables
+- **[🔐 Security Architecture](./lib/security/)** - Security system implementation
+
+---
+
+## 🏗️ Project Overview
+
+DESIST is a comprehensive mobile security and privacy application built with React Native and Expo. The app provides advanced security features while maintaining a user-friendly interface through a consistent design system.
+
+### **Key Features**
+- 🔐 **Biometric Authentication** - Face ID, Touch ID, fingerprint support
+- 🛡️ **Screen Protection** - Anti-screenshot and recording protection  
+- 🚨 **Emergency Protocols** - Panic button with automated responses
+- 👀 **Threat Detection** - Real-time security monitoring
+- 🗄️ **Secure Storage** - Encrypted data persistence
+- 🥷 **Stealth Mode** - Disguised calculator interface
+- 📱 **Cross-Platform** - iOS and Android support
+
+---
+
+## 🎨 Design System
+
+### **Core Principles**
+- **Consistency**: All components follow established patterns
+- **Accessibility**: Readable fonts, appropriate contrast
+- **Performance**: Optimized for mobile devices
+- **Security**: Visual indicators for security states
+
+### **Design Tokens**
+```typescript
+// ✅ CORRECT - Use theme constants
+import { colors, typography, spacing, shadows, radius } from './constants/theme';
+
+// ❌ WRONG - Never use hardcoded values
+backgroundColor: '#FFFFFF'  // Use colors.background instead
+fontSize: 16               // Use typography.fontSize.body instead
+```
+
+### **Typography**
+- **Font Family**: Inter (Regular, Medium, SemiBold, Bold)
+- **Consistent Sizing**: Display, Title, Heading, Body, Small, Caption
+- **Proper Hierarchy**: Clear information architecture
+
+### **Color System**
+- **Brand Colors**: Primary, Secondary, Accent
+- **Semantic Colors**: Success, Warning, Error
+- **Text Colors**: Primary, Secondary, Muted
+- **Security States**: Safe, Caution, Danger
+
+---
+
+## 🚀 Quick Start
+
+### **Prerequisites**
+- Node.js 18+
+- npm or yarn
 - Expo CLI
-- Supabase account
+- Physical device for security feature testing
 
-### Installation
-
-1. Clone the repository:
+### **Installation**
 ```bash
-git clone https://github.com/yourusername/desist-app.git
-cd desist-app
-```
+# Clone repository
+git clone [repository-url]
+cd mobile_app
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
+
+# Start development server
+npx expo start
 ```
 
-3. Set up environment variables:
+### **Style Guide Setup**
 ```bash
-cp .env.example .env
+# Read the mandatory style guide
+open docs/STYLE_GUIDE.md
+
+# Review theme constants
+open constants/theme.ts
+
+# Check existing implementations
+open app/index.tsx
+open components/security/SecurityMonitor.tsx
+```
+---
+
+## 📱 Application Structure
+
+### **Navigation**
+```
+app/
+├── index.tsx                 # Home screen
+├── (security)/              # Security features
+│   ├── dashboard.tsx        # Main security dashboard
+│   ├── emergency-setup.tsx  # Emergency configuration
+│   └── security-test.tsx    # Security validation
+├── (stealth)/               # Stealth mode
+│   ├── index.tsx           # Calculator disguise
+│   ├── notes.tsx           # Encrypted notes
+│   └── settings.tsx        # Stealth configuration
+└── (tabs)/                  # Tab navigation
+    └── legal-help.tsx       # Legal assistance
 ```
 
-4. Start the development server:
+### **Components**
+```
+components/
+├── security/
+│   ├── SecurityMonitor.tsx  # Security dashboard
+│   ├── ScreenProtector.tsx  # Anti-capture protection
+│   ├── BiometricPrompt.tsx  # Biometric authentication
+│   └── EmergencyPanel.tsx   # Emergency controls
+```
+
+### **Core Systems**
+```
+lib/
+├── security/
+│   ├── biometricAuth.ts     # Biometric authentication
+│   ├── screenProtection.ts # Screen capture protection
+│   ├── emergencyProtocols.ts # Emergency response
+│   ├── threatDetection.ts  # Security monitoring
+│   └── secureStorage.ts    # Encrypted storage
+└── stealth.ts              # Stealth mode manager
+```
+
+---
+
+## 🔐 Security Features
+
+### **Authentication**
+- **Biometric Support**: Face ID, Touch ID, Fingerprint
+- **PIN Fallback**: Secure PIN authentication
+- **Session Management**: Configurable timeout periods
+
+### **Protection Systems**
+- **Screen Capture Blocking**: Prevents screenshots/recording
+- **Background Protection**: Hides content when app backgrounded
+- **Anti-Tampering**: Detects unauthorized access attempts
+
+### **Emergency Features**
+- **Panic Button**: Instant emergency activation
+- **Emergency Contacts**: Automated notification system
+- **Data Wiping**: Secure data destruction capabilities
+
+---
+
+## 🧪 Testing
+
+### **Security Testing**
 ```bash
-npm run dev
+# Access security test suite
+# Navigate to Security Dashboard > Test All Systems
+# Or visit /app/(security)/security-test.tsx directly
 ```
 
-## 🏗️ Project Structure
+### **Required Testing**
+- **Physical Device**: Biometric features require actual hardware
+- **Platform Testing**: Verify on both iOS and Android
+- **Security Validation**: Test all protection mechanisms
+
+### **Stealth Mode Testing**
+```bash
+# Access stealth test interface
+# Navigate to Stealth Calculator > Long press operations
+# Or visit /app/stealth-test.tsx directly
+```
+
+---
+
+## 📋 Development Guidelines
+
+### **🎨 Style Requirements**
+1. **Read Style Guide**: `/docs/STYLE_GUIDE.md` is mandatory
+2. **Use Theme Constants**: Import from `/constants/theme.ts`
+3. **Follow Patterns**: Reference existing components
+4. **Maintain Consistency**: Adhere to established design
+
+### **🔐 Security Standards**
+- Never log sensitive information
+- Always use secure storage for credentials
+- Implement proper error handling
+- Follow principle of least privilege
+
+### **📱 Platform Considerations**
+- Test on both iOS and Android
+- Use platform-specific APIs appropriately
+- Handle permissions correctly
+- Optimize for mobile performance
+
+---
+
+## 🏗️ Development Phases
+
+### **✅ Phase 1: Foundation** (Complete)
+- Basic app structure and navigation
+- Initial security framework
+- Stealth mode foundation
+
+### **✅ Phase 2: Advanced Security** (Complete)
+- Biometric authentication system
+- Screen protection mechanisms
+- Emergency protocols implementation
+- Threat detection engine
+- **Design system establishment**
+- **Style guide implementation**
+
+### **🚧 Phase 3: Advanced Intelligence** (Planned)
+- Enhanced threat detection
+- Advanced privacy features
+- Behavioral analysis
+- Network security monitoring
+
+---
+
+## 📞 Support
+
+### **Style System**
+- **Style Guide**: `/docs/STYLE_GUIDE.md` (MANDATORY)
+- **Theme Constants**: `/constants/theme.ts`
+- **Developer Handover**: `/docs/DEVELOPER_HANDOVER.md`
+
+### **Technical Support**
+- **Architecture**: Review `/lib/` directory for core systems
+- **Components**: Check `/components/` for reusable UI elements
+- **Navigation**: Expo Router file-based routing in `/app/`
+
+### **Security Questions**
+- Review security manager implementations in `/lib/security/`
+- Check security component implementations in `/components/security/`
+- Test security features using built-in test suites
+
+---
+
+## ⚖️ License
+
+Private/Proprietary - All rights reserved
+
+---
+
+## 🏁 Final Reminders
+
+### **🚨 CRITICAL**
+- **Style Guide Compliance** is mandatory for all code changes
+- **Security Best Practices** must be followed at all times
+- **Cross-Platform Testing** is required for all features
+
+### **✅ Success Checklist**
+- [ ] Read and understand Style Guide
+- [ ] Import theme constants in all components
+- [ ] Follow established design patterns
+- [ ] Test on physical devices
+- [ ] Validate security features
+- [ ] Maintain code quality standards
+
+---
+
+**🛡️ Secure. Private. Reliable.**
 
 ```
 desist-app/
