@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, shadows, radius } from '../../constants/theme';
+import { colors, shadows, radius, spacing, typography } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { SecurityMonitor } from '../../components/security/SecurityMonitor';
 import { BiometricPrompt } from '../../components/security/BiometricPrompt';
@@ -179,9 +179,9 @@ const SecurityDashboard: React.FC = () => {
   };
 
   const getSecurityStatusColor = () => {
-    if (securitySummary.isSecure) return '#34C759';
-    if (securitySummary.activeFeatures >= 3) return '#FF9500';
-    return '#FF3B30';
+    if (securitySummary.isSecure) return colors.success;
+    if (securitySummary.activeFeatures >= 3) return colors.warning;
+    return colors.error;
   };
 
   const renderTabContent = () => {
@@ -196,12 +196,12 @@ const SecurityDashboard: React.FC = () => {
               style={styles.setupCard}
               onPress={() => navigateToSetup('biometric-setup')}
             >
-              <Ionicons name="finger-print" size={24} color="#007AFF" />
+              <Ionicons name="finger-print" size={24} color={colors.primary} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Biometric Setup</Text>
                 <Text style={styles.setupCardDesc}>Configure fingerprint/Face ID</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
             </TouchableOpacity>
           </View>
         );
@@ -213,12 +213,12 @@ const SecurityDashboard: React.FC = () => {
               style={styles.setupCard}
               onPress={() => navigateToSetup('emergency-setup')}
             >
-              <Ionicons name="warning" size={24} color="#FF9500" />
+              <Ionicons name="warning" size={24} color={colors.warning} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Emergency Setup</Text>
                 <Text style={styles.setupCardDesc}>Configure emergency contacts</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
             </TouchableOpacity>
           </View>
         );
@@ -231,36 +231,36 @@ const SecurityDashboard: React.FC = () => {
               style={styles.setupCard}
               onPress={() => navigateToSetup('security-test')}
             >
-              <Ionicons name="checkmark-circle" size={24} color="#34C759" />
+              <Ionicons name="checkmark-circle" size={24} color={colors.success} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Security Test</Text>
                 <Text style={styles.setupCardDesc}>Test all security features</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.setupCard}
               onPress={() => stealthManager.toggleMode()}
             >
-              <Ionicons name="swap-horizontal" size={24} color="#007AFF" />
+              <Ionicons name="swap-horizontal" size={24} color={colors.primary} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Toggle App Mode</Text>
                 <Text style={styles.setupCardDesc}>Switch between modes</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.setupCard}
               onPress={() => screenProtectionManager.enableScreenProtection()}
             >
-              <Ionicons name="shield-checkmark" size={24} color="#34C759" />
+              <Ionicons name="shield-checkmark" size={24} color={colors.success} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Screen Protection</Text>
                 <Text style={styles.setupCardDesc}>Enable screenshot protection</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
             </TouchableOpacity>
           </View>
         );
@@ -272,7 +272,7 @@ const SecurityDashboard: React.FC = () => {
   if (!isInitialized) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="shield" size={64} color="#007AFF" />
+        <Ionicons name="shield" size={64} color={colors.primary} />
         <Text style={styles.loadingText}>Initializing Security...</Text>
       </View>
     );
@@ -281,14 +281,14 @@ const SecurityDashboard: React.FC = () => {
   return (
     <ScreenProtector>
       <View style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
         
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.headerTitle}>Security Dashboard</Text>
             <TouchableOpacity onPress={updateSecuritySummary}>
-              <Ionicons name="refresh" size={24} color="#007AFF" />
+              <Ionicons name="refresh" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
           
@@ -326,7 +326,7 @@ const SecurityDashboard: React.FC = () => {
             style={styles.quickActionButton}
             onPress={handleQuickAuth}
           >
-            <Ionicons name="finger-print" size={20} color="#FFFFFF" />
+            <Ionicons name="finger-print" size={20} color={colors.background} />
             <Text style={styles.quickActionText}>Quick Auth</Text>
           </TouchableOpacity>
           
@@ -334,7 +334,7 @@ const SecurityDashboard: React.FC = () => {
             style={[styles.quickActionButton, styles.emergencyButton]}
             onPress={handleEmergencyAccess}
           >
-            <Ionicons name="warning" size={20} color="#FFFFFF" />
+            <Ionicons name="warning" size={20} color={colors.background} />
             <Text style={styles.quickActionText}>Emergency</Text>
           </TouchableOpacity>
         </View>
@@ -348,7 +348,7 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="analytics"
               size={20}
-              color={activeTab === 'monitor' ? '#007AFF' : '#8E8E93'}
+              color={activeTab === 'monitor' ? colors.primary : colors.text.secondary}
             />
             <Text style={[
               styles.tabText,
@@ -365,7 +365,7 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="finger-print"
               size={20}
-              color={activeTab === 'auth' ? '#007AFF' : '#8E8E93'}
+              color={activeTab === 'auth' ? colors.primary : colors.text.secondary}
             />
             <Text style={[
               styles.tabText,
@@ -382,7 +382,7 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="warning"
               size={20}
-              color={activeTab === 'emergency' ? '#007AFF' : '#8E8E93'}
+              color={activeTab === 'emergency' ? colors.primary : colors.text.secondary}
             />
             <Text style={[
               styles.tabText,
@@ -399,7 +399,7 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="settings"
               size={20}
-              color={activeTab === 'settings' ? '#007AFF' : '#8E8E93'}
+              color={activeTab === 'settings' ? colors.primary : colors.text.secondary}
             />
             <Text style={[
               styles.tabText,
@@ -440,7 +440,7 @@ const SecurityDashboard: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Emergency Protocols</Text>
               <TouchableOpacity onPress={() => setShowEmergencyPanel(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.text.primary} />
               </TouchableOpacity>
             </View>
             <EmergencyPanel
@@ -461,7 +461,7 @@ const SecurityDashboard: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   loadingContainer: {
     flex: 1,
@@ -512,135 +512,131 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   statusText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginRight: 8,
+    color: colors.text.primary,
+    marginRight: spacing.sm,
   },
   featuresCount: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
   },
   recommendations: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   recommendationsTitle: {
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   recommendationItem: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.secondary,
     marginBottom: 2,
   },
   quickActions: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    padding: spacing.md,
+    gap: spacing.md,
   },
   quickActionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.medium,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
   },
   emergencyButton: {
-    backgroundColor: '#FF9500',
+    backgroundColor: colors.warning,
   },
   quickActionText: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: colors.background,
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
+    borderBottomColor: colors.primary,
   },
   tabText: {
     fontSize: 10,
-    color: '#8E8E93',
-    marginTop: 4,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
     fontWeight: '500',
   },
   activeTabText: {
-    color: '#007AFF',
+    color: colors.primary,
   },
   contentContainer: {
     flex: 1,
   },
   tabContent: {
     flex: 1,
-    padding: 16,
+    padding: spacing.md,
   },
   tabTitle: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: '700',
-    color: '#333',
-    marginBottom: 20,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
   },
   setupCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background,
+    borderRadius: radius.medium,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.small,
   },
   setupCardContent: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: spacing.md,
   },
   setupCardTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   setupCardDesc: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: typography.fontSize.heading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
 });
 

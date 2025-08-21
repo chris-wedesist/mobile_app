@@ -11,6 +11,7 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
 import {
   emergencyProtocolManager,
   EmergencyContact,
@@ -113,7 +114,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
   const renderEmergencyTab = () => (
     <View style={styles.tabContent}>
       <View style={styles.emergencyHeader}>
-        <Ionicons name="warning" size={48} color="#FF3B30" />
+        <Ionicons name="warning" size={48} color={colors.error} />
         <Text style={styles.emergencyTitle}>Emergency Protocols</Text>
         <Text style={styles.emergencySubtitle}>
           Trigger emergency alerts to your contacts
@@ -128,7 +129,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
         onPress={handleEmergencyTrigger}
         disabled={isTriggering || !config.isEnabled}
       >
-        <Ionicons name="alert-circle" size={24} color="#FFFFFF" />
+        <Ionicons name="alert-circle" size={24} color={colors.background} />
         <Text style={styles.emergencyButtonText}>
           {isTriggering ? 'Triggering...' : 'TRIGGER EMERGENCY'}
         </Text>
@@ -146,7 +147,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           <Ionicons
             name={config.isEnabled ? 'checkmark-circle' : 'close-circle'}
             size={20}
-            color={config.isEnabled ? '#34C759' : '#FF3B30'}
+            color={config.isEnabled ? colors.success : colors.error}
           />
           <Text style={styles.statusText}>
             Emergency protocols {config.isEnabled ? 'enabled' : 'disabled'}
@@ -156,7 +157,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           <Ionicons
             name="people"
             size={20}
-            color="#007AFF"
+            color={colors.primary}
           />
           <Text style={styles.statusText}>
             {emergencyContacts.length} emergency contact{emergencyContacts.length !== 1 ? 's' : ''}
@@ -187,7 +188,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           style={styles.addButton}
           onPress={() => setShowAddContact(true)}
         >
-          <Ionicons name="add" size={20} color="#007AFF" />
+          <Ionicons name="add" size={20} color={colors.primary} />
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
@@ -209,14 +210,14 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
               style={styles.contactAction}
               onPress={() => handleRemoveContact(contact.id)}
             >
-              <Ionicons name="trash" size={20} color="#FF3B30" />
+              <Ionicons name="trash" size={20} color={colors.error} />
             </TouchableOpacity>
           </View>
         ))}
         
         {emergencyContacts.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="person-add" size={48} color="#8E8E93" />
+            <Ionicons name="person-add" size={48} color={colors.text.muted} />
             <Text style={styles.emptyStateText}>No emergency contacts</Text>
             <Text style={styles.emptyStateSubtext}>
               Add contacts to enable emergency protocols
@@ -316,7 +317,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
         <Ionicons
           name="warning"
           size={20}
-          color={activeTab === 'emergency' ? '#007AFF' : '#8E8E93'}
+          color={activeTab === 'emergency' ? colors.primary : colors.text.muted}
         />
         <Text style={[
           styles.tabText,
@@ -333,7 +334,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
         <Ionicons
           name="people"
           size={20}
-          color={activeTab === 'contacts' ? '#007AFF' : '#8E8E93'}
+          color={activeTab === 'contacts' ? colors.primary : colors.text.muted}
         />
         <Text style={[
           styles.tabText,
@@ -350,7 +351,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
         <Ionicons
           name="settings"
           size={20}
-          color={activeTab === 'settings' ? '#007AFF' : '#8E8E93'}
+          color={activeTab === 'settings' ? colors.primary : colors.text.muted}
         />
         <Text style={[
           styles.tabText,
@@ -374,7 +375,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Emergency Center</Text>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Ionicons name="close" size={24} color="#007AFF" />
+            <Ionicons name="close" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -500,142 +501,142 @@ const AddContactModal: React.FC<AddContactModalProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   closeButton: {
-    padding: 4,
+    padding: spacing.xs,
   },
   tabBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
   },
   tabActive: {
     borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
+    borderBottomColor: colors.primary,
   },
   tabText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginLeft: 4,
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
+    marginLeft: spacing.xs,
   },
   tabTextActive: {
-    color: '#007AFF',
+    color: colors.primary,
     fontWeight: '600',
   },
   tabContent: {
     flex: 1,
-    padding: 16,
+    padding: spacing.md,
   },
   emergencyHeader: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   emergencyTitle: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: '700',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.text.primary,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   emergencySubtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   emergencyButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.error,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    marginBottom: 24,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.medium,
+    marginBottom: spacing.lg,
   },
   emergencyButtonDisabled: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: colors.text.muted,
   },
   emergencyButtonText: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '700',
-    color: '#FFFFFF',
-    marginLeft: 8,
+    color: colors.background,
+    marginLeft: spacing.xs,
   },
   disabledText: {
-    fontSize: 14,
-    color: '#FF3B30',
+    fontSize: typography.fontSize.small,
+    color: colors.error,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   statusSection: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   statusText: {
-    fontSize: 16,
-    color: '#666',
-    marginLeft: 8,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs,
   },
   instructionsSection: {
-    backgroundColor: '#F8F9FA',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: colors.background,
+    padding: spacing.md,
+    borderRadius: radius.small,
   },
   instructionText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#F0F8FF',
-    borderRadius: 6,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.background,
+    borderRadius: radius.small,
   },
   addButtonText: {
-    fontSize: 14,
-    color: '#007AFF',
-    marginLeft: 4,
+    fontSize: typography.fontSize.small,
+    color: colors.primary,
+    marginLeft: spacing.xs,
   },
   contactsList: {
     flex: 1,
@@ -643,142 +644,142 @@ const styles = StyleSheet.create({
   contactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: spacing.md,
+    backgroundColor: colors.background,
+    borderRadius: radius.small,
+    marginBottom: spacing.xs,
   },
   contactInfo: {
     flex: 1,
   },
   contactName: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   primaryBadge: {
-    fontSize: 12,
-    color: '#007AFF',
+    fontSize: typography.fontSize.caption,
+    color: colors.primary,
     fontWeight: '500',
   },
   contactPhone: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     marginBottom: 2,
   },
   contactRelation: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.muted,
   },
   contactAction: {
-    padding: 8,
+    padding: spacing.xs,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 48,
+    paddingVertical: spacing.xl * 3,
   },
   emptyStateText: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#8E8E93',
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.text.muted,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   emptyStateSubtext: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
     textAlign: 'center',
   },
   settingsContainer: {
     flex: 1,
   },
   settingSection: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   settingLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   messageInput: {
     borderWidth: 1,
-    borderColor: '#E9ECEF',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
+    borderColor: colors.border,
+    borderRadius: radius.medium,
+    padding: spacing.sm,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
     textAlignVertical: 'top',
     minHeight: 80,
   },
   addContactContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   addContactHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   addContactTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   cancelButton: {
-    fontSize: 16,
-    color: '#FF3B30',
+    fontSize: typography.fontSize.body,
+    color: colors.error,
   },
   saveButton: {
-    fontSize: 16,
-    color: '#007AFF',
+    fontSize: typography.fontSize.body,
+    color: colors.primary,
     fontWeight: '600',
   },
   addContactForm: {
     flex: 1,
-    padding: 16,
+    padding: spacing.md,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: spacing.md,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#E9ECEF',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
+    borderColor: colors.border,
+    borderRadius: radius.medium,
+    padding: spacing.sm,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    marginBottom: 12,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
   },
   switchLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   helpText: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.muted,
     fontStyle: 'italic',
   },
 });

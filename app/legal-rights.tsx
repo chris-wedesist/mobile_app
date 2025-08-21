@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { colors, typography, spacing, radius } from '../constants/theme';
 
 export default function LegalRightsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="chevron-left" color="#fff" size={24} />
+          <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -18,7 +19,7 @@ export default function LegalRightsScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="error" color="#ff4757" size={24} />
+            <MaterialIcons name="error" color={colors.status.error} size={24} />
             <Text style={styles.sectionTitle}>Stay Calm & Assert Your Rights</Text>
           </View>
           <Text style={styles.text}>
@@ -32,7 +33,7 @@ export default function LegalRightsScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="message" color="#ff4757" size={24} />
+            <MaterialIcons name="message" color={colors.status.error} size={24} />
             <Text style={styles.sectionTitle}>What to Say</Text>
           </View>
           <Text style={styles.text}>
@@ -46,7 +47,7 @@ export default function LegalRightsScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="camera" color="#ff4757" size={24} />
+            <MaterialIcons name="camera" color={colors.status.error} size={24} />
             <Text style={styles.sectionTitle}>Documentation</Text>
           </View>
           <Text style={styles.text}>
@@ -60,7 +61,7 @@ export default function LegalRightsScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="phone" color="#ff4757" size={24} />
+            <MaterialIcons name="phone" color={colors.status.error} size={24} />
             <Text style={styles.sectionTitle}>Emergency Contacts</Text>
           </View>
           <Text style={styles.text}>
@@ -73,7 +74,7 @@ export default function LegalRightsScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="volume-up" color="#ff4757" size={24} />
+            <MaterialIcons name="volume-up" color={colors.status.error} size={24} />
             <Text style={styles.sectionTitle}>After the Incident</Text>
           </View>
           <Text style={styles.text}>
@@ -87,7 +88,7 @@ export default function LegalRightsScreen() {
 
         <TouchableOpacity 
           style={styles.emergencyButton}
-          onPress={() => router.push('/report-incident')}>
+          onPress={() => router.push('./report-incident')}>
           <Text style={styles.emergencyButtonText}>Report an Incident</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -98,77 +99,77 @@ export default function LegalRightsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.background,
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: colors.border,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   backText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.text.primary,
+    fontSize: typography.fontSize.body,
     marginLeft: 8,
-    fontFamily: 'Inter-Regular',
+    fontFamily: typography.fontFamily.regular,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: spacing.lg,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: typography.fontSize.display,
+    fontWeight: '700' as const,
+    color: colors.text.primary,
     marginBottom: 8,
-    fontFamily: 'Inter-Bold',
+    fontFamily: typography.fontFamily.bold,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#ff4757',
-    marginBottom: 30,
-    fontFamily: 'Inter-Medium',
+    fontSize: typography.fontSize.subheading,
+    color: colors.status.error,
+    marginBottom: spacing.xl,
+    fontFamily: typography.fontFamily.medium,
   },
   section: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
+    backgroundColor: colors.surface,
+    borderRadius: radius.large,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
-    gap: 10,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
-    fontFamily: 'Inter-SemiBold',
+    fontSize: typography.fontSize.subheading,
+    fontWeight: '600' as const,
+    color: colors.text.primary,
+    fontFamily: typography.fontFamily.semiBold,
   },
   text: {
-    color: '#ccc',
-    fontSize: 16,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.body,
     lineHeight: 24,
-    fontFamily: 'Inter-Regular',
+    fontFamily: typography.fontFamily.regular,
   },
   emergencyButton: {
-    backgroundColor: '#ff4757',
-    padding: 20,
-    borderRadius: 12,
+    backgroundColor: colors.status.error,
+    padding: spacing.lg,
+    borderRadius: radius.medium,
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: spacing.lg,
   },
   emergencyButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'Inter-SemiBold',
+    color: colors.text.primary,
+    fontSize: typography.fontSize.subheading,
+    fontWeight: '600' as const,
+    fontFamily: typography.fontFamily.semiBold,
   },
 });

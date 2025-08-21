@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { colors } from '../../constants/theme';
+import { colors, spacing, shadows } from '../../constants/theme';
 import { getNews, NewsItem } from '../../lib/news';
 
 type LayoutType = 'row' | 'box';
@@ -231,16 +231,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   header: {
-    paddingTop: 40,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
     backgroundColor: colors.secondary,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   title: {
     fontSize: 32,
@@ -254,43 +254,40 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   layoutToggle: {
-    padding: 8,
+    padding: spacing.xs,
   },
   boxContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 8,
+    padding: spacing.xs,
   },
   newsCard: {
     backgroundColor: colors.secondary,
     borderRadius: 12,
-    margin: 16,
-    marginTop: 8,
+    margin: spacing.md,
+    marginTop: spacing.xs,
     overflow: 'hidden',
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadows.small,
   },
   newsCardBox: {
     width: '45%',
-    margin: 8,
+    margin: spacing.xs,
   },
   newsContent: {
-    padding: 16,
+    padding: spacing.md,
   },
   newsItemTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginBottom: 8,
+    marginBottom: spacing.xs,
     fontFamily: 'Inter-Bold',
   },
   newsItemDescription: {
     fontSize: 14,
     color: colors.text.secondary,
-    marginBottom: 12,
+    marginBottom: spacing.sm,
     fontFamily: 'Inter-Regular',
     lineHeight: 20,
   },
@@ -314,13 +311,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   loadingContainer: {
-    padding: 20,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   loadMoreButton: {
     backgroundColor: colors.accent,
-    padding: 16,
-    margin: 16,
+    padding: spacing.md,
+    margin: spacing.md,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -338,19 +335,19 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    padding: 20,
+    padding: spacing.lg,
   },
   categoryFilter: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     backgroundColor: colors.secondary,
     borderRadius: 12,
-    margin: 16,
-    padding: 8,
+    margin: spacing.md,
+    padding: spacing.xs,
   },
   categoryButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -376,8 +373,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderRadius: 10,
     paddingVertical: 4,
-    paddingHorizontal: 10,
-    marginTop: 12,
+    paddingHorizontal: spacing.sm,
+    marginTop: spacing.sm,
     alignSelf: 'flex-start',
   },
   categoryBadgeText: {

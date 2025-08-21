@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import Svg, { Path, Text } from 'react-native-svg';
+import { colors, typography } from '../constants/theme';
 
 export default function NoHandsIcon({ size = 300 }) {
   // Calculate points for octagon
@@ -21,8 +22,8 @@ export default function NoHandsIcon({ size = 300 }) {
         {/* Stop sign (octagon) */}
         <Path
           d={`M ${points.join(' L ')} Z`}
-          fill="#C41E3A"  // Official US Stop sign red color
-          stroke="#fff"
+          fill={colors.status.error}
+          stroke={colors.surface}
           strokeWidth={size * 0.02}
         />
         
@@ -32,9 +33,9 @@ export default function NoHandsIcon({ size = 300 }) {
           y={center + size * 0.08}
           fontSize={size * 0.18}  // Slightly larger text proportion
           fontWeight="bold"
-          fill="#fff"
+          fill={colors.surface}
           textAnchor="middle"
-          fontFamily="Arial">
+          fontFamily={typography.fontFamily.bold}>
           DESIST!
         </Text>
       </Svg>

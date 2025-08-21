@@ -11,6 +11,7 @@ import {
   Vibration,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
 
@@ -131,8 +132,8 @@ export default function SettingsScreen() {
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: '#e9ecef', true: '#007bff' }}
-        thumbColor={value ? '#ffffff' : '#ffffff'}
+        trackColor={{ false: colors.text.muted, true: colors.primary }}
+        thumbColor={value ? colors.surface : colors.surface}
       />
     );
 
@@ -184,7 +185,7 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Storage Usage',
               '2.4 MB used',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () =>
                 Alert.alert(
                   'Storage',
@@ -200,14 +201,14 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Privacy',
               'Manage your privacy settings',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () =>
                 Alert.alert('Privacy', 'Privacy settings would appear here.')
             )}
             {renderSettingsItem(
               'App Lock',
               'Secure app with biometrics',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () =>
                 Alert.alert(
                   'App Lock',
@@ -223,20 +224,20 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Help & FAQ',
               'Get help and find answers',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () => Alert.alert('Help', 'Help documentation would appear here.')
             )}
             {renderSettingsItem(
               'Contact Support',
               'Get in touch with our team',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () =>
                 Alert.alert('Support', 'Contact information would appear here.')
             )}
             {renderSettingsItem(
               'Rate App',
               'Share your feedback',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () => Alert.alert('Rate App', 'App store rating would open here.')
             )}
           </>
@@ -248,13 +249,13 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Terms of Service',
               'Read our terms and conditions',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () => Alert.alert('Terms', 'Terms of service would appear here.')
             )}
             {renderSettingsItem(
               'Privacy Policy',
               'Read our privacy policy',
-              <Ionicons name="chevron-forward" size={20} color="#999" />,
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
               () =>
                 Alert.alert(
                   'Privacy Policy',
@@ -291,74 +292,74 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    marginTop: 20,
-    backgroundColor: '#ffffff',
-    marginHorizontal: 16,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginTop: spacing.lg,
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.md,
+    borderRadius: radius.medium,
+    shadowColor: shadows.medium.shadowColor,
+    shadowOffset: shadows.medium.shadowOffset,
+    shadowOpacity: shadows.medium.shadowOpacity,
+    shadowRadius: shadows.medium.shadowRadius,
+    elevation: shadows.medium.elevation,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
-    color: '#666',
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.text.muted,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   settingsItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: colors.border,
   },
   settingsItemContent: {
     flex: 1,
   },
   settingsItemTitle: {
-    fontSize: 16,
-    color: '#000',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   settingsItemSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
   },
   versionText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
   },
   tapIndicator: {
-    fontSize: 12,
-    color: '#007bff',
+    fontSize: typography.fontSize.caption,
+    color: colors.primary,
     fontWeight: '600',
   },
   footer: {
     alignItems: 'center',
-    padding: 32,
-    marginBottom: 20,
+    padding: spacing.xl,
+    marginBottom: spacing.lg,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#000',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   footerSubtext: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
   },
 });

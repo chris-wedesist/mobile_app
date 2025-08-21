@@ -8,7 +8,7 @@ import { Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import EmergencyCallButton from '../components/EmergencyCallButton';
 import CustomSplashScreen from '../components/SplashScreen';
-import { colors } from '../constants/theme';
+import { colors, typography, spacing } from '../constants/theme';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import { errorHandler } from '../utils/errorHandler';
 import { StateManager } from '../utils/stateManager';
@@ -89,13 +89,13 @@ class ErrorBoundary extends React.Component<any, ErrorBoundaryState> {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: '#000',
+            backgroundColor: colors.background,
           }}
         >
-          <Text style={{ color: '#fff', fontSize: 18, marginBottom: 16 }}>
+          <Text style={{ color: colors.surface, fontSize: typography.fontSize.subheading, marginBottom: spacing.md }}>
             Something went wrong.
           </Text>
-          <Text style={{ color: '#fff', fontSize: 14 }}>
+          <Text style={{ color: colors.surface, fontSize: typography.fontSize.small }}>
             {errorHandler(this.state.error)}
           </Text>
         </View>
@@ -214,7 +214,7 @@ export default function RootLayout() {
             headerShown: false,
             contentStyle: {
               backgroundColor:
-                appMode === 'stealth' ? '#f8f9fa' : colors.primary,
+                appMode === 'stealth' ? colors.background : colors.primary,
             },
           }}
         >

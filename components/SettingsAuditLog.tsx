@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { cardStyles, layoutStyles, textStyles } from '../constants/styles';
-import { colors, radius } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -322,11 +322,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   listContent: {
-    padding: 10,
+    padding: spacing.xs,
   },
   logEntry: {
     ...cardStyles.base,
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   logHeader: {
     flexDirection: 'row',
@@ -334,10 +334,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   settingName: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
     color: colors.text.primary,
-    marginLeft: 8,
+    marginLeft: spacing.xs,
   },
   logMeta: {
     flexDirection: 'row',
@@ -345,36 +345,36 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   timestamp: {
-    fontSize: 12,
+    fontSize: typography.fontSize.caption,
     color: colors.text.muted,
   },
   logDetails: {
-    marginTop: 15,
-    paddingTop: 15,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: `${colors.text.muted}20`,
   },
   metadataContainer: {
-    marginTop: 15,
+    marginTop: spacing.sm,
     backgroundColor: colors.primary,
-    padding: 10,
+    padding: spacing.xs,
     borderRadius: radius.md,
   },
   metadataLabel: {
-    fontSize: 12,
+    fontSize: typography.fontSize.caption,
     color: colors.text.muted,
     marginBottom: 2,
   },
   metadataValue: {
-    fontSize: 14,
+    fontSize: typography.fontSize.caption,
     color: colors.text.secondary,
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   retryButton: {
-    marginTop: 15,
+    marginTop: spacing.sm,
     backgroundColor: colors.accent,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: radius.lg,
   },
   retryText: {

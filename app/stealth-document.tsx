@@ -14,6 +14,7 @@ import {
 } from 'react-native-gesture-handler';
 import { useStealthMode } from '../components/StealthModeManager';
 import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 
 export default function StealthDocumentScreen() {
   const { deactivate } = useStealthMode();
@@ -49,7 +50,7 @@ export default function StealthDocumentScreen() {
           {/* Toolbar */}
           <View style={styles.toolbar}>
             <View style={styles.toolbarLeft}>
-              <MaterialIcons name="insert-drive-file" size={24} color="#444" />
+              <MaterialIcons name="insert-drive-file" size={24} color={colors.text.secondary} />
               <View style={styles.documentInfo}>
                 <Text style={styles.documentTitle}>
                   Q4 Financial Report.pdf
@@ -62,13 +63,13 @@ export default function StealthDocumentScreen() {
 
             <View style={styles.toolbarActions}>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="search" size={20} color="#666" />
+                <MaterialIcons name="search" size={20} color={colors.text.muted} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.toolbarButton}
                 onPress={() => handleZoom('out')}
               >
-                <MaterialIcons name="zoom-out" size={20} color="#666" />
+                <MaterialIcons name="zoom-out" size={20} color={colors.text.muted} />
               </TouchableOpacity>
               <Text style={styles.zoomText}>
                 {Math.round(zoomLevel * 100)}%
@@ -77,19 +78,19 @@ export default function StealthDocumentScreen() {
                 style={styles.toolbarButton}
                 onPress={() => handleZoom('in')}
               >
-                <MaterialIcons name="zoom-in" size={20} color="#666" />
+                <MaterialIcons name="zoom-in" size={20} color={colors.text.muted} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="file-download" size={20} color="#666" />
+                <MaterialIcons name="file-download" size={20} color={colors.text.muted} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="share" size={20} color="#666" />
+                <MaterialIcons name="share" size={20} color={colors.text.muted} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="print" size={20} color="#666" />
+                <MaterialIcons name="print" size={20} color={colors.text.muted} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="more-vert" size={20} color="#666" />
+                <MaterialIcons name="more-vert" size={20} color={colors.text.muted} />
               </TouchableOpacity>
             </View>
           </View>
@@ -160,68 +161,64 @@ export default function StealthDocumentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.surface,
   },
   toolbar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: spacing.md,
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: colors.border,
   },
   toolbarLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   documentInfo: {
-    marginLeft: 8,
+    marginLeft: spacing.xs,
   },
   documentTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.secondary,
   },
   documentMeta: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.muted,
   },
   toolbarActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.xs,
   },
   toolbarButton: {
-    padding: 8,
+    padding: spacing.xs,
     borderRadius: 6,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.surface,
   },
   zoomText: {
-    fontSize: 14,
-    color: '#666',
-    marginHorizontal: 8,
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
+    marginHorizontal: spacing.xs,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: spacing.lg,
   },
   page: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 40,
-    marginBottom: 20,
+    backgroundColor: colors.background,
+    borderRadius: radius.small,
+    padding: spacing.xxl,
+    marginBottom: spacing.lg,
     ...Platform.select({
       web: {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       },
       default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        ...shadows.small,
       },
     }),
   },
@@ -230,51 +227,51 @@ const styles = StyleSheet.create({
     marginHorizontal: 'auto',
   },
   pageHeader: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
     textAlign: 'center',
   },
   pageSubheader: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 32,
+    fontSize: typography.fontSize.subheading,
+    color: colors.text.muted,
+    marginBottom: spacing.xxl,
     textAlign: 'center',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
   },
   paragraph: {
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     lineHeight: 24,
-    color: '#444',
-    marginBottom: 16,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   bulletPoints: {
-    marginLeft: 8,
+    marginLeft: spacing.xs,
   },
   bullet: {
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     lineHeight: 24,
-    color: '#444',
-    marginBottom: 8,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
   footer: {
-    padding: 16,
+    padding: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    backgroundColor: '#fff',
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
     alignItems: 'center',
   },
   pageCount: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
   },
 });

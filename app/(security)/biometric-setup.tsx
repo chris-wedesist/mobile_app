@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { colors, typography, spacing, shadows, radius } from '../../constants/theme';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { BiometricPrompt } from '../../components/security/BiometricPrompt';
 
@@ -152,7 +153,7 @@ export default function BiometricSetupScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="refresh" size={48} color="#007AFF" />
+        <Ionicons name="refresh" size={48} color={colors.primary} />
         <Text style={styles.loadingText}>Checking biometric availability...</Text>
       </View>
     );
@@ -166,7 +167,7 @@ export default function BiometricSetupScreen() {
             <Ionicons
               name={getBiometricIcon() as any}
               size={64}
-              color={biometricAvailable ? '#007AFF' : '#8E8E93'}
+              color={biometricAvailable ? colors.primary : colors.text.muted}
             />
           </View>
           <Text style={styles.title}>{getBiometricTitle()}</Text>
@@ -183,7 +184,7 @@ export default function BiometricSetupScreen() {
               <Text style={styles.statusLabel}>Current Status</Text>
               <Text style={[
                 styles.statusValue,
-                { color: isEnabled ? '#34C759' : '#8E8E93' }
+                { color: isEnabled ? colors.success : colors.text.muted }
               ]}>
                 {isEnabled ? 'Enabled' : 'Disabled'}
               </Text>
@@ -191,7 +192,7 @@ export default function BiometricSetupScreen() {
             <Ionicons
               name={isEnabled ? 'checkmark-circle' : 'close-circle'}
               size={24}
-              color={isEnabled ? '#34C759' : '#8E8E93'}
+              color={isEnabled ? colors.success : colors.text.muted}
             />
           </View>
 
@@ -206,7 +207,7 @@ export default function BiometricSetupScreen() {
               <Ionicons
                 name={getBiometricIcon() as any}
                 size={24}
-                color="#007AFF"
+                color={colors.primary}
               />
             </View>
           )}
@@ -217,28 +218,28 @@ export default function BiometricSetupScreen() {
             <Text style={styles.sectionTitle}>Features</Text>
             
             <View style={styles.featureRow}>
-              <Ionicons name="shield-checkmark" size={20} color="#34C759" />
+              <Ionicons name="shield-checkmark" size={20} color={colors.success} />
               <Text style={styles.featureText}>
                 Secure app access with your biometric
               </Text>
             </View>
             
             <View style={styles.featureRow}>
-              <Ionicons name="swap-horizontal" size={20} color="#34C759" />
+              <Ionicons name="swap-horizontal" size={20} color={colors.success} />
               <Text style={styles.featureText}>
                 Protected mode switching
               </Text>
             </View>
             
             <View style={styles.featureRow}>
-              <Ionicons name="time" size={20} color="#34C759" />
+              <Ionicons name="time" size={20} color={colors.success} />
               <Text style={styles.featureText}>
                 Automatic re-authentication after timeout
               </Text>
             </View>
             
             <View style={styles.featureRow}>
-              <Ionicons name="key" size={20} color="#34C759" />
+              <Ionicons name="key" size={20} color={colors.success} />
               <Text style={styles.featureText}>
                 PIN fallback option available
               </Text>
@@ -253,7 +254,7 @@ export default function BiometricSetupScreen() {
                 style={[styles.button, styles.disableButton]}
                 onPress={handleDisableBiometric}
               >
-                <Ionicons name="close-circle" size={20} color="#FFFFFF" />
+                <Ionicons name="close-circle" size={20} color={colors.background} />
                 <Text style={styles.buttonText}>Disable Biometric</Text>
               </TouchableOpacity>
             ) : (
@@ -261,13 +262,13 @@ export default function BiometricSetupScreen() {
                 style={[styles.button, styles.enableButton]}
                 onPress={handleEnableBiometric}
               >
-                <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                <Ionicons name="checkmark-circle" size={20} color={colors.background} />
                 <Text style={styles.buttonText}>Enable Biometric</Text>
               </TouchableOpacity>
             )
           ) : (
             <View style={styles.unavailableContainer}>
-              <Ionicons name="information-circle" size={48} color="#8E8E93" />
+              <Ionicons name="information-circle" size={48} color={colors.text.muted} />
               <Text style={styles.unavailableText}>
                 Biometric authentication is not available on this device
               </Text>
@@ -284,7 +285,7 @@ export default function BiometricSetupScreen() {
             onPress={() => router.push('/emergency-setup' as any)}
           >
             <Text style={styles.nextButtonText}>Continue to Emergency Setup</Text>
-            <Ionicons name="chevron-forward" size={20} color="#007AFF" />
+            <Ionicons name="chevron-forward" size={20} color={colors.primary} />
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -310,166 +311,166 @@ export default function BiometricSetupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   loadingText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 16,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    marginTop: spacing.md,
   },
   content: {
     flex: 1,
   },
   header: {
     alignItems: 'center',
-    padding: 24,
-    paddingTop: 40,
+    padding: spacing.xl,
+    paddingTop: spacing.xl * 1.67, // 40px equivalent
   },
   iconContainer: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
+    color: colors.text.primary,
+    marginBottom: spacing.sm + 2,
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.md,
   },
   statusSection: {
-    margin: 24,
-    padding: 20,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    margin: spacing.xl,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.large,
   },
   statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   statusInfo: {
     flex: 1,
   },
   statusLabel: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 4,
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
+    marginBottom: spacing.xs / 2,
   },
   statusValue: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
   },
   featuresSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.sm + 2,
   },
   featureText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
+    marginLeft: spacing.sm + 2,
     flex: 1,
   },
   actionsSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    marginBottom: 16,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.large,
+    marginBottom: spacing.md,
   },
   enableButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: colors.success,
   },
   disableButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.error,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: 8,
+    color: colors.background,
+    marginLeft: spacing.xs,
   },
   unavailableContainer: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: spacing.xl * 1.33, // 32px equivalent
   },
   unavailableText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: colors.text.muted,
     textAlign: 'center',
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   unavailableSubtext: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
   },
   navigationSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   nextButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    backgroundColor: '#F0F8FF',
-    borderRadius: 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.large,
     borderWidth: 1,
-    borderColor: '#007AFF',
-    marginBottom: 12,
+    borderColor: colors.primary,
+    marginBottom: spacing.sm + 2,
   },
   nextButtonText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#007AFF',
-    marginRight: 8,
+    color: colors.primary,
+    marginRight: spacing.xs,
   },
   skipButton: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.sm + 2,
   },
   skipButtonText: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.body,
+    color: colors.text.muted,
   },
 });

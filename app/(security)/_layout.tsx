@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { colors, typography } from '../../constants/theme';
 
 export default function SecurityLayout() {
   return (
@@ -14,11 +15,11 @@ export default function SecurityLayout() {
           title: 'Biometric Setup',
           headerShown: true,
           headerStyle: {
-            backgroundColor: '#FFFFFF',
+            backgroundColor: colors.surface,
           },
           headerTitleStyle: {
-            color: '#333333',
-            fontSize: 18,
+            color: colors.text.primary,
+            fontSize: typography.fontSize.subheading,
             fontWeight: '600',
           },
         }}
@@ -29,11 +30,11 @@ export default function SecurityLayout() {
           title: 'Emergency Setup',
           headerShown: true,
           headerStyle: {
-            backgroundColor: '#FFFFFF',
+            backgroundColor: colors.surface,
           },
           headerTitleStyle: {
-            color: '#333333',
-            fontSize: 18,
+            color: colors.text.primary,
+            fontSize: typography.fontSize.subheading,
             fontWeight: '600',
           },
         }}
@@ -44,11 +45,11 @@ export default function SecurityLayout() {
           title: 'Security Test',
           headerShown: true,
           headerStyle: {
-            backgroundColor: '#FFFFFF',
+            backgroundColor: colors.surface,
           },
           headerTitleStyle: {
-            color: '#333333',
-            fontSize: 18,
+            color: colors.text.primary,
+            fontSize: typography.fontSize.subheading,
             fontWeight: '600',
           },
         }}

@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import * as React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface LanguageSelectorProps {
@@ -34,8 +34,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      <View style={styles.modalBackground}>
+        <View style={styles.modalContent}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('settings.language')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -82,26 +82,25 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  modalBackground: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  container: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.lg,
     width: '80%',
-    maxWidth: 400,
-    maxHeight: '70%',
+    maxHeight: '80%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
+    marginBottom: spacing.lg,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.text.muted,
   },
@@ -120,10 +119,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.small,
+    backgroundColor: colors.background,
   },
   selectedLanguage: {
     backgroundColor: colors.primary + '20',

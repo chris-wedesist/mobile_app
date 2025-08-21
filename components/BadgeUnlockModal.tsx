@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { colors, radius, shadows } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 
 type BadgeUnlockModalProps = {
   visible: boolean;
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
-    padding: 30,
+    padding: spacing.xl,
     alignItems: 'center',
     width: '90%',
     maxWidth: 400,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   badgeContainer: {
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
   badge: {
     width: 120,
@@ -269,18 +269,18 @@ const styles = StyleSheet.create({
   },
   textContent: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
     color: colors.text.primary,
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.sm,
     fontFamily: 'Inter-Bold',
   },
   description: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
@@ -288,13 +288,13 @@ const styles = StyleSheet.create({
   },
   progressSection: {
     width: '100%',
-    marginTop: 20,
+    marginTop: spacing.md,
     alignItems: 'center',
   },
   progressTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     color: colors.text.primary,
-    marginBottom: 10,
+    marginBottom: spacing.xs,
     fontFamily: 'Inter-Medium',
   },
   progressBar: {
@@ -311,20 +311,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.round,
   },
   progressText: {
-    fontSize: 14,
+    fontSize: typography.fontSize.caption,
     color: colors.text.muted,
     fontFamily: 'Inter-Regular',
   },
   button: {
     backgroundColor: colors.accent,
-    paddingHorizontal: 30,
-    paddingVertical: 15,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
     borderRadius: radius.lg,
     ...shadows.sm,
   },
   buttonText: {
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },

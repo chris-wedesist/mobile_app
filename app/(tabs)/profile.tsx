@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { colors, typography, spacing } from '../../constants/theme';
 
 export default function ProfileScreen() {
   return (
@@ -39,56 +40,56 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.lg,
+    backgroundColor: colors.background,
   },
   profileHeader: {
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 30,
+    marginTop: spacing.xxl,
+    marginBottom: spacing.xl,
   },
   profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   name: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: spacing.xs,
   },
   username: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.muted,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 30,
-    paddingVertical: 15,
+    marginBottom: spacing.xl,
+    paddingVertical: spacing.md,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderColor: colors.border,
   },
   statItem: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: spacing.xs,
   },
   statLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
   },
   bioContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: spacing.sm,
   },
   bioText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     lineHeight: 24,
-    color: '#333',
+    color: colors.text.secondary,
   },
 });

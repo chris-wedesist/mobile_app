@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 import {
   useAppState,
   useErrorState,
@@ -55,13 +55,13 @@ export default function StateManagementExample() {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff' },
+        { backgroundColor: theme === 'dark' ? colors.surface : colors.background },
       ]}
     >
       <Text
         style={[
           styles.title,
-          { color: theme === 'dark' ? '#ffffff' : '#000000' },
+          { color: theme === 'dark' ? colors.background : colors.text.primary },
         ]}
       >
         State Management Example
@@ -72,7 +72,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+            { color: theme === 'dark' ? colors.background : colors.text.primary },
           ]}
         >
           User State
@@ -80,7 +80,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           {user ? `Logged in as: ${user.name}` : 'No user logged in'}
@@ -100,7 +100,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+            { color: theme === 'dark' ? colors.background : colors.text.primary },
           ]}
         >
           Theme State
@@ -108,7 +108,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           Current theme: {theme}
@@ -123,7 +123,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+            { color: theme === 'dark' ? colors.background : colors.text.primary },
           ]}
         >
           Language State
@@ -131,7 +131,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           Current language: {language}
@@ -163,7 +163,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+            { color: theme === 'dark' ? colors.background : colors.text.primary },
           ]}
         >
           App State
@@ -171,7 +171,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           Online: {isOnline ? 'Yes' : 'No'}
@@ -179,7 +179,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           Initialized: {isInitialized ? 'Yes' : 'No'}
@@ -187,13 +187,13 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           Loading: {isLoading ? 'Yes' : 'No'}
         </Text>
         {error && (
-          <Text style={[styles.errorText, { color: '#ff0000' }]}>
+          <Text style={[styles.errorText, { color: colors.error }]}>
             Error: {error}
           </Text>
         )}
@@ -204,7 +204,7 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? '#ffffff' : '#000000' },
+            { color: theme === 'dark' ? colors.background : colors.text.primary },
           ]}
         >
           Component States
@@ -212,13 +212,13 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? '#cccccc' : '#333333' },
+            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
           ]}
         >
           Component Loading: {loadingState ? 'Yes' : 'No'}
         </Text>
         {errorState && (
-          <Text style={[styles.errorText, { color: '#ff0000' }]}>
+          <Text style={[styles.errorText, { color: colors.error }]}>
             Component Error: {errorState}
           </Text>
         )}
@@ -230,49 +230,49 @@ export default function StateManagementExample() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: spacing.md,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.fontSize.heading,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: spacing.md,
     textAlign: 'center',
   },
   section: {
-    marginBottom: 20,
-    padding: 15,
-    borderRadius: 8,
+    marginBottom: spacing.md,
+    padding: spacing.sm,
+    borderRadius: radius.medium,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   text: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: typography.fontSize.body,
+    marginBottom: spacing.xs,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 10,
+    marginTop: spacing.xs,
   },
   button: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.small,
+    marginHorizontal: spacing.xs,
   },
   buttonText: {
-    color: '#ffffff',
-    fontSize: 14,
+    color: colors.background,
+    fontSize: typography.fontSize.caption,
     fontWeight: 'bold',
   },
   errorText: {
-    fontSize: 14,
+    fontSize: typography.fontSize.caption,
     fontStyle: 'italic',
-    marginTop: 5,
+    marginTop: spacing.xs,
   },
 });

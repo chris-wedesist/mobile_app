@@ -21,7 +21,7 @@ import {
   View,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { colors, radius, shadows } from '../constants/theme';
+import { colors, radius, shadows, typography, spacing } from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -176,7 +176,7 @@ export default function ReportIncidentScreen() {
               left: 0;
             }
             .custom-div-icon {
-              background-color: #ff4757;
+              background-color: ${colors.primary};
               border: 2px solid white;
               border-radius: 50%;
               width: 20px;
@@ -455,14 +455,14 @@ export default function ReportIncidentScreen() {
               handlePlayVideo(item.video_url);
             }}
           >
-            <MaterialIcons name="play-arrow" size={24} color="#fff" />
+            <MaterialIcons name="play-arrow" size={24} color={colors.background} />
           </TouchableOpacity>
         </View>
         <View style={styles.videoInfo}>
           <MaterialIcons
             name="video-label"
             size={20}
-            color={isSelected ? '#fff' : '#666'}
+            color={isSelected ? colors.background : colors.text.secondary}
           />
           <Text
             style={[
@@ -477,7 +477,7 @@ export default function ReportIncidentScreen() {
               style={styles.removeVideoButton}
               onPress={() => toggleVideoSelection(item.video_url)}
             >
-              <MaterialIcons name="close" size={16} color="#fff" />
+              <MaterialIcons name="close" size={16} color={colors.background} />
             </TouchableOpacity>
           )}
         </View>
@@ -505,7 +505,7 @@ export default function ReportIncidentScreen() {
                 name="video-label"
                 size={20}
                 color={
-                  selectedVideos.includes(item.video_url) ? '#fff' : '#666'
+                  selectedVideos.includes(item.video_url) ? colors.background : colors.text.secondary
                 }
               />
               <Text
@@ -522,7 +522,7 @@ export default function ReportIncidentScreen() {
                   style={styles.removeVideoButton}
                   onPress={() => toggleVideoSelection(item.video_url)}
                 >
-                  <MaterialIcons name="close" size={16} color="#fff" />
+                  <MaterialIcons name="close" size={16} color={colors.background} />
                 </TouchableOpacity>
               )}
             </TouchableOpacity>
@@ -562,13 +562,13 @@ export default function ReportIncidentScreen() {
                   resizeMode="cover"
                 />
                 <View style={styles.selectedVideoOverlay}>
-                  <MaterialIcons name="play-arrow" size={24} color="#fff" />
+                  <MaterialIcons name="play-arrow" size={24} color={colors.background} />
                 </View>
                 <TouchableOpacity
                   style={styles.removeSelectedVideo}
                   onPress={() => toggleVideoSelection(videoUrl)}
                 >
-                  <MaterialIcons name="close" size={16} color="#fff" />
+                  <MaterialIcons name="close" size={16} color={colors.background} />
                 </TouchableOpacity>
               </TouchableOpacity>
             );
@@ -588,7 +588,7 @@ export default function ReportIncidentScreen() {
         style={styles.legalRightsButton}
         onPress={() => router.push('/legal-rights')}
       >
-        <MaterialIcons name="verified" size={20} color="#fff" />
+        <MaterialIcons name="verified" size={20} color={colors.background} />
         <Text style={styles.legalRightsText}>Know Your Rights</Text>
       </TouchableOpacity>
 
@@ -603,12 +603,12 @@ export default function ReportIncidentScreen() {
           <MaterialIcons
             name="location-on"
             size={20}
-            color="#fff"
+            color={colors.background}
             style={styles.locationIcon}
           />
           {isLoadingAddress ? (
             <ActivityIndicator
-              color="#fff"
+              color={colors.background}
               size="small"
               style={styles.loadingIndicator}
             />
@@ -665,7 +665,7 @@ export default function ReportIncidentScreen() {
               <MaterialIcons
                 name="error"
                 size={16}
-                color={selectedType === type ? '#fff' : '#666'}
+                color={selectedType === type ? colors.background : colors.text.secondary}
               />
               <Text
                 style={[
@@ -688,7 +688,7 @@ export default function ReportIncidentScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder={`Enter ${field.label.toLowerCase()}...`}
-                  placeholderTextColor="#666"
+                  placeholderTextColor={colors.text.secondary}
                   value={field.value}
                   onChangeText={(value) => handleFieldChange(index, value)}
                   multiline
@@ -703,7 +703,7 @@ export default function ReportIncidentScreen() {
               onPress={() => setShowVideoPicker(!showVideoPicker)}
             >
               <View style={styles.videoPickerButtonContent}>
-                <MaterialIcons name="video-label" size={20} color="#fff" />
+                <MaterialIcons name="video-label" size={20} color={colors.background} />
                 <Text style={styles.videoPickerButtonText}>
                   {selectedVideos.length > 0
                     ? `${selectedVideos.length} video${
@@ -711,7 +711,7 @@ export default function ReportIncidentScreen() {
                       } selected`
                     : 'Select videos'}
                 </Text>
-                <MaterialIcons name="chevron-right" size={20} color="#fff" />
+                <MaterialIcons name="chevron-right" size={20} color={colors.background} />
               </View>
             </TouchableOpacity>
             {renderVideoPicker()}
@@ -750,7 +750,7 @@ export default function ReportIncidentScreen() {
                 setShowVideoModal(false);
               }}
             >
-              <MaterialIcons name="close" size={24} color="#fff" />
+              <MaterialIcons name="close" size={24} color={colors.background} />
             </TouchableOpacity>
             {selectedVideo && (
               <ExpoVideo
@@ -776,75 +776,75 @@ export default function ReportIncidentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.text.primary, // Dark background for incident reporting
   },
   backButton: {
-    padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    padding: spacing.lg,
+    paddingTop: Platform.OS === 'ios' ? spacing.xl * 3 : spacing.xl * 2,
   },
   backButtonText: {
-    color: '#ff4757',
-    fontSize: 16,
+    color: colors.primary,
+    fontSize: typography.fontSize.body,
     fontFamily: 'Inter-Regular',
   },
   legalRightsButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#2a2a2a',
-    marginHorizontal: 20,
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 20,
+    gap: spacing.xs,
+    backgroundColor: colors.surface, // Dark card color
+    marginHorizontal: spacing.lg,
+    padding: spacing.sm + 2,
+    borderRadius: radius.md,
+    marginBottom: spacing.lg,
   },
   legalRightsText: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   title: {
-    fontSize: 28,
+    fontSize: typography.fontSize.display,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 30,
-    paddingHorizontal: 20,
+    color: colors.background, // White text
+    marginBottom: spacing.xl + spacing.md,
+    paddingHorizontal: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   form: {
-    padding: 20,
+    padding: spacing.lg,
   },
   label: {
-    color: '#fff',
-    fontSize: 16,
-    marginBottom: 10,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.body,
+    marginBottom: spacing.xs + 2,
     fontFamily: 'Inter-Medium',
   },
   locationButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primary,
-    padding: 15,
+    padding: spacing.md,
     borderRadius: radius.lg,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   locationIcon: {
-    marginRight: 10,
+    marginRight: spacing.xs + 2,
   },
   locationText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.body,
     flex: 1,
-    marginRight: 10,
+    marginRight: spacing.xs + 2,
   },
   mapContainer: {
     height: 400,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     borderRadius: radius.lg,
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.surface,
   },
   map: {
     flex: 1,
@@ -862,119 +862,119 @@ const styles = StyleSheet.create({
   typeContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
+    gap: spacing.xs + 2,
+    marginBottom: spacing.lg,
   },
   typeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2a2a2a',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 8,
+    backgroundColor: colors.surface, // Dark card color
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.round,
+    gap: spacing.xs,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: colors.border, // Dark border
   },
   selectedTypeButton: {
-    backgroundColor: '#ff4757',
-    borderColor: '#ff4757',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   typeButtonText: {
-    color: '#666',
-    fontSize: 14,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.small,
     fontFamily: 'Inter-Regular',
   },
   selectedTypeButtonText: {
-    color: '#fff',
+    color: colors.background, // White text
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   fieldContainer: {
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   fieldLabel: {
-    color: '#fff',
-    fontSize: 14,
-    marginBottom: 5,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.small,
+    marginBottom: spacing.xs / 2,
     fontFamily: 'Inter-Medium',
   },
   input: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 10,
-    padding: 15,
-    color: '#fff',
-    fontSize: 16,
+    backgroundColor: colors.surface, // Dark input background
+    borderRadius: radius.md,
+    padding: spacing.md,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.body,
     minHeight: 100,
     overflow: 'scroll',
     textAlignVertical: 'top',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Regular',
   },
   submitButton: {
-    backgroundColor: '#ff4757',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    padding: spacing.md,
+    borderRadius: radius.md,
     alignItems: 'center',
   },
   submitButtonDisabled: {
     opacity: 0.5,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   closeMapButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: spacing.xs + 2,
+    right: spacing.xs + 2,
     backgroundColor: colors.primary,
-    padding: 10,
+    padding: spacing.xs + 2,
     borderRadius: radius.lg,
     zIndex: 1,
     ...shadows.sm,
   },
   closeMapButtonText: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   videosList: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   videoItem: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 10,
-    marginBottom: 10,
+    backgroundColor: colors.surface, // Dark card color
+    borderRadius: radius.md,
+    marginBottom: spacing.xs + 2,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: colors.border, // Dark border
     overflow: 'hidden',
   },
   selectedVideoItem: {
-    backgroundColor: '#ff4757',
-    borderColor: '#ff4757',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   videoItemText: {
-    color: '#666',
-    fontSize: 14,
-    marginLeft: 10,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.small,
+    marginLeft: spacing.xs + 2,
     flex: 1,
     fontFamily: 'Inter-Regular',
   },
   selectedVideoItemText: {
-    color: '#fff',
+    color: colors.background, // White text
   },
   removeVideoButton: {
-    padding: 5,
+    padding: spacing.xs / 2,
   },
   noVideosText: {
-    color: '#666',
-    fontSize: 14,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.small,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Regular',
   },
   videoThumbnailContainer: {
@@ -999,7 +999,7 @@ const styles = StyleSheet.create({
   videoInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: spacing.md,
   },
   modalContainer: {
     flex: 1,
@@ -1014,17 +1014,17 @@ const styles = StyleSheet.create({
       android: Dimensions.get('window').width * (9 / 16),
       default: Dimensions.get('window').height * 0.6,
     }),
-    backgroundColor: '#000',
-    borderRadius: 10,
+    backgroundColor: colors.shadow, // Black background
+    borderRadius: radius.md,
     overflow: 'hidden',
     position: 'relative',
   },
   closeModalButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: spacing.xs + 2,
+    right: spacing.xs + 2,
     zIndex: 1,
-    padding: 5,
+    padding: spacing.xs / 2,
   },
   videoPlayer: {
     width: '100%',
@@ -1033,9 +1033,9 @@ const styles = StyleSheet.create({
   },
   videoPickerButton: {
     backgroundColor: colors.primary,
-    padding: 15,
+    padding: spacing.md,
     borderRadius: radius.lg,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   videoPickerButtonContent: {
     flexDirection: 'row',
@@ -1043,50 +1043,50 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   videoPickerButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.body,
     flex: 1,
-    marginLeft: 10,
+    marginLeft: spacing.xs + 2,
     fontFamily: 'Inter-Regular',
   },
   videoPickerContainer: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: colors.surface, // Dark card color
     borderRadius: radius.lg,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     maxHeight: 300,
     overflow: 'hidden',
   },
   videoPickerList: {
-    padding: 10,
+    padding: spacing.xs + 2,
   },
   videoPickerItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: spacing.md,
     borderRadius: radius.md,
-    marginBottom: 5,
-    backgroundColor: '#333',
+    marginBottom: spacing.xs / 2,
+    backgroundColor: colors.border, // Dark item background
   },
   selectedVideoPickerItem: {
     backgroundColor: colors.primary,
   },
   videoPickerItemText: {
-    color: '#666',
-    fontSize: 14,
-    marginLeft: 10,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.small,
+    marginLeft: spacing.xs + 2,
     flex: 1,
     fontFamily: 'Inter-Regular',
   },
   selectedVideoPickerItemText: {
-    color: '#fff',
+    color: colors.background, // White text
   },
   selectedVideosContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   selectedVideosTitle: {
-    color: '#fff',
-    fontSize: 14,
-    marginBottom: 10,
+    color: colors.background, // White text
+    fontSize: typography.fontSize.small,
+    marginBottom: spacing.xs + 2,
     fontFamily: 'Inter-Medium',
   },
   selectedVideosScroll: {
@@ -1095,7 +1095,7 @@ const styles = StyleSheet.create({
   selectedVideoPreview: {
     width: 120,
     height: 80,
-    marginRight: 10,
+    marginRight: spacing.xs + 2,
     borderRadius: radius.md,
     overflow: 'hidden',
     position: 'relative',
@@ -1116,10 +1116,10 @@ const styles = StyleSheet.create({
   },
   removeSelectedVideo: {
     position: 'absolute',
-    top: 5,
-    right: 5,
+    top: spacing.xs / 2,
+    right: spacing.xs / 2,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 12,
-    padding: 4,
+    borderRadius: radius.small + 2,
+    padding: spacing.xs / 2 - 1,
   },
 });

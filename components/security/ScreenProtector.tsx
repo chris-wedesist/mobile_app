@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
 
 interface ScreenProtectorProps {
@@ -81,7 +82,7 @@ export const ScreenProtector: React.FC<ScreenProtectorProps> = ({
         <Ionicons
           name={privacyIcon as any}
           size={80}
-          color="#007AFF"
+          color={colors.primary}
           style={styles.privacyIcon}
         />
         <Text style={styles.privacyMessage}>{privacyMessage}</Text>
@@ -159,11 +160,11 @@ export const ScreenProtectionStatus: React.FC = () => {
         <Ionicons
           name={status.isActive ? 'shield-checkmark' : 'shield-outline'}
           size={20}
-          color={status.isActive ? '#34C759' : '#8E8E93'}
+          color={status.isActive ? colors.success : colors.text.muted}
         />
         <Text style={[
           styles.statusText,
-          { color: status.isActive ? '#34C759' : '#8E8E93' }
+          { color: status.isActive ? colors.success : colors.text.muted }
         ]}>
           Screen Protection {status.isActive ? 'Active' : 'Inactive'}
         </Text>
@@ -175,7 +176,7 @@ export const ScreenProtectionStatus: React.FC = () => {
             <Ionicons
               name={status.screenshotsBlocked ? 'checkmark-circle' : 'close-circle'}
               size={16}
-              color={status.screenshotsBlocked ? '#34C759' : '#FF3B30'}
+              color={status.screenshotsBlocked ? colors.success : colors.error}
             />
             <Text style={styles.statusDetailText}>
               Screenshots {status.screenshotsBlocked ? 'Blocked' : 'Allowed'}
@@ -186,7 +187,7 @@ export const ScreenProtectionStatus: React.FC = () => {
             <Ionicons
               name={status.recordingBlocked ? 'checkmark-circle' : 'close-circle'}
               size={16}
-              color={status.recordingBlocked ? '#34C759' : '#FF3B30'}
+              color={status.recordingBlocked ? colors.success : colors.error}
             />
             <Text style={styles.statusDetailText}>
               Recording {status.recordingBlocked ? 'Blocked' : 'Allowed'}
@@ -197,7 +198,7 @@ export const ScreenProtectionStatus: React.FC = () => {
             <Ionicons
               name={status.backgroundProtected ? 'checkmark-circle' : 'close-circle'}
               size={16}
-              color={status.backgroundProtected ? '#34C759' : '#FF3B30'}
+              color={status.backgroundProtected ? colors.success : colors.error}
             />
             <Text style={styles.statusDetailText}>
               Background {status.backgroundProtected ? 'Protected' : 'Exposed'}
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
@@ -234,12 +235,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   privacyIcon: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   privacyMessage: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
     textAlign: 'center',
   },
   blurOverlay: {
@@ -253,25 +254,25 @@ const styles = StyleSheet.create({
     height,
   },
   statusContainer: {
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    padding: 12,
-    margin: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
+    padding: spacing.sm,
+    margin: spacing.md,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   statusText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: spacing.xs,
   },
   statusDetails: {
-    marginLeft: 28,
+    marginLeft: spacing.xl + spacing.xs,
   },
   statusDetailRow: {
     flexDirection: 'row',
@@ -279,9 +280,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   statusDetailText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
+    fontSize: typography.fontSize.caption,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs,
   },
 });
 

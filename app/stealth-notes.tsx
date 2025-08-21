@@ -15,6 +15,7 @@ import {
 } from 'react-native-gesture-handler';
 import { useStealthMode } from '../components/StealthModeManager';
 import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 
 type Note = {
   id: string;
@@ -141,18 +142,18 @@ export default function StealthNotesScreen() {
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Notes</Text>
             <TouchableOpacity style={styles.headerButton}>
-              <MaterialIcons name="more-vert" size={24} color="#333" />
+              <MaterialIcons name="more-vert" size={24} color={colors.text.secondary} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.searchContainer}>
-            <MaterialIcons name="search" size={20} color="#999" />
+            <MaterialIcons name="search" size={20} color={colors.text.muted} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search"
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.text.muted}
             />
           </View>
 
@@ -164,7 +165,7 @@ export default function StealthNotesScreen() {
                 style={styles.newNoteButton}
                 onPress={createNote}
               >
-                <MaterialIcons name="add" size={20} color="#fff" />
+                <MaterialIcons name="add" size={20} color={colors.background} />
                 <Text style={styles.newNoteText}>New Note</Text>
               </TouchableOpacity>
 
@@ -190,7 +191,7 @@ export default function StealthNotesScreen() {
                         {note.title}
                       </Text>
                       {note.starred && (
-                        <MaterialIcons name="star" size={16} color="#FFB800" />
+                        <MaterialIcons name="star" size={16} color={colors.warning} />
                       )}
                     </View>
                     <Text style={styles.noteItemPreview} numberOfLines={2}>
@@ -215,7 +216,7 @@ export default function StealthNotesScreen() {
                         updateNote(selectedNote.id, { title: text })
                       }
                       placeholder="Note title"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={colors.text.muted}
                     />
                     <View style={styles.editorActions}>
                       <TouchableOpacity
@@ -224,15 +225,15 @@ export default function StealthNotesScreen() {
                       >
                         <MaterialIcons
                           size={20}
-                          color={selectedNote.starred ? '#FFB800' : '#999'}
-                          fill={selectedNote.starred ? '#FFB800' : 'none'}
+                          color={selectedNote.starred ? colors.warning : colors.text.muted}
+                          fill={selectedNote.starred ? colors.warning : 'none'}
                         />
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => deleteNote(selectedNote.id)}
                       >
-                        <MaterialIcons name="delete" size={20} color="#999" />
+                        <MaterialIcons name="delete" size={20} color={colors.text.muted} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -243,7 +244,7 @@ export default function StealthNotesScreen() {
                       updateNote(selectedNote.id, { content: text })
                     }
                     placeholder="Start writing..."
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.text.muted}
                     multiline
                     textAlignVertical="top"
                   />
@@ -266,41 +267,41 @@ export default function StealthNotesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
-    paddingBottom: 10,
-    backgroundColor: '#F2F2F7',
+    paddingHorizontal: spacing.lg,
+    paddingTop: Platform.OS === 'ios' ? 60 : spacing.lg,
+    paddingBottom: spacing.sm,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
-    color: '#000',
+    color: colors.text.primary,
   },
   headerButton: {
-    padding: 8,
+    padding: spacing.xs,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E5E5EA',
-    margin: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+    backgroundColor: colors.border,
+    margin: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
   },
   searchInput: {
     flex: 1,
     height: 40,
-    fontSize: 16,
-    color: '#000',
-    paddingLeft: 8,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
+    paddingLeft: spacing.xs,
   },
   contentContainer: {
     flex: 1,
@@ -309,39 +310,39 @@ const styles = StyleSheet.create({
   sidebar: {
     width: Platform.OS === 'web' ? 300 : '40%',
     borderRightWidth: 1,
-    borderRightColor: '#E5E5EA',
-    backgroundColor: '#F2F2F7',
+    borderRightColor: colors.border,
+    backgroundColor: colors.surface,
   },
   notesCount: {
-    fontSize: 14,
-    color: '#8E8E93',
-    padding: 10,
-    paddingLeft: 15,
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
+    padding: spacing.sm,
+    paddingLeft: spacing.md,
   },
   newNoteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
-    margin: 10,
-    padding: 10,
-    borderRadius: 8,
-    gap: 8,
+    backgroundColor: colors.primary,
+    margin: spacing.sm,
+    padding: spacing.sm,
+    borderRadius: radius.small,
+    gap: spacing.xs,
   },
   newNoteText: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.background,
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
   },
   notesList: {
     flex: 1,
   },
   noteItem: {
-    padding: 15,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.border,
   },
   selectedNoteItem: {
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.border,
   },
   noteItemHeader: {
     flexDirection: 'row',
@@ -350,54 +351,54 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   noteItemTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#000',
+    color: colors.text.primary,
     flex: 1,
   },
   selectedNoteItemTitle: {
-    color: '#007AFF',
+    color: colors.primary,
   },
   noteItemPreview: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     marginBottom: 6,
     lineHeight: 18,
   },
   noteItemDate: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.secondary,
   },
   editor: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   editorHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.border,
   },
   titleInput: {
     flex: 1,
-    fontSize: 20,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#000',
+    color: colors.text.primary,
   },
   editorActions: {
     flexDirection: 'row',
-    gap: 15,
+    gap: spacing.md,
   },
   actionButton: {
-    padding: 5,
+    padding: spacing.xs,
   },
   contentInput: {
     flex: 1,
-    padding: 15,
-    fontSize: 16,
-    color: '#000',
+    padding: spacing.md,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
     lineHeight: 24,
   },
   emptyState: {
@@ -406,8 +407,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyStateText: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
 });

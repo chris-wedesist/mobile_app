@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { colors, typography, spacing, shadows, radius } from '../../constants/theme';
 import {
   emergencyProtocolManager,
   EmergencyContact,
@@ -145,7 +146,7 @@ export default function EmergencySetupScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="refresh" size={48} color="#FF3B30" />
+        <Ionicons name="refresh" size={48} color={colors.error} />
         <Text style={styles.loadingText}>Loading emergency setup...</Text>
       </View>
     );
@@ -156,7 +157,7 @@ export default function EmergencySetupScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Ionicons name="warning" size={64} color="#FF3B30" />
+            <Ionicons name="warning" size={64} color={colors.error} />
           </View>
           <Text style={styles.title}>Emergency Protocols</Text>
           <Text style={styles.description}>
@@ -175,8 +176,8 @@ export default function EmergencySetupScreen() {
             <Switch
               value={isEnabled}
               onValueChange={handleToggleEnabled}
-              trackColor={{ false: '#E9ECEF', true: '#34C759' }}
-              thumbColor={'#FFFFFF'}
+              trackColor={{ false: colors.border, true: colors.success }}
+              thumbColor={colors.background}
             />
           </View>
         </View>
@@ -188,7 +189,7 @@ export default function EmergencySetupScreen() {
               style={styles.addButton}
               onPress={() => setShowAddContact(!showAddContact)}
             >
-              <Ionicons name="add" size={20} color="#007AFF" />
+              <Ionicons name="add" size={20} color={colors.primary} />
               <Text style={styles.addButtonText}>Add</Text>
             </TouchableOpacity>
           </View>
@@ -272,14 +273,14 @@ export default function EmergencySetupScreen() {
                     style={styles.removeButton}
                     onPress={() => handleRemoveContact(contact.id)}
                   >
-                    <Ionicons name="trash" size={20} color="#FF3B30" />
+                    <Ionicons name="trash" size={20} color={colors.error} />
                   </TouchableOpacity>
                 </View>
               ))}
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons name="person-add" size={48} color="#8E8E93" />
+              <Ionicons name="person-add" size={48} color={colors.text.muted} />
               <Text style={styles.emptyStateText}>No emergency contacts</Text>
               <Text style={styles.emptyStateSubtext}>
                 Add contacts to enable emergency protocols
@@ -314,28 +315,28 @@ export default function EmergencySetupScreen() {
           <Text style={styles.sectionTitle}>Features</Text>
           
           <View style={styles.featureRow}>
-            <Ionicons name="hand-left" size={20} color="#FF3B30" />
+            <Ionicons name="hand-left" size={20} color={colors.error} />
             <Text style={styles.featureText}>
               Panic gesture: 5 rapid taps anywhere on screen
             </Text>
           </View>
           
           <View style={styles.featureRow}>
-            <Ionicons name="call" size={20} color="#FF3B30" />
+            <Ionicons name="call" size={20} color={colors.error} />
             <Text style={styles.featureText}>
               Auto-call primary contact (optional)
             </Text>
           </View>
           
           <View style={styles.featureRow}>
-            <Ionicons name="chatbubble" size={20} color="#FF3B30" />
+            <Ionicons name="chatbubble" size={20} color={colors.error} />
             <Text style={styles.featureText}>
               Auto-send emergency texts
             </Text>
           </View>
           
           <View style={styles.featureRow}>
-            <Ionicons name="eye-off" size={20} color="#FF3B30" />
+            <Ionicons name="eye-off" size={20} color={colors.error} />
             <Text style={styles.featureText}>
               Automatic switch to stealth mode
             </Text>
@@ -348,7 +349,7 @@ export default function EmergencySetupScreen() {
             onPress={() => router.push('/security-test' as any)}
           >
             <Text style={styles.nextButtonText}>Test Security Features</Text>
-            <Ionicons name="chevron-forward" size={20} color="#007AFF" />
+            <Ionicons name="chevron-forward" size={20} color={colors.primary} />
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -366,55 +367,55 @@ export default function EmergencySetupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   loadingText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 16,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    marginTop: spacing.md,
   },
   content: {
     flex: 1,
   },
   header: {
     alignItems: 'center',
-    padding: 24,
-    paddingTop: 40,
+    padding: spacing.xl,
+    paddingTop: spacing.xl * 1.67, // 40px equivalent
   },
   iconContainer: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#FFF5F5',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
+    color: colors.text.primary,
+    marginBottom: spacing.sm + 2,
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.md,
   },
   enableSection: {
-    margin: 24,
-    padding: 20,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    margin: spacing.xl,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.large,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -423,80 +424,80 @@ const styles = StyleSheet.create({
   },
   toggleInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: spacing.md,
   },
   toggleLabel: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs / 2,
   },
   toggleDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     lineHeight: 20,
   },
   contactsSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#F0F8FF',
-    borderRadius: 6,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm + 2,
+    backgroundColor: colors.surface,
+    borderRadius: radius.small + 2,
   },
   addButtonText: {
-    fontSize: 14,
-    color: '#007AFF',
-    marginLeft: 4,
+    fontSize: typography.fontSize.small,
+    color: colors.primary,
+    marginLeft: spacing.xs / 2,
   },
   addContactForm: {
-    backgroundColor: '#F8F9FA',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: radius.medium,
+    marginBottom: spacing.md,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#E9ECEF',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.border,
+    borderRadius: radius.medium,
+    padding: spacing.sm + 2,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
+    backgroundColor: colors.background,
   },
   switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   switchLabel: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: typography.fontSize.small,
+    color: colors.text.primary,
   },
   formActions: {
     flexDirection: 'row',
@@ -504,157 +505,157 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.medium,
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#E9ECEF',
-    marginRight: 8,
+    backgroundColor: colors.border,
+    marginRight: spacing.xs,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
-    marginLeft: 8,
+    backgroundColor: colors.primary,
+    marginLeft: spacing.xs,
   },
   cancelButtonText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     fontWeight: '500',
   },
   saveButtonText: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.small,
+    color: colors.background,
     fontWeight: '600',
   },
   contactsList: {
-    marginTop: 8,
+    marginTop: spacing.xs,
   },
   contactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
+    marginBottom: spacing.xs,
   },
   contactInfo: {
     flex: 1,
   },
   contactName: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs / 2,
   },
   primaryBadge: {
-    fontSize: 12,
-    color: '#007AFF',
+    fontSize: typography.fontSize.caption,
+    color: colors.primary,
     fontWeight: '500',
   },
   contactPhone: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     marginBottom: 2,
   },
   contactRelation: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.muted,
   },
   removeButton: {
-    padding: 8,
+    padding: spacing.xs,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 48,
+    paddingVertical: spacing.xl * 2,
   },
   emptyStateText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#8E8E93',
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.text.muted,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   emptyStateSubtext: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
     textAlign: 'center',
   },
   messageSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   messageDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm + 2,
     lineHeight: 20,
   },
   messageInput: {
     borderWidth: 1,
-    borderColor: '#E9ECEF',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
+    borderColor: colors.border,
+    borderRadius: radius.medium,
+    padding: spacing.sm + 2,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
     minHeight: 80,
-    marginBottom: 12,
+    marginBottom: spacing.sm + 2,
   },
   updateButton: {
-    backgroundColor: '#34C759',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    backgroundColor: colors.success,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.medium,
     alignItems: 'center',
   },
   updateButtonText: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.small,
+    color: colors.background,
     fontWeight: '600',
   },
   featuresSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.sm + 2,
   },
   featureText: {
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 12,
+    fontSize: typography.fontSize.small,
+    color: colors.text.primary,
+    marginLeft: spacing.sm + 2,
     flex: 1,
   },
   navigationSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   nextButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    backgroundColor: '#F0F8FF',
-    borderRadius: 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.large,
     borderWidth: 1,
-    borderColor: '#007AFF',
-    marginBottom: 12,
+    borderColor: colors.primary,
+    marginBottom: spacing.sm + 2,
   },
   nextButtonText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#007AFF',
-    marginRight: 8,
+    color: colors.primary,
+    marginRight: spacing.xs,
   },
   skipButton: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.sm + 2,
   },
   skipButtonText: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.body,
+    color: colors.text.muted,
   },
 });

@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { stealthManager } from '../lib/stealth';
 import { router } from 'expo-router';
+import { colors, typography, spacing, shadows, radius } from '../constants/theme';
 
 interface TestResult {
   name: string;
@@ -221,22 +222,22 @@ export default function StealthTestScreen() {
   const getStatusIcon = (status: 'pass' | 'fail' | 'pending') => {
     switch (status) {
       case 'pass':
-        return <Ionicons name="checkmark-circle" size={20} color="#28a745" />;
+        return <Ionicons name="checkmark-circle" size={20} color={colors.status.success} />;
       case 'fail':
-        return <Ionicons name="close-circle" size={20} color="#dc3545" />;
+        return <Ionicons name="close-circle" size={20} color={colors.status.error} />;
       case 'pending':
-        return <Ionicons name="time" size={20} color="#ffc107" />;
+        return <Ionicons name="time" size={20} color={colors.status.warning} />;
     }
   };
 
   const getStatusColor = (status: 'pass' | 'fail' | 'pending') => {
     switch (status) {
       case 'pass':
-        return '#28a745';
+        return colors.status.success;
       case 'fail':
-        return '#dc3545';
+        return colors.status.error;
       case 'pending':
-        return '#ffc107';
+        return colors.status.warning;
     }
   };
 
@@ -289,7 +290,7 @@ export default function StealthTestScreen() {
 
         {testResults.length === 0 && !isRunning && (
           <View style={styles.emptyState}>
-            <Ionicons name="flask-outline" size={48} color="#ccc" />
+            <Ionicons name="flask-outline" size={48} color={colors.text.muted} />
             <Text style={styles.emptyText}>No test results yet</Text>
             <Text style={styles.emptySubtext}>
               Run tests to validate functionality
@@ -300,7 +301,7 @@ export default function StealthTestScreen() {
 
       <View style={styles.actions}>
         <TouchableOpacity style={styles.actionButton} onPress={testModeSwitch}>
-          <Ionicons name="swap-horizontal" size={20} color="#007bff" />
+          <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
           <Text style={styles.actionButtonText}>Test Mode Switch</Text>
         </TouchableOpacity>
 
@@ -308,8 +309,8 @@ export default function StealthTestScreen() {
           style={styles.actionButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={20} color="#6c757d" />
-          <Text style={[styles.actionButtonText, { color: '#6c757d' }]}>
+          <Ionicons name="arrow-back" size={20} color={colors.text.secondary} />
+          <Text style={[styles.actionButtonText, { color: colors.text.secondary }]}>
             Back
           </Text>
         </TouchableOpacity>
@@ -321,127 +322,115 @@ export default function StealthTestScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.surface,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#ffffff',
+    padding: spacing.lg,
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: typography.fontSize.title,
+    fontWeight: '700' as const,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6c757d',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
   },
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff',
-    marginTop: 8,
-    marginHorizontal: 16,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    padding: spacing.lg,
+    backgroundColor: colors.background,
+    marginTop: spacing.sm,
+    marginHorizontal: spacing.md,
+    borderRadius: radius.medium,
+    ...shadows.small,
   },
   summaryText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
+    fontSize: typography.fontSize.body,
+    fontWeight: '500' as const,
+    color: colors.text.primary,
   },
   button: {
-    backgroundColor: '#007bff',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.small,
   },
   buttonDisabled: {
-    backgroundColor: '#6c757d',
+    backgroundColor: colors.text.secondary,
   },
   buttonText: {
-    color: '#ffffff',
-    fontWeight: '500',
+    color: colors.background,
+    fontWeight: '500' as const,
   },
   testResults: {
     flex: 1,
-    padding: 16,
+    padding: spacing.md,
   },
   testItem: {
-    backgroundColor: '#ffffff',
-    padding: 16,
-    marginBottom: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderRadius: radius.medium,
+    ...shadows.small,
   },
   testHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   testName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-    marginLeft: 12,
+    fontSize: typography.fontSize.body,
+    fontWeight: '500' as const,
+    color: colors.text.primary,
+    marginLeft: spacing.xs * 3,
     flex: 1,
   },
   testDetails: {
-    fontSize: 14,
-    marginTop: 8,
-    marginLeft: 32,
+    fontSize: typography.fontSize.small,
+    marginTop: spacing.sm,
+    marginLeft: spacing.xl,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 48,
+    paddingVertical: spacing.xxl,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#6c757d',
-    marginTop: 16,
+    fontSize: typography.fontSize.subheading,
+    fontWeight: '500' as const,
+    color: colors.text.secondary,
+    marginTop: spacing.md,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#adb5bd',
-    marginTop: 8,
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
+    marginTop: spacing.sm,
   },
   actions: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    padding: spacing.md,
+    gap: spacing.xs * 3,
   },
   actionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    padding: 12,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background,
+    padding: spacing.xs * 3,
+    borderRadius: radius.medium,
+    ...shadows.small,
   },
   actionButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#007bff',
-    marginLeft: 8,
+    fontSize: typography.fontSize.body,
+    fontWeight: '500' as const,
+    color: colors.primary,
+    marginLeft: spacing.sm,
   },
 });

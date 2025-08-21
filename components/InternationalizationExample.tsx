@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import * as React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 import { useTranslation } from '../hooks/useTranslation';
 import { AccessibleButton } from './AccessibleButton';
 import {
@@ -109,7 +109,7 @@ export default function InternationalizationExample() {
           style={styles.selectorButton}
           accessibilityLabel="Open language selector"
         >
-          <MaterialIcons name="settings" size={20} color="#ffffff" />
+          <MaterialIcons name="settings" size={20} color={colors.background} />
           <Text style={styles.selectorButtonText}>
             {t('settings.language')}
           </Text>
@@ -215,32 +215,32 @@ export default function InternationalizationExample() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    padding: spacing.md,
+    backgroundColor: colors.surface,
   },
   title: {
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.md,
     color: colors.text.primary,
   },
   description: {
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
     color: colors.text.secondary,
   },
   section: {
-    marginBottom: 30,
-    padding: 20,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    shadowColor: '#000',
+    marginBottom: spacing.xl,
+    padding: spacing.md,
+    backgroundColor: colors.background,
+    borderRadius: radius.small,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   sectionTitle: {
-    marginBottom: 15,
+    marginBottom: spacing.md,
     color: colors.text.primary,
   },
   languageInfo: {
@@ -260,8 +260,8 @@ const styles = StyleSheet.create({
   languageButton: {
     flex: 1,
     minWidth: 80,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   activeLanguageButton: {
     backgroundColor: colors.primary,
@@ -273,29 +273,29 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   selectorButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: colors.background,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
   },
   translationGrid: {
-    gap: 15,
+    gap: spacing.md,
   },
   translationItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.small,
   },
   translationKey: {
-    fontSize: 12,
+    fontSize: typography.fontSize.caption,
     color: colors.text.muted,
-    fontFamily: 'monospace',
+    fontFamily: typography.fontFamily.regular,
   },
   translationValue: {
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     color: colors.text.primary,
     fontWeight: '500',
   },
@@ -305,11 +305,11 @@ const styles = StyleSheet.create({
   navigationItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 6,
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.small,
   },
   navigationText: {
     fontSize: 14,

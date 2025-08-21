@@ -1,24 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { colors } from '../../constants/theme';
+import { colors, spacing } from '../../constants/theme';
 
 export default function StealthLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: '#f8f9fa',
-          borderTopColor: '#e9ecef',
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
         },
         headerStyle: {
-          backgroundColor: '#f8f9fa',
-          borderBottomColor: '#e9ecef',
+          backgroundColor: colors.background,
+          borderBottomColor: colors.border,
           borderBottomWidth: 1,
         },
-        headerTintColor: '#495057',
-        tabBarActiveTintColor: '#007bff',
-        tabBarInactiveTintColor: '#6c757d',
+        headerTintColor: colors.text.primary,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.text.muted,
         headerShown: true,
       }}
     >

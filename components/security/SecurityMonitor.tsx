@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../../constants/theme';
+import { colors, shadows, radius, typography, spacing } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
@@ -91,13 +91,13 @@ export const SecurityMonitor: React.FC = () => {
   const getSecurityLevelColor = (level: string) => {
     switch (level) {
       case 'high':
-        return '#34C759';
+        return colors.success;
       case 'medium':
-        return '#FF9500';
+        return colors.warning;
       case 'low':
-        return '#FF3B30';
+        return colors.error;
       default:
-        return '#8E8E93';
+        return colors.text.muted;
     }
   };
 
@@ -117,15 +117,15 @@ export const SecurityMonitor: React.FC = () => {
   const getThreatSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return '#FF3B30';
+        return colors.error;
       case 'high':
-        return '#FF9500';
+        return colors.warning;
       case 'medium':
-        return '#FFCC02';
+        return colors.accent;
       case 'low':
-        return '#34C759';
+        return colors.success;
       default:
-        return '#8E8E93';
+        return colors.text.muted;
     }
   };
 
@@ -189,12 +189,12 @@ export const SecurityMonitor: React.FC = () => {
           <Ionicons
             name={securityStatus.biometric ? 'finger-print' : 'finger-print-outline'}
             size={24}
-            color={securityStatus.biometric ? '#34C759' : '#8E8E93'}
+            color={securityStatus.biometric ? colors.success : colors.text.muted}
           />
           <Text style={styles.systemTitle}>Biometric</Text>
           <Text style={[
             styles.systemStatus,
-            { color: securityStatus.biometric ? '#34C759' : '#8E8E93' }
+            { color: securityStatus.biometric ? colors.success : colors.text.muted }
           ]}>
             {securityStatus.biometric ? 'Active' : 'Inactive'}
           </Text>
@@ -204,12 +204,12 @@ export const SecurityMonitor: React.FC = () => {
           <Ionicons
             name={securityStatus.screenProtection ? 'shield-checkmark' : 'shield-outline'}
             size={24}
-            color={securityStatus.screenProtection ? '#34C759' : '#8E8E93'}
+            color={securityStatus.screenProtection ? colors.success : colors.text.muted}
           />
           <Text style={styles.systemTitle}>Screen Protection</Text>
           <Text style={[
             styles.systemStatus,
-            { color: securityStatus.screenProtection ? '#34C759' : '#8E8E93' }
+            { color: securityStatus.screenProtection ? colors.success : colors.text.muted }
           ]}>
             {securityStatus.screenProtection ? 'Protected' : 'Unprotected'}
           </Text>
@@ -219,12 +219,12 @@ export const SecurityMonitor: React.FC = () => {
           <Ionicons
             name={securityStatus.emergencyEnabled ? 'warning' : 'warning-outline'}
             size={24}
-            color={securityStatus.emergencyEnabled ? '#FF9500' : '#8E8E93'}
+            color={securityStatus.emergencyEnabled ? colors.warning : colors.text.muted}
           />
           <Text style={styles.systemTitle}>Emergency</Text>
           <Text style={[
             styles.systemStatus,
-            { color: securityStatus.emergencyEnabled ? '#FF9500' : '#8E8E93' }
+            { color: securityStatus.emergencyEnabled ? colors.warning : colors.text.muted }
           ]}>
             {securityStatus.emergencyEnabled ? 'Ready' : 'Disabled'}
           </Text>
@@ -234,12 +234,12 @@ export const SecurityMonitor: React.FC = () => {
           <Ionicons
             name={securityStatus.threatMonitoring ? 'eye' : 'eye-outline'}
             size={24}
-            color={securityStatus.threatMonitoring ? '#007AFF' : '#8E8E93'}
+            color={securityStatus.threatMonitoring ? colors.primary : colors.text.muted}
           />
           <Text style={styles.systemTitle}>Threat Detection</Text>
           <Text style={[
             styles.systemStatus,
-            { color: securityStatus.threatMonitoring ? '#007AFF' : '#8E8E93' }
+            { color: securityStatus.threatMonitoring ? colors.primary : colors.text.muted }
           ]}>
             {securityStatus.threatMonitoring ? 'Monitoring' : 'Offline'}
           </Text>
@@ -280,7 +280,7 @@ export const SecurityMonitor: React.FC = () => {
           </View>
         ) : (
           <View style={styles.noThreats}>
-            <Ionicons name="checkmark-circle" size={48} color="#34C759" />
+            <Ionicons name="checkmark-circle" size={48} color={colors.success} />
             <Text style={styles.noThreatsText}>No recent security events</Text>
             <Text style={styles.noThreatsSubtext}>
               Your app is secure and functioning normally
@@ -296,29 +296,29 @@ export const SecurityMonitor: React.FC = () => {
           style={styles.actionButton}
           onPress={() => stealthManager.toggleMode()}
         >
-          <Ionicons name="swap-horizontal" size={20} color="#007AFF" />
+          <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
           <Text style={styles.actionButtonText}>Toggle App Mode</Text>
-          <Ionicons name="chevron-forward" size={16} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.actionButton}
           onPress={updateSecurityStatus}
         >
-          <Ionicons name="refresh" size={20} color="#007AFF" />
+          <Ionicons name="refresh" size={20} color={colors.primary} />
           <Text style={styles.actionButtonText}>Refresh Status</Text>
-          <Ionicons name="chevron-forward" size={16} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => threatDetectionEngine.clearSecurityData()}
         >
-          <Ionicons name="trash" size={20} color="#FF3B30" />
-          <Text style={[styles.actionButtonText, { color: '#FF3B30' }]}>
+          <Ionicons name="trash" size={20} color={colors.error} />
+          <Text style={[styles.actionButtonText, { color: colors.error }]}>
             Clear Security Log
           </Text>
-          <Ionicons name="chevron-forward" size={16} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   header: {
-    padding: 16,
+    padding: spacing.md,
     backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -342,19 +342,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: '700',
     fontFamily: 'Inter-Bold',
     color: colors.text.primary,
   },
   lastUpdate: {
-    fontSize: 12,
+    fontSize: typography.fontSize.caption,
     fontFamily: 'Inter-Regular',
     color: colors.text.secondary,
   },
   overallStatusCard: {
-    margin: 16,
-    padding: 20,
+    margin: spacing.md,
+    padding: spacing.lg,
     backgroundColor: colors.background,
     borderRadius: radius.medium,
     ...shadows.small,
@@ -364,149 +364,145 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusText: {
-    marginLeft: 16,
+    marginLeft: spacing.md,
     flex: 1,
   },
   statusLevel: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
     fontFamily: 'Inter-Medium',
     color: colors.text.primary,
     marginBottom: 4,
   },
   statusDescription: {
-    fontSize: 14,
+    fontSize: typography.fontSize.caption,
     fontFamily: 'Inter-Regular',
     color: colors.text.secondary,
   },
   systemsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    margin: 16,
+    margin: spacing.md,
     marginTop: 0,
   },
   systemCard: {
     width: '48%',
     backgroundColor: colors.background,
     borderRadius: radius.small,
-    padding: 16,
-    marginBottom: 8,
+    padding: spacing.md,
+    marginBottom: spacing.xs,
     marginRight: '2%',
     alignItems: 'center',
     ...shadows.small,
   },
   systemTitle: {
-    fontSize: 12,
+    fontSize: typography.fontSize.caption,
     fontWeight: '600',
     fontFamily: 'Inter-Medium',
     color: colors.text.primary,
-    marginTop: 8,
+    marginTop: spacing.xs,
     marginBottom: 4,
     textAlign: 'center',
   },
   systemStatus: {
-    fontSize: 10,
+    fontSize: typography.fontSize.small,
     fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },
   threatsSection: {
-    margin: 16,
+    margin: spacing.md,
     marginTop: 0,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.sm,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   threatBadge: {
-    backgroundColor: '#FF3B30',
-    borderRadius: 12,
-    paddingHorizontal: 8,
+    backgroundColor: colors.error,
+    borderRadius: radius.large,
+    paddingHorizontal: spacing.xs,
     paddingVertical: 4,
     minWidth: 24,
     alignItems: 'center',
   },
   threatBadgeText: {
-    fontSize: 12,
+    fontSize: typography.fontSize.caption,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.background,
   },
   threatsList: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: colors.background,
+    borderRadius: radius.medium,
     overflow: 'hidden',
   },
   threatItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.surface,
   },
   severityIndicator: {
     width: 4,
     height: 40,
-    borderRadius: 2,
-    marginRight: 12,
+    borderRadius: radius.small,
+    marginRight: spacing.sm,
   },
   threatInfo: {
     flex: 1,
   },
   threatDescription: {
-    fontSize: 14,
+    fontSize: typography.fontSize.caption,
     fontWeight: '500',
-    color: '#333',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   threatTime: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.muted,
   },
   noThreats: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 32,
+    backgroundColor: colors.background,
+    borderRadius: radius.medium,
+    padding: spacing.xl * 2,
     alignItems: 'center',
   },
   noThreatsText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#34C759',
-    marginTop: 12,
+    color: colors.success,
+    marginTop: spacing.sm,
     marginBottom: 4,
   },
   noThreatsSubtext: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   quickActions: {
-    margin: 16,
+    margin: spacing.md,
     marginTop: 0,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background,
+    padding: spacing.md,
+    borderRadius: radius.medium,
+    marginBottom: spacing.xs,
+    ...shadows.small,
   },
   actionButtonText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
+    marginLeft: spacing.sm,
     flex: 1,
   },
 });

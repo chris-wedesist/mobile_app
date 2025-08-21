@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
 
@@ -287,71 +288,71 @@ export default function CalculatorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.background,
   },
   displayContainer: {
     flex: 1,
     justifyContent: 'flex-end',
-    padding: 20,
-    backgroundColor: '#ffffff',
-    marginHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.sm,
+    marginTop: spacing.sm,
+    borderRadius: radius.medium,
+    shadowColor: shadows.medium.shadowColor,
+    shadowOffset: shadows.medium.shadowOffset,
+    shadowOpacity: shadows.medium.shadowOpacity,
+    shadowRadius: shadows.medium.shadowRadius,
+    elevation: shadows.medium.elevation,
   },
   displayTouchable: {
-    padding: 10,
+    padding: spacing.sm,
   },
   display: {
     fontSize: 48,
     fontWeight: '300',
     textAlign: 'right',
-    color: '#000000',
+    color: colors.text.primary,
     minHeight: 60,
   },
   buttonContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingHorizontal: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   row: {
     flexDirection: 'row',
-    marginVertical: 5,
+    marginVertical: spacing.xs,
   },
   button: {
     flex: 1,
     height: 70,
-    marginHorizontal: 5,
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
+    marginHorizontal: spacing.xs,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: shadows.medium.shadowColor,
+    shadowOffset: shadows.medium.shadowOffset,
+    shadowOpacity: shadows.medium.shadowOpacity,
+    shadowRadius: shadows.medium.shadowRadius,
+    elevation: shadows.medium.elevation,
   },
   buttonText: {
     fontSize: 24,
     fontWeight: '400',
-    color: '#000000',
+    color: colors.text.primary,
   },
   operatorButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: colors.primary,
   },
   operatorText: {
-    color: '#ffffff',
+    color: colors.surface,
     fontWeight: '500',
   },
   equalsButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: colors.success,
   },
   equalsText: {
-    color: '#ffffff',
+    color: colors.surface,
     fontWeight: '500',
   },
   zeroButton: {

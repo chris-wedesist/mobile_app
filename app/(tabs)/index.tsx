@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import NoHandsIcon from '../../components/NoHandsIcon';
-import { colors } from '../../constants/theme';
+import { colors, spacing, shadows } from '../../constants/theme';
 import { fetchNewsWithOptimization, NewsItem } from '../../lib/news';
 import {
   StateManager,
@@ -150,23 +150,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.secondary,
-    paddingVertical: 40,
+    paddingVertical: spacing.xxl,
   },
   content: {
-    padding: 30,
+    padding: spacing.xl,
     backgroundColor: colors.primary,
   },
   title: {
     fontSize: 48,
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginBottom: 12,
+    marginBottom: spacing.sm,
     fontFamily: 'Inter-Bold',
   },
   subtitle: {
     fontSize: 26,
     color: colors.accent,
-    marginBottom: 24,
+    marginBottom: spacing.xl,
     fontFamily: 'Inter-Medium',
   },
   description: {
@@ -176,14 +176,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   newsSection: {
-    padding: 20,
+    padding: spacing.lg,
     backgroundColor: colors.primary,
   },
   newsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   newsTitle: {
     fontSize: 24,
@@ -193,8 +193,8 @@ const styles = StyleSheet.create({
   },
   viewAllButton: {
     backgroundColor: colors.accent,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -210,28 +210,25 @@ const styles = StyleSheet.create({
   newsCard: {
     backgroundColor: colors.secondary,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: spacing.md,
     overflow: 'hidden',
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadows.small,
   },
   newsContent: {
-    padding: 16,
+    padding: spacing.md,
   },
   newsItemTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginBottom: 8,
+    marginBottom: spacing.xs,
     fontFamily: 'Inter-Bold',
   },
   newsItemDescription: {
     fontSize: 14,
     color: colors.text.secondary,
-    marginBottom: 12,
+    marginBottom: spacing.sm,
     fontFamily: 'Inter-Regular',
   },
   newsMeta: {

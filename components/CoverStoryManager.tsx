@@ -7,6 +7,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import { colors, typography, spacing, shadows, radius } from '../constants/theme';
 import CoverStoryNotes from './CoverStoryNotes';
 
 const supabase = createClient(
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     zIndex: 9999,
   },
 });

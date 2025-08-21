@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 
 type Note = {
   id: string;
@@ -106,7 +107,7 @@ export default function CoverStoryNotes() {
     <View style={styles.container}>
       <View style={styles.sidebar}>
         <View style={styles.searchContainer}>
-          <MaterialIcons name="search" size={20} color="#666" />
+          <MaterialIcons name="search" size={20} color={colors.text.muted} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search notes..."
@@ -116,7 +117,7 @@ export default function CoverStoryNotes() {
         </View>
 
         <TouchableOpacity style={styles.newNoteButton} onPress={createNote}>
-          <MaterialIcons name="add" size={20} color="#fff" />
+          <MaterialIcons name="add" size={20} color={colors.background} />
           <Text style={styles.newNoteText}>New Note</Text>
         </TouchableOpacity>
 
@@ -129,7 +130,7 @@ export default function CoverStoryNotes() {
                 selectedNote?.id === note.id && styles.selectedNoteItem
               ]}
               onPress={() => setSelectedNote(note)}>
-              <MaterialIcons name="insert-drive-file" size={16} color={selectedNote?.id === note.id ? '#007AFF' : '#666'} />
+              <MaterialIcons name="insert-drive-file" size={16} color={selectedNote?.id === note.id ? colors.primary : colors.text.muted} />
               <View style={styles.noteItemContent}>
                 <Text
                   style={[
@@ -146,7 +147,7 @@ export default function CoverStoryNotes() {
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => deleteNote(note.id)}>
-                <MaterialIcons name="delete" size={16} color="#FF3B30" />
+                <MaterialIcons name="delete" size={16} color={colors.error} />
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
@@ -164,7 +165,7 @@ export default function CoverStoryNotes() {
                 placeholder="Note title"
               />
               <TouchableOpacity style={styles.moreButton}>
-                <MaterialIcons name="more-vert" size={20} color="#666" />
+                <MaterialIcons name="more-vert" size={20} color={colors.text.muted} />
               </TouchableOpacity>
             </View>
             <TextInput
@@ -190,38 +191,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   sidebar: {
     width: Platform.OS === 'web' ? 250 : '40%',
     borderRightWidth: 1,
-    borderRightColor: '#E5E5E5',
+    borderRightColor: colors.border,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-    gap: 10,
+    borderBottomColor: colors.border,
+    gap: spacing.sm,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
-    color: '#333',
+    fontSize: typography.fontSize.small,
+    color: colors.text.primary,
   },
   newNoteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
-    margin: 10,
-    padding: 10,
-    borderRadius: 8,
-    gap: 8,
+    backgroundColor: colors.primary,
+    margin: spacing.sm,
+    padding: spacing.sm,
+    borderRadius: radius.small,
+    gap: spacing.xs,
   },
   newNoteText: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.background,
+    fontSize: typography.fontSize.small,
     fontWeight: '600',
   },
   notesList: {
@@ -230,58 +231,58 @@ const styles = StyleSheet.create({
   noteItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-    gap: 10,
+    borderBottomColor: colors.border,
+    gap: spacing.sm,
   },
   selectedNoteItem: {
-    backgroundColor: '#E8F2FF',
+    backgroundColor: colors.accent + '20',
   },
   noteItemContent: {
     flex: 1,
   },
   noteItemTitle: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 4,
+    fontSize: typography.fontSize.small,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   selectedNoteItemTitle: {
-    color: '#007AFF',
+    color: colors.primary,
     fontWeight: '600',
   },
   noteItemDate: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.muted,
   },
   deleteButton: {
-    padding: 5,
+    padding: spacing.xs,
   },
   editor: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   editorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: colors.border,
   },
   titleInput: {
     flex: 1,
-    fontSize: 20,
+    fontSize: typography.fontSize.heading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   moreButton: {
-    padding: 5,
+    padding: spacing.xs,
   },
   contentInput: {
     flex: 1,
-    padding: 15,
-    fontSize: 16,
-    color: '#333',
+    padding: spacing.md,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
     lineHeight: 24,
   },
   emptyState: {
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyStateText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.muted,
   },
 });

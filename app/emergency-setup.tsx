@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { colors, radius, shadows } from '../constants/theme';
+import { colors, radius, shadows, spacing, typography } from '../constants/theme';
 // Emergency contact type definition
 interface EmergencyContact {
   id: string;
@@ -261,9 +261,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   backButton: {
     flexDirection: 'row',
@@ -271,30 +271,30 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: colors.text.primary,
-    fontSize: 16,
-    marginLeft: 8,
+    fontSize: typography.fontSize.body,
+    marginLeft: spacing.xs,
     fontFamily: 'Inter-Regular',
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: spacing.lg,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    gap: 10,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
   title: {
-    fontSize: 28,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
     color: colors.text.primary,
     fontFamily: 'Inter-Bold',
   },
   description: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     color: colors.text.secondary,
-    marginBottom: 30,
+    marginBottom: spacing.xl,
     lineHeight: 24,
     fontFamily: 'Inter-Regular',
   },
@@ -302,10 +302,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: `${colors.status.error}20`,
-    padding: 15,
+    padding: spacing.md,
     borderRadius: radius.lg,
-    marginBottom: 20,
-    gap: 10,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
   errorText: {
     color: colors.status.error,
@@ -315,14 +315,14 @@ const styles = StyleSheet.create({
   formSection: {
     backgroundColor: colors.secondary,
     borderRadius: radius.lg,
-    padding: 20,
-    marginBottom: 20,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
     ...shadows.sm,
   },
   label: {
     color: colors.text.muted,
-    fontSize: 14,
-    marginBottom: 8,
+    fontSize: typography.fontSize.small,
+    marginBottom: spacing.xs,
     fontFamily: 'Inter-Medium',
   },
   inputContainer: {
@@ -330,23 +330,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
-    padding: 15,
-    marginBottom: 20,
-    gap: 10,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
   input: {
     flex: 1,
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontFamily: 'Inter-Regular',
   },
   messageContainer: {
     flexDirection: 'row',
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
-    padding: 15,
-    marginBottom: 20,
-    gap: 10,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
     alignItems: 'flex-start',
   },
   messageInput: {
@@ -357,11 +357,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   toggleLabel: {
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontFamily: 'Inter-Regular',
   },
   testButton: {
@@ -369,9 +369,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.accent,
-    padding: 15,
+    padding: spacing.md,
     borderRadius: radius.lg,
-    gap: 10,
+    gap: spacing.sm,
     ...shadows.sm,
   },
   testButtonActive: {
@@ -379,13 +379,13 @@ const styles = StyleSheet.create({
   },
   testButtonText: {
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   saveButton: {
     backgroundColor: colors.accent,
-    padding: 20,
+    padding: spacing.lg,
     borderRadius: radius.lg,
     alignItems: 'center',
     ...shadows.md,
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: colors.text.primary,
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
   },

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { colors, typography, spacing, shadows, radius } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
@@ -276,13 +277,13 @@ export default function SecurityTestScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pass':
-        return '#34C759';
+        return colors.status.success;
       case 'warning':
-        return '#FF9500';
+        return colors.status.warning;
       case 'fail':
-        return '#FF3B30';
+        return colors.status.error;
       default:
-        return '#8E8E93';
+        return colors.text.secondary;
     }
   };
 
@@ -305,7 +306,7 @@ export default function SecurityTestScreen() {
         <View style={styles.header}>
           <View style={[
             styles.iconContainer,
-            { backgroundColor: overallStatus === 'pass' ? '#E8F5E8' : '#FFF5F5' }
+            { backgroundColor: overallStatus === 'pass' ? colors.status.success + '20' : colors.status.error + '20' }
           ]}>
             <Ionicons
               name={overallStatus === 'pass' ? 'shield-checkmark' : 'shield'}
@@ -349,7 +350,7 @@ export default function SecurityTestScreen() {
               <Ionicons
                 name="refresh"
                 size={20}
-                color="#007AFF"
+                color={colors.primary}
                 style={[
                   styles.refreshIcon,
                   isRunningTests && styles.refreshIconSpinning
@@ -391,42 +392,42 @@ export default function SecurityTestScreen() {
             style={styles.manualTestButton}
             onPress={handleTestBiometric}
           >
-            <Ionicons name="finger-print" size={24} color="#007AFF" />
+            <Ionicons name="finger-print" size={24} color={colors.primary} />
             <View style={styles.manualTestInfo}>
               <Text style={styles.manualTestName}>Test Biometric Authentication</Text>
               <Text style={styles.manualTestDescription}>
                 Verify biometric authentication is working
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+            <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.manualTestButton}
             onPress={handleTestScreenProtection}
           >
-            <Ionicons name="shield" size={24} color="#007AFF" />
+            <Ionicons name="shield" size={24} color={colors.primary} />
             <View style={styles.manualTestInfo}>
               <Text style={styles.manualTestName}>Test Screen Protection</Text>
               <Text style={styles.manualTestDescription}>
                 Check screenshot and recording protection
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+            <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.manualTestButton}
             onPress={handleTestEmergency}
           >
-            <Ionicons name="warning" size={24} color="#FF3B30" />
+            <Ionicons name="warning" size={24} color={colors.status.error} />
             <View style={styles.manualTestInfo}>
               <Text style={styles.manualTestName}>Test Emergency Protocols</Text>
               <Text style={styles.manualTestDescription}>
                 Simulate emergency trigger (safe test)
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+            <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
           </TouchableOpacity>
         </View>
 
@@ -437,7 +438,7 @@ export default function SecurityTestScreen() {
             style={styles.finishButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+            <Ionicons name="checkmark-circle" size={20} color={colors.background} />
             <Text style={styles.finishButtonText}>Finish Security Setup</Text>
           </TouchableOpacity>
           
@@ -464,15 +465,15 @@ export default function SecurityTestScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
   },
   header: {
     alignItems: 'center',
-    padding: 24,
-    paddingTop: 40,
+    padding: spacing.xl,
+    paddingTop: spacing.xl * 1.67, // 40px equivalent
   },
   iconContainer: {
     width: 120,
@@ -480,41 +481,41 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
+    color: colors.text.primary,
+    marginBottom: spacing.sm + 2,
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.md,
   },
   overallStatusSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   statusCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.large,
     borderWidth: 2,
   },
   overallStatusText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    marginLeft: 12,
+    marginLeft: spacing.sm + 2,
   },
   testResultsSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   sectionHeader: {
@@ -524,119 +525,119 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   refreshButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#F0F8FF',
-    borderRadius: 6,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.small,
   },
   refreshIcon: {
-    marginRight: 4,
+    marginRight: spacing.xs / 2,
   },
   refreshIconSpinning: {
     // Add rotation animation if needed
   },
   refreshButtonText: {
-    fontSize: 14,
-    color: '#007AFF',
+    fontSize: typography.fontSize.small,
+    color: colors.primary,
   },
   testResultItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
+    marginBottom: spacing.xs,
   },
   testResultInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: spacing.sm,
   },
   testResultName: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs / 2,
   },
   testResultMessage: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     lineHeight: 20,
   },
   statusBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    marginLeft: 12,
+    paddingVertical: spacing.xs / 2,
+    paddingHorizontal: spacing.xs,
+    borderRadius: radius.small,
+    marginLeft: spacing.sm,
   },
   statusBadgeText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.background,
   },
   manualTestsSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   manualTestButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
+    marginBottom: spacing.xs,
   },
   manualTestInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: spacing.sm,
   },
   manualTestName: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs / 2,
   },
   manualTestDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
   },
   navigationSection: {
-    margin: 24,
+    margin: spacing.xl,
     marginTop: 0,
   },
   finishButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    backgroundColor: '#34C759',
-    borderRadius: 12,
-    marginBottom: 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.status.success,
+    borderRadius: radius.large,
+    marginBottom: spacing.sm,
   },
   finishButtonText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: 8,
+    color: colors.background,
+    marginLeft: spacing.xs,
   },
   setupButton: {
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: '#F0F8FF',
-    borderRadius: 8,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   setupButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
+    fontSize: typography.fontSize.body,
+    color: colors.primary,
   },
 });

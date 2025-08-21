@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { colors, radius, shadows } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   },
   slide: {
     width,
-    padding: 40,
+    padding: spacing.xl * 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -209,18 +209,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: spacing.xl * 2,
     ...shadows.md,
   },
   title: {
-    fontSize: 28,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
     color: colors.text.primary,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.md,
   },
   description: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: spacing.xl * 2,
   },
   paginationDot: {
     width: 10,
@@ -244,22 +244,22 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 40,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.xl * 2,
+    paddingBottom: spacing.xl * 2,
   },
   skipButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   skipButtonText: {
     color: colors.text.secondary,
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '500',
   },
   nextButton: {
     backgroundColor: colors.accent,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
     borderRadius: radius.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -267,14 +267,14 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    marginRight: 8,
+    marginRight: spacing.xs,
   },
   getStartedButton: {
     backgroundColor: colors.accent,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl * 2,
     borderRadius: radius.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   getStartedButtonText: {
     color: colors.text.primary,
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
   },
   disabledButton: {

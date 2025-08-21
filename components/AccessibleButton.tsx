@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
-import { colors } from '../constants/theme';
+import { colors, typography, spacing, radius } from '../constants/theme';
 
 // Button props interface with accessibility support
 interface AccessibleButtonProps {
@@ -124,7 +124,7 @@ export const AccessibleButton = forwardRef<
           <>
             <ActivityIndicator
               size="small"
-              color="#ffffff"
+              color={colors.surface}
               style={styles.loader}
             />
             <Text style={[styles.loadingText, textStyle]}>Loading...</Text>
@@ -154,17 +154,17 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   text: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: colors.surface,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
     textAlign: 'center',
   },
   loadingText: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: colors.surface,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
     textAlign: 'center',
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   loader: {
     marginRight: 8,

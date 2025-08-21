@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { colors } from '../constants/theme';
+import { colors, typography, spacing, radius, shadows } from '../constants/theme';
 import {
   createAccessibilityState,
   generateAccessibilityHint,
@@ -221,36 +221,32 @@ export default function AccessibilityExample() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    padding: spacing.md,
+    backgroundColor: colors.surface,
   },
   title: {
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.md,
     color: colors.text.primary,
   },
   description: {
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
     color: colors.text.secondary,
   },
   section: {
-    marginBottom: 30,
-    padding: 20,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: spacing.xl,
+    padding: spacing.md,
+    backgroundColor: colors.background,
+    borderRadius: radius.medium,
+    ...shadows.small,
   },
   sectionTitle: {
-    marginBottom: 15,
+    marginBottom: spacing.sm,
     color: colors.text.primary,
   },
   button: {
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   secondaryButton: {
     backgroundColor: colors.secondary,
@@ -262,6 +258,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text.muted,
   },
   textExample: {
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
 });

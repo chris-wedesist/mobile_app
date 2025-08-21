@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows, radius } from '../../constants/theme';
+import { colors, shadows, radius, typography, spacing } from '../../constants/theme';
 import { biometricAuthManager, BiometricType } from '../../lib/security/biometricAuth';
 
 interface BiometricPromptProps {
@@ -142,7 +142,7 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
               <Ionicons
                 name={getBiometricIcon() as any}
                 size={60}
-                color={isAuthenticating ? '#007AFF' : '#333'}
+                color={isAuthenticating ? colors.primary : colors.text.primary}
                 style={styles.biometricIcon}
               />
             </TouchableOpacity>
@@ -187,13 +187,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    margin: 20,
+    backgroundColor: colors.background,
+    borderRadius: radius.large,
+    padding: spacing.lg,
+    margin: spacing.md,
     minWidth: 300,
     maxWidth: 400,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -204,54 +204,54 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 20,
+    fontSize: typography.fontSize.heading,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   biometricSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   biometricButton: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
     borderWidth: 2,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   biometricButtonActive: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F0F8FF',
+    borderColor: colors.primary,
+    backgroundColor: colors.background,
   },
   biometricIcon: {
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   instructionText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 8,
-    paddingHorizontal: 16,
+    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.md,
   },
   errorText: {
-    fontSize: 14,
-    color: '#FF3B30',
+    fontSize: typography.fontSize.small,
+    color: colors.error,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: spacing.xs,
   },
   actions: {
     flexDirection: 'row',
@@ -259,25 +259,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fallbackButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: '#F8F9FA',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.small,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   fallbackButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
+    fontSize: typography.fontSize.body,
+    color: colors.primary,
     fontWeight: '500',
   },
   cancelButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   cancelButtonText: {
-    fontSize: 16,
-    color: '#FF3B30',
+    fontSize: typography.fontSize.body,
+    color: colors.error,
     fontWeight: '500',
   },
 });

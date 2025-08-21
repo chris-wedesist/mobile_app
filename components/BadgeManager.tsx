@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
+import { colors } from '../constants/theme';
 import BadgeUnlockModal from './BadgeUnlockModal';
 
 const supabase = createClient(
@@ -31,7 +32,7 @@ const BADGES: Badge[] = [
     name: 'Founding Protector',
     description:
       'One of the first to join DESIST! and complete safety training',
-    icon: <MaterialIcons name="shield" size={32} color="#EA5455" />,
+    icon: <MaterialIcons name="shield" size={32} color={colors.status.error} />,
     requirements: {
       type: 'onboarding',
       value: 1,
@@ -41,7 +42,7 @@ const BADGES: Badge[] = [
     id: 'shield_builder',
     name: 'Shield Builder',
     description: 'Growing the community by helping others stay safe',
-    icon: <MaterialIcons name="group" size={32} color="#EA5455" />,
+    icon: <MaterialIcons name="group" size={32} color={colors.status.error} />,
     requirements: {
       type: 'invites',
       value: 3,
@@ -51,7 +52,7 @@ const BADGES: Badge[] = [
     id: 'emergency_sentinel',
     name: 'Emergency Sentinel',
     description: 'Actively contributing to community safety awareness',
-    icon: <MaterialIcons name="notifications" size={32} color="#EA5455" />,
+    icon: <MaterialIcons name="notifications" size={32} color={colors.status.error} />,
     requirements: {
       type: 'verified_incidents',
       value: 5,

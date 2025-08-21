@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, shadows, radius } from '../constants/theme';
+import { colors, shadows, radius, typography, spacing } from '../constants/theme';
 import { stealthManager } from '../lib/stealth';
 import { biometricAuthManager } from '../lib/security/biometricAuth';
 import { screenProtectionManager } from '../lib/security/screenProtection';
@@ -183,11 +183,11 @@ const HomeScreen: React.FC = () => {
   const getModeColor = () => {
     switch (appStatus.mode) {
       case 'stealth':
-        return '#34C759';
+        return colors.mode.stealth;
       case 'emergency':
-        return '#FF3B30';
+        return colors.mode.emergency;
       default:
-        return '#007AFF';
+        return colors.mode.normal;
     }
   };
 
@@ -205,20 +205,20 @@ const HomeScreen: React.FC = () => {
   const getSecurityColor = () => {
     switch (appStatus.securityLevel) {
       case 'high':
-        return '#34C759';
+        return colors.success;
       case 'medium':
-        return '#FF9500';
+        return colors.warning;
       case 'low':
-        return '#FF3B30';
+        return colors.error;
       default:
-        return '#8E8E93';
+        return colors.text.secondary;
     }
   };
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="shield" size={80} color="#007AFF" />
+        <Ionicons name="shield" size={80} color={colors.primary} />
         <Text style={styles.loadingTitle}>DESIST</Text>
         <Text style={styles.loadingSubtitle}>Initializing Security...</Text>
       </View>
@@ -230,25 +230,25 @@ const HomeScreen: React.FC = () => {
       <View style={styles.container}>
         <StatusBar 
           barStyle={appStatus.mode === 'stealth' ? 'light-content' : 'dark-content'}
-          backgroundColor={appStatus.mode === 'stealth' ? '#1C1C1E' : '#FFFFFF'}
+          backgroundColor={appStatus.mode === 'stealth' ? colors.text.primary : colors.background}
         />
         
         {/* Header */}
         <View style={[
           styles.header,
-          { backgroundColor: appStatus.mode === 'stealth' ? '#1C1C1E' : '#FFFFFF' }
+          { backgroundColor: appStatus.mode === 'stealth' ? colors.text.primary : colors.background }
         ]}>
           <View style={styles.headerContent}>
             <View>
               <Text style={[
                 styles.appTitle,
-                { color: appStatus.mode === 'stealth' ? '#FFFFFF' : '#333' }
+                { color: appStatus.mode === 'stealth' ? colors.background : colors.text.primary }
               ]}>
                 DESIST
               </Text>
               <Text style={[
                 styles.appSubtitle,
-                { color: appStatus.mode === 'stealth' ? '#A1A1A6' : '#666' }
+                { color: appStatus.mode === 'stealth' ? colors.text.muted : colors.text.secondary }
               ]}>
                 Digital Security & Privacy
               </Text>
@@ -261,7 +261,7 @@ const HomeScreen: React.FC = () => {
               <Ionicons 
                 name="refresh" 
                 size={24} 
-                color={appStatus.mode === 'stealth' ? '#FFFFFF' : '#007AFF'} 
+                color={appStatus.mode === 'stealth' ? colors.background : colors.primary} 
               />
             </TouchableOpacity>
           </View>
@@ -317,9 +317,9 @@ const HomeScreen: React.FC = () => {
             style={[styles.actionButton, styles.primaryAction]}
             onPress={() => router.push('/security-dashboard' as any)}
           >
-            <Ionicons name="shield-checkmark" size={24} color="#FFFFFF" />
+            <Ionicons name="shield-checkmark" size={24} color={colors.background} />
             <Text style={styles.actionText}>Security Dashboard</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <Ionicons name="chevron-forward" size={20} color={colors.background} />
           </TouchableOpacity>
 
           <View style={styles.actionRow}>
@@ -327,8 +327,8 @@ const HomeScreen: React.FC = () => {
               style={[styles.actionButton, styles.secondaryAction]}
               onPress={handleModeSwitch}
             >
-              <Ionicons name="swap-horizontal" size={20} color="#007AFF" />
-              <Text style={[styles.actionText, { color: '#007AFF' }]}>
+              <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
+              <Text style={[styles.actionText, { color: colors.primary }]}>
                 Switch Mode
               </Text>
             </TouchableOpacity>
@@ -337,8 +337,8 @@ const HomeScreen: React.FC = () => {
               style={[styles.actionButton, styles.secondaryAction]}
               onPress={handleQuickAuth}
             >
-              <Ionicons name="finger-print" size={20} color="#007AFF" />
-              <Text style={[styles.actionText, { color: '#007AFF' }]}>
+              <Ionicons name="finger-print" size={20} color={colors.primary} />
+              <Text style={[styles.actionText, { color: colors.primary }]}>
                 Quick Auth
               </Text>
             </TouchableOpacity>
@@ -348,11 +348,11 @@ const HomeScreen: React.FC = () => {
             style={[styles.actionButton, styles.emergencyAction]}
             onPress={handleEmergency}
           >
-            <Ionicons name="warning" size={20} color="#FFFFFF" />
-            <Text style={[styles.actionText, { color: '#FFFFFF' }]}>
+            <Ionicons name="warning" size={20} color={colors.background} />
+            <Text style={[styles.actionText, { color: colors.background }]}>
               Emergency
             </Text>
-            <Ionicons name="alert-circle" size={16} color="#FFFFFF" />
+            <Ionicons name="alert-circle" size={16} color={colors.background} />
           </TouchableOpacity>
         </View>
 
@@ -365,7 +365,7 @@ const HomeScreen: React.FC = () => {
               style={styles.setupCard}
               onPress={() => router.push('/biometric-setup' as any)}
             >
-              <Ionicons name="finger-print" size={32} color="#007AFF" />
+              <Ionicons name="finger-print" size={32} color={colors.primary} />
               <Text style={styles.setupTitle}>Biometric</Text>
               <Text style={styles.setupSubtitle}>Face ID / Touch ID</Text>
             </TouchableOpacity>
@@ -374,7 +374,7 @@ const HomeScreen: React.FC = () => {
               style={styles.setupCard}
               onPress={() => router.push('/emergency-setup' as any)}
             >
-              <Ionicons name="people" size={32} color="#FF9500" />
+              <Ionicons name="people" size={32} color={colors.warning} />
               <Text style={styles.setupTitle}>Emergency</Text>
               <Text style={styles.setupSubtitle}>Contact Setup</Text>
             </TouchableOpacity>
@@ -383,7 +383,7 @@ const HomeScreen: React.FC = () => {
               style={styles.setupCard}
               onPress={() => router.push('/security-test' as any)}
             >
-              <Ionicons name="checkmark-circle" size={32} color="#34C759" />
+              <Ionicons name="checkmark-circle" size={32} color={colors.success} />
               <Text style={styles.setupTitle}>Test</Text>
               <Text style={styles.setupSubtitle}>Security Check</Text>
             </TouchableOpacity>
@@ -392,7 +392,7 @@ const HomeScreen: React.FC = () => {
               style={styles.setupCard}
               onPress={() => router.push('/security-dashboard' as any)}
             >
-              <Ionicons name="analytics" size={32} color="#8E4EC6" />
+              <Ionicons name="analytics" size={32} color={colors.secondary} />
               <Text style={styles.setupTitle}>Monitor</Text>
               <Text style={styles.setupSubtitle}>Live Status</Text>
             </TouchableOpacity>
@@ -415,23 +415,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   loadingTitle: {
-    fontSize: 32,
+    fontSize: typography.fontSize.display,
     fontWeight: '800',
-    fontFamily: 'Inter-Bold',
+    fontFamily: typography.fontFamily.bold,
     color: colors.text.primary,
-    marginTop: 16,
+    marginTop: spacing.md,
     letterSpacing: 2,
   },
   loadingSubtitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily.regular,
     color: colors.text.secondary,
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   header: {
     paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   headerContent: {
     flexDirection: 'row',
@@ -439,22 +439,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appTitle: {
-    fontSize: 32,
+    fontSize: typography.fontSize.display,
     fontWeight: '800',
-    fontFamily: 'Inter-Bold',
+    fontFamily: typography.fontFamily.bold,
     letterSpacing: 2,
   },
   appSubtitle: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    marginTop: 4,
+    fontSize: typography.fontSize.small,
+    fontFamily: typography.fontFamily.regular,
+    marginTop: spacing.xs,
   },
   refreshButton: {
-    padding: 8,
+    padding: spacing.sm,
   },
   statusCard: {
-    margin: 20,
-    padding: 20,
+    margin: spacing.lg,
+    padding: spacing.lg,
     backgroundColor: colors.background,
     borderRadius: radius.large,
     ...shadows.medium,
@@ -463,43 +463,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   modeIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   modeText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    fontFamily: 'Inter-Medium',
+    fontFamily: typography.fontFamily.medium,
     color: colors.text.primary,
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   securityLevel: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   securityDot: {
-    width: 8,
-    height: 8,
+    width: spacing.sm,
+    height: spacing.sm,
     borderRadius: radius.round,
-    marginRight: 6,
+    marginRight: spacing.sm,
   },
   securityText: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
+    fontSize: typography.fontSize.caption,
+    fontFamily: typography.fontFamily.medium,
     color: colors.text.secondary,
     fontWeight: '500',
   },
   featuresStatus: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   featuresText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
+    fontSize: typography.fontSize.small,
+    fontFamily: typography.fontFamily.regular,
     color: colors.text.secondary,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   progressBar: {
     height: 6,
@@ -512,26 +512,26 @@ const styles = StyleSheet.create({
     borderRadius: radius.small,
   },
   quickActions: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
   },
   setupSection: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.lg,
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: typography.fontSize.heading,
     fontWeight: '600',
-    fontFamily: 'Inter-Medium',
+    fontFamily: typography.fontFamily.medium,
     color: colors.text.primary,
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radius.medium,
-    padding: 16,
-    marginBottom: 12,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
   primaryAction: {
     backgroundColor: colors.primary,
@@ -542,22 +542,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     flex: 1,
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   emergencyAction: {
     backgroundColor: colors.error,
   },
   actionRow: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   actionText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    fontFamily: 'Inter-Medium',
+    fontFamily: typography.fontFamily.medium,
     color: colors.background,
     flex: 1,
-    marginLeft: 12,
+    marginLeft: spacing.md,
   },
   setupGrid: {
     flexDirection: 'row',
@@ -568,22 +568,22 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: colors.background,
     borderRadius: radius.medium,
-    padding: 20,
+    padding: spacing.lg,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
     ...shadows.small,
   },
   setupTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    fontFamily: 'Inter-Medium',
+    fontFamily: typography.fontFamily.medium,
     color: colors.text.primary,
-    marginTop: 12,
-    marginBottom: 4,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   setupSubtitle: {
-    fontSize: 12,
-    fontFamily: 'Inter-Regular',
+    fontSize: typography.fontSize.caption,
+    fontFamily: typography.fontFamily.regular,
     color: colors.text.secondary,
     textAlign: 'center',
   },

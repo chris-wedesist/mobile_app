@@ -7,6 +7,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
 import { ScreenProtector } from '../security/ScreenProtector';
 
 interface PrivacyGuardProps {
@@ -69,31 +70,27 @@ function PrivacyOverlay() {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   iconContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.md,
   },
   calculatorIcon: {
     width: 80,
     height: 100,
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: colors.primary,
+    borderRadius: radius.medium,
+    padding: spacing.xs,
+    ...shadows.medium,
   },
   calculatorScreen: {
     width: '100%',
     height: 20,
-    backgroundColor: '#000',
-    borderRadius: 2,
-    marginBottom: 8,
+    backgroundColor: colors.text.primary,
+    borderRadius: radius.small,
+    marginBottom: spacing.xs,
   },
   calculatorButtons: {
     flex: 1,
@@ -105,13 +102,13 @@ const styles = StyleSheet.create({
   calculatorButton: {
     width: '22%',
     height: '22%',
-    backgroundColor: '#ffffff',
-    borderRadius: 2,
+    backgroundColor: colors.background,
+    borderRadius: radius.small,
   },
   appName: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '500',
-    color: '#000',
+    color: colors.text.primary,
   },
 });
 
