@@ -1,6 +1,7 @@
 # Stealth Mode Implementation Guide
 
 ## Overview
+
 This document provides detailed technical specifications for implementing stealth mode functionality in the DESIST mobile app.
 
 ## Architecture Overview
@@ -118,14 +119,18 @@ export default function StealthLayout() {
         name="index"
         options={{
           title: 'Calculator',
-          tabBarIcon: ({ color }) => <Ionicons name="calculator" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="calculator" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="notes"
         options={{
           title: 'Notes',
-          tabBarIcon: ({ color }) => <Ionicons name="document-text" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="document-text" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -143,6 +148,7 @@ export default function StealthLayout() {
 ### 4. Stealth Components
 
 #### Calculator Disguise (`app/(stealth)/index.tsx`)
+
 ```typescript
 export default function CalculatorScreen() {
   const [display, setDisplay] = useState('0');
@@ -151,15 +157,16 @@ export default function CalculatorScreen() {
 
   const handleHiddenToggle = async () => {
     const now = Date.now();
-    
+
     if (now - lastTapTime > 3000) {
       setTapCount(0);
     }
-    
-    setTapCount(prev => prev + 1);
+
+    setTapCount((prev) => prev + 1);
     setLastTapTime(now);
-    
-    if (tapCount === 6) { // 7 taps total
+
+    if (tapCount === 6) {
+      // 7 taps total
       // Show hidden input for PIN or immediate toggle
       await handleModeSwitch();
     }
@@ -177,6 +184,7 @@ export default function CalculatorScreen() {
 ```
 
 #### Hidden Settings (`app/(stealth)/settings.tsx`)
+
 ```typescript
 export default function StealthSettings() {
   const [showHidden, setShowHidden] = useState(false);
@@ -193,7 +201,7 @@ export default function StealthSettings() {
         <Text style={styles.sectionTitle}>General</Text>
         {/* Normal settings items */}
       </View>
-      
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
         <TouchableOpacity onPress={handleVersionTap}>
@@ -201,9 +209,7 @@ export default function StealthSettings() {
         </TouchableOpacity>
       </View>
 
-      {showHidden && (
-        <HiddenSettingsPanel onModeSwitch={handleModeSwitch} />
-      )}
+      {showHidden && <HiddenSettingsPanel onModeSwitch={handleModeSwitch} />}
     </ScrollView>
   );
 }
@@ -212,6 +218,7 @@ export default function StealthSettings() {
 ### 5. Security Components
 
 #### Privacy Guard (`components/stealth/PrivacyGuard.tsx`)
+
 ```typescript
 export function PrivacyGuard({ children }: { children: React.ReactNode }) {
   const [isBackground, setIsBackground] = useState(false);
@@ -242,6 +249,7 @@ function PrivacyOverlay() {
 ```
 
 #### Screenshot Prevention (`utils/privacy.ts`)
+
 ```typescript
 import { Alert } from 'react-native';
 
@@ -264,18 +272,21 @@ export class PrivacyManager {
 ## Implementation Steps
 
 ### Phase 1: Basic Infrastructure (Week 1)
+
 1. Create stealth mode manager
 2. Implement mode persistence
 3. Set up basic navigation structure
 4. Create calculator disguise screen
 
 ### Phase 2: Security Layer (Week 2)
+
 1. Implement hidden toggle mechanism
 2. Add privacy guards
 3. Create emergency reset
 4. Add screenshot prevention
 
 ### Phase 3: Polish & Testing (Week 3)
+
 1. Refine disguise interfaces
 2. Test mode switching extensively
 3. Security audit
@@ -284,6 +295,7 @@ export class PrivacyManager {
 ## Testing Checklist
 
 ### Functional Testing
+
 - [ ] Mode switches correctly between stealth/normal
 - [ ] Hidden toggle mechanism works reliably
 - [ ] Data isolation between modes
@@ -291,6 +303,7 @@ export class PrivacyManager {
 - [ ] Emergency reset functions properly
 
 ### Security Testing
+
 - [ ] No visual indicators of hidden functionality
 - [ ] Screenshots blocked in normal mode
 - [ ] App content hidden when backgrounded
@@ -298,6 +311,7 @@ export class PrivacyManager {
 - [ ] Toggle mechanism not accidentally triggered
 
 ### User Experience Testing
+
 - [ ] Stealth mode looks authentic
 - [ ] Mode transitions are smooth
 - [ ] No performance impact
@@ -307,6 +321,7 @@ export class PrivacyManager {
 ## Configuration Files
 
 ### Update `app.json`
+
 ```json
 {
   "expo": {
@@ -320,6 +335,7 @@ export class PrivacyManager {
 ```
 
 ### Required Dependencies
+
 ```json
 {
   "expo-local-authentication": "^14.0.1",
@@ -346,4 +362,4 @@ export class PrivacyManager {
 
 ---
 
-*This implementation guide should be followed precisely to ensure user safety and app security.*
+_This implementation guide should be followed precisely to ensure user safety and app security._

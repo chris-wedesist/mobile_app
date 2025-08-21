@@ -10,7 +10,7 @@ export const DevPerformance = {
       console.log(`[DevPerf] Started: ${label}`);
     }
   },
-  
+
   endMeasure: (label) => {
     if (__DEV__ && timings[label]) {
       const end = Date.now();
@@ -19,12 +19,12 @@ export const DevPerformance = {
       console.log(`[DevPerf] ${label}: ${timings[label].duration}ms`);
     }
   },
-  
+
   logAppStartup: () => {
     if (__DEV__) {
       const loadTime = Date.now() - startTime;
       console.log(`[DevPerf] App Startup: ${loadTime}ms`);
-      
+
       // Log after interactions are complete
       InteractionManager.runAfterInteractions(() => {
         const totalTime = Date.now() - startTime;
@@ -32,15 +32,15 @@ export const DevPerformance = {
       });
     }
   },
-  
+
   resetStartTime: () => {
     startTime = Date.now();
   },
-  
+
   getReport: () => {
     return Object.entries(timings).map(([key, value]) => ({
       label: key,
       duration: value.duration || 'incomplete',
     }));
-  }
+  },
 };

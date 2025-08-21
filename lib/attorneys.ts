@@ -2,21 +2,21 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 
 // Google Places API available types that can be used for filtering
-export type GooglePlaceType = 
-  | 'lawyer' 
+export type GooglePlaceType =
+  | 'lawyer'
   | 'legal_services'
   | 'establishment'
   | 'point_of_interest';
 
 // Filter categories based on what we can reasonably infer from Google Places data
-export type AttorneyTag = 
-  | 'highly_rated'        // rating >= 4.0
-  | 'well_reviewed'       // userRatingsTotal >= 10
-  | 'established'         // businessStatus === 'OPERATIONAL'
-  | 'verified'           // has photo and complete address
-  | 'nearby'             // within close distance
-  | 'accessible'         // complete address information
-  | 'responsive';        // recently updated or active
+export type AttorneyTag =
+  | 'highly_rated' // rating >= 4.0
+  | 'well_reviewed' // userRatingsTotal >= 10
+  | 'established' // businessStatus === 'OPERATIONAL'
+  | 'verified' // has photo and complete address
+  | 'nearby' // within close distance
+  | 'accessible' // complete address information
+  | 'responsive'; // recently updated or active
 
 export interface Attorney {
   id: string;
@@ -34,7 +34,7 @@ export interface Attorney {
   placeId: string;
   // Google Places API derived data
   types?: string[];
-  priceLevel?: number;        // 0-4 scale from Google Places
+  priceLevel?: number; // 0-4 scale from Google Places
   openingHours?: {
     openNow?: boolean;
     periods?: any[];
@@ -119,10 +119,12 @@ const mapGooglePlaceToAttorney = (place: any): Attorney => {
     businessStatus: place.business_status || 'UNKNOWN',
     types: place.types || [],
     priceLevel: place.price_level,
-    openingHours: place.opening_hours ? {
-      openNow: place.opening_hours.open_now,
-      periods: place.opening_hours.periods
-    } : undefined,
+    openingHours: place.opening_hours
+      ? {
+          openNow: place.opening_hours.open_now,
+          periods: place.opening_hours.periods,
+        }
+      : undefined,
   };
 
   // Generate tags based on available Google Places data
@@ -151,13 +153,21 @@ const generateAttorneyTags = (attorney: Attorney): AttorneyTag[] => {
   }
 
   // Verified: has photo and complete address
-  if (attorney.photoReference && attorney.location.address && 
-      attorney.location.latitude && attorney.location.longitude) {
+  if (
+    attorney.photoReference &&
+    attorney.location.address &&
+    attorney.location.latitude &&
+    attorney.location.longitude
+  ) {
     tags.push('verified');
   }
 
   // Accessible: has complete location data
-  if (attorney.location.address && attorney.location.latitude && attorney.location.longitude) {
+  if (
+    attorney.location.address &&
+    attorney.location.latitude &&
+    attorney.location.longitude
+  ) {
     tags.push('accessible');
   }
 

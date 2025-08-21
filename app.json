@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#1B2D45"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "extra": {
       "EXPO_PUBLIC_GOOGLE_PLACES_API_KEY": "AIzaSyAfi0WKfQ7L9UM9VNNqlOnj9jpU7sL1iX4",
       "router": {},
@@ -53,9 +51,7 @@
       "typedRoutes": true,
       "tsconfigPaths": true
     },
-    "plugins": [
-      "expo-router"
-    ],
+    "plugins": ["expo-router"],
     "updates": {
       "enabled": true,
       "fallbackToCacheTimeout": 0,

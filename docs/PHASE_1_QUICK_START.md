@@ -16,17 +16,20 @@ Build the core stealth mode functionality that allows the app to appear as a cal
 ## 📋 DELIVERABLES CHECKLIST
 
 ### **Core Architecture**
+
 - [ ] Mode management system (`lib/stealth.ts`)
-- [ ] Root layout with mode detection (`app/_layout.tsx`)  
+- [ ] Root layout with mode detection (`app/_layout.tsx`)
 - [ ] Stealth navigation layout (`app/(stealth)/_layout.tsx`)
 - [ ] Normal tabs layout (`app/(tabs)/_layout.tsx`)
 
 ### **Stealth Interfaces**
+
 - [ ] Calculator disguise (`app/(stealth)/index.tsx`)
 - [ ] Notes app disguise (`app/(stealth)/notes.tsx`)
 - [ ] Fake settings with hidden toggle (`app/(stealth)/settings.tsx`)
 
 ### **Integration**
+
 - [ ] Mode switching logic with gestures/PIN
 - [ ] Data persistence (AsyncStorage)
 - [ ] Integration with existing attorney search
@@ -37,21 +40,25 @@ Build the core stealth mode functionality that allows the app to appear as a cal
 ## 🏗️ IMPLEMENTATION ORDER
 
 ### **Day 1-2: Foundation**
+
 1. Create mode management system
 2. Set up root layout with mode detection
 3. Create basic stealth navigation structure
 
-### **Day 3-4: Interfaces** 
+### **Day 3-4: Interfaces**
+
 1. Build functional calculator disguise
 2. Create notes app interface
 3. Implement fake settings screen
 
 ### **Day 5-6: Integration**
+
 1. Add hidden toggle mechanism
 2. Implement mode switching logic
 3. Add data persistence
 
 ### **Day 7: Testing & Polish**
+
 1. Test mode switching functionality
 2. Ensure smooth transitions
 3. Validate integration with attorney search
@@ -92,18 +99,21 @@ app/
 ## 🎨 DESIGN REQUIREMENTS
 
 ### **Calculator Interface:**
+
 - Professional calculator appearance
 - Functional arithmetic operations
 - History display
 - Convincing icon and styling
 
 ### **Notes Interface:**
+
 - Simple note-taking functionality
 - List of notes
 - Add/edit/delete capabilities
 - Search functionality
 
 ### **Settings Interface:**
+
 - Standard app settings appearance
 - Version info (tap 7 times for toggle)
 - Fake preference options

@@ -12,6 +12,7 @@ import { colors } from '../constants/theme';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import { errorHandler } from '../utils/errorHandler';
 import { StateManager } from '../utils/stateManager';
+import { stealthManager, AppMode } from '../lib/stealth';
 
 // Import polyfills for Expo Go compatibility
 import './polyfills';
@@ -109,18 +110,28 @@ export default function RootLayout() {
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const [appMode, setAppMode] = useState<AppMode>('stealth');
   const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    console.log('RootLayout mounted, checking first launch...');
+    console.log('RootLayout mounted, checking app mode and first launch...');
 
-    // Initialize state management
+    // Initialize state management and stealth mode
     const initializeApp = async () => {
       try {
+        // Initialize stealth manager first
+        await stealthManager.initialize();
+        const currentMode = await stealthManager.getCurrentMode();
+        setAppMode(currentMode);
+        console.log('Current app mode:', currentMode);
+
+        // Initialize state management
         await StateManager.initialize();
         console.log('State management initialized successfully');
       } catch (error) {
-        console.error('Failed to initialize state management:', error);
+        console.error('Failed to initialize app:', error);
+        // Fallback to stealth mode for safety
+        setAppMode('stealth');
       }
 
       // Continue with existing initialization
@@ -149,8 +160,14 @@ export default function RootLayout() {
         console.log('Setting initial route to onboarding');
         setInitialRoute('/onboarding');
       } else {
-        console.log('Setting initial route to tabs');
-        setInitialRoute('/(tabs)');
+        // Route based on current mode
+        if (appMode === 'stealth') {
+          console.log('Setting initial route to stealth mode');
+          setInitialRoute('/(stealth)');
+        } else {
+          console.log('Setting initial route to normal tabs');
+          setInitialRoute('/(tabs)');
+        }
       }
 
       // Short timeout to ensure state updates properly
@@ -160,7 +177,8 @@ export default function RootLayout() {
       }, 500) as any;
     } catch (error) {
       console.error('Error checking first launch status:', error);
-      setInitialRoute('/(tabs)'); // Default to tabs on error
+      // Default to stealth mode for safety
+      setInitialRoute('/(stealth)');
       setIsReady(true);
     }
   };
@@ -187,17 +205,23 @@ export default function RootLayout() {
     return <CustomSplashScreen />;
   }
 
-  console.log('Rendering main layout');
+  console.log('Rendering main layout with mode:', appMode);
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: colors.primary },
+            contentStyle: { backgroundColor: appMode === 'stealth' ? '#f8f9fa' : colors.primary },
           }}
         >
+          {/* Stealth mode screens */}
+          <Stack.Screen name="(stealth)" options={{ headerShown: false }} />
+          
+          {/* Normal mode screens */}
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          
+          {/* Modal screens available in both modes */}
           <Stack.Screen
             name="emergency-setup"
             options={{ presentation: 'modal' }}
@@ -230,9 +254,10 @@ export default function RootLayout() {
           />
           <Stack.Screen name="+not-found" />
         </Stack>
-        <StatusBar style="light" />
+        <StatusBar style={appMode === 'stealth' ? 'dark' : 'light'} />
 
-        {initialRoute !== '/onboarding' && <EmergencyCallButton />}
+        {/* Emergency call button only in normal mode */}
+        {initialRoute !== '/onboarding' && appMode === 'normal' && <EmergencyCallButton />}
       </GestureHandlerRootView>
     </ErrorBoundary>
   );
