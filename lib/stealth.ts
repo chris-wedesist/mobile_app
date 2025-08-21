@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { biometricAuthManager } from './security/biometricAuth';
+import { screenProtectionManager } from './security/screenProtection';
+import { threatDetectionEngine } from './security/threatDetection';
 
 export type AppMode = 'stealth' | 'normal';
 
@@ -10,6 +13,9 @@ export interface StealthConfig {
   securityEnabled: boolean;
   preferredCoverStory: string;
   emergencyResetEnabled: boolean;
+  biometricRequired: boolean;
+  screenProtectionEnabled: boolean;
+  threatDetectionEnabled: boolean;
 }
 
 const STORAGE_KEY = 'desist_stealth_config';
@@ -21,6 +27,9 @@ const DEFAULT_CONFIG: StealthConfig = {
   securityEnabled: true,
   preferredCoverStory: 'calculator',
   emergencyResetEnabled: true,
+  biometricRequired: false,
+  screenProtectionEnabled: true,
+  threatDetectionEnabled: true,
 };
 
 export class StealthManager {
@@ -50,6 +59,10 @@ export class StealthManager {
         // First launch - save default config
         await this.saveConfig();
       }
+
+      // Initialize security systems
+      await this.initializeSecurity();
+
       this.initialized = true;
       console.log(
         'StealthManager initialized with mode:',
@@ -60,6 +73,31 @@ export class StealthManager {
       // Fallback to safe defaults
       this.config = DEFAULT_CONFIG;
       this.initialized = true;
+    }
+  }
+
+  private async initializeSecurity(): Promise<void> {
+    try {
+      if (this.config.securityEnabled) {
+        // Initialize biometric authentication
+        await biometricAuthManager.initialize();
+
+        // Initialize screen protection
+        await screenProtectionManager.initialize();
+        if (this.config.screenProtectionEnabled && this.config.currentMode === 'normal') {
+          await screenProtectionManager.enableScreenProtection();
+        }
+
+        // Initialize threat detection
+        if (this.config.threatDetectionEnabled) {
+          await threatDetectionEngine.initialize();
+          await threatDetectionEngine.startMonitoring();
+        }
+
+        console.log('Security systems initialized');
+      }
+    } catch (error) {
+      console.error('Failed to initialize security systems:', error);
     }
   }
 
@@ -87,9 +125,34 @@ export class StealthManager {
         return false;
       }
 
+      // Biometric authentication check if required
+      if (this.config.biometricRequired && this.config.securityEnabled) {
+        const authRequired = await biometricAuthManager.isAuthenticationRequired();
+        if (authRequired) {
+          const authResult = await biometricAuthManager.authenticateWithBiometric(
+            'Authenticate to switch app mode'
+          );
+          if (!authResult.success) {
+            console.warn('Biometric authentication failed for mode toggle');
+            return false;
+          }
+        }
+      }
+
       // Toggle the mode
       const newMode: AppMode =
         this.config.currentMode === 'stealth' ? 'normal' : 'stealth';
+
+      // Log usage pattern for threat detection
+      if (this.config.threatDetectionEnabled) {
+        await threatDetectionEngine.logUsagePattern('mode_toggle', undefined, {
+          fromMode: this.config.currentMode,
+          toMode: newMode,
+        });
+      }
+
+      // Update screen protection based on new mode
+      await this.updateSecurityForMode(newMode);
 
       this.config = {
         ...this.config,
@@ -106,6 +169,22 @@ export class StealthManager {
     } catch (error) {
       console.error('Failed to toggle mode:', error);
       return false;
+    }
+  }
+
+  private async updateSecurityForMode(mode: AppMode): Promise<void> {
+    try {
+      if (!this.config.securityEnabled) return;
+
+      if (mode === 'normal' && this.config.screenProtectionEnabled) {
+        // Enable screen protection for normal mode
+        await screenProtectionManager.enableScreenProtection();
+      } else if (mode === 'stealth') {
+        // Disable screen protection for stealth mode (to appear normal)
+        await screenProtectionManager.disableScreenProtection();
+      }
+    } catch (error) {
+      console.error('Failed to update security for mode:', error);
     }
   }
 
@@ -233,6 +312,112 @@ export class StealthManager {
       toggleCount: this.config.toggleCount,
       lastToggleTime: this.config.lastToggleTime,
       isFirstLaunch: this.config.isFirstLaunch,
+    };
+  }
+
+  // Security configuration methods
+  async enableBiometricAuth(): Promise<boolean> {
+    try {
+      const success = await biometricAuthManager.enableBiometricAuth();
+      if (success) {
+        this.config.biometricRequired = true;
+        await this.saveConfig();
+      }
+      return success;
+    } catch (error) {
+      console.error('Failed to enable biometric auth:', error);
+      return false;
+    }
+  }
+
+  async disableBiometricAuth(): Promise<void> {
+    try {
+      await biometricAuthManager.disableBiometricAuth();
+      this.config.biometricRequired = false;
+      await this.saveConfig();
+    } catch (error) {
+      console.error('Failed to disable biometric auth:', error);
+    }
+  }
+
+  async enableScreenProtection(): Promise<boolean> {
+    try {
+      const success = await screenProtectionManager.enableScreenProtection();
+      if (success) {
+        this.config.screenProtectionEnabled = true;
+        await this.saveConfig();
+      }
+      return success;
+    } catch (error) {
+      console.error('Failed to enable screen protection:', error);
+      return false;
+    }
+  }
+
+  async disableScreenProtection(): Promise<boolean> {
+    try {
+      const success = await screenProtectionManager.disableScreenProtection();
+      if (success) {
+        this.config.screenProtectionEnabled = false;
+        await this.saveConfig();
+      }
+      return success;
+    } catch (error) {
+      console.error('Failed to disable screen protection:', error);
+      return false;
+    }
+  }
+
+  async enableThreatDetection(): Promise<void> {
+    try {
+      await threatDetectionEngine.startMonitoring();
+      this.config.threatDetectionEnabled = true;
+      await this.saveConfig();
+    } catch (error) {
+      console.error('Failed to enable threat detection:', error);
+    }
+  }
+
+  async disableThreatDetection(): Promise<void> {
+    try {
+      await threatDetectionEngine.stopMonitoring();
+      this.config.threatDetectionEnabled = false;
+      await this.saveConfig();
+    } catch (error) {
+      console.error('Failed to disable threat detection:', error);
+    }
+  }
+
+  // Get comprehensive security status
+  async getSecurityStatus(): Promise<{
+    biometricEnabled: boolean;
+    screenProtectionEnabled: boolean;
+    threatDetectionEnabled: boolean;
+    securityLevel: 'low' | 'medium' | 'high';
+  }> {
+    const biometricEnabled = biometricAuthManager.isEnabled();
+    const screenStatus = screenProtectionManager.getProtectionStatus();
+    const threatStatus = threatDetectionEngine.getSecurityStatus();
+
+    // Calculate security level
+    let securityLevel: 'low' | 'medium' | 'high' = 'low';
+    const securityFeatures = [
+      biometricEnabled,
+      screenStatus.isActive,
+      threatStatus.monitoring,
+    ].filter(Boolean).length;
+
+    if (securityFeatures >= 3) {
+      securityLevel = 'high';
+    } else if (securityFeatures >= 2) {
+      securityLevel = 'medium';
+    }
+
+    return {
+      biometricEnabled,
+      screenProtectionEnabled: screenStatus.isActive,
+      threatDetectionEnabled: threatStatus.monitoring,
+      securityLevel,
     };
   }
 }

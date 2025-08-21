@@ -7,6 +7,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import { ScreenProtector } from '../security/ScreenProtector';
 
 interface PrivacyGuardProps {
   children: React.ReactNode;
@@ -34,11 +35,16 @@ export function PrivacyGuard({
     return () => subscription?.remove();
   }, []);
 
-  if (isBackground && isStealthMode) {
-    return <PrivacyOverlay />;
-  }
-
-  return <>{children}</>;
+  // Wrap with ScreenProtector for enhanced security
+  return (
+    <ScreenProtector
+      showPrivacyScreen={isStealthMode}
+      privacyMessage="Calculator"
+      privacyIcon="calculator"
+    >
+      {isBackground && isStealthMode ? <PrivacyOverlay /> : children}
+    </ScreenProtector>
+  );
 }
 
 function PrivacyOverlay() {
