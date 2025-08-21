@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { colors, shadows, radius } from '../constants/theme';
 import { stealthManager } from '../lib/stealth';
 import { biometricAuthManager } from '../lib/security/biometricAuth';
 import { screenProtectionManager } from '../lib/security/screenProtection';
@@ -405,24 +406,26 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   loadingTitle: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#333',
+    fontFamily: 'Inter-Bold',
+    color: colors.text.primary,
     marginTop: 16,
     letterSpacing: 2,
   },
   loadingSubtitle: {
     fontSize: 16,
-    color: '#666',
+    fontFamily: 'Inter-Regular',
+    color: colors.text.secondary,
     marginTop: 8,
   },
   header: {
@@ -438,10 +441,12 @@ const styles = StyleSheet.create({
   appTitle: {
     fontSize: 32,
     fontWeight: '800',
+    fontFamily: 'Inter-Bold',
     letterSpacing: 2,
   },
   appSubtitle: {
     fontSize: 14,
+    fontFamily: 'Inter-Regular',
     marginTop: 4,
   },
   refreshButton: {
@@ -450,13 +455,9 @@ const styles = StyleSheet.create({
   statusCard: {
     margin: 20,
     padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: colors.background,
+    borderRadius: radius.large,
+    ...shadows.medium,
   },
   statusHeader: {
     flexDirection: 'row',
@@ -471,7 +472,8 @@ const styles = StyleSheet.create({
   modeText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    fontFamily: 'Inter-Medium',
+    color: colors.text.primary,
     marginLeft: 8,
   },
   securityLevel: {
@@ -481,12 +483,13 @@ const styles = StyleSheet.create({
   securityDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: radius.round,
     marginRight: 6,
   },
   securityText: {
     fontSize: 12,
-    color: '#666',
+    fontFamily: 'Inter-Medium',
+    color: colors.text.secondary,
     fontWeight: '500',
   },
   featuresStatus: {
@@ -494,18 +497,19 @@ const styles = StyleSheet.create({
   },
   featuresText: {
     fontSize: 14,
-    color: '#666',
+    fontFamily: 'Inter-Regular',
+    color: colors.text.secondary,
     marginBottom: 8,
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#E9ECEF',
-    borderRadius: 3,
+    backgroundColor: colors.border,
+    borderRadius: radius.small,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: radius.small,
   },
   quickActions: {
     paddingHorizontal: 20,
@@ -518,33 +522,30 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
+    fontFamily: 'Inter-Medium',
+    color: colors.text.primary,
     marginBottom: 16,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: radius.medium,
     padding: 16,
     marginBottom: 12,
   },
   primaryAction: {
-    backgroundColor: '#007AFF',
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: colors.primary,
+    ...shadows.medium,
   },
   secondaryAction: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
     flex: 1,
     marginRight: 8,
   },
   emergencyAction: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.error,
   },
   actionRow: {
     flexDirection: 'row',
@@ -553,7 +554,8 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    fontFamily: 'Inter-Medium',
+    color: colors.background,
     flex: 1,
     marginLeft: 12,
   },
@@ -564,27 +566,25 @@ const styles = StyleSheet.create({
   },
   setupCard: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: colors.background,
+    borderRadius: radius.medium,
     padding: 20,
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadows.small,
   },
   setupTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    fontFamily: 'Inter-Medium',
+    color: colors.text.primary,
     marginTop: 12,
     marginBottom: 4,
   },
   setupSubtitle: {
     fontSize: 12,
-    color: '#666',
+    fontFamily: 'Inter-Regular',
+    color: colors.text.secondary,
     textAlign: 'center',
   },
 });

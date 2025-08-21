@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, shadows, radius } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
@@ -150,7 +151,7 @@ export const SecurityMonitor: React.FC = () => {
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
-          colors={['#007AFF']}
+          colors={[colors.primary]}
         />
       }
     >
@@ -327,13 +328,13 @@ export const SecurityMonitor: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   header: {
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   titleRow: {
     flexDirection: 'row',
@@ -343,22 +344,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#333',
+    fontFamily: 'Inter-Bold',
+    color: colors.text.primary,
   },
   lastUpdate: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: 'Inter-Regular',
+    color: colors.text.secondary,
   },
   overallStatusCard: {
     margin: 16,
     padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: colors.background,
+    borderRadius: radius.medium,
+    ...shadows.small,
   },
   statusHeader: {
     flexDirection: 'row',
@@ -371,12 +370,14 @@ const styles = StyleSheet.create({
   statusLevel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    fontFamily: 'Inter-Medium',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   statusDescription: {
     fontSize: 14,
-    color: '#666',
+    fontFamily: 'Inter-Regular',
+    color: colors.text.secondary,
   },
   systemsGrid: {
     flexDirection: 'row',
@@ -386,22 +387,19 @@ const styles = StyleSheet.create({
   },
   systemCard: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: colors.background,
+    borderRadius: radius.small,
     padding: 16,
     marginBottom: 8,
     marginRight: '2%',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadows.small,
   },
   systemTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#333',
+    fontFamily: 'Inter-Medium',
+    color: colors.text.primary,
     marginTop: 8,
     marginBottom: 4,
     textAlign: 'center',
@@ -409,6 +407,7 @@ const styles = StyleSheet.create({
   systemStatus: {
     fontSize: 10,
     fontWeight: '500',
+    fontFamily: 'Inter-Medium',
   },
   threatsSection: {
     margin: 16,

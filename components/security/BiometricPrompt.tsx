@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, shadows, radius } from '../../constants/theme';
 import { biometricAuthManager, BiometricType } from '../../lib/security/biometricAuth';
 
 interface BiometricPromptProps {

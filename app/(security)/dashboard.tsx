@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { colors, shadows, radius } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { SecurityMonitor } from '../../components/security/SecurityMonitor';
 import { BiometricPrompt } from '../../components/security/BiometricPrompt';
@@ -466,20 +467,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   loadingText: {
     fontSize: 16,
-    color: '#666',
+    fontFamily: 'Inter-Regular',
+    color: colors.text.secondary,
     marginTop: 16,
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     paddingTop: 60,
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   headerTop: {
     flexDirection: 'row',
@@ -490,11 +492,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#333',
+    fontFamily: 'Inter-Bold',
+    color: colors.text.primary,
   },
   summaryCard: {
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.medium,
     padding: 16,
   },
   summaryStatus: {
