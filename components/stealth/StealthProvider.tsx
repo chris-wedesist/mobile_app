@@ -77,9 +77,7 @@ export function StealthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <StealthContext.Provider value={value}>
-      {children}
-    </StealthContext.Provider>
+    <StealthContext.Provider value={value}>{children}</StealthContext.Provider>
   );
 }
 

@@ -51,7 +51,10 @@ export class StealthManager {
         await this.saveConfig();
       }
       this.initialized = true;
-      console.log('StealthManager initialized with mode:', this.config.currentMode);
+      console.log(
+        'StealthManager initialized with mode:',
+        this.config.currentMode
+      );
     } catch (error) {
       console.error('Failed to initialize StealthManager:', error);
       // Fallback to safe defaults
@@ -75,8 +78,9 @@ export class StealthManager {
     try {
       // Security check for toggle frequency (prevent accidental toggles)
       const now = new Date();
-      const timeSinceLastToggle = now.getTime() - this.config.lastToggleTime.getTime();
-      
+      const timeSinceLastToggle =
+        now.getTime() - this.config.lastToggleTime.getTime();
+
       // Require at least 5 seconds between toggles
       if (timeSinceLastToggle < 5000) {
         console.warn('Toggle attempt too soon after last toggle');
@@ -84,8 +88,9 @@ export class StealthManager {
       }
 
       // Toggle the mode
-      const newMode: AppMode = this.config.currentMode === 'stealth' ? 'normal' : 'stealth';
-      
+      const newMode: AppMode =
+        this.config.currentMode === 'stealth' ? 'normal' : 'stealth';
+
       this.config = {
         ...this.config,
         currentMode: newMode,
@@ -95,7 +100,7 @@ export class StealthManager {
       };
 
       await this.saveConfig();
-      
+
       console.log(`Mode toggled to: ${newMode}`);
       return true;
     } catch (error) {
@@ -187,8 +192,8 @@ export class StealthManager {
     // Check timing - all taps should be within 5 seconds
     const firstTap = sequence[0];
     const lastTap = sequence[sequence.length - 1];
-    
-    return (lastTap - firstTap) <= MAX_SEQUENCE_TIME;
+
+    return lastTap - firstTap <= MAX_SEQUENCE_TIME;
   }
 
   // Method to clear all data (emergency use)
@@ -237,7 +242,8 @@ export const stealthManager = StealthManager.getInstance();
 
 // Export helper functions for common operations
 export const getCurrentMode = () => stealthManager.getCurrentMode();
-export const toggleMode = (password?: string) => stealthManager.toggleMode(password);
+export const toggleMode = (password?: string) =>
+  stealthManager.toggleMode(password);
 export const setMode = (mode: AppMode) => stealthManager.setMode(mode);
 export const resetToStealth = () => stealthManager.resetToStealth();
 export const isStealthMode = () => stealthManager.isStealthMode();

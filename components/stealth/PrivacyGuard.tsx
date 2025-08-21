@@ -1,22 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { AppState, AppStateStatus, View, Image, Text, StyleSheet } from 'react-native';
+import {
+  AppState,
+  AppStateStatus,
+  View,
+  Image,
+  Text,
+  StyleSheet,
+} from 'react-native';
 
 interface PrivacyGuardProps {
   children: React.ReactNode;
   isStealthMode?: boolean;
 }
 
-export function PrivacyGuard({ children, isStealthMode = true }: PrivacyGuardProps) {
+export function PrivacyGuard({
+  children,
+  isStealthMode = true,
+}: PrivacyGuardProps) {
   const [isBackground, setIsBackground] = useState(false);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-      if (nextAppState === 'background' || nextAppState === 'inactive') {
-        setIsBackground(true);
-      } else if (nextAppState === 'active') {
-        setIsBackground(false);
+    const subscription = AppState.addEventListener(
+      'change',
+      (nextAppState: AppStateStatus) => {
+        if (nextAppState === 'background' || nextAppState === 'inactive') {
+          setIsBackground(true);
+        } else if (nextAppState === 'active') {
+          setIsBackground(false);
+        }
       }
-    });
+    );
 
     return () => subscription?.remove();
   }, []);

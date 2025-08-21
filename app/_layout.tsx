@@ -212,15 +212,18 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: appMode === 'stealth' ? '#f8f9fa' : colors.primary },
+            contentStyle: {
+              backgroundColor:
+                appMode === 'stealth' ? '#f8f9fa' : colors.primary,
+            },
           }}
         >
           {/* Stealth mode screens */}
           <Stack.Screen name="(stealth)" options={{ headerShown: false }} />
-          
+
           {/* Normal mode screens */}
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          
+
           {/* Modal screens available in both modes */}
           <Stack.Screen
             name="emergency-setup"
@@ -257,7 +260,9 @@ export default function RootLayout() {
         <StatusBar style={appMode === 'stealth' ? 'dark' : 'light'} />
 
         {/* Emergency call button only in normal mode */}
-        {initialRoute !== '/onboarding' && appMode === 'normal' && <EmergencyCallButton />}
+        {initialRoute !== '/onboarding' && appMode === 'normal' && (
+          <EmergencyCallButton />
+        )}
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

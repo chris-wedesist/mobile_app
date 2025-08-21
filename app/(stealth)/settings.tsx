@@ -28,14 +28,14 @@ export default function SettingsScreen() {
 
   const handleVersionTap = () => {
     const now = Date.now();
-    
+
     // Reset counter if too much time has passed (3 seconds)
     if (now - lastVersionTap > 3000) {
       setVersionTapCount(1);
     } else {
-      setVersionTapCount(prev => prev + 1);
+      setVersionTapCount((prev) => prev + 1);
     }
-    
+
     setLastVersionTap(now);
 
     // Clear any existing timeout
@@ -49,7 +49,8 @@ export default function SettingsScreen() {
     }, 3000);
 
     // Check for 7 taps
-    if (versionTapCount >= 6) { // 7th tap (0-indexed)
+    if (versionTapCount >= 6) {
+      // 7th tap (0-indexed)
       setVersionTapCount(0);
       Vibration.vibrate(100);
       showHiddenMenu();
@@ -110,7 +111,9 @@ export default function SettingsScreen() {
     >
       <View style={styles.settingsItemContent}>
         <Text style={styles.settingsItemTitle}>{title}</Text>
-        {subtitle && <Text style={styles.settingsItemSubtitle}>{subtitle}</Text>}
+        {subtitle && (
+          <Text style={styles.settingsItemSubtitle}>{subtitle}</Text>
+        )}
       </View>
       {rightElement}
     </TouchableOpacity>
@@ -121,7 +124,7 @@ export default function SettingsScreen() {
     subtitle: string,
     value: boolean,
     onValueChange: (value: boolean) => void
-  ) => (
+  ) =>
     renderSettingsItem(
       title,
       subtitle,
@@ -131,12 +134,14 @@ export default function SettingsScreen() {
         trackColor={{ false: '#e9ecef', true: '#007bff' }}
         thumbColor={value ? '#ffffff' : '#ffffff'}
       />
-    )
-  );
+    );
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {renderSettingsSection(
           'Notifications',
           <>
@@ -180,7 +185,11 @@ export default function SettingsScreen() {
               'Storage Usage',
               '2.4 MB used',
               <Ionicons name="chevron-forward" size={20} color="#999" />,
-              () => Alert.alert('Storage', 'Storage usage details would appear here.')
+              () =>
+                Alert.alert(
+                  'Storage',
+                  'Storage usage details would appear here.'
+                )
             )}
           </>
         )}
@@ -192,13 +201,18 @@ export default function SettingsScreen() {
               'Privacy',
               'Manage your privacy settings',
               <Ionicons name="chevron-forward" size={20} color="#999" />,
-              () => Alert.alert('Privacy', 'Privacy settings would appear here.')
+              () =>
+                Alert.alert('Privacy', 'Privacy settings would appear here.')
             )}
             {renderSettingsItem(
               'App Lock',
               'Secure app with biometrics',
               <Ionicons name="chevron-forward" size={20} color="#999" />,
-              () => Alert.alert('App Lock', 'Biometric security settings would appear here.')
+              () =>
+                Alert.alert(
+                  'App Lock',
+                  'Biometric security settings would appear here.'
+                )
             )}
           </>
         )}
@@ -216,7 +230,8 @@ export default function SettingsScreen() {
               'Contact Support',
               'Get in touch with our team',
               <Ionicons name="chevron-forward" size={20} color="#999" />,
-              () => Alert.alert('Support', 'Contact information would appear here.')
+              () =>
+                Alert.alert('Support', 'Contact information would appear here.')
             )}
             {renderSettingsItem(
               'Rate App',
@@ -240,7 +255,11 @@ export default function SettingsScreen() {
               'Privacy Policy',
               'Read our privacy policy',
               <Ionicons name="chevron-forward" size={20} color="#999" />,
-              () => Alert.alert('Privacy Policy', 'Privacy policy would appear here.')
+              () =>
+                Alert.alert(
+                  'Privacy Policy',
+                  'Privacy policy would appear here.'
+                )
             )}
             <TouchableOpacity
               style={styles.settingsItem}

@@ -6,12 +6,12 @@ export default function StealthLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle: { 
+        tabBarStyle: {
           backgroundColor: '#f8f9fa',
           borderTopColor: '#e9ecef',
           borderTopWidth: 1,
         },
-        headerStyle: { 
+        headerStyle: {
           backgroundColor: '#f8f9fa',
           borderBottomColor: '#e9ecef',
           borderBottomWidth: 1,

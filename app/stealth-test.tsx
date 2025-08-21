@@ -22,9 +22,13 @@ export default function StealthTestScreen() {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
 
-  const updateTestResult = (name: string, status: 'pass' | 'fail', details?: string) => {
-    setTestResults(prev => {
-      const existing = prev.find(r => r.name === name);
+  const updateTestResult = (
+    name: string,
+    status: 'pass' | 'fail',
+    details?: string
+  ) => {
+    setTestResults((prev) => {
+      const existing = prev.find((r) => r.name === name);
       if (existing) {
         existing.status = status;
         existing.details = details;
@@ -50,9 +54,17 @@ export default function StealthTestScreen() {
     try {
       const currentMode = await stealthManager.getCurrentMode();
       if (currentMode === 'stealth' || currentMode === 'normal') {
-        updateTestResult('Mode Detection', 'pass', `Current mode: ${currentMode}`);
+        updateTestResult(
+          'Mode Detection',
+          'pass',
+          `Current mode: ${currentMode}`
+        );
       } else {
-        updateTestResult('Mode Detection', 'fail', `Invalid mode: ${currentMode}`);
+        updateTestResult(
+          'Mode Detection',
+          'fail',
+          `Invalid mode: ${currentMode}`
+        );
       }
     } catch (error) {
       updateTestResult('Mode Detection', 'fail', error.message);
@@ -62,9 +74,17 @@ export default function StealthTestScreen() {
     try {
       const config = await stealthManager.getConfig();
       if (config.currentMode && typeof config.toggleCount === 'number') {
-        updateTestResult('Configuration Persistence', 'pass', 'Config loaded successfully');
+        updateTestResult(
+          'Configuration Persistence',
+          'pass',
+          'Config loaded successfully'
+        );
       } else {
-        updateTestResult('Configuration Persistence', 'fail', 'Invalid config structure');
+        updateTestResult(
+          'Configuration Persistence',
+          'fail',
+          'Invalid config structure'
+        );
       }
     } catch (error) {
       updateTestResult('Configuration Persistence', 'fail', error.message);
@@ -72,16 +92,26 @@ export default function StealthTestScreen() {
 
     // Test 4: Toggle Sequence Validation
     try {
-      const validSequence = Array.from({ length: 7 }, (_, i) => Date.now() + i * 100);
+      const validSequence = Array.from(
+        { length: 7 },
+        (_, i) => Date.now() + i * 100
+      );
       const isValid = stealthManager.validateToggleSequence(validSequence);
-      
-      const invalidSequence = Array.from({ length: 5 }, (_, i) => Date.now() + i * 100);
+
+      const invalidSequence = Array.from(
+        { length: 5 },
+        (_, i) => Date.now() + i * 100
+      );
       const isInvalid = !stealthManager.validateToggleSequence(invalidSequence);
-      
+
       if (isValid && isInvalid) {
         updateTestResult('Toggle Sequence Validation', 'pass');
       } else {
-        updateTestResult('Toggle Sequence Validation', 'fail', 'Validation logic error');
+        updateTestResult(
+          'Toggle Sequence Validation',
+          'fail',
+          'Validation logic error'
+        );
       }
     } catch (error) {
       updateTestResult('Toggle Sequence Validation', 'fail', error.message);
@@ -90,17 +120,25 @@ export default function StealthTestScreen() {
     // Test 5: Mode Toggle (without actually switching)
     try {
       const initialMode = await stealthManager.getCurrentMode();
-      
+
       // Test the toggle logic by checking if it would prevent rapid toggles
       const recentToggle = await stealthManager.toggleMode();
       const immediateToggle = await stealthManager.toggleMode(); // Should fail due to timing
-      
+
       if (!immediateToggle) {
-        updateTestResult('Mode Toggle Protection', 'pass', 'Rapid toggle prevention works');
+        updateTestResult(
+          'Mode Toggle Protection',
+          'pass',
+          'Rapid toggle prevention works'
+        );
         // Reset to initial mode
         await stealthManager.setMode(initialMode);
       } else {
-        updateTestResult('Mode Toggle Protection', 'fail', 'Rapid toggle not prevented');
+        updateTestResult(
+          'Mode Toggle Protection',
+          'fail',
+          'Rapid toggle not prevented'
+        );
       }
     } catch (error) {
       updateTestResult('Mode Toggle Protection', 'fail', error.message);
@@ -122,7 +160,10 @@ export default function StealthTestScreen() {
     // Test 7: Usage Statistics
     try {
       const stats = stealthManager.getUsageStats();
-      if (typeof stats.toggleCount === 'number' && stats.lastToggleTime instanceof Date) {
+      if (
+        typeof stats.toggleCount === 'number' &&
+        stats.lastToggleTime instanceof Date
+      ) {
         updateTestResult('Usage Statistics', 'pass');
       } else {
         updateTestResult('Usage Statistics', 'fail', 'Invalid stats structure');
@@ -146,7 +187,7 @@ export default function StealthTestScreen() {
             try {
               const currentMode = await stealthManager.getCurrentMode();
               const success = await stealthManager.toggleMode();
-              
+
               if (success) {
                 const newMode = await stealthManager.getCurrentMode();
                 Alert.alert(
@@ -157,7 +198,7 @@ export default function StealthTestScreen() {
                       text: 'Navigate',
                       onPress: () => {
                         if (newMode === 'stealth') {
-                        router.replace('/stealth-calculator' as any);
+                          router.replace('/stealth-calculator' as any);
                         } else {
                           router.replace('/(tabs)' as any);
                         }
@@ -199,7 +240,7 @@ export default function StealthTestScreen() {
     }
   };
 
-  const passedTests = testResults.filter(r => r.status === 'pass').length;
+  const passedTests = testResults.filter((r) => r.status === 'pass').length;
   const totalTests = testResults.length;
 
   return (
@@ -211,7 +252,9 @@ export default function StealthTestScreen() {
 
       <View style={styles.summary}>
         <Text style={styles.summaryText}>
-          {totalTests > 0 ? `${passedTests}/${totalTests} tests passed` : 'No tests run yet'}
+          {totalTests > 0
+            ? `${passedTests}/${totalTests} tests passed`
+            : 'No tests run yet'}
         </Text>
         <TouchableOpacity
           style={[styles.button, isRunning && styles.buttonDisabled]}
@@ -232,7 +275,12 @@ export default function StealthTestScreen() {
               <Text style={styles.testName}>{result.name}</Text>
             </View>
             {result.details && (
-              <Text style={[styles.testDetails, { color: getStatusColor(result.status) }]}>
+              <Text
+                style={[
+                  styles.testDetails,
+                  { color: getStatusColor(result.status) },
+                ]}
+              >
                 {result.details}
               </Text>
             )}
@@ -243,7 +291,9 @@ export default function StealthTestScreen() {
           <View style={styles.emptyState}>
             <Ionicons name="flask-outline" size={48} color="#ccc" />
             <Text style={styles.emptyText}>No test results yet</Text>
-            <Text style={styles.emptySubtext}>Run tests to validate functionality</Text>
+            <Text style={styles.emptySubtext}>
+              Run tests to validate functionality
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -253,13 +303,15 @@ export default function StealthTestScreen() {
           <Ionicons name="swap-horizontal" size={20} color="#007bff" />
           <Text style={styles.actionButtonText}>Test Mode Switch</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.actionButton} 
+
+        <TouchableOpacity
+          style={styles.actionButton}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={20} color="#6c757d" />
-          <Text style={[styles.actionButtonText, { color: '#6c757d' }]}>Back</Text>
+          <Text style={[styles.actionButtonText, { color: '#6c757d' }]}>
+            Back
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

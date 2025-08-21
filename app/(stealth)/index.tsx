@@ -18,7 +18,7 @@ export default function CalculatorScreen() {
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<Operation>(null);
   const [clearNext, setClearNext] = useState(false);
-  
+
   // Hidden toggle mechanism
   const [tapSequence, setTapSequence] = useState<number[]>([]);
   const [holdStartTime, setHoldStartTime] = useState<number | null>(null);
@@ -72,7 +72,7 @@ export default function CalculatorScreen() {
     setPreviousValue(null);
     setOperation(null);
     setClearNext(false);
-    
+
     // Reset tap sequence when clearing
     setTapSequence([]);
   };
@@ -94,13 +94,13 @@ export default function CalculatorScreen() {
   // Hidden toggle mechanism - 7 taps + hold on display
   const handleDisplayPress = () => {
     const now = Date.now();
-    
+
     // Reset sequence if too much time has passed (5 seconds)
-    const newSequence = tapSequence.filter(time => now - time < 5000);
+    const newSequence = tapSequence.filter((time) => now - time < 5000);
     newSequence.push(now);
-    
+
     setTapSequence(newSequence);
-    
+
     // Check if we have 7 taps
     if (newSequence.length >= 7) {
       // Verify the sequence timing
@@ -116,7 +116,7 @@ export default function CalculatorScreen() {
 
   const handleDisplayLongPress = () => {
     setHoldStartTime(Date.now());
-    
+
     // Start hold timer
     holdTimeoutRef.current = setTimeout(() => {
       // If we have recent taps and a long press, show toggle
@@ -203,10 +203,30 @@ export default function CalculatorScreen() {
       <View style={styles.buttonContainer}>
         {/* Row 1 */}
         <View style={styles.row}>
-          {renderButton('C', handleClear, styles.operatorButton, styles.operatorText)}
-          {renderButton('⌫', handleDelete, styles.operatorButton, styles.operatorText)}
-          {renderButton('%', () => {}, styles.operatorButton, styles.operatorText)}
-          {renderButton('÷', () => handleOperation('÷'), styles.operatorButton, styles.operatorText)}
+          {renderButton(
+            'C',
+            handleClear,
+            styles.operatorButton,
+            styles.operatorText
+          )}
+          {renderButton(
+            '⌫',
+            handleDelete,
+            styles.operatorButton,
+            styles.operatorText
+          )}
+          {renderButton(
+            '%',
+            () => {},
+            styles.operatorButton,
+            styles.operatorText
+          )}
+          {renderButton(
+            '÷',
+            () => handleOperation('÷'),
+            styles.operatorButton,
+            styles.operatorText
+          )}
         </View>
 
         {/* Row 2 */}
@@ -214,7 +234,12 @@ export default function CalculatorScreen() {
           {renderButton('7', () => handleNumber('7'))}
           {renderButton('8', () => handleNumber('8'))}
           {renderButton('9', () => handleNumber('9'))}
-          {renderButton('×', () => handleOperation('×'), styles.operatorButton, styles.operatorText)}
+          {renderButton(
+            '×',
+            () => handleOperation('×'),
+            styles.operatorButton,
+            styles.operatorText
+          )}
         </View>
 
         {/* Row 3 */}
@@ -222,7 +247,12 @@ export default function CalculatorScreen() {
           {renderButton('4', () => handleNumber('4'))}
           {renderButton('5', () => handleNumber('5'))}
           {renderButton('6', () => handleNumber('6'))}
-          {renderButton('-', () => handleOperation('-'), styles.operatorButton, styles.operatorText)}
+          {renderButton(
+            '-',
+            () => handleOperation('-'),
+            styles.operatorButton,
+            styles.operatorText
+          )}
         </View>
 
         {/* Row 4 */}
@@ -230,14 +260,24 @@ export default function CalculatorScreen() {
           {renderButton('1', () => handleNumber('1'))}
           {renderButton('2', () => handleNumber('2'))}
           {renderButton('3', () => handleNumber('3'))}
-          {renderButton('+', () => handleOperation('+'), styles.operatorButton, styles.operatorText)}
+          {renderButton(
+            '+',
+            () => handleOperation('+'),
+            styles.operatorButton,
+            styles.operatorText
+          )}
         </View>
 
         {/* Row 5 */}
         <View style={styles.row}>
           {renderButton('0', () => handleNumber('0'), styles.zeroButton)}
           {renderButton('.', handleDecimal)}
-          {renderButton('=', () => handleOperation('='), styles.equalsButton, styles.equalsText)}
+          {renderButton(
+            '=',
+            () => handleOperation('='),
+            styles.equalsButton,
+            styles.equalsText
+          )}
         </View>
       </View>
     </SafeAreaView>
