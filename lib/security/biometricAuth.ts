@@ -10,6 +10,10 @@ export interface BiometricConfig {
   biometricType: BiometricType;
   lastAuthTime: Date;
   maxAuthInterval: number; // in milliseconds
+  videoAccessPinEnabled: boolean; // NEW: PIN required for video access
+  lastVideoAccessTime: Date; // NEW: Track last video access
+  videoPinRequired: boolean; // NEW: Whether PIN is required for videos
+  newRecordingDetected: boolean; // NEW: Flag for new recordings
 }
 
 const BIOMETRIC_CONFIG_KEY = 'desist_biometric_config';
@@ -22,6 +26,10 @@ const DEFAULT_CONFIG: BiometricConfig = {
   biometricType: 'none',
   lastAuthTime: new Date(0),
   maxAuthInterval: 5 * 60 * 1000, // 5 minutes
+  videoAccessPinEnabled: true, // NEW: Default to requiring PIN for videos
+  lastVideoAccessTime: new Date(0), // NEW: No previous video access
+  videoPinRequired: true, // NEW: PIN required by default
+  newRecordingDetected: false, // NEW: No new recordings initially
 };
 
 export class BiometricAuthManager {
@@ -304,6 +312,166 @@ export class BiometricAuthManager {
     this.config.lastAuthTime = new Date();
     await this.saveConfig();
   }
+
+  // NEW: Video access PIN protection methods
+  async isVideoPinRequired(): Promise<boolean> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    // If video PIN is disabled, no PIN required
+    if (!this.config.videoAccessPinEnabled) {
+      return false;
+    }
+
+    // If there's a new recording detected, PIN is required
+    if (this.config.newRecordingDetected) {
+      return true;
+    }
+
+    // If user has never accessed videos, PIN is required
+    if (this.config.lastVideoAccessTime.getTime() === 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async authenticateForVideoAccess(pin?: string): Promise<{
+    success: boolean;
+    error?: string;
+    requiresPin?: boolean;
+  }> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      // Check if PIN is required
+      const pinRequired = await this.isVideoPinRequired();
+      
+      if (!pinRequired) {
+        // Update last access time
+        this.config.lastVideoAccessTime = new Date();
+        await this.saveConfig();
+        return { success: true };
+      }
+
+      // PIN is required
+      if (!pin) {
+        return { 
+          success: false, 
+          requiresPin: true,
+          error: 'PIN required for video access' 
+        };
+      }
+
+      // Validate PIN (this would integrate with your PIN system)
+      const pinValid = await this.validateVideoPin(pin);
+      
+      if (pinValid) {
+        // Clear new recording flag and update access time
+        this.config.newRecordingDetected = false;
+        this.config.lastVideoAccessTime = new Date();
+        await this.saveConfig();
+        
+        return { success: true };
+      } else {
+        return { 
+          success: false, 
+          error: 'Invalid PIN' 
+        };
+      }
+    } catch (error) {
+      console.error('Video access authentication error:', error);
+      return {
+        success: false,
+        error: 'Authentication system error',
+      };
+    }
+  }
+
+  async setNewRecordingDetected(detected: boolean = true): Promise<void> {
+    this.config.newRecordingDetected = detected;
+    await this.saveConfig();
+    console.log(`New recording detection ${detected ? 'enabled' : 'disabled'}`);
+  }
+
+  async enableVideoAccessPin(): Promise<void> {
+    this.config.videoAccessPinEnabled = true;
+    this.config.videoPinRequired = true;
+    await this.saveConfig();
+    console.log('Video access PIN protection enabled');
+  }
+
+  async disableVideoAccessPin(): Promise<void> {
+    this.config.videoAccessPinEnabled = false;
+    this.config.videoPinRequired = false;
+    this.config.newRecordingDetected = false;
+    await this.saveConfig();
+    console.log('Video access PIN protection disabled');
+  }
+
+  private async validateVideoPin(pin: string): Promise<boolean> {
+    // This would integrate with your existing PIN system
+    // For now, we'll use a simple storage-based validation
+    try {
+      const storedPinHash = await AsyncStorage.getItem(PIN_STORAGE_KEY);
+      if (!storedPinHash) {
+        // No PIN set yet, this would prompt user to set one
+        console.warn('No video access PIN set - would prompt user to create one');
+        return false;
+      }
+
+      // Simple hash comparison (in production, use proper hashing)
+      const pinHash = await this.hashPin(pin);
+      return pinHash === storedPinHash;
+    } catch (error) {
+      console.error('PIN validation error:', error);
+      return false;
+    }
+  }
+
+  async setVideoAccessPin(pin: string): Promise<boolean> {
+    try {
+      const pinHash = await this.hashPin(pin);
+      await AsyncStorage.setItem(PIN_STORAGE_KEY, pinHash);
+      
+      // Enable video PIN protection when PIN is set
+      await this.enableVideoAccessPin();
+      
+      console.log('Video access PIN set successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to set video access PIN:', error);
+      return false;
+    }
+  }
+
+  private async hashPin(pin: string): Promise<string> {
+    // Simple hash for demo - in production use crypto library
+    // This would use expo-crypto or similar for proper hashing
+    let hash = 0;
+    for (let i = 0; i < pin.length; i++) {
+      const char = pin.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash.toString();
+  }
+
+  // Getter methods for video access
+  isVideoAccessPinEnabled(): boolean {
+    return this.config.videoAccessPinEnabled;
+  }
+
+  hasNewRecording(): boolean {
+    return this.config.newRecordingDetected;
+  }
+
+  getLastVideoAccessTime(): Date {
+    return this.config.lastVideoAccessTime;
+  }
 }
 
 // Export singleton instance
@@ -317,3 +485,14 @@ export const isAuthRequired = () =>
   biometricAuthManager.isAuthenticationRequired();
 export const checkBiometricAvailable = () =>
   biometricAuthManager.checkBiometricAvailability();
+
+// NEW: Video access helper functions
+export const isVideoPinRequired = () => biometricAuthManager.isVideoPinRequired();
+export const authenticateForVideoAccess = (pin?: string) =>
+  biometricAuthManager.authenticateForVideoAccess(pin);
+export const setNewRecordingDetected = (detected?: boolean) =>
+  biometricAuthManager.setNewRecordingDetected(detected);
+export const setVideoAccessPin = (pin: string) =>
+  biometricAuthManager.setVideoAccessPin(pin);
+export const enableVideoAccessPin = () => biometricAuthManager.enableVideoAccessPin();
+export const disableVideoAccessPin = () => biometricAuthManager.disableVideoAccessPin();

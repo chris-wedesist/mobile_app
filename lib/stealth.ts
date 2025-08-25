@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { biometricAuthManager } from './security/biometricAuth';
 import { screenProtectionManager } from './security/screenProtection';
 import { threatDetectionEngine } from './security/threatDetection';
+import { blankScreenStealthManager } from './security/blankScreenStealth';
 
 export type AppMode = 'stealth' | 'normal';
 
@@ -16,6 +17,7 @@ export interface StealthConfig {
   biometricRequired: boolean;
   screenProtectionEnabled: boolean;
   threatDetectionEnabled: boolean;
+  blankScreenStealthEnabled: boolean; // NEW: Blank screen stealth feature
 }
 
 const STORAGE_KEY = 'desist_stealth_config';
@@ -30,6 +32,7 @@ const DEFAULT_CONFIG: StealthConfig = {
   biometricRequired: false,
   screenProtectionEnabled: true,
   threatDetectionEnabled: true,
+  blankScreenStealthEnabled: false, // NEW: Disabled by default
 };
 
 export class StealthManager {
@@ -95,6 +98,11 @@ export class StealthManager {
         if (this.config.threatDetectionEnabled) {
           await threatDetectionEngine.initialize();
           await threatDetectionEngine.startMonitoring();
+        }
+
+        // Initialize blank screen stealth
+        if (this.config.blankScreenStealthEnabled) {
+          await blankScreenStealthManager.initialize();
         }
 
         console.log('Security systems initialized');
@@ -398,6 +406,7 @@ export class StealthManager {
     biometricEnabled: boolean;
     screenProtectionEnabled: boolean;
     threatDetectionEnabled: boolean;
+    blankScreenStealthEnabled: boolean;
     securityLevel: 'low' | 'medium' | 'high';
   }> {
     const biometricEnabled = biometricAuthManager.isEnabled();
@@ -410,6 +419,7 @@ export class StealthManager {
       biometricEnabled,
       screenStatus.isActive,
       threatStatus.monitoring,
+      this.config.blankScreenStealthEnabled,
     ].filter(Boolean).length;
 
     if (securityFeatures >= 3) {
@@ -422,8 +432,61 @@ export class StealthManager {
       biometricEnabled,
       screenProtectionEnabled: screenStatus.isActive,
       threatDetectionEnabled: threatStatus.monitoring,
+      blankScreenStealthEnabled: this.config.blankScreenStealthEnabled,
       securityLevel,
     };
+  }
+
+  // NEW: Blank screen stealth methods
+  async enableBlankScreenStealth(): Promise<boolean> {
+    try {
+      await blankScreenStealthManager.initialize();
+      this.config.blankScreenStealthEnabled = true;
+      await this.saveConfig();
+      console.log('Blank screen stealth enabled');
+      return true;
+    } catch (error) {
+      console.error('Failed to enable blank screen stealth:', error);
+      return false;
+    }
+  }
+
+  async disableBlankScreenStealth(): Promise<boolean> {
+    try {
+      // Deactivate if currently active
+      if (blankScreenStealthManager.isActive()) {
+        await blankScreenStealthManager.deactivateBlankScreen();
+      }
+      
+      this.config.blankScreenStealthEnabled = false;
+      await this.saveConfig();
+      console.log('Blank screen stealth disabled');
+      return true;
+    } catch (error) {
+      console.error('Failed to disable blank screen stealth:', error);
+      return false;
+    }
+  }
+
+  async activateBlankScreen(): Promise<boolean> {
+    if (!this.config.blankScreenStealthEnabled) {
+      console.warn('Blank screen stealth not enabled');
+      return false;
+    }
+
+    return await blankScreenStealthManager.activateBlankScreen();
+  }
+
+  async deactivateBlankScreen(): Promise<boolean> {
+    return await blankScreenStealthManager.deactivateBlankScreen();
+  }
+
+  isBlankScreenActive(): boolean {
+    return blankScreenStealthManager.isActive();
+  }
+
+  getBlankScreenConfig() {
+    return blankScreenStealthManager.getConfig();
   }
 }
 
@@ -437,3 +500,10 @@ export const toggleMode = (password?: string) =>
 export const setMode = (mode: AppMode) => stealthManager.setMode(mode);
 export const resetToStealth = () => stealthManager.resetToStealth();
 export const isStealthMode = () => stealthManager.isStealthMode();
+
+// NEW: Export blank screen stealth helper functions
+export const enableBlankScreenStealth = () => stealthManager.enableBlankScreenStealth();
+export const disableBlankScreenStealth = () => stealthManager.disableBlankScreenStealth();
+export const activateBlankScreen = () => stealthManager.activateBlankScreen();
+export const deactivateBlankScreen = () => stealthManager.deactivateBlankScreen();
+export const isBlankScreenActive = () => stealthManager.isBlankScreenActive();
