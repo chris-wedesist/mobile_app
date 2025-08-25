@@ -14,7 +14,13 @@ import {
 } from 'react-native-gesture-handler';
 import { useStealthMode } from '../components/StealthModeManager';
 import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
-import { colors, typography, spacing, radius, shadows } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../constants/theme';
 
 export default function StealthDocumentScreen() {
   const { deactivate } = useStealthMode();
@@ -50,7 +56,11 @@ export default function StealthDocumentScreen() {
           {/* Toolbar */}
           <View style={styles.toolbar}>
             <View style={styles.toolbarLeft}>
-              <MaterialIcons name="insert-drive-file" size={24} color={colors.text.secondary} />
+              <MaterialIcons
+                name="insert-drive-file"
+                size={24}
+                color={colors.text.secondary}
+              />
               <View style={styles.documentInfo}>
                 <Text style={styles.documentTitle}>
                   Q4 Financial Report.pdf
@@ -63,13 +73,21 @@ export default function StealthDocumentScreen() {
 
             <View style={styles.toolbarActions}>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="search" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="search"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.toolbarButton}
                 onPress={() => handleZoom('out')}
               >
-                <MaterialIcons name="zoom-out" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="zoom-out"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <Text style={styles.zoomText}>
                 {Math.round(zoomLevel * 100)}%
@@ -78,19 +96,39 @@ export default function StealthDocumentScreen() {
                 style={styles.toolbarButton}
                 onPress={() => handleZoom('in')}
               >
-                <MaterialIcons name="zoom-in" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="zoom-in"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="file-download" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="file-download"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="share" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="share"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="print" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="print"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.toolbarButton}>
-                <MaterialIcons name="more-vert" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="more-vert"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
             </View>
           </View>

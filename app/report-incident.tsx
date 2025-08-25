@@ -21,7 +21,13 @@ import {
   View,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { colors, radius, shadows, typography, spacing } from '../constants/theme';
+import {
+  colors,
+  radius,
+  shadows,
+  typography,
+  spacing,
+} from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -455,7 +461,11 @@ export default function ReportIncidentScreen() {
               handlePlayVideo(item.video_url);
             }}
           >
-            <MaterialIcons name="play-arrow" size={24} color={colors.background} />
+            <MaterialIcons
+              name="play-arrow"
+              size={24}
+              color={colors.background}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.videoInfo}>
@@ -505,7 +515,9 @@ export default function ReportIncidentScreen() {
                 name="video-label"
                 size={20}
                 color={
-                  selectedVideos.includes(item.video_url) ? colors.background : colors.text.secondary
+                  selectedVideos.includes(item.video_url)
+                    ? colors.background
+                    : colors.text.secondary
                 }
               />
               <Text
@@ -522,7 +534,11 @@ export default function ReportIncidentScreen() {
                   style={styles.removeVideoButton}
                   onPress={() => toggleVideoSelection(item.video_url)}
                 >
-                  <MaterialIcons name="close" size={16} color={colors.background} />
+                  <MaterialIcons
+                    name="close"
+                    size={16}
+                    color={colors.background}
+                  />
                 </TouchableOpacity>
               )}
             </TouchableOpacity>
@@ -562,13 +578,21 @@ export default function ReportIncidentScreen() {
                   resizeMode="cover"
                 />
                 <View style={styles.selectedVideoOverlay}>
-                  <MaterialIcons name="play-arrow" size={24} color={colors.background} />
+                  <MaterialIcons
+                    name="play-arrow"
+                    size={24}
+                    color={colors.background}
+                  />
                 </View>
                 <TouchableOpacity
                   style={styles.removeSelectedVideo}
                   onPress={() => toggleVideoSelection(videoUrl)}
                 >
-                  <MaterialIcons name="close" size={16} color={colors.background} />
+                  <MaterialIcons
+                    name="close"
+                    size={16}
+                    color={colors.background}
+                  />
                 </TouchableOpacity>
               </TouchableOpacity>
             );
@@ -665,7 +689,11 @@ export default function ReportIncidentScreen() {
               <MaterialIcons
                 name="error"
                 size={16}
-                color={selectedType === type ? colors.background : colors.text.secondary}
+                color={
+                  selectedType === type
+                    ? colors.background
+                    : colors.text.secondary
+                }
               />
               <Text
                 style={[
@@ -703,7 +731,11 @@ export default function ReportIncidentScreen() {
               onPress={() => setShowVideoPicker(!showVideoPicker)}
             >
               <View style={styles.videoPickerButtonContent}>
-                <MaterialIcons name="video-label" size={20} color={colors.background} />
+                <MaterialIcons
+                  name="video-label"
+                  size={20}
+                  color={colors.background}
+                />
                 <Text style={styles.videoPickerButtonText}>
                   {selectedVideos.length > 0
                     ? `${selectedVideos.length} video${
@@ -711,7 +743,11 @@ export default function ReportIncidentScreen() {
                       } selected`
                     : 'Select videos'}
                 </Text>
-                <MaterialIcons name="chevron-right" size={20} color={colors.background} />
+                <MaterialIcons
+                  name="chevron-right"
+                  size={20}
+                  color={colors.background}
+                />
               </View>
             </TouchableOpacity>
             {renderVideoPicker()}

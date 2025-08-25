@@ -1,7 +1,13 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import * as React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors, typography, spacing, radius, shadows } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../constants/theme';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface LanguageSelectorProps {

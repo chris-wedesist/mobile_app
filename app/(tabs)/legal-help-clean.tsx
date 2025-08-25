@@ -13,7 +13,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { colors, typography, spacing, radius, shadows, tagColors } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+  tagColors,
+} from '../../constants/theme';
 import {
   searchAttorneys,
   type Attorney,

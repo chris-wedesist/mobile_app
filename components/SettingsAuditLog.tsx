@@ -9,7 +9,13 @@ import {
   View,
 } from 'react-native';
 import { cardStyles, layoutStyles, textStyles } from '../constants/styles';
-import { colors, typography, spacing, radius, shadows } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../constants/theme';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,

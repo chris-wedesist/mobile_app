@@ -11,7 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, typography, spacing, shadows, radius } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  shadows,
+  radius,
+} from '../../constants/theme';
 import {
   emergencyProtocolManager,
   EmergencyContact,
@@ -42,10 +48,10 @@ export default function EmergencySetupScreen() {
   const initializeEmergency = async () => {
     try {
       await emergencyProtocolManager.initialize();
-      
+
       const emergencyContacts = emergencyProtocolManager.getEmergencyContacts();
       const config = emergencyProtocolManager.getConfig();
-      
+
       setContacts(emergencyContacts);
       setIsEnabled(config.isEnabled);
       setEmergencyMessage(config.emergencyMessage);
@@ -60,7 +66,7 @@ export default function EmergencySetupScreen() {
     try {
       await emergencyProtocolManager.updateConfig({ isEnabled: enabled });
       setIsEnabled(enabled);
-      
+
       if (enabled && contacts.length === 0) {
         Alert.alert(
           'Add Contacts',
@@ -89,7 +95,7 @@ export default function EmergencySetupScreen() {
 
       // Reload contacts
       await initializeEmergency();
-      
+
       // Reset form
       setNewContact({
         name: '',
@@ -134,8 +140,8 @@ export default function EmergencySetupScreen() {
 
   const handleUpdateMessage = async () => {
     try {
-      await emergencyProtocolManager.updateConfig({ 
-        emergencyMessage: emergencyMessage.trim() 
+      await emergencyProtocolManager.updateConfig({
+        emergencyMessage: emergencyMessage.trim(),
       });
       Alert.alert('Updated', 'Emergency message has been updated.');
     } catch (error) {
@@ -161,7 +167,8 @@ export default function EmergencySetupScreen() {
           </View>
           <Text style={styles.title}>Emergency Protocols</Text>
           <Text style={styles.description}>
-            Set up emergency contacts and configure automatic alerts for critical situations.
+            Set up emergency contacts and configure automatic alerts for
+            critical situations.
           </Text>
         </View>
 
@@ -201,7 +208,9 @@ export default function EmergencySetupScreen() {
                 <TextInput
                   style={styles.textInput}
                   value={newContact.name}
-                  onChangeText={(text) => setNewContact(prev => ({ ...prev, name: text }))}
+                  onChangeText={(text) =>
+                    setNewContact((prev) => ({ ...prev, name: text }))
+                  }
                   placeholder="Enter contact name"
                 />
               </View>
@@ -211,7 +220,9 @@ export default function EmergencySetupScreen() {
                 <TextInput
                   style={styles.textInput}
                   value={newContact.phoneNumber}
-                  onChangeText={(text) => setNewContact(prev => ({ ...prev, phoneNumber: text }))}
+                  onChangeText={(text) =>
+                    setNewContact((prev) => ({ ...prev, phoneNumber: text }))
+                  }
                   placeholder="Enter phone number"
                   keyboardType="phone-pad"
                 />
@@ -222,7 +233,9 @@ export default function EmergencySetupScreen() {
                 <TextInput
                   style={styles.textInput}
                   value={newContact.relationship}
-                  onChangeText={(text) => setNewContact(prev => ({ ...prev, relationship: text }))}
+                  onChangeText={(text) =>
+                    setNewContact((prev) => ({ ...prev, relationship: text }))
+                  }
                   placeholder="e.g., Family, Friend, Lawyer"
                 />
               </View>
@@ -231,7 +244,9 @@ export default function EmergencySetupScreen() {
                 <Text style={styles.switchLabel}>Primary Contact</Text>
                 <Switch
                   value={newContact.isPrimary}
-                  onValueChange={(value) => setNewContact(prev => ({ ...prev, isPrimary: value }))}
+                  onValueChange={(value) =>
+                    setNewContact((prev) => ({ ...prev, isPrimary: value }))
+                  }
                 />
               </View>
 
@@ -240,7 +255,12 @@ export default function EmergencySetupScreen() {
                   style={[styles.button, styles.cancelButton]}
                   onPress={() => {
                     setShowAddContact(false);
-                    setNewContact({ name: '', phoneNumber: '', relationship: '', isPrimary: false });
+                    setNewContact({
+                      name: '',
+                      phoneNumber: '',
+                      relationship: '',
+                      isPrimary: false,
+                    });
                   }}
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -266,8 +286,12 @@ export default function EmergencySetupScreen() {
                         <Text style={styles.primaryBadge}> (Primary)</Text>
                       )}
                     </Text>
-                    <Text style={styles.contactPhone}>{contact.phoneNumber}</Text>
-                    <Text style={styles.contactRelation}>{contact.relationship}</Text>
+                    <Text style={styles.contactPhone}>
+                      {contact.phoneNumber}
+                    </Text>
+                    <Text style={styles.contactRelation}>
+                      {contact.relationship}
+                    </Text>
                   </View>
                   <TouchableOpacity
                     style={styles.removeButton}
@@ -292,7 +316,8 @@ export default function EmergencySetupScreen() {
         <View style={styles.messageSection}>
           <Text style={styles.sectionTitle}>Emergency Message</Text>
           <Text style={styles.messageDescription}>
-            This message will be sent to your emergency contacts when protocols are triggered.
+            This message will be sent to your emergency contacts when protocols
+            are triggered.
           </Text>
           <TextInput
             style={styles.messageInput}
@@ -313,28 +338,26 @@ export default function EmergencySetupScreen() {
 
         <View style={styles.featuresSection}>
           <Text style={styles.sectionTitle}>Features</Text>
-          
+
           <View style={styles.featureRow}>
             <Ionicons name="hand-left" size={20} color={colors.error} />
             <Text style={styles.featureText}>
               Panic gesture: 5 rapid taps anywhere on screen
             </Text>
           </View>
-          
+
           <View style={styles.featureRow}>
             <Ionicons name="call" size={20} color={colors.error} />
             <Text style={styles.featureText}>
               Auto-call primary contact (optional)
             </Text>
           </View>
-          
+
           <View style={styles.featureRow}>
             <Ionicons name="chatbubble" size={20} color={colors.error} />
-            <Text style={styles.featureText}>
-              Auto-send emergency texts
-            </Text>
+            <Text style={styles.featureText}>Auto-send emergency texts</Text>
           </View>
-          
+
           <View style={styles.featureRow}>
             <Ionicons name="eye-off" size={20} color={colors.error} />
             <Text style={styles.featureText}>
@@ -351,7 +374,7 @@ export default function EmergencySetupScreen() {
             <Text style={styles.nextButtonText}>Test Security Features</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.primary} />
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.skipButton}
             onPress={() => router.back()}

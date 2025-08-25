@@ -11,7 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, shadows, radius, spacing, typography } from '../../constants/theme';
+import {
+  colors,
+  shadows,
+  radius,
+  spacing,
+  typography,
+} from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { SecurityMonitor } from '../../components/security/SecurityMonitor';
 import { BiometricPrompt } from '../../components/security/BiometricPrompt';
@@ -89,7 +95,7 @@ const SecurityDashboard: React.FC = () => {
       ]);
 
       const recentThreats = threatDetectionEngine.getRecentThreats(24 * 60); // Last 24 hours
-      
+
       let activeFeatures = 0;
       const recommendations: string[] = [];
 
@@ -97,7 +103,9 @@ const SecurityDashboard: React.FC = () => {
       if (biometricEnabled) {
         activeFeatures++;
       } else {
-        recommendations.push('Enable biometric authentication for enhanced security');
+        recommendations.push(
+          'Enable biometric authentication for enhanced security'
+        );
       }
 
       // Check screen protection
@@ -144,7 +152,8 @@ const SecurityDashboard: React.FC = () => {
 
   const handleQuickAuth = async () => {
     try {
-      const isAvailable = await biometricAuthManager.checkBiometricAvailability();
+      const isAvailable =
+        await biometricAuthManager.checkBiometricAvailability();
       if (isAvailable.isAvailable) {
         setShowBiometricPrompt(true);
       } else {
@@ -199,9 +208,15 @@ const SecurityDashboard: React.FC = () => {
               <Ionicons name="finger-print" size={24} color={colors.primary} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Biometric Setup</Text>
-                <Text style={styles.setupCardDesc}>Configure fingerprint/Face ID</Text>
+                <Text style={styles.setupCardDesc}>
+                  Configure fingerprint/Face ID
+                </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />
             </TouchableOpacity>
           </View>
         );
@@ -216,9 +231,15 @@ const SecurityDashboard: React.FC = () => {
               <Ionicons name="warning" size={24} color={colors.warning} />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Emergency Setup</Text>
-                <Text style={styles.setupCardDesc}>Configure emergency contacts</Text>
+                <Text style={styles.setupCardDesc}>
+                  Configure emergency contacts
+                </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />
             </TouchableOpacity>
           </View>
         );
@@ -226,41 +247,69 @@ const SecurityDashboard: React.FC = () => {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.tabTitle}>Security Settings</Text>
-            
+
             <TouchableOpacity
               style={styles.setupCard}
               onPress={() => navigateToSetup('security-test')}
             >
-              <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+              <Ionicons
+                name="checkmark-circle"
+                size={24}
+                color={colors.success}
+              />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Security Test</Text>
-                <Text style={styles.setupCardDesc}>Test all security features</Text>
+                <Text style={styles.setupCardDesc}>
+                  Test all security features
+                </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.setupCard}
               onPress={() => stealthManager.toggleMode()}
             >
-              <Ionicons name="swap-horizontal" size={24} color={colors.primary} />
+              <Ionicons
+                name="swap-horizontal"
+                size={24}
+                color={colors.primary}
+              />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Toggle App Mode</Text>
                 <Text style={styles.setupCardDesc}>Switch between modes</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.setupCard}
               onPress={() => screenProtectionManager.enableScreenProtection()}
             >
-              <Ionicons name="shield-checkmark" size={24} color={colors.success} />
+              <Ionicons
+                name="shield-checkmark"
+                size={24}
+                color={colors.success}
+              />
               <View style={styles.setupCardContent}>
                 <Text style={styles.setupCardTitle}>Screen Protection</Text>
-                <Text style={styles.setupCardDesc}>Enable screenshot protection</Text>
+                <Text style={styles.setupCardDesc}>
+                  Enable screenshot protection
+                </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />
             </TouchableOpacity>
           </View>
         );
@@ -281,8 +330,11 @@ const SecurityDashboard: React.FC = () => {
   return (
     <ScreenProtector>
       <View style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-        
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={colors.background}
+        />
+
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -291,25 +343,30 @@ const SecurityDashboard: React.FC = () => {
               <Ionicons name="refresh" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
-          
+
           {/* Security Summary */}
           <View style={styles.summaryCard}>
             <View style={styles.summaryStatus}>
-              <View style={[
-                styles.statusIndicator,
-                { backgroundColor: getSecurityStatusColor() }
-              ]} />
+              <View
+                style={[
+                  styles.statusIndicator,
+                  { backgroundColor: getSecurityStatusColor() },
+                ]}
+              />
               <Text style={styles.statusText}>
                 {securitySummary.isSecure ? 'Secure' : 'Needs Attention'}
               </Text>
               <Text style={styles.featuresCount}>
-                {securitySummary.activeFeatures}/{securitySummary.totalFeatures} Active
+                {securitySummary.activeFeatures}/{securitySummary.totalFeatures}{' '}
+                Active
               </Text>
             </View>
-            
+
             {securitySummary.recommendedActions.length > 0 && (
               <View style={styles.recommendations}>
-                <Text style={styles.recommendationsTitle}>Recommendations:</Text>
+                <Text style={styles.recommendationsTitle}>
+                  Recommendations:
+                </Text>
                 {securitySummary.recommendedActions.map((action, index) => (
                   <Text key={index} style={styles.recommendationItem}>
                     • {action}
@@ -329,7 +386,7 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons name="finger-print" size={20} color={colors.background} />
             <Text style={styles.quickActionText}>Quick Auth</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={[styles.quickActionButton, styles.emergencyButton]}
             onPress={handleEmergencyAccess}
@@ -348,12 +405,16 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="analytics"
               size={20}
-              color={activeTab === 'monitor' ? colors.primary : colors.text.secondary}
+              color={
+                activeTab === 'monitor' ? colors.primary : colors.text.secondary
+              }
             />
-            <Text style={[
-              styles.tabText,
-              activeTab === 'monitor' && styles.activeTabText
-            ]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'monitor' && styles.activeTabText,
+              ]}
+            >
               Monitor
             </Text>
           </TouchableOpacity>
@@ -365,12 +426,16 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="finger-print"
               size={20}
-              color={activeTab === 'auth' ? colors.primary : colors.text.secondary}
+              color={
+                activeTab === 'auth' ? colors.primary : colors.text.secondary
+              }
             />
-            <Text style={[
-              styles.tabText,
-              activeTab === 'auth' && styles.activeTabText
-            ]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'auth' && styles.activeTabText,
+              ]}
+            >
               Auth
             </Text>
           </TouchableOpacity>
@@ -382,12 +447,18 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="warning"
               size={20}
-              color={activeTab === 'emergency' ? colors.primary : colors.text.secondary}
+              color={
+                activeTab === 'emergency'
+                  ? colors.primary
+                  : colors.text.secondary
+              }
             />
-            <Text style={[
-              styles.tabText,
-              activeTab === 'emergency' && styles.activeTabText
-            ]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'emergency' && styles.activeTabText,
+              ]}
+            >
               Emergency
             </Text>
           </TouchableOpacity>
@@ -399,21 +470,25 @@ const SecurityDashboard: React.FC = () => {
             <Ionicons
               name="settings"
               size={20}
-              color={activeTab === 'settings' ? colors.primary : colors.text.secondary}
+              color={
+                activeTab === 'settings'
+                  ? colors.primary
+                  : colors.text.secondary
+              }
             />
-            <Text style={[
-              styles.tabText,
-              activeTab === 'settings' && styles.activeTabText
-            ]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'settings' && styles.activeTabText,
+              ]}
+            >
               Settings
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Tab Content */}
-        <View style={styles.contentContainer}>
-          {renderTabContent()}
-        </View>
+        <View style={styles.contentContainer}>{renderTabContent()}</View>
 
         {/* Modals */}
         <BiometricPrompt
@@ -448,7 +523,10 @@ const SecurityDashboard: React.FC = () => {
               onClose={() => setShowEmergencyPanel(false)}
               onEmergencyTriggered={() => {
                 setShowEmergencyPanel(false);
-                Alert.alert('Emergency Triggered', 'Emergency protocols have been activated');
+                Alert.alert(
+                  'Emergency Triggered',
+                  'Emergency protocols have been activated'
+                );
               }}
             />
           </View>

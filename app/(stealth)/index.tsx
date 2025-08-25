@@ -8,7 +8,13 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
 

@@ -1,6 +1,6 @@
 /**
  * ESLint Configuration for DESIST Mobile App
- * 
+ *
  * Enforces style guide compliance and code quality standards
  * See /docs/STYLE_GUIDE.md for complete guidelines
  */
@@ -18,12 +18,15 @@ module.exports = {
     'no-restricted-syntax': [
       'error',
       {
-        selector: "Literal[value=/#[0-9A-Fa-f]{3,8}/]",
-        message: "❌ Hardcoded hex colors are forbidden. Use colors from '../constants/theme' instead. See /docs/STYLE_GUIDE.md",
+        selector: 'Literal[value=/#[0-9A-Fa-f]{3,8}/]',
+        message:
+          "❌ Hardcoded hex colors are forbidden. Use colors from '../constants/theme' instead. See /docs/STYLE_GUIDE.md",
       },
       {
-        selector: "Literal[value=/^(Arial|Helvetica|Times|Georgia|Verdana|System)$/]",
-        message: "❌ Hardcoded font families are forbidden. Use typography.fontFamily from '../constants/theme' instead. See /docs/STYLE_GUIDE.md",
+        selector:
+          'Literal[value=/^(Arial|Helvetica|Times|Georgia|Verdana|System)$/]',
+        message:
+          "❌ Hardcoded font families are forbidden. Use typography.fontFamily from '../constants/theme' instead. See /docs/STYLE_GUIDE.md",
       },
     ],
     'no-magic-numbers': [
@@ -32,7 +35,8 @@ module.exports = {
         ignore: [0, 1, -1, 2],
         ignoreArrayIndexes: true,
         detectObjects: false,
-        message: "Consider using spacing, radius, or typography constants from theme instead of magic numbers",
+        message:
+          'Consider using spacing, radius, or typography constants from theme instead of magic numbers',
       },
     ],
 
@@ -85,10 +89,6 @@ module.exports = {
     'react-native/react-native': true,
   },
   settings: {
-    'react-native/style-sheet-object-names': [
-      'StyleSheet',
-      'styles',
-      'style',
-    ],
+    'react-native/style-sheet-object-names': ['StyleSheet', 'styles', 'style'],
   },
 };

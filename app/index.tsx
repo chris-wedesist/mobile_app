@@ -10,7 +10,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, shadows, radius, typography, spacing } from '../constants/theme';
+import {
+  colors,
+  shadows,
+  radius,
+  typography,
+  spacing,
+} from '../constants/theme';
 import { stealthManager } from '../lib/stealth';
 import { biometricAuthManager } from '../lib/security/biometricAuth';
 import { screenProtectionManager } from '../lib/security/screenProtection';
@@ -43,7 +49,7 @@ const HomeScreen: React.FC = () => {
   const initializeApp = async () => {
     try {
       setIsLoading(true);
-      
+
       // Initialize all security systems
       await Promise.all([
         stealthManager.initialize(),
@@ -58,7 +64,7 @@ const HomeScreen: React.FC = () => {
 
       // Get current app status
       await updateAppStatus();
-      
+
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to initialize app:', error);
@@ -115,10 +121,12 @@ const HomeScreen: React.FC = () => {
     try {
       await stealthManager.toggleMode();
       await updateAppStatus();
-      
+
       Alert.alert(
         'Mode Switched',
-        `App switched to ${appStatus.mode === 'stealth' ? 'normal' : 'stealth'} mode`,
+        `App switched to ${
+          appStatus.mode === 'stealth' ? 'normal' : 'stealth'
+        } mode`,
         [{ text: 'OK' }]
       );
     } catch (error) {
@@ -129,7 +137,8 @@ const HomeScreen: React.FC = () => {
 
   const handleQuickAuth = async () => {
     try {
-      const availability = await biometricAuthManager.checkBiometricAvailability();
+      const availability =
+        await biometricAuthManager.checkBiometricAvailability();
       if (availability.isAvailable) {
         const result = await biometricAuthManager.authenticateWithBiometric();
         if (result.success) {
@@ -144,10 +153,10 @@ const HomeScreen: React.FC = () => {
           'Biometric authentication is not available on this device.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Setup', 
-              onPress: () => router.push('/biometric-setup' as any)
-            }
+            {
+              text: 'Setup',
+              onPress: () => router.push('/biometric-setup' as any),
+            },
           ]
         );
       }
@@ -169,13 +178,16 @@ const HomeScreen: React.FC = () => {
           onPress: async () => {
             try {
               await emergencyProtocolManager.triggerEmergency('manual');
-              Alert.alert('Emergency Triggered', 'Emergency protocols activated');
+              Alert.alert(
+                'Emergency Triggered',
+                'Emergency protocols activated'
+              );
             } catch (error) {
               console.error('Emergency trigger error:', error);
               Alert.alert('Error', 'Failed to trigger emergency protocols');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -228,40 +240,71 @@ const HomeScreen: React.FC = () => {
   return (
     <ScreenProtector>
       <View style={styles.container}>
-        <StatusBar 
-          barStyle={appStatus.mode === 'stealth' ? 'light-content' : 'dark-content'}
-          backgroundColor={appStatus.mode === 'stealth' ? colors.text.primary : colors.background}
+        <StatusBar
+          barStyle={
+            appStatus.mode === 'stealth' ? 'light-content' : 'dark-content'
+          }
+          backgroundColor={
+            appStatus.mode === 'stealth'
+              ? colors.text.primary
+              : colors.background
+          }
         />
-        
+
         {/* Header */}
-        <View style={[
-          styles.header,
-          { backgroundColor: appStatus.mode === 'stealth' ? colors.text.primary : colors.background }
-        ]}>
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor:
+                appStatus.mode === 'stealth'
+                  ? colors.text.primary
+                  : colors.background,
+            },
+          ]}
+        >
           <View style={styles.headerContent}>
             <View>
-              <Text style={[
-                styles.appTitle,
-                { color: appStatus.mode === 'stealth' ? colors.background : colors.text.primary }
-              ]}>
+              <Text
+                style={[
+                  styles.appTitle,
+                  {
+                    color:
+                      appStatus.mode === 'stealth'
+                        ? colors.background
+                        : colors.text.primary,
+                  },
+                ]}
+              >
                 DESIST
               </Text>
-              <Text style={[
-                styles.appSubtitle,
-                { color: appStatus.mode === 'stealth' ? colors.text.muted : colors.text.secondary }
-              ]}>
+              <Text
+                style={[
+                  styles.appSubtitle,
+                  {
+                    color:
+                      appStatus.mode === 'stealth'
+                        ? colors.text.muted
+                        : colors.text.secondary,
+                  },
+                ]}
+              >
                 Digital Security & Privacy
               </Text>
             </View>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.refreshButton}
               onPress={updateAppStatus}
             >
-              <Ionicons 
-                name="refresh" 
-                size={24} 
-                color={appStatus.mode === 'stealth' ? colors.background : colors.primary} 
+              <Ionicons
+                name="refresh"
+                size={24}
+                color={
+                  appStatus.mode === 'stealth'
+                    ? colors.background
+                    : colors.primary
+                }
               />
             </TouchableOpacity>
           </View>
@@ -280,31 +323,35 @@ const HomeScreen: React.FC = () => {
                 {appStatus.mode.toUpperCase()} MODE
               </Text>
             </View>
-            
+
             <View style={styles.securityLevel}>
-              <View style={[
-                styles.securityDot,
-                { backgroundColor: getSecurityColor() }
-              ]} />
+              <View
+                style={[
+                  styles.securityDot,
+                  { backgroundColor: getSecurityColor() },
+                ]}
+              />
               <Text style={styles.securityText}>
                 Security: {appStatus.securityLevel.toUpperCase()}
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.featuresStatus}>
             <Text style={styles.featuresText}>
               {appStatus.activeFeatures}/5 Security Features Active
             </Text>
-            
+
             <View style={styles.progressBar}>
-              <View style={[
-                styles.progressFill,
-                { 
-                  width: `${(appStatus.activeFeatures / 5) * 100}%`,
-                  backgroundColor: getSecurityColor()
-                }
-              ]} />
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${(appStatus.activeFeatures / 5) * 100}%`,
+                    backgroundColor: getSecurityColor(),
+                  },
+                ]}
+              />
             </View>
           </View>
         </View>
@@ -312,14 +359,22 @@ const HomeScreen: React.FC = () => {
         {/* Quick Actions */}
         <View style={styles.quickActions}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
-          
+
           <TouchableOpacity
             style={[styles.actionButton, styles.primaryAction]}
             onPress={() => router.push('/security-dashboard' as any)}
           >
-            <Ionicons name="shield-checkmark" size={24} color={colors.background} />
+            <Ionicons
+              name="shield-checkmark"
+              size={24}
+              color={colors.background}
+            />
             <Text style={styles.actionText}>Security Dashboard</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.background} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.background}
+            />
           </TouchableOpacity>
 
           <View style={styles.actionRow}>
@@ -327,7 +382,11 @@ const HomeScreen: React.FC = () => {
               style={[styles.actionButton, styles.secondaryAction]}
               onPress={handleModeSwitch}
             >
-              <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
+              <Ionicons
+                name="swap-horizontal"
+                size={20}
+                color={colors.primary}
+              />
               <Text style={[styles.actionText, { color: colors.primary }]}>
                 Switch Mode
               </Text>
@@ -359,7 +418,7 @@ const HomeScreen: React.FC = () => {
         {/* Setup Cards */}
         <View style={styles.setupSection}>
           <Text style={styles.sectionTitle}>Security Setup</Text>
-          
+
           <View style={styles.setupGrid}>
             <TouchableOpacity
               style={styles.setupCard}
@@ -383,7 +442,11 @@ const HomeScreen: React.FC = () => {
               style={styles.setupCard}
               onPress={() => router.push('/security-test' as any)}
             >
-              <Ionicons name="checkmark-circle" size={32} color={colors.success} />
+              <Ionicons
+                name="checkmark-circle"
+                size={32}
+                color={colors.success}
+              />
               <Text style={styles.setupTitle}>Test</Text>
               <Text style={styles.setupSubtitle}>Security Check</Text>
             </TouchableOpacity>

@@ -9,7 +9,13 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../../constants/theme';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
 
 interface ScreenProtectorProps {
@@ -27,12 +33,17 @@ export const ScreenProtector: React.FC<ScreenProtectorProps> = ({
   privacyMessage = 'App is protected',
   privacyIcon = 'shield-checkmark',
 }) => {
-  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
+  const [appState, setAppState] = useState<AppStateStatus>(
+    AppState.currentState
+  );
   const [shouldShowPrivacy, setShouldShowPrivacy] = useState(false);
   const [shouldBlur, setShouldBlur] = useState(false);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
 
     // Initialize screen protection
     initializeProtection();
@@ -54,14 +65,18 @@ export const ScreenProtector: React.FC<ScreenProtectorProps> = ({
   const updateProtectionState = () => {
     const config = screenProtectionManager.getConfig();
     const isInBackground = appState === 'background' || appState === 'inactive';
-    
-    setShouldShowPrivacy(config.showPrivacyScreen && isInBackground && showPrivacyScreen);
+
+    setShouldShowPrivacy(
+      config.showPrivacyScreen && isInBackground && showPrivacyScreen
+    );
     setShouldBlur(config.blurOnBackground && isInBackground);
   };
 
   const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    const isGoingToBackground = nextAppState === 'background' || nextAppState === 'inactive';
-    const isComingToForeground = nextAppState === 'active' && appState !== 'active';
+    const isGoingToBackground =
+      nextAppState === 'background' || nextAppState === 'inactive';
+    const isComingToForeground =
+      nextAppState === 'active' && appState !== 'active';
 
     if (isGoingToBackground) {
       // App is going to background - activate privacy protection
@@ -99,7 +114,7 @@ export const ScreenProtector: React.FC<ScreenProtectorProps> = ({
   return (
     <View style={styles.container}>
       {children}
-      
+
       {shouldBlur && renderBlurredContent()}
       {shouldShowPrivacy && !shouldBlur && renderPrivacyScreen()}
     </View>
@@ -137,10 +152,10 @@ export const ScreenProtectionStatus: React.FC = () => {
 
   useEffect(() => {
     updateStatus();
-    
+
     // Update status periodically
     const interval = setInterval(updateStatus, 5000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -162,19 +177,23 @@ export const ScreenProtectionStatus: React.FC = () => {
           size={20}
           color={status.isActive ? colors.success : colors.text.muted}
         />
-        <Text style={[
-          styles.statusText,
-          { color: status.isActive ? colors.success : colors.text.muted }
-        ]}>
+        <Text
+          style={[
+            styles.statusText,
+            { color: status.isActive ? colors.success : colors.text.muted },
+          ]}
+        >
           Screen Protection {status.isActive ? 'Active' : 'Inactive'}
         </Text>
       </View>
-      
+
       {status.isActive && (
         <View style={styles.statusDetails}>
           <View style={styles.statusDetailRow}>
             <Ionicons
-              name={status.screenshotsBlocked ? 'checkmark-circle' : 'close-circle'}
+              name={
+                status.screenshotsBlocked ? 'checkmark-circle' : 'close-circle'
+              }
               size={16}
               color={status.screenshotsBlocked ? colors.success : colors.error}
             />
@@ -182,10 +201,12 @@ export const ScreenProtectionStatus: React.FC = () => {
               Screenshots {status.screenshotsBlocked ? 'Blocked' : 'Allowed'}
             </Text>
           </View>
-          
+
           <View style={styles.statusDetailRow}>
             <Ionicons
-              name={status.recordingBlocked ? 'checkmark-circle' : 'close-circle'}
+              name={
+                status.recordingBlocked ? 'checkmark-circle' : 'close-circle'
+              }
               size={16}
               color={status.recordingBlocked ? colors.success : colors.error}
             />
@@ -193,10 +214,12 @@ export const ScreenProtectionStatus: React.FC = () => {
               Recording {status.recordingBlocked ? 'Blocked' : 'Allowed'}
             </Text>
           </View>
-          
+
           <View style={styles.statusDetailRow}>
             <Ionicons
-              name={status.backgroundProtected ? 'checkmark-circle' : 'close-circle'}
+              name={
+                status.backgroundProtected ? 'checkmark-circle' : 'close-circle'
+              }
               size={16}
               color={status.backgroundProtected ? colors.success : colors.error}
             />

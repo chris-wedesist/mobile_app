@@ -5,9 +5,9 @@ import { colors, typography } from '../constants/theme';
 export default function NoHandsIcon({ size = 300 }) {
   // Calculate points for octagon
   const center = size / 2;
-  const radius = (size * 0.45);  // Slightly larger proportion of the size
+  const radius = size * 0.45; // Slightly larger proportion of the size
   const points = [];
-  
+
   // Generate 8 points for octagon
   for (let i = 0; i < 8; i++) {
     const angle = (i * Math.PI) / 4 - Math.PI / 8;
@@ -26,16 +26,17 @@ export default function NoHandsIcon({ size = 300 }) {
           stroke={colors.surface}
           strokeWidth={size * 0.02}
         />
-        
+
         {/* DESIST! text */}
         <Text
           x={center}
           y={center + size * 0.08}
-          fontSize={size * 0.18}  // Slightly larger text proportion
+          fontSize={size * 0.18} // Slightly larger text proportion
           fontWeight="bold"
           fill={colors.surface}
           textAnchor="middle"
-          fontFamily={typography.fontFamily.bold}>
+          fontFamily={typography.fontFamily.bold}
+        >
           DESIST!
         </Text>
       </Svg>

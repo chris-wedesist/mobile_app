@@ -1,4 +1,10 @@
-import { colors, typography, spacing, radius, shadows } from '@/constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState } from 'react';

@@ -65,7 +65,9 @@ export class ThreatDetectionEngine {
 
     try {
       // Load configuration
-      const storedConfig = await AsyncStorage.getItem(THREAT_DETECTION_CONFIG_KEY);
+      const storedConfig = await AsyncStorage.getItem(
+        THREAT_DETECTION_CONFIG_KEY
+      );
       if (storedConfig) {
         this.config = {
           ...DEFAULT_CONFIG,
@@ -174,7 +176,6 @@ export class ThreatDetectionEngine {
       if (threats.length > 0 && this.config.autoResponseEnabled) {
         await this.evaluateAutoResponse();
       }
-
     } catch (error) {
       console.error('Error during security scan:', error);
     }
@@ -202,7 +203,7 @@ export class ThreatDetectionEngine {
 
       // Additional jailbreak checks would go here
       // For now, this is a basic implementation
-      
+
       return null;
     } catch (error) {
       console.error('Error checking jailbreak status:', error);
@@ -214,7 +215,7 @@ export class ThreatDetectionEngine {
     try {
       // Check if the app is in development mode
       const isDev = __DEV__;
-      
+
       if (isDev) {
         return {
           id: `debugging_${Date.now()}`,
@@ -250,7 +251,11 @@ export class ThreatDetectionEngine {
     }
   }
 
-  async logUsagePattern(action: string, duration?: number, details?: any): Promise<void> {
+  async logUsagePattern(
+    action: string,
+    duration?: number,
+    details?: any
+  ): Promise<void> {
     if (!this.config.monitorUsagePatterns) return;
 
     const pattern: UsagePattern = {
@@ -278,14 +283,18 @@ export class ThreatDetectionEngine {
     await this.saveUsagePatterns();
   }
 
-  private async detectUnusualPattern(pattern: UsagePattern): Promise<SecurityThreat | null> {
+  private async detectUnusualPattern(
+    pattern: UsagePattern
+  ): Promise<SecurityThreat | null> {
     // Simple unusual pattern detection
-    const recentPatterns = this.usagePatterns.filter(p => 
-      Date.now() - p.timestamp.getTime() < 60000 // Last minute
+    const recentPatterns = this.usagePatterns.filter(
+      (p) => Date.now() - p.timestamp.getTime() < 60000 // Last minute
     );
 
     // Check for rapid repeated actions
-    const sameActionPatterns = recentPatterns.filter(p => p.action === pattern.action);
+    const sameActionPatterns = recentPatterns.filter(
+      (p) => p.action === pattern.action
+    );
     if (sameActionPatterns.length > 10) {
       return {
         id: `unusual_pattern_${Date.now()}`,
@@ -312,16 +321,20 @@ export class ThreatDetectionEngine {
     }
 
     await this.saveSecurityLog();
-    console.warn(`Security threat detected: ${threat.type} - ${threat.description}`);
+    console.warn(
+      `Security threat detected: ${threat.type} - ${threat.description}`
+    );
   }
 
   private async evaluateAutoResponse(): Promise<void> {
-    const recentThreats = this.securityLog.filter(threat =>
-      Date.now() - threat.timestamp.getTime() < 300000 // Last 5 minutes
+    const recentThreats = this.securityLog.filter(
+      (threat) => Date.now() - threat.timestamp.getTime() < 300000 // Last 5 minutes
     );
 
     if (recentThreats.length >= this.config.alertThreshold) {
-      console.warn(`Threat threshold exceeded: ${recentThreats.length} threats in 5 minutes`);
+      console.warn(
+        `Threat threshold exceeded: ${recentThreats.length} threats in 5 minutes`
+      );
       // Here you could trigger emergency protocols or other auto-responses
       // For now, just log the event
     }
@@ -332,8 +345,10 @@ export class ThreatDetectionEngine {
   }
 
   getRecentThreats(minutes: number = 60): SecurityThreat[] {
-    const cutoff = Date.now() - (minutes * 60 * 1000);
-    return this.securityLog.filter(threat => threat.timestamp.getTime() > cutoff);
+    const cutoff = Date.now() - minutes * 60 * 1000;
+    return this.securityLog.filter(
+      (threat) => threat.timestamp.getTime() > cutoff
+    );
   }
 
   getThreatCount(): number {
@@ -371,8 +386,12 @@ export class ThreatDetectionEngine {
     riskLevel: 'low' | 'medium' | 'high';
   } {
     const recentThreats = this.getRecentThreats(60);
-    const criticalThreats = recentThreats.filter(t => t.severity === 'critical').length;
-    const highThreats = recentThreats.filter(t => t.severity === 'high').length;
+    const criticalThreats = recentThreats.filter(
+      (t) => t.severity === 'critical'
+    ).length;
+    const highThreats = recentThreats.filter(
+      (t) => t.severity === 'high'
+    ).length;
 
     let riskLevel: 'low' | 'medium' | 'high' = 'low';
     if (criticalThreats > 0 || highThreats > 2) {
@@ -384,14 +403,20 @@ export class ThreatDetectionEngine {
     return {
       monitoring: this.monitoring,
       threatsDetected: this.threatCount,
-      lastScanTime: this.securityLog.length > 0 ? this.securityLog[this.securityLog.length - 1].timestamp : null,
+      lastScanTime:
+        this.securityLog.length > 0
+          ? this.securityLog[this.securityLog.length - 1].timestamp
+          : null,
       riskLevel,
     };
   }
 
   private async saveConfig(): Promise<void> {
     try {
-      await AsyncStorage.setItem(THREAT_DETECTION_CONFIG_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(
+        THREAT_DETECTION_CONFIG_KEY,
+        JSON.stringify(this.config)
+      );
     } catch (error) {
       console.error('Failed to save threat detection config:', error);
     }
@@ -399,7 +424,10 @@ export class ThreatDetectionEngine {
 
   private async saveSecurityLog(): Promise<void> {
     try {
-      await AsyncStorage.setItem(SECURITY_LOG_KEY, JSON.stringify(this.securityLog));
+      await AsyncStorage.setItem(
+        SECURITY_LOG_KEY,
+        JSON.stringify(this.securityLog)
+      );
     } catch (error) {
       console.error('Failed to save security log:', error);
     }
@@ -407,7 +435,10 @@ export class ThreatDetectionEngine {
 
   private async saveUsagePatterns(): Promise<void> {
     try {
-      await AsyncStorage.setItem(USAGE_PATTERNS_KEY, JSON.stringify(this.usagePatterns));
+      await AsyncStorage.setItem(
+        USAGE_PATTERNS_KEY,
+        JSON.stringify(this.usagePatterns)
+      );
     } catch (error) {
       console.error('Failed to save usage patterns:', error);
     }
@@ -432,8 +463,11 @@ export class ThreatDetectionEngine {
 export const threatDetectionEngine = ThreatDetectionEngine.getInstance();
 
 // Export helper functions
-export const startThreatMonitoring = () => threatDetectionEngine.startMonitoring();
-export const stopThreatMonitoring = () => threatDetectionEngine.stopMonitoring();
+export const startThreatMonitoring = () =>
+  threatDetectionEngine.startMonitoring();
+export const stopThreatMonitoring = () =>
+  threatDetectionEngine.stopMonitoring();
 export const logUsage = (action: string, duration?: number, details?: any) =>
   threatDetectionEngine.logUsagePattern(action, duration, details);
-export const getSecurityStatus = () => threatDetectionEngine.getSecurityStatus();
+export const getSecurityStatus = () =>
+  threatDetectionEngine.getSecurityStatus();

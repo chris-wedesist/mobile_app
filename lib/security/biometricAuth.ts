@@ -48,7 +48,7 @@ export class BiometricAuthManager {
           lastAuthTime: new Date(JSON.parse(storedConfig).lastAuthTime),
         };
       }
-      
+
       // Check biometric availability
       await this.checkBiometricAvailability();
       this.initialized = true;
@@ -68,7 +68,8 @@ export class BiometricAuthManager {
     try {
       const isHardwareAvailable = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      const supportedTypes =
+        await LocalAuthentication.supportedAuthenticationTypesAsync();
 
       if (!isHardwareAvailable || !isEnrolled) {
         return {
@@ -80,18 +81,28 @@ export class BiometricAuthManager {
 
       // Determine the primary biometric type
       let biometricType: BiometricType = 'none';
-      if (supportedTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+      if (
+        supportedTypes.includes(
+          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+        )
+      ) {
         biometricType = 'facial';
-      } else if (supportedTypes.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+      } else if (
+        supportedTypes.includes(
+          LocalAuthentication.AuthenticationType.FINGERPRINT
+        )
+      ) {
         biometricType = 'fingerprint';
-      } else if (supportedTypes.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+      } else if (
+        supportedTypes.includes(LocalAuthentication.AuthenticationType.IRIS)
+      ) {
         biometricType = 'iris';
       }
 
       return {
         isAvailable: true,
         biometricType,
-        supportedTypes: supportedTypes.map(type => {
+        supportedTypes: supportedTypes.map((type) => {
           switch (type) {
             case LocalAuthentication.AuthenticationType.FINGERPRINT:
               return 'fingerprint';
@@ -121,7 +132,7 @@ export class BiometricAuthManager {
 
     try {
       const availability = await this.checkBiometricAvailability();
-      
+
       if (!availability.isAvailable) {
         console.warn('Biometric authentication not available');
         return false;
@@ -183,10 +194,10 @@ export class BiometricAuthManager {
 
     try {
       const availability = await this.checkBiometricAvailability();
-      
+
       if (!availability.isAvailable) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: 'Biometric authentication not available',
           fallbackAvailable: this.config.fallbackToPin,
         };
@@ -202,23 +213,23 @@ export class BiometricAuthManager {
       if (result.success) {
         this.config.lastAuthTime = new Date();
         await this.saveConfig();
-        
+
         return { success: true };
       } else {
         let errorMsg = 'Authentication failed';
         if ('error' in result && result.error) {
           errorMsg = result.error;
         }
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: errorMsg,
           fallbackAvailable: this.config.fallbackToPin,
         };
       }
     } catch (error) {
       console.error('Biometric authentication error:', error);
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: 'Authentication system error',
         fallbackAvailable: this.config.fallbackToPin,
       };
@@ -236,7 +247,7 @@ export class BiometricAuthManager {
 
     const now = new Date();
     const timeSinceAuth = now.getTime() - this.config.lastAuthTime.getTime();
-    
+
     return timeSinceAuth > this.config.maxAuthInterval;
   }
 
@@ -272,7 +283,10 @@ export class BiometricAuthManager {
 
   private async saveConfig(): Promise<void> {
     try {
-      await AsyncStorage.setItem(BIOMETRIC_CONFIG_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(
+        BIOMETRIC_CONFIG_KEY,
+        JSON.stringify(this.config)
+      );
     } catch (error) {
       console.error('Failed to save biometric config:', error);
       throw error;
@@ -297,7 +311,9 @@ export const biometricAuthManager = BiometricAuthManager.getInstance();
 
 // Export helper functions
 export const enableBiometric = () => biometricAuthManager.enableBiometricAuth();
-export const authenticateWithBiometric = (prompt?: string) => 
+export const authenticateWithBiometric = (prompt?: string) =>
   biometricAuthManager.authenticateWithBiometric(prompt);
-export const isAuthRequired = () => biometricAuthManager.isAuthenticationRequired();
-export const checkBiometricAvailable = () => biometricAuthManager.checkBiometricAvailability();
+export const isAuthRequired = () =>
+  biometricAuthManager.isAuthenticationRequired();
+export const checkBiometricAvailable = () =>
+  biometricAuthManager.checkBiometricAvailability();

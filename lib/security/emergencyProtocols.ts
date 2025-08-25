@@ -34,7 +34,8 @@ const DEFAULT_CONFIG: EmergencyConfig = {
   autoCallEnabled: false,
   autoTextEnabled: true,
   locationSharingEnabled: false,
-  emergencyMessage: 'This is an emergency alert from DESIST app. I may need assistance.',
+  emergencyMessage:
+    'This is an emergency alert from DESIST app. I may need assistance.',
   quickResetEnabled: true,
   remoteDisableEnabled: false,
   lastEmergencyTime: new Date(0),
@@ -64,7 +65,9 @@ export class EmergencyProtocolManager {
         this.config = {
           ...DEFAULT_CONFIG,
           ...JSON.parse(storedConfig),
-          lastEmergencyTime: new Date(JSON.parse(storedConfig).lastEmergencyTime),
+          lastEmergencyTime: new Date(
+            JSON.parse(storedConfig).lastEmergencyTime
+          ),
         };
       }
 
@@ -77,12 +80,16 @@ export class EmergencyProtocolManager {
     }
   }
 
-  async addEmergencyContact(contact: Omit<EmergencyContact, 'id'>): Promise<string> {
+  async addEmergencyContact(
+    contact: Omit<EmergencyContact, 'id'>
+  ): Promise<string> {
     if (!this.initialized) {
       await this.initialize();
     }
 
-    const id = `contact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `contact_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     const newContact: EmergencyContact = {
       ...contact,
       id,
@@ -90,15 +97,17 @@ export class EmergencyProtocolManager {
 
     // If this is set as primary, remove primary status from others
     if (contact.isPrimary) {
-      this.config.emergencyContacts = this.config.emergencyContacts.map(c => ({
-        ...c,
-        isPrimary: false,
-      }));
+      this.config.emergencyContacts = this.config.emergencyContacts.map(
+        (c) => ({
+          ...c,
+          isPrimary: false,
+        })
+      );
     }
 
     this.config.emergencyContacts.push(newContact);
     await this.saveConfig();
-    
+
     return id;
   }
 
@@ -109,7 +118,7 @@ export class EmergencyProtocolManager {
 
     const initialLength = this.config.emergencyContacts.length;
     this.config.emergencyContacts = this.config.emergencyContacts.filter(
-      contact => contact.id !== contactId
+      (contact) => contact.id !== contactId
     );
 
     if (this.config.emergencyContacts.length < initialLength) {
@@ -119,22 +128,29 @@ export class EmergencyProtocolManager {
     return false;
   }
 
-  async updateEmergencyContact(contactId: string, updates: Partial<EmergencyContact>): Promise<boolean> {
+  async updateEmergencyContact(
+    contactId: string,
+    updates: Partial<EmergencyContact>
+  ): Promise<boolean> {
     if (!this.initialized) {
       await this.initialize();
     }
 
-    const contactIndex = this.config.emergencyContacts.findIndex(c => c.id === contactId);
+    const contactIndex = this.config.emergencyContacts.findIndex(
+      (c) => c.id === contactId
+    );
     if (contactIndex === -1) {
       return false;
     }
 
     // If setting as primary, remove primary from others
     if (updates.isPrimary) {
-      this.config.emergencyContacts = this.config.emergencyContacts.map(c => ({
-        ...c,
-        isPrimary: false,
-      }));
+      this.config.emergencyContacts = this.config.emergencyContacts.map(
+        (c) => ({
+          ...c,
+          isPrimary: false,
+        })
+      );
     }
 
     this.config.emergencyContacts[contactIndex] = {
@@ -146,7 +162,9 @@ export class EmergencyProtocolManager {
     return true;
   }
 
-  async triggerEmergency(triggerType: 'manual' | 'panic_gesture' | 'remote'): Promise<boolean> {
+  async triggerEmergency(
+    triggerType: 'manual' | 'panic_gesture' | 'remote'
+  ): Promise<boolean> {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -164,9 +182,9 @@ export class EmergencyProtocolManager {
     try {
       this.emergencyActive = true;
       this.config.lastEmergencyTime = new Date();
-      
+
       console.log(`Emergency triggered by: ${triggerType}`);
-      
+
       // Log the emergency event
       await this.logEmergencyEvent(triggerType);
 
@@ -210,7 +228,9 @@ export class EmergencyProtocolManager {
   }
 
   private async makeEmergencyCall(): Promise<void> {
-    const primaryContact = this.config.emergencyContacts.find(c => c.isPrimary);
+    const primaryContact = this.config.emergencyContacts.find(
+      (c) => c.isPrimary
+    );
     if (!primaryContact) {
       console.warn('No primary emergency contact configured');
       return;
@@ -219,7 +239,7 @@ export class EmergencyProtocolManager {
     try {
       const phoneUrl = `tel:${primaryContact.phoneNumber}`;
       const canOpen = await Linking.canOpenURL(phoneUrl);
-      
+
       if (canOpen) {
         await Linking.openURL(phoneUrl);
         console.log(`Emergency call initiated to ${primaryContact.name}`);
@@ -235,18 +255,23 @@ export class EmergencyProtocolManager {
     // Note: SMS sending would require expo-sms and proper implementation
     // This is a placeholder for the text messaging functionality
     const contacts = this.config.emergencyContacts.slice(0, 3); // Limit to first 3 contacts
-    
+
     for (const contact of contacts) {
       try {
-        const smsUrl = `sms:${contact.phoneNumber}?body=${encodeURIComponent(this.config.emergencyMessage)}`;
+        const smsUrl = `sms:${contact.phoneNumber}?body=${encodeURIComponent(
+          this.config.emergencyMessage
+        )}`;
         const canOpen = await Linking.canOpenURL(smsUrl);
-        
+
         if (canOpen) {
           await Linking.openURL(smsUrl);
           console.log(`Emergency text prepared for ${contact.name}`);
         }
       } catch (error) {
-        console.error(`Failed to send emergency text to ${contact.name}:`, error);
+        console.error(
+          `Failed to send emergency text to ${contact.name}:`,
+          error
+        );
       }
     }
   }
@@ -261,10 +286,10 @@ export class EmergencyProtocolManager {
     try {
       // Reset to stealth mode
       await stealthManager.resetToStealth();
-      
+
       // Disable screen protection temporarily for emergency
       await screenProtectionManager.emergencyDisable();
-      
+
       console.log('Quick emergency reset completed');
     } catch (error) {
       console.error('Failed to perform quick reset:', error);
@@ -279,7 +304,7 @@ export class EmergencyProtocolManager {
 
     // Clear old taps (older than 3 seconds)
     this.panicGestureSequence = this.panicGestureSequence.filter(
-      tap => now - tap < 3000
+      (tap) => now - tap < 3000
     );
 
     // Check for panic pattern: 5 rapid taps within 3 seconds
@@ -343,9 +368,9 @@ export class EmergencyProtocolManager {
 
       const existingLog = await AsyncStorage.getItem(EMERGENCY_LOG_KEY);
       const log = existingLog ? JSON.parse(existingLog) : [];
-      
+
       log.push(logEntry);
-      
+
       // Keep only last 10 emergency events
       if (log.length > 10) {
         log.splice(0, log.length - 10);
@@ -369,7 +394,10 @@ export class EmergencyProtocolManager {
 
   private async saveConfig(): Promise<void> {
     try {
-      await AsyncStorage.setItem(EMERGENCY_CONFIG_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(
+        EMERGENCY_CONFIG_KEY,
+        JSON.stringify(this.config)
+      );
     } catch (error) {
       console.error('Failed to save emergency config:', error);
       throw error;
@@ -389,8 +417,10 @@ export class EmergencyProtocolManager {
 export const emergencyProtocolManager = EmergencyProtocolManager.getInstance();
 
 // Export helper functions
-export const triggerEmergency = (triggerType: 'manual' | 'panic_gesture' | 'remote') =>
-  emergencyProtocolManager.triggerEmergency(triggerType);
+export const triggerEmergency = (
+  triggerType: 'manual' | 'panic_gesture' | 'remote'
+) => emergencyProtocolManager.triggerEmergency(triggerType);
 export const addEmergencyContact = (contact: Omit<EmergencyContact, 'id'>) =>
   emergencyProtocolManager.addEmergencyContact(contact);
-export const registerPanicTap = () => emergencyProtocolManager.registerPanicGestureTap();
+export const registerPanicTap = () =>
+  emergencyProtocolManager.registerPanicGestureTap();

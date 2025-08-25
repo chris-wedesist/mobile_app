@@ -47,7 +47,9 @@ export class SecureStorageManager {
 
     try {
       // Load configuration
-      const storedConfig = await AsyncStorage.getItem(SECURE_STORAGE_CONFIG_KEY);
+      const storedConfig = await AsyncStorage.getItem(
+        SECURE_STORAGE_CONFIG_KEY
+      );
       if (storedConfig) {
         this.config = {
           ...DEFAULT_CONFIG,
@@ -75,14 +77,19 @@ export class SecureStorageManager {
   private async initializeEncryptionKey(): Promise<void> {
     try {
       // Try to get existing encryption key
-      const existingKey = await SecureStore.getItemAsync('desist_encryption_key');
-      
+      const existingKey = await SecureStore.getItemAsync(
+        'desist_encryption_key'
+      );
+
       if (existingKey) {
         this.encryptionKey = existingKey;
       } else {
         // Generate new encryption key
-        this.encryptionKey = CryptoJS.lib.WordArray.random(256/8).toString();
-        await SecureStore.setItemAsync('desist_encryption_key', this.encryptionKey);
+        this.encryptionKey = CryptoJS.lib.WordArray.random(256 / 8).toString();
+        await SecureStore.setItemAsync(
+          'desist_encryption_key',
+          this.encryptionKey
+        );
       }
     } catch (error) {
       console.error('Failed to initialize encryption key:', error);
@@ -91,22 +98,28 @@ export class SecureStorageManager {
     }
   }
 
-  async setItem(key: string, value: string, options?: {
-    expirationDays?: number;
-    useSecureStore?: boolean;
-    encrypt?: boolean;
-  }): Promise<boolean> {
+  async setItem(
+    key: string,
+    value: string,
+    options?: {
+      expirationDays?: number;
+      useSecureStore?: boolean;
+      encrypt?: boolean;
+    }
+  ): Promise<boolean> {
     if (!this.initialized) {
       await this.initialize();
     }
 
     try {
-      const useSecureStore = options?.useSecureStore ?? this.config.useSecureStore;
+      const useSecureStore =
+        options?.useSecureStore ?? this.config.useSecureStore;
       const encrypt = options?.encrypt ?? this.config.encryptData;
-      const expirationDays = options?.expirationDays ?? this.config.defaultExpirationDays;
+      const expirationDays =
+        options?.expirationDays ?? this.config.defaultExpirationDays;
 
       let processedValue = value;
-      
+
       // Encrypt if requested
       if (encrypt) {
         processedValue = this.encryptValue(value);
@@ -142,18 +155,22 @@ export class SecureStorageManager {
     }
   }
 
-  async getItem(key: string, options?: {
-    useSecureStore?: boolean;
-  }): Promise<string | null> {
+  async getItem(
+    key: string,
+    options?: {
+      useSecureStore?: boolean;
+    }
+  ): Promise<string | null> {
     if (!this.initialized) {
       await this.initialize();
     }
 
     try {
-      const useSecureStore = options?.useSecureStore ?? this.config.useSecureStore;
-      
+      const useSecureStore =
+        options?.useSecureStore ?? this.config.useSecureStore;
+
       let serializedItem: string | null;
-      
+
       // Get from appropriate storage
       if (useSecureStore) {
         serializedItem = await SecureStore.getItemAsync(key);
@@ -168,7 +185,10 @@ export class SecureStorageManager {
       const storageItem: StorageItem = JSON.parse(serializedItem);
 
       // Check expiration
-      if (storageItem.expiresAt && new Date() > new Date(storageItem.expiresAt)) {
+      if (
+        storageItem.expiresAt &&
+        new Date() > new Date(storageItem.expiresAt)
+      ) {
         // Item has expired, remove it
         await this.removeItem(key, { useSecureStore });
         return null;
@@ -188,16 +208,20 @@ export class SecureStorageManager {
     }
   }
 
-  async removeItem(key: string, options?: {
-    useSecureStore?: boolean;
-  }): Promise<boolean> {
+  async removeItem(
+    key: string,
+    options?: {
+      useSecureStore?: boolean;
+    }
+  ): Promise<boolean> {
     if (!this.initialized) {
       await this.initialize();
     }
 
     try {
-      const useSecureStore = options?.useSecureStore ?? this.config.useSecureStore;
-      
+      const useSecureStore =
+        options?.useSecureStore ?? this.config.useSecureStore;
+
       if (useSecureStore) {
         await SecureStore.deleteItemAsync(key);
       } else {
@@ -211,9 +235,7 @@ export class SecureStorageManager {
     }
   }
 
-  async getAllKeys(options?: {
-    useSecureStore?: boolean;
-  }): Promise<string[]> {
+  async getAllKeys(options?: { useSecureStore?: boolean }): Promise<string[]> {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -227,7 +249,11 @@ export class SecureStorageManager {
         return [];
       } else {
         const keys = await AsyncStorage.getAllKeys();
-        return keys.filter(key => !key.endsWith(ENCRYPTION_KEY_SUFFIX) && !key.endsWith(EXPIRATION_SUFFIX));
+        return keys.filter(
+          (key) =>
+            !key.endsWith(ENCRYPTION_KEY_SUFFIX) &&
+            !key.endsWith(EXPIRATION_SUFFIX)
+        );
       }
     } catch (error) {
       console.error('Failed to get all keys:', error);
@@ -235,11 +261,18 @@ export class SecureStorageManager {
     }
   }
 
-  async setItemWithExpiration(key: string, value: string, expirationDate: Date, options?: {
-    useSecureStore?: boolean;
-    encrypt?: boolean;
-  }): Promise<boolean> {
-    const expirationDays = Math.ceil((expirationDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  async setItemWithExpiration(
+    key: string,
+    value: string,
+    expirationDate: Date,
+    options?: {
+      useSecureStore?: boolean;
+      encrypt?: boolean;
+    }
+  ): Promise<boolean> {
+    const expirationDays = Math.ceil(
+      (expirationDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
     return this.setItem(key, value, {
       ...options,
       expirationDays: Math.max(1, expirationDays),
@@ -256,13 +289,16 @@ export class SecureStorageManager {
     try {
       // Clean up AsyncStorage items
       const keys = await AsyncStorage.getAllKeys();
-      
+
       for (const key of keys) {
         try {
           const item = await AsyncStorage.getItem(key);
           if (item) {
             const storageItem: StorageItem = JSON.parse(item);
-            if (storageItem.expiresAt && new Date() > new Date(storageItem.expiresAt)) {
+            if (
+              storageItem.expiresAt &&
+              new Date() > new Date(storageItem.expiresAt)
+            ) {
               await AsyncStorage.removeItem(key);
               cleanedCount++;
             }
@@ -333,15 +369,18 @@ export class SecureStorageManager {
         const item = await AsyncStorage.getItem(key);
         if (item) {
           const storageItem: StorageItem = JSON.parse(item);
-          
-          if (storageItem.expiresAt && new Date() > new Date(storageItem.expiresAt)) {
+
+          if (
+            storageItem.expiresAt &&
+            new Date() > new Date(storageItem.expiresAt)
+          ) {
             expiredItems++;
           }
-          
+
           if (storageItem.encrypted) {
             encryptedItems++;
           }
-          
+
           storageSize += item.length;
         }
       } catch (error) {
@@ -360,7 +399,10 @@ export class SecureStorageManager {
 
   private async saveConfig(): Promise<void> {
     try {
-      await AsyncStorage.setItem(SECURE_STORAGE_CONFIG_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(
+        SECURE_STORAGE_CONFIG_KEY,
+        JSON.stringify(this.config)
+      );
     } catch (error) {
       console.error('Failed to save secure storage config:', error);
     }
@@ -371,7 +413,7 @@ export class SecureStorageManager {
     try {
       // Clear all AsyncStorage data
       await AsyncStorage.clear();
-      
+
       // Clear SecureStore data (we can only clear known keys)
       try {
         await SecureStore.deleteItemAsync('desist_encryption_key');
@@ -388,19 +430,22 @@ export class SecureStorageManager {
   }
 
   // Secure deletion with overwrite
-  async secureDelete(key: string, options?: {
-    useSecureStore?: boolean;
-    overwritePasses?: number;
-  }): Promise<boolean> {
+  async secureDelete(
+    key: string,
+    options?: {
+      useSecureStore?: boolean;
+      overwritePasses?: number;
+    }
+  ): Promise<boolean> {
     const overwritePasses = options?.overwritePasses ?? 3;
-    
+
     try {
       // Overwrite with random data multiple times
       for (let i = 0; i < overwritePasses; i++) {
         const randomData = CryptoJS.lib.WordArray.random(1024).toString();
         await this.setItem(key, randomData, options);
       }
-      
+
       // Finally remove the item
       return await this.removeItem(key, options);
     } catch (error) {
@@ -420,4 +465,5 @@ export const getSecureItem = (key: string, options?: any) =>
   secureStorageManager.getItem(key, options);
 export const removeSecureItem = (key: string, options?: any) =>
   secureStorageManager.removeItem(key, options);
-export const cleanupExpiredData = () => secureStorageManager.cleanupExpiredData();
+export const cleanupExpiredData = () =>
+  secureStorageManager.cleanupExpiredData();

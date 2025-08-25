@@ -7,7 +7,13 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
-import { colors, typography, spacing, shadows, radius } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  shadows,
+  radius,
+} from '../constants/theme';
 import CoverStoryNotes from './CoverStoryNotes';
 
 const supabase = createClient(

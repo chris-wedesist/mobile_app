@@ -11,7 +11,13 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../../constants/theme';
 import {
   emergencyProtocolManager,
   EmergencyContact,
@@ -31,8 +37,12 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
   onClose,
   onEmergencyTriggered,
 }) => {
-  const [activeTab, setActiveTab] = useState<'emergency' | 'contacts' | 'settings'>('emergency');
-  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
+  const [activeTab, setActiveTab] = useState<
+    'emergency' | 'contacts' | 'settings'
+  >('emergency');
+  const [emergencyContacts, setEmergencyContacts] = useState<
+    EmergencyContact[]
+  >([]);
   const [config, setConfig] = useState({
     isEnabled: false,
     panicGestureEnabled: true,
@@ -54,7 +64,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
       await emergencyProtocolManager.initialize();
       const contacts = emergencyProtocolManager.getEmergencyContacts();
       const currentConfig = emergencyProtocolManager.getConfig();
-      
+
       setEmergencyContacts(contacts);
       setConfig({
         isEnabled: currentConfig.isEnabled,
@@ -82,7 +92,10 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
             try {
               const success = await triggerEmergency('manual');
               if (success) {
-                Alert.alert('Emergency Triggered', 'Emergency protocols have been activated.');
+                Alert.alert(
+                  'Emergency Triggered',
+                  'Emergency protocols have been activated.'
+                );
                 onEmergencyTriggered?.();
                 onClose();
               } else {
@@ -90,7 +103,10 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
               }
             } catch (error) {
               console.error('Emergency trigger error:', error);
-              Alert.alert('Error', 'An error occurred while triggering emergency protocols.');
+              Alert.alert(
+                'Error',
+                'An error occurred while triggering emergency protocols.'
+              );
             } finally {
               setIsTriggering(false);
             }
@@ -103,7 +119,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
   const handleConfigUpdate = async (updates: Partial<typeof config>) => {
     const newConfig = { ...config, ...updates };
     setConfig(newConfig);
-    
+
     try {
       await emergencyProtocolManager.updateConfig(newConfig);
     } catch (error) {
@@ -154,13 +170,10 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           </Text>
         </View>
         <View style={styles.statusRow}>
-          <Ionicons
-            name="people"
-            size={20}
-            color={colors.primary}
-          />
+          <Ionicons name="people" size={20} color={colors.primary} />
           <Text style={styles.statusText}>
-            {emergencyContacts.length} emergency contact{emergencyContacts.length !== 1 ? 's' : ''}
+            {emergencyContacts.length} emergency contact
+            {emergencyContacts.length !== 1 ? 's' : ''}
           </Text>
         </View>
       </View>
@@ -214,7 +227,7 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
             </TouchableOpacity>
           </View>
         ))}
-        
+
         {emergencyContacts.length === 0 && (
           <View style={styles.emptyState}>
             <Ionicons name="person-add" size={48} color={colors.text.muted} />
@@ -233,12 +246,14 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
       <ScrollView style={styles.settingsContainer}>
         <View style={styles.settingSection}>
           <Text style={styles.sectionTitle}>General</Text>
-          
+
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>Enable Emergency Protocols</Text>
             <Switch
               value={config.isEnabled}
-              onValueChange={(value) => handleConfigUpdate({ isEnabled: value })}
+              onValueChange={(value) =>
+                handleConfigUpdate({ isEnabled: value })
+              }
             />
           </View>
 
@@ -246,19 +261,23 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
             <Text style={styles.settingLabel}>Panic Gesture</Text>
             <Switch
               value={config.panicGestureEnabled}
-              onValueChange={(value) => handleConfigUpdate({ panicGestureEnabled: value })}
+              onValueChange={(value) =>
+                handleConfigUpdate({ panicGestureEnabled: value })
+              }
             />
           </View>
         </View>
 
         <View style={styles.settingSection}>
           <Text style={styles.sectionTitle}>Auto Actions</Text>
-          
+
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>Auto Call Primary Contact</Text>
             <Switch
               value={config.autoCallEnabled}
-              onValueChange={(value) => handleConfigUpdate({ autoCallEnabled: value })}
+              onValueChange={(value) =>
+                handleConfigUpdate({ autoCallEnabled: value })
+              }
             />
           </View>
 
@@ -266,7 +285,9 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
             <Text style={styles.settingLabel}>Auto Send Text Messages</Text>
             <Switch
               value={config.autoTextEnabled}
-              onValueChange={(value) => handleConfigUpdate({ autoTextEnabled: value })}
+              onValueChange={(value) =>
+                handleConfigUpdate({ autoTextEnabled: value })
+              }
             />
           </View>
         </View>
@@ -276,7 +297,9 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           <TextInput
             style={styles.messageInput}
             value={config.emergencyMessage}
-            onChangeText={(text) => handleConfigUpdate({ emergencyMessage: text })}
+            onChangeText={(text) =>
+              handleConfigUpdate({ emergencyMessage: text })
+            }
             placeholder="Enter emergency message..."
             multiline
             numberOfLines={3}
@@ -319,10 +342,12 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           size={20}
           color={activeTab === 'emergency' ? colors.primary : colors.text.muted}
         />
-        <Text style={[
-          styles.tabText,
-          activeTab === 'emergency' && styles.tabTextActive,
-        ]}>
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === 'emergency' && styles.tabTextActive,
+          ]}
+        >
           Emergency
         </Text>
       </TouchableOpacity>
@@ -336,10 +361,12 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           size={20}
           color={activeTab === 'contacts' ? colors.primary : colors.text.muted}
         />
-        <Text style={[
-          styles.tabText,
-          activeTab === 'contacts' && styles.tabTextActive,
-        ]}>
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === 'contacts' && styles.tabTextActive,
+          ]}
+        >
           Contacts
         </Text>
       </TouchableOpacity>
@@ -353,10 +380,12 @@ export const EmergencyPanel: React.FC<EmergencyPanelProps> = ({
           size={20}
           color={activeTab === 'settings' ? colors.primary : colors.text.muted}
         />
-        <Text style={[
-          styles.tabText,
-          activeTab === 'settings' && styles.tabTextActive,
-        ]}>
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === 'settings' && styles.tabTextActive,
+          ]}
+        >
           Settings
         </Text>
       </TouchableOpacity>
@@ -440,7 +469,11 @@ const AddContactModal: React.FC<AddContactModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="formSheet">
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="formSheet"
+    >
       <View style={styles.addContactContainer}>
         <View style={styles.addContactHeader}>
           <TouchableOpacity onPress={onClose}>

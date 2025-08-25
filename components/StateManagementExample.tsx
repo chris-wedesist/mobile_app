@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, typography, spacing, radius, shadows } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../constants/theme';
 import {
   useAppState,
   useErrorState,
@@ -55,7 +61,10 @@ export default function StateManagementExample() {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme === 'dark' ? colors.surface : colors.background },
+        {
+          backgroundColor:
+            theme === 'dark' ? colors.surface : colors.background,
+        },
       ]}
     >
       <Text
@@ -72,7 +81,9 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? colors.background : colors.text.primary },
+            {
+              color: theme === 'dark' ? colors.background : colors.text.primary,
+            },
           ]}
         >
           User State
@@ -80,7 +91,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           {user ? `Logged in as: ${user.name}` : 'No user logged in'}
@@ -100,7 +114,9 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? colors.background : colors.text.primary },
+            {
+              color: theme === 'dark' ? colors.background : colors.text.primary,
+            },
           ]}
         >
           Theme State
@@ -108,7 +124,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           Current theme: {theme}
@@ -123,7 +142,9 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? colors.background : colors.text.primary },
+            {
+              color: theme === 'dark' ? colors.background : colors.text.primary,
+            },
           ]}
         >
           Language State
@@ -131,7 +152,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           Current language: {language}
@@ -163,7 +187,9 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? colors.background : colors.text.primary },
+            {
+              color: theme === 'dark' ? colors.background : colors.text.primary,
+            },
           ]}
         >
           App State
@@ -171,7 +197,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           Online: {isOnline ? 'Yes' : 'No'}
@@ -179,7 +208,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           Initialized: {isInitialized ? 'Yes' : 'No'}
@@ -187,7 +219,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           Loading: {isLoading ? 'Yes' : 'No'}
@@ -204,7 +239,9 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: theme === 'dark' ? colors.background : colors.text.primary },
+            {
+              color: theme === 'dark' ? colors.background : colors.text.primary,
+            },
           ]}
         >
           Component States
@@ -212,7 +249,10 @@ export default function StateManagementExample() {
         <Text
           style={[
             styles.text,
-            { color: theme === 'dark' ? colors.text.muted : colors.text.secondary },
+            {
+              color:
+                theme === 'dark' ? colors.text.muted : colors.text.secondary,
+            },
           ]}
         >
           Component Loading: {loadingState ? 'Yes' : 'No'}

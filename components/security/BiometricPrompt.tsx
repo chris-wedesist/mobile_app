@@ -9,8 +9,17 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows, radius, typography, spacing } from '../../constants/theme';
-import { biometricAuthManager, BiometricType } from '../../lib/security/biometricAuth';
+import {
+  colors,
+  shadows,
+  radius,
+  typography,
+  spacing,
+} from '../../constants/theme';
+import {
+  biometricAuthManager,
+  BiometricType,
+} from '../../lib/security/biometricAuth';
 
 interface BiometricPromptProps {
   visible: boolean;
@@ -45,9 +54,10 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
 
   const initializeBiometric = async () => {
     try {
-      const availability = await biometricAuthManager.checkBiometricAvailability();
+      const availability =
+        await biometricAuthManager.checkBiometricAvailability();
       setBiometricType(availability.biometricType);
-      
+
       if (!availability.isAvailable) {
         setError('Biometric authentication is not available');
         if (allowFallback && onFallback) {
@@ -67,8 +77,10 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
     setError('');
 
     try {
-      const result = await biometricAuthManager.authenticateWithBiometric(title);
-      
+      const result = await biometricAuthManager.authenticateWithBiometric(
+        title
+      );
+
       if (result.success) {
         onSuccess();
       } else {
@@ -106,7 +118,9 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
       case 'fingerprint':
         return 'Touch the fingerprint sensor';
       case 'facial':
-        return Platform.OS === 'ios' ? 'Look at your iPhone to authenticate with Face ID' : 'Look at the camera';
+        return Platform.OS === 'ios'
+          ? 'Look at your iPhone to authenticate with Face ID'
+          : 'Look at the camera';
       case 'iris':
         return 'Look at the camera for iris scan';
       default:
@@ -151,9 +165,7 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
               {isAuthenticating ? 'Authenticating...' : getBiometricText()}
             </Text>
 
-            {error ? (
-              <Text style={styles.errorText}>{error}</Text>
-            ) : null}
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
 
           <View style={styles.actions}>
@@ -166,10 +178,7 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={onCancel}
-            >
+            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>

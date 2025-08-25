@@ -92,10 +92,21 @@ class ErrorBoundary extends React.Component<any, ErrorBoundaryState> {
             backgroundColor: colors.background,
           }}
         >
-          <Text style={{ color: colors.surface, fontSize: typography.fontSize.subheading, marginBottom: spacing.md }}>
+          <Text
+            style={{
+              color: colors.surface,
+              fontSize: typography.fontSize.subheading,
+              marginBottom: spacing.md,
+            }}
+          >
             Something went wrong.
           </Text>
-          <Text style={{ color: colors.surface, fontSize: typography.fontSize.small }}>
+          <Text
+            style={{
+              color: colors.surface,
+              fontSize: typography.fontSize.small,
+            }}
+          >
             {errorHandler(this.state.error)}
           </Text>
         </View>

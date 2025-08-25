@@ -15,7 +15,13 @@ import {
 } from 'react-native-gesture-handler';
 import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
-import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../../constants/theme';
 
 type Note = {
   id: string;
@@ -146,7 +152,11 @@ export default function StealthNotesScreen() {
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Notes</Text>
             <TouchableOpacity style={styles.headerButton}>
-              <MaterialIcons name="more-vert" size={24} color={colors.text.secondary} />
+              <MaterialIcons
+                name="more-vert"
+                size={24}
+                color={colors.text.secondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -195,7 +205,11 @@ export default function StealthNotesScreen() {
                         {note.title}
                       </Text>
                       {note.starred && (
-                        <MaterialIcons name="star" size={16} color={colors.warning} />
+                        <MaterialIcons
+                          name="star"
+                          size={16}
+                          color={colors.warning}
+                        />
                       )}
                     </View>
                     <Text style={styles.noteItemPreview} numberOfLines={2}>
@@ -229,7 +243,11 @@ export default function StealthNotesScreen() {
                       >
                         <MaterialIcons
                           size={20}
-                          color={selectedNote.starred ? colors.warning : colors.text.muted}
+                          color={
+                            selectedNote.starred
+                              ? colors.warning
+                              : colors.text.muted
+                          }
                           fill={selectedNote.starred ? colors.warning : 'none'}
                         />
                       </TouchableOpacity>
@@ -237,7 +255,11 @@ export default function StealthNotesScreen() {
                         style={styles.actionButton}
                         onPress={() => deleteNote(selectedNote.id)}
                       >
-                        <MaterialIcons name="delete" size={20} color={colors.text.muted} />
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color={colors.text.muted}
+                        />
                       </TouchableOpacity>
                     </View>
                   </View>

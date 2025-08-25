@@ -6,13 +6,15 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <View style={styles.profileHeader}>
         <Image
-          source={{ uri: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg' }}
+          source={{
+            uri: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
+          }}
           style={styles.profileImage}
         />
         <Text style={styles.name}>John Doe</Text>
         <Text style={styles.username}>@johndoe</Text>
       </View>
-      
+
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Text style={styles.statValue}>125</Text>
@@ -27,10 +29,11 @@ export default function ProfileScreen() {
           <Text style={styles.statLabel}>Following</Text>
         </View>
       </View>
-      
+
       <View style={styles.bioContainer}>
         <Text style={styles.bioText}>
-          Professional photographer and travel enthusiast. Capturing moments and sharing stories from around the world.
+          Professional photographer and travel enthusiast. Capturing moments and
+          sharing stories from around the world.
         </Text>
       </View>
     </View>

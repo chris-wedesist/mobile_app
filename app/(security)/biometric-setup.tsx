@@ -10,7 +10,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, typography, spacing, shadows, radius } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  shadows,
+  radius,
+} from '../../constants/theme';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { BiometricPrompt } from '../../components/security/BiometricPrompt';
 
@@ -28,11 +34,12 @@ export default function BiometricSetupScreen() {
   const initializeBiometric = async () => {
     try {
       await biometricAuthManager.initialize();
-      
-      const availability = await biometricAuthManager.checkBiometricAvailability();
+
+      const availability =
+        await biometricAuthManager.checkBiometricAvailability();
       setBiometricAvailable(availability.isAvailable);
       setBiometricType(availability.biometricType);
-      
+
       const enabled = biometricAuthManager.isEnabled();
       setIsEnabled(enabled);
     } catch (error) {
@@ -57,7 +64,7 @@ export default function BiometricSetupScreen() {
 
   const handleBiometricSuccess = async () => {
     setShowBiometricPrompt(false);
-    
+
     try {
       const success = await biometricAuthManager.enableBiometricAuth();
       if (success) {
@@ -154,7 +161,9 @@ export default function BiometricSetupScreen() {
     return (
       <View style={styles.loadingContainer}>
         <Ionicons name="refresh" size={48} color={colors.primary} />
-        <Text style={styles.loadingText}>Checking biometric availability...</Text>
+        <Text style={styles.loadingText}>
+          Checking biometric availability...
+        </Text>
       </View>
     );
   }
@@ -182,10 +191,12 @@ export default function BiometricSetupScreen() {
           <View style={styles.statusRow}>
             <View style={styles.statusInfo}>
               <Text style={styles.statusLabel}>Current Status</Text>
-              <Text style={[
-                styles.statusValue,
-                { color: isEnabled ? colors.success : colors.text.muted }
-              ]}>
+              <Text
+                style={[
+                  styles.statusValue,
+                  { color: isEnabled ? colors.success : colors.text.muted },
+                ]}
+              >
                 {isEnabled ? 'Enabled' : 'Disabled'}
               </Text>
             </View>
@@ -201,7 +212,8 @@ export default function BiometricSetupScreen() {
               <View style={styles.statusInfo}>
                 <Text style={styles.statusLabel}>Biometric Type</Text>
                 <Text style={styles.statusValue}>
-                  {biometricType.charAt(0).toUpperCase() + biometricType.slice(1)}
+                  {biometricType.charAt(0).toUpperCase() +
+                    biometricType.slice(1)}
                 </Text>
               </View>
               <Ionicons
@@ -216,28 +228,34 @@ export default function BiometricSetupScreen() {
         {biometricAvailable && (
           <View style={styles.featuresSection}>
             <Text style={styles.sectionTitle}>Features</Text>
-            
+
             <View style={styles.featureRow}>
-              <Ionicons name="shield-checkmark" size={20} color={colors.success} />
+              <Ionicons
+                name="shield-checkmark"
+                size={20}
+                color={colors.success}
+              />
               <Text style={styles.featureText}>
                 Secure app access with your biometric
               </Text>
             </View>
-            
+
             <View style={styles.featureRow}>
-              <Ionicons name="swap-horizontal" size={20} color={colors.success} />
-              <Text style={styles.featureText}>
-                Protected mode switching
-              </Text>
+              <Ionicons
+                name="swap-horizontal"
+                size={20}
+                color={colors.success}
+              />
+              <Text style={styles.featureText}>Protected mode switching</Text>
             </View>
-            
+
             <View style={styles.featureRow}>
               <Ionicons name="time" size={20} color={colors.success} />
               <Text style={styles.featureText}>
                 Automatic re-authentication after timeout
               </Text>
             </View>
-            
+
             <View style={styles.featureRow}>
               <Ionicons name="key" size={20} color={colors.success} />
               <Text style={styles.featureText}>
@@ -254,7 +272,11 @@ export default function BiometricSetupScreen() {
                 style={[styles.button, styles.disableButton]}
                 onPress={handleDisableBiometric}
               >
-                <Ionicons name="close-circle" size={20} color={colors.background} />
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={colors.background}
+                />
                 <Text style={styles.buttonText}>Disable Biometric</Text>
               </TouchableOpacity>
             ) : (
@@ -262,18 +284,27 @@ export default function BiometricSetupScreen() {
                 style={[styles.button, styles.enableButton]}
                 onPress={handleEnableBiometric}
               >
-                <Ionicons name="checkmark-circle" size={20} color={colors.background} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={20}
+                  color={colors.background}
+                />
                 <Text style={styles.buttonText}>Enable Biometric</Text>
               </TouchableOpacity>
             )
           ) : (
             <View style={styles.unavailableContainer}>
-              <Ionicons name="information-circle" size={48} color={colors.text.muted} />
+              <Ionicons
+                name="information-circle"
+                size={48}
+                color={colors.text.muted}
+              />
               <Text style={styles.unavailableText}>
                 Biometric authentication is not available on this device
               </Text>
               <Text style={styles.unavailableSubtext}>
-                Make sure biometric authentication is set up in your device settings
+                Make sure biometric authentication is set up in your device
+                settings
               </Text>
             </View>
           )}
@@ -284,10 +315,12 @@ export default function BiometricSetupScreen() {
             style={styles.nextButton}
             onPress={() => router.push('/emergency-setup' as any)}
           >
-            <Text style={styles.nextButtonText}>Continue to Emergency Setup</Text>
+            <Text style={styles.nextButtonText}>
+              Continue to Emergency Setup
+            </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.primary} />
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.skipButton}
             onPress={() => router.back()}

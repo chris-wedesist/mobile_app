@@ -8,12 +8,21 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows, radius, typography, spacing } from '../../constants/theme';
+import {
+  colors,
+  shadows,
+  radius,
+  typography,
+  spacing,
+} from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
 import { emergencyProtocolManager } from '../../lib/security/emergencyProtocols';
-import { threatDetectionEngine, SecurityThreat } from '../../lib/security/threatDetection';
+import {
+  threatDetectionEngine,
+  SecurityThreat,
+} from '../../lib/security/threatDetection';
 
 interface SecurityStatus {
   overall: 'high' | 'medium' | 'low';
@@ -40,10 +49,10 @@ export const SecurityMonitor: React.FC = () => {
 
   useEffect(() => {
     updateSecurityStatus();
-    
+
     // Update status every 30 seconds
     const interval = setInterval(updateSecurityStatus, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -134,7 +143,7 @@ export const SecurityMonitor: React.FC = () => {
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ago`;
     } else if (minutes > 0) {
@@ -177,8 +186,10 @@ export const SecurityMonitor: React.FC = () => {
             </Text>
             <Text style={styles.statusDescription}>
               {securityStatus.overall === 'high' && 'All systems operational'}
-              {securityStatus.overall === 'medium' && 'Some features need attention'}
-              {securityStatus.overall === 'low' && 'Security improvements needed'}
+              {securityStatus.overall === 'medium' &&
+                'Some features need attention'}
+              {securityStatus.overall === 'low' &&
+                'Security improvements needed'}
             </Text>
           </View>
         </View>
@@ -187,45 +198,81 @@ export const SecurityMonitor: React.FC = () => {
       <View style={styles.systemsGrid}>
         <View style={styles.systemCard}>
           <Ionicons
-            name={securityStatus.biometric ? 'finger-print' : 'finger-print-outline'}
+            name={
+              securityStatus.biometric ? 'finger-print' : 'finger-print-outline'
+            }
             size={24}
-            color={securityStatus.biometric ? colors.success : colors.text.muted}
+            color={
+              securityStatus.biometric ? colors.success : colors.text.muted
+            }
           />
           <Text style={styles.systemTitle}>Biometric</Text>
-          <Text style={[
-            styles.systemStatus,
-            { color: securityStatus.biometric ? colors.success : colors.text.muted }
-          ]}>
+          <Text
+            style={[
+              styles.systemStatus,
+              {
+                color: securityStatus.biometric
+                  ? colors.success
+                  : colors.text.muted,
+              },
+            ]}
+          >
             {securityStatus.biometric ? 'Active' : 'Inactive'}
           </Text>
         </View>
 
         <View style={styles.systemCard}>
           <Ionicons
-            name={securityStatus.screenProtection ? 'shield-checkmark' : 'shield-outline'}
+            name={
+              securityStatus.screenProtection
+                ? 'shield-checkmark'
+                : 'shield-outline'
+            }
             size={24}
-            color={securityStatus.screenProtection ? colors.success : colors.text.muted}
+            color={
+              securityStatus.screenProtection
+                ? colors.success
+                : colors.text.muted
+            }
           />
           <Text style={styles.systemTitle}>Screen Protection</Text>
-          <Text style={[
-            styles.systemStatus,
-            { color: securityStatus.screenProtection ? colors.success : colors.text.muted }
-          ]}>
+          <Text
+            style={[
+              styles.systemStatus,
+              {
+                color: securityStatus.screenProtection
+                  ? colors.success
+                  : colors.text.muted,
+              },
+            ]}
+          >
             {securityStatus.screenProtection ? 'Protected' : 'Unprotected'}
           </Text>
         </View>
 
         <View style={styles.systemCard}>
           <Ionicons
-            name={securityStatus.emergencyEnabled ? 'warning' : 'warning-outline'}
+            name={
+              securityStatus.emergencyEnabled ? 'warning' : 'warning-outline'
+            }
             size={24}
-            color={securityStatus.emergencyEnabled ? colors.warning : colors.text.muted}
+            color={
+              securityStatus.emergencyEnabled
+                ? colors.warning
+                : colors.text.muted
+            }
           />
           <Text style={styles.systemTitle}>Emergency</Text>
-          <Text style={[
-            styles.systemStatus,
-            { color: securityStatus.emergencyEnabled ? colors.warning : colors.text.muted }
-          ]}>
+          <Text
+            style={[
+              styles.systemStatus,
+              {
+                color: securityStatus.emergencyEnabled
+                  ? colors.warning
+                  : colors.text.muted,
+              },
+            ]}
+          >
             {securityStatus.emergencyEnabled ? 'Ready' : 'Disabled'}
           </Text>
         </View>
@@ -234,13 +281,23 @@ export const SecurityMonitor: React.FC = () => {
           <Ionicons
             name={securityStatus.threatMonitoring ? 'eye' : 'eye-outline'}
             size={24}
-            color={securityStatus.threatMonitoring ? colors.primary : colors.text.muted}
+            color={
+              securityStatus.threatMonitoring
+                ? colors.primary
+                : colors.text.muted
+            }
           />
           <Text style={styles.systemTitle}>Threat Detection</Text>
-          <Text style={[
-            styles.systemStatus,
-            { color: securityStatus.threatMonitoring ? colors.primary : colors.text.muted }
-          ]}>
+          <Text
+            style={[
+              styles.systemStatus,
+              {
+                color: securityStatus.threatMonitoring
+                  ? colors.primary
+                  : colors.text.muted,
+              },
+            ]}
+          >
             {securityStatus.threatMonitoring ? 'Monitoring' : 'Offline'}
           </Text>
         </View>
@@ -260,12 +317,18 @@ export const SecurityMonitor: React.FC = () => {
           <View style={styles.threatsList}>
             {recentThreats.map((threat) => (
               <View key={threat.id} style={styles.threatItem}>
-                <View style={[
-                  styles.severityIndicator,
-                  { backgroundColor: getThreatSeverityColor(threat.severity) }
-                ]} />
+                <View
+                  style={[
+                    styles.severityIndicator,
+                    {
+                      backgroundColor: getThreatSeverityColor(threat.severity),
+                    },
+                  ]}
+                />
                 <View style={styles.threatInfo}>
-                  <Text style={styles.threatDescription}>{threat.description}</Text>
+                  <Text style={styles.threatDescription}>
+                    {threat.description}
+                  </Text>
                   <Text style={styles.threatTime}>
                     {threat.type} • {formatTime(threat.timestamp)}
                   </Text>
@@ -280,7 +343,11 @@ export const SecurityMonitor: React.FC = () => {
           </View>
         ) : (
           <View style={styles.noThreats}>
-            <Ionicons name="checkmark-circle" size={48} color={colors.success} />
+            <Ionicons
+              name="checkmark-circle"
+              size={48}
+              color={colors.success}
+            />
             <Text style={styles.noThreatsText}>No recent security events</Text>
             <Text style={styles.noThreatsSubtext}>
               Your app is secure and functioning normally
@@ -291,14 +358,18 @@ export const SecurityMonitor: React.FC = () => {
 
       <View style={styles.quickActions}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
-        
+
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => stealthManager.toggleMode()}
         >
           <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
           <Text style={styles.actionButtonText}>Toggle App Mode</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.text.muted}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -307,7 +378,11 @@ export const SecurityMonitor: React.FC = () => {
         >
           <Ionicons name="refresh" size={20} color={colors.primary} />
           <Text style={styles.actionButtonText}>Refresh Status</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.text.muted}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -318,7 +393,11 @@ export const SecurityMonitor: React.FC = () => {
           <Text style={[styles.actionButtonText, { color: colors.error }]}>
             Clear Security Log
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.text.muted}
+          />
         </TouchableOpacity>
       </View>
     </ScrollView>

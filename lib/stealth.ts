@@ -84,7 +84,10 @@ export class StealthManager {
 
         // Initialize screen protection
         await screenProtectionManager.initialize();
-        if (this.config.screenProtectionEnabled && this.config.currentMode === 'normal') {
+        if (
+          this.config.screenProtectionEnabled &&
+          this.config.currentMode === 'normal'
+        ) {
           await screenProtectionManager.enableScreenProtection();
         }
 
@@ -127,11 +130,13 @@ export class StealthManager {
 
       // Biometric authentication check if required
       if (this.config.biometricRequired && this.config.securityEnabled) {
-        const authRequired = await biometricAuthManager.isAuthenticationRequired();
+        const authRequired =
+          await biometricAuthManager.isAuthenticationRequired();
         if (authRequired) {
-          const authResult = await biometricAuthManager.authenticateWithBiometric(
-            'Authenticate to switch app mode'
-          );
+          const authResult =
+            await biometricAuthManager.authenticateWithBiometric(
+              'Authenticate to switch app mode'
+            );
           if (!authResult.success) {
             console.warn('Biometric authentication failed for mode toggle');
             return false;

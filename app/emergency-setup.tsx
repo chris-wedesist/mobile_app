@@ -14,7 +14,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { colors, radius, shadows, spacing, typography } from '../constants/theme';
+import {
+  colors,
+  radius,
+  shadows,
+  spacing,
+  typography,
+} from '../constants/theme';
 // Emergency contact type definition
 interface EmergencyContact {
   id: string;

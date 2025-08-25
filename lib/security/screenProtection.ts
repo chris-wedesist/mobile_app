@@ -1,4 +1,7 @@
-import { preventScreenCaptureAsync, allowScreenCaptureAsync } from 'expo-screen-capture';
+import {
+  preventScreenCaptureAsync,
+  allowScreenCaptureAsync,
+} from 'expo-screen-capture';
 import { AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -38,7 +41,9 @@ export class ScreenProtectionManager {
     if (this.initialized) return;
 
     try {
-      const storedConfig = await AsyncStorage.getItem(SCREEN_PROTECTION_CONFIG_KEY);
+      const storedConfig = await AsyncStorage.getItem(
+        SCREEN_PROTECTION_CONFIG_KEY
+      );
       if (storedConfig) {
         this.config = {
           ...DEFAULT_CONFIG,
@@ -101,19 +106,23 @@ export class ScreenProtectionManager {
     }
   }
 
-  async setProtectionLevel(config: Partial<ScreenProtectionConfig>): Promise<void> {
+  async setProtectionLevel(
+    config: Partial<ScreenProtectionConfig>
+  ): Promise<void> {
     if (!this.initialized) {
       await this.initialize();
     }
 
-    const oldPreventCapture = this.config.preventScreenshots || this.config.preventRecording;
-    
+    const oldPreventCapture =
+      this.config.preventScreenshots || this.config.preventRecording;
+
     this.config = {
       ...this.config,
       ...config,
     };
 
-    const newPreventCapture = this.config.preventScreenshots || this.config.preventRecording;
+    const newPreventCapture =
+      this.config.preventScreenshots || this.config.preventRecording;
 
     // Update screen capture prevention if the setting changed
     if (oldPreventCapture !== newPreventCapture) {
@@ -132,8 +141,10 @@ export class ScreenProtectionManager {
   }
 
   private handleAppStateChange(nextAppState: AppStateStatus): void {
-    const isGoingToBackground = nextAppState === 'background' || nextAppState === 'inactive';
-    const isComingToForeground = nextAppState === 'active' && this.isInBackground;
+    const isGoingToBackground =
+      nextAppState === 'background' || nextAppState === 'inactive';
+    const isComingToForeground =
+      nextAppState === 'active' && this.isInBackground;
 
     if (isGoingToBackground && !this.isInBackground) {
       this.handleAppGoingToBackground();
@@ -186,7 +197,10 @@ export class ScreenProtectionManager {
 
   private async saveConfig(): Promise<void> {
     try {
-      await AsyncStorage.setItem(SCREEN_PROTECTION_CONFIG_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(
+        SCREEN_PROTECTION_CONFIG_KEY,
+        JSON.stringify(this.config)
+      );
     } catch (error) {
       console.error('Failed to save screen protection config:', error);
       throw error;
@@ -229,9 +243,12 @@ export class ScreenProtectionManager {
   } {
     return {
       isActive: this.config.isProtectionActive,
-      screenshotsBlocked: this.config.preventScreenshots && this.config.isProtectionActive,
-      recordingBlocked: this.config.preventRecording && this.config.isProtectionActive,
-      backgroundProtected: this.config.blurOnBackground || this.config.showPrivacyScreen,
+      screenshotsBlocked:
+        this.config.preventScreenshots && this.config.isProtectionActive,
+      recordingBlocked:
+        this.config.preventRecording && this.config.isProtectionActive,
+      backgroundProtected:
+        this.config.blurOnBackground || this.config.showPrivacyScreen,
     };
   }
 }
@@ -240,8 +257,11 @@ export class ScreenProtectionManager {
 export const screenProtectionManager = ScreenProtectionManager.getInstance();
 
 // Export helper functions
-export const enableScreenProtection = () => screenProtectionManager.enableScreenProtection();
-export const disableScreenProtection = () => screenProtectionManager.disableScreenProtection();
-export const setProtectionLevel = (config: Partial<ScreenProtectionConfig>) => 
+export const enableScreenProtection = () =>
+  screenProtectionManager.enableScreenProtection();
+export const disableScreenProtection = () =>
+  screenProtectionManager.disableScreenProtection();
+export const setProtectionLevel = (config: Partial<ScreenProtectionConfig>) =>
   screenProtectionManager.setProtectionLevel(config);
-export const getProtectionStatus = () => screenProtectionManager.getProtectionStatus();
+export const getProtectionStatus = () =>
+  screenProtectionManager.getProtectionStatus();

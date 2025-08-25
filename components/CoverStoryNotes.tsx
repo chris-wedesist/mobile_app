@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, typography, spacing, radius, shadows } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../constants/theme';
 
 type Note = {
   id: string;
@@ -32,16 +46,20 @@ export default function CoverStoryNotes() {
             id: '1',
             title: 'Shopping List',
             content: '- Milk\n- Bread\n- Eggs\n- Coffee\n- Bananas',
-            lastModified: Date.now() - 86400000 // 1 day ago
+            lastModified: Date.now() - 86400000, // 1 day ago
           },
           {
             id: '2',
             title: 'Meeting Notes',
-            content: 'Team sync:\n- Project updates\n- Timeline review\n- Action items\n\nFollow up with Sarah about design review',
-            lastModified: Date.now() - 172800000 // 2 days ago
-          }
+            content:
+              'Team sync:\n- Project updates\n- Timeline review\n- Action items\n\nFollow up with Sarah about design review',
+            lastModified: Date.now() - 172800000, // 2 days ago
+          },
         ];
-        await AsyncStorage.setItem('cover_story_notes', JSON.stringify(defaultNotes));
+        await AsyncStorage.setItem(
+          'cover_story_notes',
+          JSON.stringify(defaultNotes)
+        );
         setNotes(defaultNotes);
       }
     } catch (error) {
@@ -51,7 +69,10 @@ export default function CoverStoryNotes() {
 
   const saveNotes = async (updatedNotes: Note[]) => {
     try {
-      await AsyncStorage.setItem('cover_story_notes', JSON.stringify(updatedNotes));
+      await AsyncStorage.setItem(
+        'cover_story_notes',
+        JSON.stringify(updatedNotes)
+      );
       setNotes(updatedNotes);
     } catch (error) {
       console.error('Error saving notes:', error);
@@ -63,26 +84,28 @@ export default function CoverStoryNotes() {
       id: Date.now().toString(),
       title: 'New Note',
       content: '',
-      lastModified: Date.now()
+      lastModified: Date.now(),
     };
-    setNotes(prev => [newNote, ...prev]);
+    setNotes((prev) => [newNote, ...prev]);
     setSelectedNote(newNote);
   };
 
   const updateNote = (id: string, updates: Partial<Note>) => {
-    const updatedNotes = notes.map(note =>
-      note.id === id
-        ? { ...note, ...updates, lastModified: Date.now() }
-        : note
+    const updatedNotes = notes.map((note) =>
+      note.id === id ? { ...note, ...updates, lastModified: Date.now() } : note
     );
     saveNotes(updatedNotes);
     if (selectedNote?.id === id) {
-      setSelectedNote({ ...selectedNote, ...updates, lastModified: Date.now() });
+      setSelectedNote({
+        ...selectedNote,
+        ...updates,
+        lastModified: Date.now(),
+      });
     }
   };
 
   const deleteNote = (id: string) => {
-    const updatedNotes = notes.filter(note => note.id !== id);
+    const updatedNotes = notes.filter((note) => note.id !== id);
     saveNotes(updatedNotes);
     if (selectedNote?.id === id) {
       setSelectedNote(null);
@@ -98,9 +121,10 @@ export default function CoverStoryNotes() {
     });
   };
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -122,22 +146,33 @@ export default function CoverStoryNotes() {
         </TouchableOpacity>
 
         <ScrollView style={styles.notesList}>
-          {filteredNotes.map(note => (
+          {filteredNotes.map((note) => (
             <TouchableOpacity
               key={note.id}
               style={[
                 styles.noteItem,
-                selectedNote?.id === note.id && styles.selectedNoteItem
+                selectedNote?.id === note.id && styles.selectedNoteItem,
               ]}
-              onPress={() => setSelectedNote(note)}>
-              <MaterialIcons name="insert-drive-file" size={16} color={selectedNote?.id === note.id ? colors.primary : colors.text.muted} />
+              onPress={() => setSelectedNote(note)}
+            >
+              <MaterialIcons
+                name="insert-drive-file"
+                size={16}
+                color={
+                  selectedNote?.id === note.id
+                    ? colors.primary
+                    : colors.text.muted
+                }
+              />
               <View style={styles.noteItemContent}>
                 <Text
                   style={[
                     styles.noteItemTitle,
-                    selectedNote?.id === note.id && styles.selectedNoteItemTitle
+                    selectedNote?.id === note.id &&
+                      styles.selectedNoteItemTitle,
                   ]}
-                  numberOfLines={1}>
+                  numberOfLines={1}
+                >
                   {note.title}
                 </Text>
                 <Text style={styles.noteItemDate}>
@@ -146,7 +181,8 @@ export default function CoverStoryNotes() {
               </View>
               <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={() => deleteNote(note.id)}>
+                onPress={() => deleteNote(note.id)}
+              >
                 <MaterialIcons name="delete" size={16} color={colors.error} />
               </TouchableOpacity>
             </TouchableOpacity>
@@ -161,17 +197,25 @@ export default function CoverStoryNotes() {
               <TextInput
                 style={styles.titleInput}
                 value={selectedNote.title}
-                onChangeText={(text) => updateNote(selectedNote.id, { title: text })}
+                onChangeText={(text) =>
+                  updateNote(selectedNote.id, { title: text })
+                }
                 placeholder="Note title"
               />
               <TouchableOpacity style={styles.moreButton}>
-                <MaterialIcons name="more-vert" size={20} color={colors.text.muted} />
+                <MaterialIcons
+                  name="more-vert"
+                  size={20}
+                  color={colors.text.muted}
+                />
               </TouchableOpacity>
             </View>
             <TextInput
               style={styles.contentInput}
               value={selectedNote.content}
-              onChangeText={(text) => updateNote(selectedNote.id, { content: text })}
+              onChangeText={(text) =>
+                updateNote(selectedNote.id, { content: text })
+              }
               placeholder="Start writing..."
               multiline
               textAlignVertical="top"
@@ -179,7 +223,9 @@ export default function CoverStoryNotes() {
           </>
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>Select a note or create a new one</Text>
+            <Text style={styles.emptyStateText}>
+              Select a note or create a new one
+            </Text>
           </View>
         )}
       </View>

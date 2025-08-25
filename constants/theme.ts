@@ -1,6 +1,6 @@
 /**
  * DESIST Mobile App - Official Design System
- * 
+ *
  * ⚠️  IMPORTANT: This is the single source of truth for all design tokens.
  * ⚠️  Never use hardcoded values. Always import and use these tokens.
  * ⚠️  See /docs/STYLE_GUIDE.md for complete usage guidelines.
@@ -8,44 +8,44 @@
 
 export const colors = {
   // Brand Colors
-  primary: '#007AFF',    // Main brand color - iOS blue
-  secondary: '#5856D6',  // Supporting brand color - iOS purple
-  accent: '#FF6B6B',     // Highlight and CTA color
+  primary: '#007AFF', // Main brand color - iOS blue
+  secondary: '#5856D6', // Supporting brand color - iOS purple
+  accent: '#FF6B6B', // Highlight and CTA color
 
   // Semantic Colors
-  success: '#34C759',    // Green - success states, secure status
-  warning: '#FF9500',    // Orange - warning states, caution
-  error: '#FF3B30',      // Red - error states, danger, emergency
+  success: '#34C759', // Green - success states, secure status
+  warning: '#FF9500', // Orange - warning states, caution
+  error: '#FF3B30', // Red - error states, danger, emergency
 
   // Background Colors
   background: '#FFFFFF', // Main app background
-  surface: '#F2F2F7',    // Cards, elevated surfaces
+  surface: '#F2F2F7', // Cards, elevated surfaces
 
   // Text Colors
   text: {
-    primary: '#000000',   // Main text, headings
+    primary: '#000000', // Main text, headings
     secondary: '#8E8E93', // Supporting text, descriptions
-    muted: '#C7C7CC',     // Placeholder text, disabled states
+    muted: '#C7C7CC', // Placeholder text, disabled states
   },
 
   // Legacy support (deprecated - use text.secondary)
   textSecondary: '#8E8E93',
 
   // UI Elements
-  border: '#C6C6C8',     // Borders, dividers
-  shadow: '#000000',     // Shadow color for all elevations
+  border: '#C6C6C8', // Borders, dividers
+  shadow: '#000000', // Shadow color for all elevations
 
   // Status Colors (for security features)
   status: {
-    error: '#FF3B30',    // Danger, critical alerts
-    warning: '#FF9500',  // Caution, attention needed
-    success: '#34C759',  // Safe, active, enabled
+    error: '#FF3B30', // Danger, critical alerts
+    warning: '#FF9500', // Caution, attention needed
+    success: '#34C759', // Safe, active, enabled
   },
 
   // Mode Colors (for app modes)
   mode: {
-    normal: '#007AFF',   // Normal operating mode
-    stealth: '#34C759',  // Stealth mode active
+    normal: '#007AFF', // Normal operating mode
+    stealth: '#34C759', // Stealth mode active
     emergency: '#FF3B30', // Emergency mode active
   },
 };
@@ -65,13 +65,13 @@ export const typography = {
 
   // Font Sizes (in pixels)
   fontSize: {
-    display: 32,    // Large titles, app name
-    title: 24,      // Screen titles, section headers
-    heading: 20,    // Card titles, important text
+    display: 32, // Large titles, app name
+    title: 24, // Screen titles, section headers
+    heading: 20, // Card titles, important text
     subheading: 18, // Secondary headers
-    body: 16,       // Default body text, buttons
-    small: 14,      // Supporting text, captions
-    caption: 12,    // Fine print, metadata
+    body: 16, // Default body text, buttons
+    small: 14, // Supporting text, captions
+    caption: 12, // Fine print, metadata
   },
 
   // Font Weights
@@ -86,9 +86,9 @@ export const typography = {
 
   // Line Heights (relative to font size)
   lineHeight: {
-    tight: 1.2,     // Compact headings
-    normal: 1.4,    // Default body text
-    relaxed: 1.6,   // Comfortable reading
+    tight: 1.2, // Compact headings
+    normal: 1.4, // Default body text
+    relaxed: 1.6, // Comfortable reading
   },
 };
 
@@ -97,12 +97,12 @@ export const typography = {
  * Consistent spacing scale for margins, padding, and gaps
  */
 export const spacing = {
-  xs: 4,    // Tiny gaps, fine adjustments
-  sm: 8,    // Small spacing, compact layouts
-  md: 16,   // Standard spacing, most common
-  lg: 24,   // Large spacing, section separation
-  xl: 32,   // Extra large spacing, major sections
-  xxl: 48,  // Maximum spacing, dramatic separation
+  xs: 4, // Tiny gaps, fine adjustments
+  sm: 8, // Small spacing, compact layouts
+  md: 16, // Standard spacing, most common
+  lg: 24, // Large spacing, section separation
+  xl: 32, // Extra large spacing, major sections
+  xxl: 48, // Maximum spacing, dramatic separation
 };
 
 // Muted color palette for attorney filter tags (separate from main app colors)
@@ -194,13 +194,13 @@ export const shadows = {
  * Consistent corner radius for buttons, cards, and other UI elements
  */
 export const radius = {
-  small: 4,     // Subtle rounding, small buttons
-  medium: 8,    // Standard rounding, most components
-  large: 12,    // Prominent rounding, cards
-  xlarge: 16,   // Maximum rounding, special elements
-  
+  small: 4, // Subtle rounding, small buttons
+  medium: 8, // Standard rounding, most components
+  large: 12, // Prominent rounding, cards
+  xlarge: 16, // Maximum rounding, special elements
+
   // Aliases for convenience
-  md: 8,        // Same as medium
-  lg: 12,       // Same as large
-  round: 999,   // Perfect circles, pills
+  md: 8, // Same as medium
+  lg: 12, // Same as large
+  round: 999, // Perfect circles, pills
 };

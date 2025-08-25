@@ -52,7 +52,13 @@ const BADGES: Badge[] = [
     id: 'emergency_sentinel',
     name: 'Emergency Sentinel',
     description: 'Actively contributing to community safety awareness',
-    icon: <MaterialIcons name="notifications" size={32} color={colors.status.error} />,
+    icon: (
+      <MaterialIcons
+        name="notifications"
+        size={32}
+        color={colors.status.error}
+      />
+    ),
     requirements: {
       type: 'verified_incidents',
       value: 5,

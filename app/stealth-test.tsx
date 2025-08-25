@@ -11,7 +11,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { stealthManager } from '../lib/stealth';
 import { router } from 'expo-router';
-import { colors, typography, spacing, shadows, radius } from '../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  shadows,
+  radius,
+} from '../constants/theme';
 
 interface TestResult {
   name: string;
@@ -222,9 +228,17 @@ export default function StealthTestScreen() {
   const getStatusIcon = (status: 'pass' | 'fail' | 'pending') => {
     switch (status) {
       case 'pass':
-        return <Ionicons name="checkmark-circle" size={20} color={colors.status.success} />;
+        return (
+          <Ionicons
+            name="checkmark-circle"
+            size={20}
+            color={colors.status.success}
+          />
+        );
       case 'fail':
-        return <Ionicons name="close-circle" size={20} color={colors.status.error} />;
+        return (
+          <Ionicons name="close-circle" size={20} color={colors.status.error} />
+        );
       case 'pending':
         return <Ionicons name="time" size={20} color={colors.status.warning} />;
     }
@@ -290,7 +304,11 @@ export default function StealthTestScreen() {
 
         {testResults.length === 0 && !isRunning && (
           <View style={styles.emptyState}>
-            <Ionicons name="flask-outline" size={48} color={colors.text.muted} />
+            <Ionicons
+              name="flask-outline"
+              size={48}
+              color={colors.text.muted}
+            />
             <Text style={styles.emptyText}>No test results yet</Text>
             <Text style={styles.emptySubtext}>
               Run tests to validate functionality
@@ -310,7 +328,9 @@ export default function StealthTestScreen() {
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={20} color={colors.text.secondary} />
-          <Text style={[styles.actionButtonText, { color: colors.text.secondary }]}>
+          <Text
+            style={[styles.actionButtonText, { color: colors.text.secondary }]}
+          >
             Back
           </Text>
         </TouchableOpacity>

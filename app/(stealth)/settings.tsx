@@ -11,7 +11,13 @@ import {
   Vibration,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, spacing, radius, shadows } from '../../constants/theme';
+import {
+  colors,
+  typography,
+  spacing,
+  radius,
+  shadows,
+} from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
 
@@ -185,7 +191,11 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Storage Usage',
               '2.4 MB used',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () =>
                 Alert.alert(
                   'Storage',
@@ -201,14 +211,22 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Privacy',
               'Manage your privacy settings',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () =>
                 Alert.alert('Privacy', 'Privacy settings would appear here.')
             )}
             {renderSettingsItem(
               'App Lock',
               'Secure app with biometrics',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () =>
                 Alert.alert(
                   'App Lock',
@@ -224,20 +242,32 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Help & FAQ',
               'Get help and find answers',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () => Alert.alert('Help', 'Help documentation would appear here.')
             )}
             {renderSettingsItem(
               'Contact Support',
               'Get in touch with our team',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () =>
                 Alert.alert('Support', 'Contact information would appear here.')
             )}
             {renderSettingsItem(
               'Rate App',
               'Share your feedback',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () => Alert.alert('Rate App', 'App store rating would open here.')
             )}
           </>
@@ -249,13 +279,21 @@ export default function SettingsScreen() {
             {renderSettingsItem(
               'Terms of Service',
               'Read our terms and conditions',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () => Alert.alert('Terms', 'Terms of service would appear here.')
             )}
             {renderSettingsItem(
               'Privacy Policy',
               'Read our privacy policy',
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />,
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.text.muted}
+              />,
               () =>
                 Alert.alert(
                   'Privacy Policy',
