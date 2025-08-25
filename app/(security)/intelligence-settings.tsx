@@ -392,7 +392,7 @@ export default function IntelligenceSettingsScreen() {
       <View style={styles.navigationButtons}>
         <TouchableOpacity
           style={styles.navigationButton}
-          onPress={() => router.push('phase3-demo')}
+          onPress={() => router.push('/phase3-demo' as any)}
         >
           <Text style={styles.navigationButtonText}>Demo Features</Text>
         </TouchableOpacity>

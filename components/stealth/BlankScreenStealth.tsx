@@ -23,12 +23,14 @@ export const BlankScreenOverlay: React.FC<BlankScreenOverlayProps> = ({
   const [longPressDuration, setLongPressDuration] = useState(3000);
 
   useEffect(() => {
-    if (isActive) {
-      const config = blankScreenStealthManager.getConfig();
-      setBrightnessLevel(config.brightnessLevel);
-      setActivationMethod(config.activationMethod);
-      setLongPressDuration(config.longPressDeactivationDuration);
-    }
+    const loadConfig = async () => {
+      if (isActive) {
+        const config = await blankScreenStealthManager.exportConfig();
+        setActivationMethod(config.activationMethod || 'both');
+        setLongPressDuration(config.longPressDeactivationDuration || 3000);
+      }
+    };
+    loadConfig();
   }, [isActive]);
 
   // Pan responder for swipe gestures
@@ -117,29 +119,36 @@ export const BlankScreenStealthComponent: React.FC = () => {
 
 // Settings component for configuring blank screen stealth
 export const BlankScreenSettings: React.FC = () => {
-  const [config, setConfig] = useState(blankScreenStealthManager.getConfig());
+  const [config, setConfig] = useState<any>(null);
 
   useEffect(() => {
-    setConfig(blankScreenStealthManager.getConfig());
+    const loadConfig = async () => {
+      const newConfig = await blankScreenStealthManager.exportConfig();
+      setConfig(newConfig);
+    };
+    loadConfig();
   }, []);
 
   const updateActivationMethod = async (
     method: 'long_press' | 'gesture' | 'both'
   ) => {
     await blankScreenStealthManager.setActivationMethod(method);
-    setConfig(blankScreenStealthManager.getConfig());
+    const newConfig = await blankScreenStealthManager.exportConfig();
+    setConfig(newConfig);
   };
 
   const updateGestureSequence = async (
     sequence: 'triple_tap' | 'swipe_up' | 'shake'
   ) => {
     await blankScreenStealthManager.setGestureSequence(sequence);
-    setConfig(blankScreenStealthManager.getConfig());
+    const newConfig = await blankScreenStealthManager.exportConfig();
+    setConfig(newConfig);
   };
 
   const updateLongPressDuration = async (duration: number) => {
     await blankScreenStealthManager.setLongPressDuration(duration);
-    setConfig(blankScreenStealthManager.getConfig());
+    const newConfig = await blankScreenStealthManager.exportConfig();
+    setConfig(newConfig);
   };
 
   const activateBlankScreen = async () => {

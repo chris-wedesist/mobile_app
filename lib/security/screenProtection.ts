@@ -9,8 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export interface PrivacyFilter {
   id: string;
   name: string;
-  opacity: number;  // 0-1, how opaque the filter should be
-  color: string;    // CSS color string
+  opacity: number; // 0-1, how opaque the filter should be
+  color: string; // CSS color string
   blurRadius: number; // blur intensity
   enabled: boolean;
 }
@@ -21,13 +21,13 @@ export interface ScreenProtectionConfig {
   blurOnBackground: boolean;
   showPrivacyScreen: boolean;
   isProtectionActive: boolean;
-  
+
   // Phase 4 additions
   dynamicPrivacyOverlay: boolean;
   recordingDetection: boolean;
   privacyFilters: PrivacyFilter[];
   activeFilterId: string | null;
-  autoEnableThreshold: number;  // number of suspicious events before auto-enabling
+  autoEnableThreshold: number; // number of suspicious events before auto-enabling
   sensitivityLevel: 'low' | 'medium' | 'high';
   notifyOnDetection: boolean;
 }
@@ -40,7 +40,7 @@ const DEFAULT_CONFIG: ScreenProtectionConfig = {
   blurOnBackground: true,
   showPrivacyScreen: true,
   isProtectionActive: false,
-  
+
   // Phase 4 default configurations
   dynamicPrivacyOverlay: false,
   recordingDetection: true,
@@ -51,7 +51,7 @@ const DEFAULT_CONFIG: ScreenProtectionConfig = {
       opacity: 0.7,
       color: '#000000',
       blurRadius: 10,
-      enabled: true
+      enabled: true,
     },
     {
       id: 'maximum',
@@ -59,7 +59,7 @@ const DEFAULT_CONFIG: ScreenProtectionConfig = {
       opacity: 1.0,
       color: '#000000',
       blurRadius: 20,
-      enabled: true
+      enabled: true,
     },
     {
       id: 'subtle',
@@ -67,8 +67,8 @@ const DEFAULT_CONFIG: ScreenProtectionConfig = {
       opacity: 0.3,
       color: '#222222',
       blurRadius: 5,
-      enabled: true
-    }
+      enabled: true,
+    },
   ],
   activeFilterId: 'default',
   autoEnableThreshold: 3,
@@ -261,106 +261,112 @@ export class ScreenProtectionManager {
   }
 
   // Phase 4: Enhanced methods
-  
+
   // Dynamic privacy overlay methods
   async enableDynamicPrivacyOverlay(enabled: boolean): Promise<void> {
     this.config.dynamicPrivacyOverlay = enabled;
     await this.saveConfig();
   }
-  
+
   // Screen recording detection
   async enableRecordingDetection(enabled: boolean): Promise<void> {
     this.config.recordingDetection = enabled;
     await this.saveConfig();
-    
+
     if (enabled) {
       // In a real app, this would initiate recording detection mechanisms
       console.log('Screen recording detection enabled');
     }
   }
-  
+
   // Privacy filter management
   async addPrivacyFilter(
-    name: string, 
-    opacity: number, 
-    color: string, 
+    name: string,
+    opacity: number,
+    color: string,
     blurRadius: number
   ): Promise<string> {
-    const id = `filter_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    
+    const id = `filter_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
+
     const newFilter: PrivacyFilter = {
       id,
       name,
       opacity: Math.max(0, Math.min(1, opacity)), // Ensure between 0-1
       color,
       blurRadius: Math.max(0, blurRadius),
-      enabled: true
+      enabled: true,
     };
-    
+
     this.config.privacyFilters.push(newFilter);
     await this.saveConfig();
-    
+
     return id;
   }
-  
+
   async updatePrivacyFilter(
-    id: string, 
+    id: string,
     updates: Partial<Omit<PrivacyFilter, 'id'>>
   ): Promise<boolean> {
-    const filterIndex = this.config.privacyFilters.findIndex(f => f.id === id);
-    
+    const filterIndex = this.config.privacyFilters.findIndex(
+      (f) => f.id === id
+    );
+
     if (filterIndex === -1) {
       return false;
     }
-    
+
     this.config.privacyFilters[filterIndex] = {
       ...this.config.privacyFilters[filterIndex],
-      ...updates
+      ...updates,
     };
-    
+
     await this.saveConfig();
     return true;
   }
-  
+
   async removePrivacyFilter(id: string): Promise<boolean> {
     // Don't allow removing the default filter
     if (id === 'default' || id === 'maximum' || id === 'subtle') {
       return false;
     }
-    
+
     const initialLength = this.config.privacyFilters.length;
-    this.config.privacyFilters = this.config.privacyFilters.filter(f => f.id !== id);
-    
+    this.config.privacyFilters = this.config.privacyFilters.filter(
+      (f) => f.id !== id
+    );
+
     // If we removed the active filter, switch to default
     if (this.config.activeFilterId === id) {
       this.config.activeFilterId = 'default';
     }
-    
+
     if (initialLength !== this.config.privacyFilters.length) {
       await this.saveConfig();
       return true;
     }
-    
+
     return false;
   }
-  
+
   async setActivePrivacyFilter(id: string): Promise<boolean> {
-    const filter = this.config.privacyFilters.find(f => f.id === id);
-    
+    const filter = this.config.privacyFilters.find((f) => f.id === id);
+
     if (!filter || !filter.enabled) {
       return false;
     }
-    
+
     this.config.activeFilterId = id;
     await this.saveConfig();
-    
+
     return true;
   }
-  
+
   // Sensitivity configuration
   async setSensitivityLevel(level: 'low' | 'medium' | 'high'): Promise<void> {
     this.config.sensitivityLevel = level;
-    
+
     // Adjust auto-enable threshold based on sensitivity
     switch (level) {
       case 'low':
@@ -373,49 +379,53 @@ export class ScreenProtectionManager {
         this.config.autoEnableThreshold = 1;
         break;
     }
-    
+
     await this.saveConfig();
   }
-  
+
   async setAutoEnableThreshold(threshold: number): Promise<void> {
     this.config.autoEnableThreshold = Math.max(1, threshold);
     await this.saveConfig();
   }
-  
+
   async enableNotifications(enabled: boolean): Promise<void> {
     this.config.notifyOnDetection = enabled;
     await this.saveConfig();
   }
-  
+
   // Helper method to handle screen recording detection
   handleRecordingDetection(): void {
     if (!this.config.recordingDetection) return;
-    
+
     // In a real app, this would implement complex detection logic
     console.log('Potential screen recording detected');
-    
+
     // Auto-enable protection if configured
     if (this.config.autoEnableThreshold <= 1) {
       this.enableScreenProtection();
     }
-    
+
     // Notify if enabled
     if (this.config.notifyOnDetection) {
       console.log('Screen recording notification would appear here');
     }
   }
-  
+
   // Get the current active privacy filter
   getActivePrivacyFilter(): PrivacyFilter | null {
     if (!this.config.activeFilterId) return null;
-    return this.config.privacyFilters.find(f => f.id === this.config.activeFilterId) || null;
+    return (
+      this.config.privacyFilters.find(
+        (f) => f.id === this.config.activeFilterId
+      ) || null
+    );
   }
-  
+
   // Get all available privacy filters
   getPrivacyFilters(): PrivacyFilter[] {
     return [...this.config.privacyFilters];
   }
-  
+
   // Clean up subscriptions
   destroy(): void {
     if (this.appStateSubscription) {
@@ -480,10 +490,16 @@ export const enableDynamicPrivacyOverlay = (enabled: boolean) =>
   screenProtectionManager.enableDynamicPrivacyOverlay(enabled);
 export const enableRecordingDetection = (enabled: boolean) =>
   screenProtectionManager.enableRecordingDetection(enabled);
-export const addPrivacyFilter = (name: string, opacity: number, color: string, blurRadius: number) =>
-  screenProtectionManager.addPrivacyFilter(name, opacity, color, blurRadius);
-export const updatePrivacyFilter = (id: string, updates: Partial<Omit<PrivacyFilter, 'id'>>) =>
-  screenProtectionManager.updatePrivacyFilter(id, updates);
+export const addPrivacyFilter = (
+  name: string,
+  opacity: number,
+  color: string,
+  blurRadius: number
+) => screenProtectionManager.addPrivacyFilter(name, opacity, color, blurRadius);
+export const updatePrivacyFilter = (
+  id: string,
+  updates: Partial<Omit<PrivacyFilter, 'id'>>
+) => screenProtectionManager.updatePrivacyFilter(id, updates);
 export const removePrivacyFilter = (id: string) =>
   screenProtectionManager.removePrivacyFilter(id);
 export const setActivePrivacyFilter = (id: string) =>

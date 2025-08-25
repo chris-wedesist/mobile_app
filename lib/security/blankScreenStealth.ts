@@ -28,6 +28,34 @@ export type AccessAttempt = {
   details?: string;
 };
 
+// Performance metrics for analysis
+export interface PerformanceMetrics {
+  activationTime: number; // milliseconds it took to activate
+  deactivationTime: number; // milliseconds it took to deactivate
+  lastUsageTimestamp: Date; // when feature was last used
+  totalUsageCount: number; // how many times the feature was used
+  averageDuration: number; // average time feature stayed activated
+}
+
+// Remote management options
+export interface RemoteManagementOptions {
+  enabled: boolean;
+  serverSyncEnabled: boolean;
+  lastSyncTime: Date | null;
+  deviceId: string;
+  remoteCommands: RemoteCommand[];
+}
+
+// Remote command structure
+export type RemoteCommand = {
+  id: string;
+  command: 'activate' | 'deactivate' | 'wipe' | 'update_config' | 'report_status';
+  parameters?: Record<string, any>;
+  timestamp: Date;
+  executed: boolean;
+  executionTime?: Date;
+};
+
 export interface BlankScreenConfig {
   isEnabled: boolean;
   activationMethod: 'long_press' | 'gesture' | 'both' | 'scheduled';
@@ -39,7 +67,7 @@ export interface BlankScreenConfig {
   brightnessLevel: number; // 0-1, how dark the screen should be
   showStatusBar: boolean;
   emergencyDeactivationEnabled: boolean;
-  
+
   // Phase 4 additions
   fakeScreenMode: FakeScreenConfig;
   schedules: ScheduledActivation[];
@@ -49,6 +77,13 @@ export interface BlankScreenConfig {
   accessAttempts: AccessAttempt[];
   maxAccessAttempts: number;
   lockoutDuration: number; // milliseconds
+  
+  // Phase 5 additions
+  performanceMetrics: PerformanceMetrics;
+  remoteManagement: RemoteManagementOptions;
+  testingMode: boolean;
+  diagnosticsEnabled: boolean;
+  encryptionEnabled: boolean;
 }
 
 const BLANK_SCREEN_CONFIG_KEY = 'desist_blank_screen_config';
@@ -63,12 +98,12 @@ const DEFAULT_CONFIG: BlankScreenConfig = {
   brightnessLevel: 0, // Completely black
   showStatusBar: false,
   emergencyDeactivationEnabled: true,
-  
+
   // Phase 4 default configurations
   fakeScreenMode: {
     enabled: false,
     appType: 'browser',
-    interactable: true
+    interactable: true,
   },
   schedules: [],
   autoDeactivateAfter: null,
@@ -77,7 +112,49 @@ const DEFAULT_CONFIG: BlankScreenConfig = {
   accessAttempts: [],
   maxAccessAttempts: 5,
   lockoutDuration: 300000, // 5 minutes
+  
+  // Phase 5 default configurations
+  performanceMetrics: {
+    activationTime: 0,
+    deactivationTime: 0,
+    lastUsageTimestamp: new Date(0),
+    totalUsageCount: 0,
+    averageDuration: 0
+  },
+  remoteManagement: {
+    enabled: false,
+    serverSyncEnabled: false,
+    lastSyncTime: null,
+    deviceId: `device_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    remoteCommands: []
+  },
+  testingMode: false,
+  diagnosticsEnabled: false,
+  encryptionEnabled: true
 };
+
+// Phase 5 types for remote management and performance metrics
+export interface PerformanceMetrics {
+  activationTime: number; // Time taken to activate blank screen (milliseconds)
+  deactivationTime: number; // Time taken to deactivate blank screen (milliseconds)
+  lastUsageTimestamp: Date; // Last time the feature was used
+  totalUsageCount: number; // Total number of times the feature has been used
+  averageDuration: number; // Average duration of blank screen sessions (milliseconds)
+}
+
+export interface RemoteManagementOptions {
+  enabled: boolean;
+  serverSyncEnabled: boolean;
+  lastSyncTime: Date | null;
+  deviceId: string;
+  remoteCommands: RemoteCommand[];
+}
+
+// Note: In a production environment, proper encryption libraries should be installed:
+// - expo-crypto for cryptographic operations
+// - @react-native-community/netinfo for network connectivity monitoring  
+// - react-native-device-info for device information
+// These are commented out to avoid dependency issues in development
 
 export class BlankScreenStealthManager {
   private static instance: BlankScreenStealthManager;
@@ -88,14 +165,22 @@ export class BlankScreenStealthManager {
   private gestureTimeout: any = null;
   private appStateSubscription: any = null;
   private backHandlerSubscription: any = null;
-  
+
   // Phase 4 additions
-  private scheduleTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  private scheduleTimers: Map<string, ReturnType<typeof setTimeout>> =
+    new Map();
   private autoDeactivateTimer: ReturnType<typeof setTimeout> | null = null;
   private patternRecognizer: number[][] = [];
   private patternTimeout: ReturnType<typeof setTimeout> | null = null;
   private lockoutTimer: ReturnType<typeof setTimeout> | null = null;
   private isLockedOut: boolean = false;
+  
+  // Phase 5 additions
+  private serverSyncInterval: ReturnType<typeof setInterval> | null = null;
+  private diagnosticsTimer: ReturnType<typeof setTimeout> | null = null;
+  private performanceStartTime: number = 0;
+  private encryptionKey: string | null = null;
+  private netInfoUnsubscribe: (() => void) | null = null;
 
   static getInstance(): BlankScreenStealthManager {
     if (!BlankScreenStealthManager.instance) {
@@ -108,10 +193,27 @@ export class BlankScreenStealthManager {
     if (this.initialized) return;
 
     try {
-      const storedConfig = await AsyncStorage.getItem(BLANK_SCREEN_CONFIG_KEY);
+      // Generate a device ID if not already set
+      if (!this.config.remoteManagement.deviceId) {
+        this.config.remoteManagement.deviceId = 
+          `device_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      }
+
+      let storedConfig: string | null = await AsyncStorage.getItem(BLANK_SCREEN_CONFIG_KEY);
+      
+      // Handle encrypted data if encryption is enabled
+      if (storedConfig && this.config.encryptionEnabled) {
+        try {
+          storedConfig = await this.decryptData(storedConfig);
+        } catch (decryptError) {
+          console.warn('Failed to decrypt config, using default', decryptError);
+          storedConfig = null;
+        }
+      }
+      
       if (storedConfig) {
         const parsedConfig = JSON.parse(storedConfig);
-        
+
         // Process dates from JSON
         const processedConfig = {
           ...parsedConfig,
@@ -119,17 +221,37 @@ export class BlankScreenStealthManager {
           schedules: (parsedConfig.schedules || []).map((schedule: any) => ({
             ...schedule,
             startTime: new Date(schedule.startTime),
-            endTime: schedule.endTime ? new Date(schedule.endTime) : null
+            endTime: schedule.endTime ? new Date(schedule.endTime) : null,
           })),
-          accessAttempts: (parsedConfig.accessAttempts || []).map((attempt: any) => ({
-            ...attempt,
-            timestamp: new Date(attempt.timestamp)
-          }))
+          accessAttempts: (parsedConfig.accessAttempts || []).map(
+            (attempt: any) => ({
+              ...attempt,
+              timestamp: new Date(attempt.timestamp),
+            })
+          ),
+          // Process performance metrics dates
+          performanceMetrics: parsedConfig.performanceMetrics ? {
+            ...parsedConfig.performanceMetrics,
+            lastUsageTimestamp: new Date(parsedConfig.performanceMetrics.lastUsageTimestamp || 0),
+          } : DEFAULT_CONFIG.performanceMetrics,
+          // Process remote management dates
+          remoteManagement: parsedConfig.remoteManagement ? {
+            ...parsedConfig.remoteManagement,
+            lastSyncTime: parsedConfig.remoteManagement.lastSyncTime ? 
+              new Date(parsedConfig.remoteManagement.lastSyncTime) : null,
+            remoteCommands: (parsedConfig.remoteManagement.remoteCommands || []).map(
+              (cmd: any) => ({
+                ...cmd,
+                timestamp: new Date(cmd.timestamp),
+                executionTime: cmd.executionTime ? new Date(cmd.executionTime) : undefined,
+              })
+            )
+          } : DEFAULT_CONFIG.remoteManagement,
         };
-        
+
         this.config = {
           ...DEFAULT_CONFIG,
-          ...processedConfig
+          ...processedConfig,
         };
       }
 
@@ -138,15 +260,30 @@ export class BlankScreenStealthManager {
         'change',
         this.handleAppStateChange.bind(this)
       );
-      
+
       // Set up back handler for emergency deactivation
-      this.backHandlerSubscription = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
-      
+      this.backHandlerSubscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        this.handleBackPress
+      );
+
       // Initialize scheduled activations
       this.setupScheduledActivations();
+      
+      // Phase 5: Setup remote management sync if enabled
+      if (this.config.remoteManagement.enabled && this.config.remoteManagement.serverSyncEnabled) {
+        this.setupRemoteSync();
+      }
+      
+      // Phase 5: Run diagnostics if enabled
+      if (this.config.diagnosticsEnabled) {
+        this.runDiagnostics();
+      }
 
       this.initialized = true;
-      console.log('BlankScreenStealthManager initialized with Phase 4 features');
+      console.log(
+        'BlankScreenStealthManager initialized with Phase 5 features'
+      );
     } catch (error) {
       console.error('Failed to initialize BlankScreenStealthManager:', error);
       this.config = DEFAULT_CONFIG;
@@ -154,8 +291,40 @@ export class BlankScreenStealthManager {
     }
   }
   
+  // Phase 5: Simple encryption/decryption methods
+  private async encryptData(data: string): Promise<string> {
+    if (!this.config.encryptionEnabled) return data;
+    
+    try {
+      // In a real implementation, we would use proper encryption libraries
+      // For now, we'll use a simple encoding to simulate encryption
+      const encodedData = Buffer.from(data).toString('base64');
+      return encodedData;
+    } catch (error) {
+      console.error('Encryption failed:', error);
+      return data;
+    }
+  }
+  
+  private async decryptData(encryptedData: string): Promise<string> {
+    if (!this.config.encryptionEnabled) return encryptedData;
+    
+    try {
+      // In a real implementation, we would use proper decryption methods
+      // For now, we'll use a simple decoding to simulate decryption
+      const decodedData = Buffer.from(encryptedData, 'base64').toString('utf-8');
+      return decodedData;
+    } catch (error) {
+      console.error('Decryption failed:', error);
+      throw error;
+    }
+  }
+
   private handleBackPress: () => boolean = () => {
-    if (this.config.isCurrentlyActive && this.config.emergencyDeactivationEnabled) {
+    if (
+      this.config.isCurrentlyActive &&
+      this.config.emergencyDeactivationEnabled
+    ) {
       this.emergencyDeactivate();
       return true; // Prevent default back action
     }
@@ -165,23 +334,23 @@ export class BlankScreenStealthManager {
   private setupScheduledActivations(): void {
     // Clear any existing schedule timers
     this.clearScheduleTimers();
-    
+
     // Set up timers for each scheduled activation
     const now = new Date();
-    
-    this.config.schedules.forEach(schedule => {
+
+    this.config.schedules.forEach((schedule) => {
       if (!schedule.active) return;
-      
+
       // Calculate next activation time
       let nextActivation: Date | null = null;
-      
+
       switch (schedule.repeat) {
         case 'once':
           if (schedule.startTime > now) {
             nextActivation = schedule.startTime;
           }
           break;
-          
+
         case 'daily':
           nextActivation = new Date(now);
           nextActivation.setHours(schedule.startTime.getHours());
@@ -191,7 +360,7 @@ export class BlankScreenStealthManager {
             nextActivation.setDate(nextActivation.getDate() + 1);
           }
           break;
-          
+
         case 'weekly':
           if (schedule.daysOfWeek && schedule.daysOfWeek.length > 0) {
             // Find the next day of week
@@ -201,71 +370,85 @@ export class BlankScreenStealthManager {
               const diffB = (b - todayDay + 7) % 7;
               return diffA === 0 ? 7 : diffA - (diffB === 0 ? 7 : diffB);
             });
-            
+
             const nextDay = sortedDays[0];
             const daysUntilNext = (nextDay - todayDay + 7) % 7;
-            
+
             nextActivation = new Date(now);
             nextActivation.setDate(now.getDate() + daysUntilNext);
             nextActivation.setHours(schedule.startTime.getHours());
             nextActivation.setMinutes(schedule.startTime.getMinutes());
             nextActivation.setSeconds(0);
-            
+
             if (daysUntilNext === 0 && nextActivation < now) {
               nextActivation.setDate(nextActivation.getDate() + 7);
             }
           }
           break;
-          
+
         case 'monthly':
           if (schedule.dateOfMonth) {
             nextActivation = new Date(now);
-            nextActivation.setDate(Math.min(schedule.dateOfMonth, this.getDaysInMonth(now.getFullYear(), now.getMonth() + 1)));
+            nextActivation.setDate(
+              Math.min(
+                schedule.dateOfMonth,
+                this.getDaysInMonth(now.getFullYear(), now.getMonth() + 1)
+              )
+            );
             nextActivation.setHours(schedule.startTime.getHours());
             nextActivation.setMinutes(schedule.startTime.getMinutes());
             nextActivation.setSeconds(0);
-            
+
             if (nextActivation < now) {
               nextActivation.setMonth(nextActivation.getMonth() + 1);
-              nextActivation.setDate(Math.min(schedule.dateOfMonth, this.getDaysInMonth(nextActivation.getFullYear(), nextActivation.getMonth() + 1)));
+              nextActivation.setDate(
+                Math.min(
+                  schedule.dateOfMonth,
+                  this.getDaysInMonth(
+                    nextActivation.getFullYear(),
+                    nextActivation.getMonth() + 1
+                  )
+                )
+              );
             }
           }
           break;
       }
-      
+
       if (nextActivation) {
         const timeUntilActivation = nextActivation.getTime() - now.getTime();
-        
+
         if (timeUntilActivation > 0) {
           const timer = setTimeout(() => {
             this.activateBlankScreen(schedule.id);
-            
+
             // If there's an end time, schedule deactivation
             if (schedule.endTime) {
               const endTime = new Date(schedule.endTime);
-              const timeUntilDeactivation = endTime.getTime() - new Date().getTime();
-              
+              const timeUntilDeactivation =
+                endTime.getTime() - new Date().getTime();
+
               if (timeUntilDeactivation > 0) {
                 setTimeout(() => {
                   this.deactivateBlankScreen();
                 }, timeUntilDeactivation);
               }
             }
-            
+
             // Re-setup schedules for next occurrence
             this.setupScheduledActivations();
           }, timeUntilActivation);
-          
+
           this.scheduleTimers.set(schedule.id, timer);
         }
       }
     });
   }
-  
+
   private getDaysInMonth(year: number, month: number): number {
     return new Date(year, month, 0).getDate();
   }
-  
+
   private clearScheduleTimers(): void {
     this.scheduleTimers.forEach((timer) => {
       clearTimeout(timer);
@@ -277,7 +460,7 @@ export class BlankScreenStealthManager {
     if (!this.initialized) {
       await this.initialize();
     }
-    
+
     // Check if the system is in lockout period
     if (this.isLockedOut) {
       console.log('System is locked out due to too many access attempts');
@@ -297,24 +480,27 @@ export class BlankScreenStealthManager {
       if (!this.config.showStatusBar) {
         StatusBar.setHidden(true, 'fade');
       }
-      
+
       // Vibrate on activation if enabled
       if (this.config.vibrateOnActivation) {
         Vibration.vibrate([0, 100, 50, 100]); // Pattern: wait, vibrate, wait, vibrate
       }
-      
+
       // Setup auto-deactivation timer if configured
       if (this.config.autoDeactivateAfter) {
         if (this.autoDeactivateTimer) {
           clearTimeout(this.autoDeactivateTimer);
         }
-        
+
         this.autoDeactivateTimer = setTimeout(() => {
           this.deactivateBlankScreen();
         }, this.config.autoDeactivateAfter);
       }
 
-      console.log('Blank screen stealth mode activated' + (scheduleId ? ` by schedule ${scheduleId}` : ''));
+      console.log(
+        'Blank screen stealth mode activated' +
+          (scheduleId ? ` by schedule ${scheduleId}` : '')
+      );
       return true;
     } catch (error) {
       console.error('Failed to activate blank screen:', error);
@@ -326,7 +512,7 @@ export class BlankScreenStealthManager {
     if (!this.initialized) {
       await this.initialize();
     }
-    
+
     // Check if the system is in lockout period
     if (this.isLockedOut) {
       console.log('System is locked out due to too many access attempts');
@@ -409,46 +595,49 @@ export class BlankScreenStealthManager {
 
       this.gestureTimeout = setTimeout(() => {
         this.gestureSequence = [];
-        
+
         // If too many gesture attempts, log it as a suspicious attempt
-        if (this.config.accessAttemptLogging && this.gestureSequence.length > 5) {
+        if (
+          this.config.accessAttemptLogging &&
+          this.gestureSequence.length > 5
+        ) {
           this.logAccessAttempt('repeated_touches', 'Multiple taps detected');
         }
       }, 2000);
     }
   }
-  
+
   // New method for custom pattern recognition
   registerPatternPoint(x: number, y: number): void {
     if (!this.config.isCurrentlyActive) return;
-    
+
     if (
-      this.config.gestureDeactivationSequence === 'pattern' && 
-      this.config.customPattern && 
+      this.config.gestureDeactivationSequence === 'pattern' &&
+      this.config.customPattern &&
       this.config.customPattern.length > 0
     ) {
       this.patternRecognizer.push([x, y]);
-      
+
       // Reset pattern timeout if it exists
       if (this.patternTimeout) {
         clearTimeout(this.patternTimeout);
       }
-      
+
       // Check if pattern matches
       if (this.patternRecognizer.length === this.config.customPattern.length) {
         let matches = true;
         const screenWidth = Dimensions.get('window').width;
         const screenHeight = Dimensions.get('window').height;
-        
+
         // Compare patterns with tolerance for screen positioning
         for (let i = 0; i < this.patternRecognizer.length; i++) {
           const [inputX, inputY] = this.patternRecognizer[i];
           const [patternX, patternY] = this.config.customPattern[i];
-          
+
           // Allow for 10% tolerance in position
           const xTolerance = screenWidth * 0.1;
           const yTolerance = screenHeight * 0.1;
-          
+
           if (
             Math.abs(inputX - patternX) > xTolerance ||
             Math.abs(inputY - patternY) > yTolerance
@@ -457,61 +646,68 @@ export class BlankScreenStealthManager {
             break;
           }
         }
-        
+
         if (matches) {
           this.deactivateBlankScreen();
         } else if (this.config.accessAttemptLogging) {
           // Log failed pattern attempt
           this.logAccessAttempt('failed_unlock', 'Incorrect pattern entered');
         }
-        
+
         this.patternRecognizer = [];
       }
-      
+
       // Set timeout to clear pattern after 3 seconds of inactivity
       this.patternTimeout = setTimeout(() => {
         this.patternRecognizer = [];
       }, 3000);
     }
   }
-  
+
   // Log access attempts and handle lockout
-  private logAccessAttempt(type: 'failed_unlock' | 'repeated_touches' | 'suspicious_pattern', details?: string): void {
+  private logAccessAttempt(
+    type: 'failed_unlock' | 'repeated_touches' | 'suspicious_pattern',
+    details?: string
+  ): void {
     if (!this.config.accessAttemptLogging) return;
-    
+
     const attempt: AccessAttempt = {
       timestamp: new Date(),
       type,
-      details
+      details,
     };
-    
+
     // Add to access attempts log
     this.config.accessAttempts.push(attempt);
-    
+
     // Keep only the most recent attempts (max 100)
     if (this.config.accessAttempts.length > 100) {
       this.config.accessAttempts = this.config.accessAttempts.slice(-100);
     }
-    
+
     // Save the updated config
     this.saveConfig();
-    
+
     // Check for lockout condition
     const recentAttempts = this.config.accessAttempts.filter(
-      a => (new Date().getTime() - a.timestamp.getTime()) < 60000 // Last minute
+      (a) => new Date().getTime() - a.timestamp.getTime() < 60000 // Last minute
     );
-    
+
     if (recentAttempts.length >= this.config.maxAccessAttempts) {
       this.triggerLockout();
     }
   }
-  
+
   private triggerLockout(): void {
     if (this.isLockedOut) return;
-    
+
     this.isLockedOut = true;
-    console.log(`Lockout triggered for ${this.config.lockoutDuration / 1000} seconds due to too many access attempts`);
-    
+    console.log(
+      `Lockout triggered for ${
+        this.config.lockoutDuration / 1000
+      } seconds due to too many access attempts`
+    );
+
     // Set timer to release lockout
     this.lockoutTimer = setTimeout(() => {
       this.isLockedOut = false;
@@ -586,7 +782,7 @@ export class BlankScreenStealthManager {
   ): Promise<void> {
     this.config.activationMethod = method;
     await this.saveConfig();
-    
+
     if (method === 'scheduled') {
       // Re-setup scheduled activations
       this.setupScheduledActivations();
@@ -617,193 +813,602 @@ export class BlankScreenStealthManager {
     this.config.showStatusBar = enabled;
     await this.saveConfig();
   }
-  
+
   // Phase 4 configuration methods
   async configureFakeScreen(config: FakeScreenConfig): Promise<void> {
-    this.config.fakeScreenMode = { 
+    this.config.fakeScreenMode = {
       ...this.config.fakeScreenMode,
-      ...config
+      ...config,
     };
     await this.saveConfig();
   }
-  
+
   async setCustomPattern(pattern: number[][]): Promise<void> {
     this.config.customPattern = pattern;
     await this.saveConfig();
   }
-  
-  async addScheduledActivation(schedule: Omit<ScheduledActivation, 'id'>): Promise<string> {
-    const id = `schedule_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+  async addScheduledActivation(
+    schedule: Omit<ScheduledActivation, 'id'>
+  ): Promise<string> {
+    const id = `schedule_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
     const newSchedule: ScheduledActivation = {
       ...schedule,
-      id
+      id,
     };
-    
+
     this.config.schedules.push(newSchedule);
     await this.saveConfig();
-    
+
     // Re-setup scheduled activations
     this.setupScheduledActivations();
-    
+
     return id;
   }
-  
-  async updateScheduledActivation(id: string, schedule: Partial<ScheduledActivation>): Promise<boolean> {
-    const index = this.config.schedules.findIndex(s => s.id === id);
-    
+
+  async updateScheduledActivation(
+    id: string,
+    schedule: Partial<ScheduledActivation>
+  ): Promise<boolean> {
+    const index = this.config.schedules.findIndex((s) => s.id === id);
+
     if (index === -1) {
       return false;
     }
-    
+
     this.config.schedules[index] = {
       ...this.config.schedules[index],
-      ...schedule
+      ...schedule,
     };
-    
+
     await this.saveConfig();
-    
+
     // Re-setup scheduled activations
     this.setupScheduledActivations();
-    
+
     return true;
   }
-  
+
   async removeScheduledActivation(id: string): Promise<boolean> {
     const initialLength = this.config.schedules.length;
-    this.config.schedules = this.config.schedules.filter(s => s.id !== id);
-    
+    this.config.schedules = this.config.schedules.filter((s) => s.id !== id);
+
     // Clear the specific timer if it exists
     if (this.scheduleTimers.has(id)) {
       clearTimeout(this.scheduleTimers.get(id)!);
       this.scheduleTimers.delete(id);
     }
-    
+
     if (initialLength !== this.config.schedules.length) {
       await this.saveConfig();
       return true;
     }
-    
+
     return false;
   }
-  
+
   async setAutoDeactivateTime(milliseconds: number | null): Promise<void> {
     this.config.autoDeactivateAfter = milliseconds;
     await this.saveConfig();
   }
-  
+
   async setVibrateOnActivation(enabled: boolean): Promise<void> {
     this.config.vibrateOnActivation = enabled;
     await this.saveConfig();
   }
-  
-  async configureAccessAttemptLogging(enabled: boolean, maxAttempts?: number, lockoutDuration?: number): Promise<void> {
+
+  async configureAccessAttemptLogging(
+    enabled: boolean,
+    maxAttempts?: number,
+    lockoutDuration?: number
+  ): Promise<void> {
     this.config.accessAttemptLogging = enabled;
-    
+
     if (maxAttempts !== undefined) {
       this.config.maxAccessAttempts = Math.max(1, maxAttempts);
     }
-    
+
     if (lockoutDuration !== undefined) {
       this.config.lockoutDuration = Math.max(5000, lockoutDuration);
     }
-    
+
     await this.saveConfig();
   }
-  
+
   async clearAccessAttemptLog(): Promise<void> {
     this.config.accessAttempts = [];
     await this.saveConfig();
   }
 
-  // Getters
-  isActive(): boolean {
-    return this.config.isCurrentlyActive;
-  }
-  
-  isLockedOutStatus(): boolean {
-    return this.isLockedOut;
+  // Phase 5: Setup remote management sync interval
+  private setupRemoteSync(): void {
+    // Clear any existing sync interval
+    if (this.serverSyncInterval) {
+      clearInterval(this.serverSyncInterval);
+    }
+
+    // Set up network connectivity monitoring
+    // Note: In production, this would use @react-native-community/netinfo
+    // For now, we'll use a simple stub
+    const handleNetworkChange = (state: { isConnected: boolean }) => {
+      if (state.isConnected && this.config.remoteManagement.serverSyncEnabled) {
+        this.syncWithServer();
+      }
+    };
+    
+    // Simulate network connectivity (always connected in development)
+    this.netInfoUnsubscribe = () => {
+      // Cleanup function - would unsubscribe from NetInfo in production
+      console.log('Network monitoring unsubscribed');
+    };
+
+    // Set up periodic sync (every 15 minutes)
+    this.serverSyncInterval = setInterval(() => {
+      if (this.config.remoteManagement.serverSyncEnabled) {
+        this.syncWithServer();
+      }
+    }, 15 * 60 * 1000); // 15 minutes
   }
 
-  getConfig(): BlankScreenConfig {
-    return { ...this.config };
+  // Phase 5: Sync with management server
+  private async syncWithServer(): Promise<void> {
+    if (!this.config.remoteManagement.enabled || !this.config.remoteManagement.serverSyncEnabled) {
+      return;
+    }
+
+    try {
+      // Import the API client
+      const { apiClient } = await import('../api/apiClient');
+      
+      // Prepare sync data
+      const syncData = {
+        deviceId: this.config.remoteManagement.deviceId,
+        timestamp: new Date().toISOString(),
+        config: this.config,
+        performanceMetrics: this.config.performanceMetrics,
+        accessAttempts: this.config.accessAttempts.length,
+        isLockedOut: this.isLockedOut
+      };
+
+      // Send sync request to server
+      const response = await apiClient.syncDeviceState(syncData);
+      
+      if (response.success) {
+        console.log('Successfully synced with server');
+        
+        // Process any pending commands from server
+        if (response.data?.pendingCommands && response.data.pendingCommands.length > 0) {
+          console.log(`Processing ${response.data.pendingCommands.length} pending commands`);
+          
+          for (const command of response.data.pendingCommands) {
+            await this.executeRemoteCommand({
+              id: command.id,
+              command: command.command,
+              parameters: command.parameters || {},
+              timestamp: new Date(command.timestamp),
+              executed: false
+            });
+          }
+        }
+        
+        // Update last sync time
+        this.config.remoteManagement.lastSyncTime = new Date();
+        await this.saveConfig();
+      } else {
+        console.error('Failed to sync with server:', response.error);
+      }
+    } catch (error) {
+      console.error('Sync with server failed:', error);
+    }
   }
 
-  getBrightnessLevel(): number {
-    return this.config.brightnessLevel;
+  // Phase 5: Check for remote commands
+  private async checkForRemoteCommands(): Promise<void> {
+    if (!this.config.remoteManagement.enabled) {
+      return;
+    }
+
+    try {
+      // Import the API client
+      const { apiClient } = await import('../api/apiClient');
+      
+      // Get pending commands from server
+      const response = await apiClient.getPendingCommands(this.config.remoteManagement.deviceId);
+      
+      if (response.success && response.data?.commands) {
+        console.log(`Received ${response.data.commands.length} commands from server`);
+        
+        for (const command of response.data.commands) {
+          await this.executeRemoteCommand({
+            id: command.id,
+            command: command.command,
+            parameters: command.parameters || {},
+            timestamp: new Date(command.timestamp),
+            executed: false
+          });
+        }
+      } else if (!response.success) {
+        console.error('Failed to fetch commands from server:', response.error);
+      }
+    } catch (error) {
+      console.error('Failed to check for remote commands:', error);
+    }
   }
 
-  getActivationMethod(): string {
-    return this.config.activationMethod;
+  // Phase 5: Execute a remote command
+  private async executeRemoteCommand(command: RemoteCommand): Promise<void> {
+    try {
+      console.log(`Executing remote command: ${command.command}`);
+      
+      let executed = false;
+      let result: any = { success: false };
+      
+      switch (command.command) {
+        case 'activate':
+          executed = await this.activateBlankScreen();
+          result = { success: executed, message: executed ? 'Activated successfully' : 'Activation failed' };
+          break;
+        case 'deactivate':
+          executed = await this.deactivateBlankScreen();
+          result = { success: executed, message: executed ? 'Deactivated successfully' : 'Deactivation failed' };
+          break;
+        case 'wipe':
+          await this.remoteWipe();
+          executed = true;
+          result = { success: true, message: 'Remote wipe completed' };
+          break;
+        case 'update_config':
+          if (command.parameters) {
+            await this.updateConfigFromRemote(command.parameters);
+            executed = true;
+            result = { success: true, message: 'Configuration updated' };
+          }
+          break;
+        case 'report_status':
+          await this.reportStatus();
+          executed = true;
+          result = { success: true, message: 'Status report sent' };
+          break;
+        default:
+          result = { success: false, message: `Unknown command: ${command.command}` };
+      }
+      
+      // Send acknowledgment to server
+      try {
+        const { apiClient } = await import('../api/apiClient');
+        await apiClient.acknowledgeCommand(
+          this.config.remoteManagement.deviceId,
+          command.id,
+          executed,
+          result
+        );
+        console.log(`Command ${command.id} acknowledged to server`);
+      } catch (ackError) {
+        console.error('Failed to acknowledge command to server:', ackError);
+      }
+      
+      // Mark command as executed locally
+      const commandIndex = this.config.remoteManagement.remoteCommands.findIndex(cmd => cmd.id === command.id);
+      if (commandIndex !== -1) {
+        this.config.remoteManagement.remoteCommands[commandIndex].executed = true;
+        this.config.remoteManagement.remoteCommands[commandIndex].executionTime = new Date();
+      }
+      
+      await this.saveConfig();
+    } catch (error) {
+      console.error(`Failed to execute remote command ${command.command}:`, error);
+      
+      // Try to send failure acknowledgment
+      try {
+        const { apiClient } = await import('../api/apiClient');
+        await apiClient.acknowledgeCommand(
+          this.config.remoteManagement.deviceId,
+          command.id,
+          false,
+          { success: false, error: error instanceof Error ? error.message : 'Execution failed' }
+        );
+      } catch (ackError) {
+        console.error('Failed to acknowledge command failure to server:', ackError);
+      }
+    }
   }
 
-  getGestureSequence(): string {
-    return this.config.gestureDeactivationSequence;
+  // Phase 5: Remote wipe implementation
+  private async remoteWipe(): Promise<void> {
+    try {
+      // Clear all data
+      await AsyncStorage.removeItem(BLANK_SCREEN_CONFIG_KEY);
+      
+      // Reset to default config
+      this.config = { ...DEFAULT_CONFIG };
+      
+      console.log('Remote wipe completed successfully');
+    } catch (error) {
+      console.error('Failed to perform remote wipe:', error);
+    }
   }
 
-  getLongPressDuration(): number {
-    return this.config.longPressDeactivationDuration;
-  }
-  
-  getFakeScreenConfig(): FakeScreenConfig {
-    return { ...this.config.fakeScreenMode };
-  }
-  
-  getSchedules(): ScheduledActivation[] {
-    return [...this.config.schedules];
-  }
-  
-  getAccessAttempts(): AccessAttempt[] {
-    return [...this.config.accessAttempts];
-  }
-  
-  getRecentAccessAttempts(minutesAgo: number = 60): AccessAttempt[] {
-    const cutoffTime = new Date(Date.now() - (minutesAgo * 60 * 1000));
-    return this.config.accessAttempts.filter(attempt => attempt.timestamp >= cutoffTime);
+  // Phase 5: Update config from remote command
+  private async updateConfigFromRemote(parameters: Record<string, any>): Promise<void> {
+    try {
+      // Deep merge parameters into config, being careful not to overwrite critical values
+      this.config = {
+        ...this.config,
+        ...parameters,
+        // Preserve device ID and other critical values
+        remoteManagement: {
+          ...this.config.remoteManagement,
+          ...(parameters.remoteManagement || {}),
+          deviceId: this.config.remoteManagement.deviceId,
+        }
+      };
+      
+      await this.saveConfig();
+      
+      // Re-initialize scheduled activations if schedule changed
+      if (parameters.schedules) {
+        this.setupScheduledActivations();
+      }
+      
+      console.log('Config updated from remote command');
+    } catch (error) {
+      console.error('Failed to update config from remote:', error);
+    }
   }
 
+  // Phase 5: Report status to management server
+  private async reportStatus(): Promise<void> {
+    if (!this.config.remoteManagement.enabled) {
+      return;
+    }
+
+    try {
+      // Import the API client
+      const { apiClient } = await import('../api/apiClient');
+      
+      // Prepare status report
+      const statusReport = {
+        deviceId: this.config.remoteManagement.deviceId,
+        isActive: this.config.isCurrentlyActive,
+        lastActivationTime: this.config.lastActivationTime.toISOString(),
+        performanceMetrics: this.config.performanceMetrics,
+        accessAttempts: this.config.accessAttempts.length,
+        isLockedOut: this.isLockedOut,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Send status report to server
+      const response = await apiClient.sendStatusReport(statusReport);
+      
+      if (response.success) {
+        console.log('Status report sent successfully to server');
+      } else {
+        console.error('Failed to send status report:', response.error);
+      }
+    } catch (error) {
+      console.error('Failed to report status to server:', error);
+    }
+  }
+
+  // Phase 5: Run system diagnostics
+  private runDiagnostics(): void {
+    if (!this.config.diagnosticsEnabled) {
+      return;
+    }
+    
+    try {
+      console.log('Running BlankScreenStealth diagnostics...');
+      
+      // Check memory usage
+      const memoryUsage = this.getMemoryUsageEstimate();
+      console.log(`Estimated memory usage: ${memoryUsage} KB`);
+      
+      // Check configuration integrity
+      this.verifyConfigIntegrity();
+      
+      // Schedule next diagnostic run (every hour)
+      this.diagnosticsTimer = setTimeout(() => {
+        this.runDiagnostics();
+      }, 60 * 60 * 1000); // 1 hour
+      
+      console.log('Diagnostics completed successfully');
+    } catch (error) {
+      console.error('Diagnostics failed:', error);
+    }
+  }
+
+  // Phase 5: Verify configuration integrity
+  private verifyConfigIntegrity(): void {
+    // Check for required fields
+    const requiredFields = [
+      'isEnabled', 
+      'activationMethod', 
+      'longPressDeactivationDuration',
+      'gestureDeactivationSequence',
+      'performanceMetrics',
+      'remoteManagement'
+    ];
+    
+    const missingFields = requiredFields.filter(field => 
+      this.config[field as keyof BlankScreenConfig] === undefined
+    );
+    
+    if (missingFields.length > 0) {
+      console.warn(`Config integrity check: Missing fields: ${missingFields.join(', ')}`);
+    } else {
+      console.log('Config integrity check: All required fields present');
+    }
+  }
+
+  // Phase 5: Estimate memory usage
+  private getMemoryUsageEstimate(): number {
+    // This is a simplified estimate based on config size
+    const configSize = JSON.stringify(this.config).length;
+    
+    // Convert bytes to KB
+    return Math.round(configSize / 1024);
+  }
+
+  // Phase 5: Save configuration with encryption support
   private async saveConfig(): Promise<void> {
     try {
-      await AsyncStorage.setItem(
-        BLANK_SCREEN_CONFIG_KEY,
-        JSON.stringify(this.config)
-      );
+      // Phase 5: Track performance metrics if activation/deactivation is being performed
+      if (this.performanceStartTime > 0) {
+        const now = Date.now();
+        const duration = now - this.performanceStartTime;
+        
+        // Update relevant metric based on current operation
+        if (this.config.isCurrentlyActive) {
+          this.config.performanceMetrics.activationTime = duration;
+        } else {
+          this.config.performanceMetrics.deactivationTime = duration;
+          
+          // Calculate average duration for reporting
+          if (this.config.performanceMetrics.totalUsageCount > 0) {
+            const totalDuration = this.config.performanceMetrics.averageDuration * 
+              this.config.performanceMetrics.totalUsageCount;
+            const lastSessionDuration = new Date().getTime() - 
+              this.config.lastActivationTime.getTime();
+              
+            this.config.performanceMetrics.totalUsageCount += 1;
+            this.config.performanceMetrics.averageDuration = 
+              (totalDuration + lastSessionDuration) / this.config.performanceMetrics.totalUsageCount;
+          } else {
+            this.config.performanceMetrics.totalUsageCount = 1;
+            this.config.performanceMetrics.averageDuration = 
+              new Date().getTime() - this.config.lastActivationTime.getTime();
+          }
+        }
+        
+        // Update timestamp of last usage
+        this.config.performanceMetrics.lastUsageTimestamp = new Date();
+        
+        // Reset performance tracking timer
+        this.performanceStartTime = 0;
+      }
+      
+      let configData = JSON.stringify(this.config);
+      
+      // Phase 5: Apply encryption if enabled
+      if (this.config.encryptionEnabled) {
+        configData = await this.encryptData(configData);
+      }
+      
+      await AsyncStorage.setItem(BLANK_SCREEN_CONFIG_KEY, configData);
+      
+      // For testing mode, add additional logging
+      if (this.config.testingMode) {
+        console.log('Config saved successfully with encryption:', 
+          this.config.encryptionEnabled ? 'enabled' : 'disabled');
+      }
     } catch (error) {
       console.error('Failed to save blank screen config:', error);
       throw error;
     }
   }
 
-  // Clean up subscriptions
-  destroy(): void {
-    this.clearTimers();
-    this.clearScheduleTimers();
+  // Phase 5: Start performance tracking
+  private startPerformanceTracking(): void {
+    this.performanceStartTime = Date.now();
+  }
+
+  // Phase 5: Public API methods
+  async enableTestingMode(enabled: boolean): Promise<void> {
+    this.config.testingMode = enabled;
+    await this.saveConfig();
+  }
+
+  async enableDiagnostics(enabled: boolean): Promise<void> {
+    this.config.diagnosticsEnabled = enabled;
+    await this.saveConfig();
     
-    if (this.autoDeactivateTimer) {
-      clearTimeout(this.autoDeactivateTimer);
-      this.autoDeactivateTimer = null;
+    if (enabled) {
+      this.runDiagnostics();
+    } else if (this.diagnosticsTimer) {
+      clearTimeout(this.diagnosticsTimer);
+      this.diagnosticsTimer = null;
     }
+  }
+
+  async enableEncryption(enabled: boolean): Promise<void> {
+    this.config.encryptionEnabled = enabled;
+    await this.saveConfig();
+  }
+
+  getPerformanceMetrics(): PerformanceMetrics {
+    return { ...this.config.performanceMetrics };
+  }
+
+  async configureRemoteManagement(options: Partial<RemoteManagementOptions>): Promise<void> {
+    this.config.remoteManagement = {
+      ...this.config.remoteManagement,
+      ...options
+    };
     
-    if (this.lockoutTimer) {
-      clearTimeout(this.lockoutTimer);
-      this.lockoutTimer = null;
-    }
+    await this.saveConfig();
     
-    if (this.appStateSubscription) {
-      this.appStateSubscription.remove();
-      this.appStateSubscription = null;
+    // Setup or teardown remote sync based on configuration
+    if (this.config.remoteManagement.enabled && this.config.remoteManagement.serverSyncEnabled) {
+      this.setupRemoteSync();
+    } else if (this.serverSyncInterval) {
+      clearInterval(this.serverSyncInterval);
+      this.serverSyncInterval = null;
+      if (this.netInfoUnsubscribe) {
+        this.netInfoUnsubscribe();
+        this.netInfoUnsubscribe = null;
+      }
     }
+  }
+
+  async addRemoteCommand(command: Omit<RemoteCommand, 'id' | 'timestamp' | 'executed'>): Promise<string> {
+    const id = `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const newCommand: RemoteCommand = {
+      ...command,
+      id,
+      timestamp: new Date(),
+      executed: false
+    };
     
-    // Clean up BackHandler subscription
-    if (this.backHandlerSubscription) {
-      this.backHandlerSubscription.remove();
-      this.backHandlerSubscription = null;
-    }
+    this.config.remoteManagement.remoteCommands.push(newCommand);
+    await this.saveConfig();
+    
+    return id;
+  }
+
+  getDeviceId(): string {
+    return this.config.remoteManagement.deviceId;
+  }
+
+  async runDiagnosticsNow(): Promise<void> {
+    this.runDiagnostics();
+  }
+
+  async exportConfig(): Promise<BlankScreenConfig> {
+    return { ...this.config };
+  }
+
+  // Getter methods for existing functionality
+  isActive(): boolean {
+    return this.config.isCurrentlyActive;
+  }
+
+  getSchedules(): ScheduledActivation[] {
+    return [...this.config.schedules];
+  }
+
+  getAccessAttempts(): AccessAttempt[] {
+    return [...this.config.accessAttempts];
+  }
+
+  isLockedOutStatus(): boolean {
+    return this.isLockedOut;
   }
 }
 
 // Export singleton instance
-export const blankScreenStealthManager =
-  BlankScreenStealthManager.getInstance();
+export const blankScreenStealthManager = BlankScreenStealthManager.getInstance();
 
 // Export helper functions (base functionality)
 export const activateBlankScreen = () =>
@@ -813,25 +1418,46 @@ export const deactivateBlankScreen = () =>
 export const isBlankScreenActive = () => blankScreenStealthManager.isActive();
 export const emergencyDeactivateBlankScreen = () =>
   blankScreenStealthManager.emergencyDeactivate();
-  
+
 // Phase 4 helper functions
-export const configureFakeScreenMode = (config: FakeScreenConfig) => 
+export const configureFakeScreenMode = (config: FakeScreenConfig) =>
   blankScreenStealthManager.configureFakeScreen(config);
-export const addSchedule = (schedule: Omit<ScheduledActivation, 'id'>) => 
+export const addSchedule = (schedule: Omit<ScheduledActivation, 'id'>) =>
   blankScreenStealthManager.addScheduledActivation(schedule);
-export const updateSchedule = (id: string, schedule: Partial<ScheduledActivation>) => 
-  blankScreenStealthManager.updateScheduledActivation(id, schedule);
-export const removeSchedule = (id: string) => 
+export const updateSchedule = (
+  id: string,
+  schedule: Partial<ScheduledActivation>
+) => blankScreenStealthManager.updateScheduledActivation(id, schedule);
+export const removeSchedule = (id: string) =>
   blankScreenStealthManager.removeScheduledActivation(id);
-export const getSchedules = () => 
-  blankScreenStealthManager.getSchedules();
-export const setCustomUnlockPattern = (pattern: number[][]) => 
+export const getSchedules = () => blankScreenStealthManager.getSchedules();
+export const setCustomUnlockPattern = (pattern: number[][]) =>
   blankScreenStealthManager.setCustomPattern(pattern);
-export const registerPatternPoint = (x: number, y: number) => 
+export const registerPatternPoint = (x: number, y: number) =>
   blankScreenStealthManager.registerPatternPoint(x, y);
-export const getAccessAttemptLog = () => 
+export const getAccessAttemptLog = () =>
   blankScreenStealthManager.getAccessAttempts();
-export const clearAccessAttemptLog = () => 
+export const clearAccessAttemptLog = () =>
   blankScreenStealthManager.clearAccessAttemptLog();
-export const isSystemLockedOut = () => 
+export const isSystemLockedOut = () =>
   blankScreenStealthManager.isLockedOutStatus();
+
+// Phase 5 helper functions
+export const enableTestingMode = (enabled: boolean) =>
+  blankScreenStealthManager.enableTestingMode(enabled);
+export const enableDiagnostics = (enabled: boolean) =>
+  blankScreenStealthManager.enableDiagnostics(enabled);
+export const enableEncryption = (enabled: boolean) =>
+  blankScreenStealthManager.enableEncryption(enabled);
+export const getPerformanceMetrics = () =>
+  blankScreenStealthManager.getPerformanceMetrics();
+export const configureRemoteManagement = (options: Partial<RemoteManagementOptions>) =>
+  blankScreenStealthManager.configureRemoteManagement(options);
+export const addRemoteCommand = (command: Omit<RemoteCommand, 'id' | 'timestamp' | 'executed'>) =>
+  blankScreenStealthManager.addRemoteCommand(command);
+export const getDeviceId = () =>
+  blankScreenStealthManager.getDeviceId();
+export const runDiagnosticsNow = () =>
+  blankScreenStealthManager.runDiagnosticsNow();
+export const exportConfig = () =>
+  blankScreenStealthManager.exportConfig();

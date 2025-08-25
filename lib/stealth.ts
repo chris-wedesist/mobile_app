@@ -486,7 +486,7 @@ export class StealthManager {
   }
 
   getBlankScreenConfig() {
-    return blankScreenStealthManager.getConfig();
+    return blankScreenStealthManager.exportConfig();
   }
 }
 

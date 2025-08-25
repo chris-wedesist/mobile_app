@@ -1,67 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { threatIntelligenceEngine } from '../../lib/intelligence/threatIntelligence';
 
 export const ThreatDashboard: React.FC = () => {
-  const [assessment, setAssessment] = useState<any>(null);
+  const [threatLevel, setThreatLevel] = useState<string>('low');
+  const [lastAssessment, setLastAssessment] = useState<Date | null>(null);
 
   useEffect(() => {
-    const fetchAssessment = async () => {
-      const result = await threatIntelligenceEngine.assessThreats({});
-      setAssessment(result);
+    const assessThreats = async () => {
+      try {
+        const result = await threatIntelligenceEngine.assessThreat({});
+        setThreatLevel(result.severity);
+        setLastAssessment(new Date());
+      } catch (error) {
+        console.error('Failed to assess threats:', error);
+      }
     };
-    fetchAssessment();
+
+    assessThreats();
   }, []);
 
-  if (!assessment) {
-    return <Text style={styles.loading}>Loading threat assessment...</Text>;
-  }
-
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Threat Intelligence Dashboard</Text>
-      <Text style={styles.label}>Risk Score: <Text style={styles.value}>{assessment.riskScore}</Text></Text>
-      <Text style={styles.label}>Severity: <Text style={styles.value}>{assessment.severity}</Text></Text>
-      <Text style={styles.label}>Confidence: <Text style={styles.value}>{assessment.confidence.toFixed(2)}</Text></Text>
-      <Text style={styles.label}>Threat Categories:</Text>
-      {assessment.threatCategories.map((cat: string, idx: number) => (
-        <Text key={idx} style={styles.value}>- {cat}</Text>
-      ))}
-      <Text style={styles.label}>Recommendations:</Text>
-      {assessment.recommendations.map((rec: string, idx: number) => (
-        <Text key={idx} style={styles.value}>- {rec}</Text>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Threat Level</Text>
+      <Text style={[styles.level, styles[`level${threatLevel.charAt(0).toUpperCase() + threatLevel.slice(1)}`]]}>
+        {threatLevel.toUpperCase()}
+      </Text>
+      {lastAssessment && (
+        <Text style={styles.timestamp}>
+          Last assessed: {lastAssessment.toLocaleTimeString()}
+        </Text>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    margin: 8,
   },
   title: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#007AFF',
+    marginBottom: 8,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 10,
-    color: '#333',
+  level: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 8,
   },
-  value: {
-    fontSize: 16,
+  levelLow: {
+    color: '#4CAF50',
+  },
+  levelMedium: {
+    color: '#FF9800',
+  },
+  levelHigh: {
+    color: '#F44336',
+  },
+  levelCritical: {
+    color: '#D32F2F',
+  },
+  timestamp: {
+    fontSize: 12,
     color: '#666',
-    marginLeft: 10,
-  },
-  loading: {
-    fontSize: 16,
-    color: '#999',
-    padding: 20,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
-
-export default ThreatDashboard;

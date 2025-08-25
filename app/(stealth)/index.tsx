@@ -29,7 +29,7 @@ export default function CalculatorScreen() {
   // Hidden toggle mechanism
   const [tapSequence, setTapSequence] = useState<number[]>([]);
   const [holdStartTime, setHoldStartTime] = useState<number | null>(null);
-  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleNumber = (num: string) => {
     if (clearNext) {

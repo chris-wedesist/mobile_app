@@ -1,0 +1,68 @@
+{"level":"info","message":"WebSocket server initialized","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Connected to SQLite database at ./data/desist.db","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table devices created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table device_configs created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table commands created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table sync_logs created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table status_reports created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table admin_users created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Table device_tokens created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Database indexes created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Default admin user created with username: admin","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"warn","message":"Please change the default admin password in production!","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"Database initialized successfully","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"🚀 DESIST Management Server running on http://localhost:3000","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"📋 API Documentation available at http://localhost:3000/api","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"💓 Health check available at http://localhost:3000/health","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"🔧 Environment: development","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"🔌 WebSocket server running on ws://localhost:3000","service":"desist-management-server","timestamp":"2025-08-25 18:45:08"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:45:34 +0000] \"GET /health?id=bbe2d9cd-9818-4afc-a3c5-aa09e0585e67&vscodeBrowserReqId=1756161934155 HTTP/1.1\" 200 105 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.102.0 Chrome/134.0.6998.205 Electron/35.6.0 Safari/537.36\"","service":"desist-management-server","timestamp":"2025-08-25 18:45:34"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:46:17 +0000] \"GET /api?id=bbe2d9cd-9818-4afc-a3c5-aa09e0585e67&vscodeBrowserReqId=1756161977276 HTTP/1.1\" 200 - \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.102.0 Chrome/134.0.6998.205 Electron/35.6.0 Safari/537.36\"","service":"desist-management-server","timestamp":"2025-08-25 18:46:17"}
+{"level":"info","message":"WebSocket server initialized","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Connected to SQLite database at ./data/desist.db","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table devices created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table device_configs created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table commands created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table sync_logs created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table status_reports created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table admin_users created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Table device_tokens created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Database indexes created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"Database initialized successfully","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"🚀 DESIST Management Server running on http://localhost:3000","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"📋 API Documentation available at http://localhost:3000/api","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"💓 Health check available at http://localhost:3000/health","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"🔧 Environment: development","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"🔌 WebSocket server running on ws://localhost:3000","service":"desist-management-server","timestamp":"2025-08-25 18:48:40"}
+{"level":"info","message":"WebSocket server initialized","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Connected to SQLite database at ./data/desist.db","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table devices created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table device_configs created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table commands created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table sync_logs created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table status_reports created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table admin_users created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Table device_tokens created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Database indexes created/verified","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"Database initialized successfully","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"🚀 DESIST Management Server running on http://localhost:3000","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"📋 API Documentation available at http://localhost:3000/api","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"💓 Health check available at http://localhost:3000/health","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"🔧 Environment: development","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"🔌 WebSocket server running on ws://localhost:3000","service":"desist-management-server","timestamp":"2025-08-25 18:50:39"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"GET /health HTTP/1.1\" 200 105 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"New device registered: test_device_1756162244201","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"POST /api/auth/register HTTP/1.1\" 201 765 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"GET /api/devices/test_device_1756162244201/status HTTP/1.1\" 200 358 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"Configuration updated for device test_device_1756162244201, version 1","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"PUT /api/devices/test_device_1756162244201/config HTTP/1.1\" 200 138 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"Device test_device_1756162244201 sync completed","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"POST /api/devices/test_device_1756162244201/sync HTTP/1.1\" 200 298 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"Status report received from device test_device_1756162244201, threat level: low","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"POST /api/devices/test_device_1756162244201/status-report HTTP/1.1\" 200 169 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"Retrieved 0 pending commands for device test_device_1756162244201","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"GET /api/devices/test_device_1756162244201/commands HTTP/1.1\" 200 112 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"POST /api/auth/refresh HTTP/1.1\" 200 510 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"POST /api/auth/admin/login HTTP/1.1\" 200 325 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"GET /api/admin/dashboard HTTP/1.1\" 200 501 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:50:44 +0000] \"POST /api/auth/logout HTTP/1.1\" 200 70 \"-\" \"axios/1.11.0\"","service":"desist-management-server","timestamp":"2025-08-25 18:50:44"}

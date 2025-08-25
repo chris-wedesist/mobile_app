@@ -31,7 +31,7 @@ export default function SettingsScreen() {
   // Hidden toggle mechanism
   const [versionTapCount, setVersionTapCount] = useState(0);
   const [lastVersionTap, setLastVersionTap] = useState(0);
-  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleVersionTap = () => {
     const now = Date.now();

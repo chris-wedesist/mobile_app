@@ -43,7 +43,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
       await blankScreenStealthManager.initialize();
 
       const stealthConfig = await stealthManager.getConfig();
-      const blankConfig = blankScreenStealthManager.getConfig();
+      const blankConfig = await blankScreenStealthManager.exportConfig();
       const biometricConfig = biometricAuthManager.getConfig();
 
       setBlankScreenEnabled(stealthConfig.blankScreenStealthEnabled);

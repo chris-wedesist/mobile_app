@@ -1,75 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Picker, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { coverApplicationsManager } from '../../lib/stealth-advanced/coverApplications';
 
 export const StealthSelector: React.FC = () => {
-  const [activeCover, setActiveCover] = useState(coverApplicationsManager.getConfig().activeCoverApp);
-  const covers = coverApplicationsManager.getConfig().availableCovers;
+  const [activeCover, setActiveCover] = useState(coverApplicationsManager.getActiveCover()?.name || '');
+  const covers = coverApplicationsManager.getAvailableCovers();
 
-  const handleChange = (app: string) => {
-    coverApplicationsManager.setActiveCover(app);
-    setActiveCover(app);
+  const selectCover = (appName: string) => {
+    coverApplicationsManager.activateCover(appName);
+    setActiveCover(appName);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Stealth Cover Selector</Text>
-      <Text style={styles.label}>Current Cover: <Text style={styles.value}>{activeCover}</Text></Text>
-      <Picker
-        selectedValue={activeCover}
-        style={styles.picker}
-        onValueChange={handleChange}
-      >
-        {covers.map((cover) => (
-          <Picker.Item key={cover} label={cover} value={cover} />
-        ))}
-      </Picker>
-      <TouchableOpacity style={styles.button} onPress={() => handleChange(activeCover)}>
-        <Text style={styles.buttonText}>Apply Cover</Text>
-      </TouchableOpacity>
+      <Text style={styles.title}>Active Cover Application</Text>
+      {covers.map((cover) => (
+        <TouchableOpacity
+          key={cover.name}
+          style={[
+            styles.option,
+            cover.name === activeCover && styles.selectedOption,
+          ]}
+          onPress={() => selectCover(cover.name)}
+        >
+          <Text style={styles.optionText}>{cover.name}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: 16,
   },
   title: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#007AFF',
+    marginBottom: 12,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 10,
-    color: '#333',
-  },
-  value: {
-    fontSize: 16,
-    color: '#666',
-    marginLeft: 10,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-    marginVertical: 20,
-  },
-  button: {
-    backgroundColor: '#007AFF',
+  option: {
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 8,
   },
-  buttonText: {
-    color: '#fff',
+  selectedOption: {
+    backgroundColor: '#007AFF',
+  },
+  optionText: {
     fontSize: 16,
-    fontWeight: '600',
   },
 });
-
-export default StealthSelector;
