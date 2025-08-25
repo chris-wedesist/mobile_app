@@ -349,7 +349,7 @@ export class BiometricAuthManager {
     try {
       // Check if PIN is required
       const pinRequired = await this.isVideoPinRequired();
-      
+
       if (!pinRequired) {
         // Update last access time
         this.config.lastVideoAccessTime = new Date();
@@ -359,27 +359,27 @@ export class BiometricAuthManager {
 
       // PIN is required
       if (!pin) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           requiresPin: true,
-          error: 'PIN required for video access' 
+          error: 'PIN required for video access',
         };
       }
 
       // Validate PIN (this would integrate with your PIN system)
       const pinValid = await this.validateVideoPin(pin);
-      
+
       if (pinValid) {
         // Clear new recording flag and update access time
         this.config.newRecordingDetected = false;
         this.config.lastVideoAccessTime = new Date();
         await this.saveConfig();
-        
+
         return { success: true };
       } else {
-        return { 
-          success: false, 
-          error: 'Invalid PIN' 
+        return {
+          success: false,
+          error: 'Invalid PIN',
         };
       }
     } catch (error) {
@@ -419,7 +419,9 @@ export class BiometricAuthManager {
       const storedPinHash = await AsyncStorage.getItem(PIN_STORAGE_KEY);
       if (!storedPinHash) {
         // No PIN set yet, this would prompt user to set one
-        console.warn('No video access PIN set - would prompt user to create one');
+        console.warn(
+          'No video access PIN set - would prompt user to create one'
+        );
         return false;
       }
 
@@ -436,10 +438,10 @@ export class BiometricAuthManager {
     try {
       const pinHash = await this.hashPin(pin);
       await AsyncStorage.setItem(PIN_STORAGE_KEY, pinHash);
-      
+
       // Enable video PIN protection when PIN is set
       await this.enableVideoAccessPin();
-      
+
       console.log('Video access PIN set successfully');
       return true;
     } catch (error) {
@@ -454,7 +456,7 @@ export class BiometricAuthManager {
     let hash = 0;
     for (let i = 0; i < pin.length; i++) {
       const char = pin.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString();
@@ -487,12 +489,15 @@ export const checkBiometricAvailable = () =>
   biometricAuthManager.checkBiometricAvailability();
 
 // NEW: Video access helper functions
-export const isVideoPinRequired = () => biometricAuthManager.isVideoPinRequired();
+export const isVideoPinRequired = () =>
+  biometricAuthManager.isVideoPinRequired();
 export const authenticateForVideoAccess = (pin?: string) =>
   biometricAuthManager.authenticateForVideoAccess(pin);
 export const setNewRecordingDetected = (detected?: boolean) =>
   biometricAuthManager.setNewRecordingDetected(detected);
 export const setVideoAccessPin = (pin: string) =>
   biometricAuthManager.setVideoAccessPin(pin);
-export const enableVideoAccessPin = () => biometricAuthManager.enableVideoAccessPin();
-export const disableVideoAccessPin = () => biometricAuthManager.disableVideoAccessPin();
+export const enableVideoAccessPin = () =>
+  biometricAuthManager.enableVideoAccessPin();
+export const disableVideoAccessPin = () =>
+  biometricAuthManager.disableVideoAccessPin();

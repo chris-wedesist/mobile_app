@@ -28,7 +28,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
 
   useEffect(() => {
     loadSettings();
-    
+
     // Set up interval to check blank screen status
     const interval = setInterval(() => {
       setIsBlankScreenActive(blankScreenStealthManager.isActive());
@@ -41,11 +41,11 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
     try {
       await stealthManager.initialize();
       await blankScreenStealthManager.initialize();
-      
+
       const stealthConfig = await stealthManager.getConfig();
       const blankConfig = blankScreenStealthManager.getConfig();
       const biometricConfig = biometricAuthManager.getConfig();
-      
+
       setBlankScreenEnabled(stealthConfig.blankScreenStealthEnabled);
       setBlankScreenConfig(blankConfig);
       setVideoAccessPinEnabled(biometricConfig.videoAccessPinEnabled);
@@ -119,9 +119,13 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
 
     Alert.alert(
       'Activate Blank Screen',
-      `The screen will appear completely off. Use ${blankScreenConfig.activationMethod === 'long_press' ? 'long press' : 
-        blankScreenConfig.activationMethod === 'gesture' ? 'triple tap' : 
-        'long press or triple tap'} to deactivate.`,
+      `The screen will appear completely off. Use ${
+        blankScreenConfig.activationMethod === 'long_press'
+          ? 'long press'
+          : blankScreenConfig.activationMethod === 'gesture'
+          ? 'triple tap'
+          : 'long press or triple tap'
+      } to deactivate.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -158,31 +162,28 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
   };
 
   const configureBlankScreenSettings = () => {
-    Alert.alert(
-      'Blank Screen Configuration',
-      'Choose deactivation method:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Long Press Only',
-          onPress: () => blankScreenStealthManager.setActivationMethod('long_press'),
-        },
-        {
-          text: 'Triple Tap Only',
-          onPress: () => blankScreenStealthManager.setActivationMethod('gesture'),
-        },
-        {
-          text: 'Both Methods',
-          onPress: () => blankScreenStealthManager.setActivationMethod('both'),
-        },
-      ]
-    );
+    Alert.alert('Blank Screen Configuration', 'Choose deactivation method:', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Long Press Only',
+        onPress: () =>
+          blankScreenStealthManager.setActivationMethod('long_press'),
+      },
+      {
+        text: 'Triple Tap Only',
+        onPress: () => blankScreenStealthManager.setActivationMethod('gesture'),
+      },
+      {
+        text: 'Both Methods',
+        onPress: () => blankScreenStealthManager.setActivationMethod('both'),
+      },
+    ]);
   };
 
   return (
     <ScrollView style={styles.container}>
       <VideoAccessPinModal />
-      
+
       <View style={styles.header}>
         <Ionicons name="shield-checkmark" size={32} color="#007AFF" />
         <Text style={styles.headerTitle}>Phase 3: Advanced Stealth</Text>
@@ -195,7 +196,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
           <Ionicons name="phone-portrait-outline" size={24} color="#666" />
           <Text style={styles.sectionTitle}>Blank Screen Stealth</Text>
         </View>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Text style={styles.settingTitle}>Enable Blank Screen Mode</Text>
@@ -215,21 +216,27 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                isBlankScreenActive ? styles.actionButtonActive : styles.actionButtonInactive
+                isBlankScreenActive
+                  ? styles.actionButtonActive
+                  : styles.actionButtonInactive,
               ]}
               onPress={activateBlankScreen}
               disabled={isBlankScreenActive}
             >
-              <Ionicons 
-                name={isBlankScreenActive ? "checkmark-circle" : "power"} 
-                size={20} 
-                color={isBlankScreenActive ? "#28a745" : "#fff"} 
+              <Ionicons
+                name={isBlankScreenActive ? 'checkmark-circle' : 'power'}
+                size={20}
+                color={isBlankScreenActive ? '#28a745' : '#fff'}
               />
-              <Text style={[
-                styles.actionButtonText,
-                isBlankScreenActive ? styles.actionButtonTextActive : {}
-              ]}>
-                {isBlankScreenActive ? 'Blank Screen Active' : 'Activate Blank Screen'}
+              <Text
+                style={[
+                  styles.actionButtonText,
+                  isBlankScreenActive ? styles.actionButtonTextActive : {},
+                ]}
+              >
+                {isBlankScreenActive
+                  ? 'Blank Screen Active'
+                  : 'Activate Blank Screen'}
               </Text>
             </TouchableOpacity>
 
@@ -238,14 +245,19 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
               onPress={configureBlankScreenSettings}
             >
               <Ionicons name="settings-outline" size={20} color="#007AFF" />
-              <Text style={styles.configButtonText}>Configure Deactivation</Text>
+              <Text style={styles.configButtonText}>
+                Configure Deactivation
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.infoBox}>
               <Text style={styles.infoText}>
-                Deactivation: {blankScreenConfig.activationMethod === 'long_press' ? 'Long press (3s)' : 
-                              blankScreenConfig.activationMethod === 'gesture' ? 'Triple tap' : 
-                              'Long press or triple tap'}
+                Deactivation:{' '}
+                {blankScreenConfig.activationMethod === 'long_press'
+                  ? 'Long press (3s)'
+                  : blankScreenConfig.activationMethod === 'gesture'
+                  ? 'Triple tap'
+                  : 'Long press or triple tap'}
               </Text>
             </View>
           </>
@@ -258,7 +270,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
           <Ionicons name="videocam" size={24} color="#666" />
           <Text style={styles.sectionTitle}>Video Access Security</Text>
         </View>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Text style={styles.settingTitle}>PIN for Video Access</Text>
@@ -288,23 +300,31 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
               onPress={simulateNewRecording}
             >
               <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
-              <Text style={styles.configButtonText}>Simulate New Recording</Text>
+              <Text style={styles.configButtonText}>
+                Simulate New Recording
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.infoBox}>
               <View style={styles.statusRow}>
                 <Text style={styles.statusLabel}>New recording detected:</Text>
-                <View style={[
-                  styles.statusBadge,
-                  hasNewRecording ? styles.statusBadgeWarning : styles.statusBadgeSuccess
-                ]}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    hasNewRecording
+                      ? styles.statusBadgeWarning
+                      : styles.statusBadgeSuccess,
+                  ]}
+                >
                   <Text style={styles.statusBadgeText}>
                     {hasNewRecording ? 'YES' : 'NO'}
                   </Text>
                 </View>
               </View>
               <Text style={styles.infoText}>
-                {hasNewRecording ? 'PIN required for next video access' : 'No PIN required currently'}
+                {hasNewRecording
+                  ? 'PIN required for next video access'
+                  : 'No PIN required currently'}
               </Text>
             </View>
           </>
@@ -317,22 +337,22 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
           <Ionicons name="analytics" size={24} color="#666" />
           <Text style={styles.sectionTitle}>Phase 3 Security Status</Text>
         </View>
-        
+
         <View style={styles.securityGrid}>
           <View style={styles.securityItem}>
-            <Ionicons 
-              name={blankScreenEnabled ? "checkmark-circle" : "close-circle"} 
-              size={24} 
-              color={blankScreenEnabled ? "#28a745" : "#dc3545"} 
+            <Ionicons
+              name={blankScreenEnabled ? 'checkmark-circle' : 'close-circle'}
+              size={24}
+              color={blankScreenEnabled ? '#28a745' : '#dc3545'}
             />
             <Text style={styles.securityItemText}>Blank Screen</Text>
           </View>
-          
+
           <View style={styles.securityItem}>
-            <Ionicons 
-              name={videoAccessPinEnabled ? "checkmark-circle" : "close-circle"} 
-              size={24} 
-              color={videoAccessPinEnabled ? "#28a745" : "#dc3545"} 
+            <Ionicons
+              name={videoAccessPinEnabled ? 'checkmark-circle' : 'close-circle'}
+              size={24}
+              color={videoAccessPinEnabled ? '#28a745' : '#dc3545'}
             />
             <Text style={styles.securityItemText}>Video PIN</Text>
           </View>

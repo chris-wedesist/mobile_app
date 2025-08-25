@@ -59,7 +59,10 @@ export class IntelligenceManager {
       }
 
       // Initialize sub-systems as needed based on config
-      if (this.config.advancedCoverAppsEnabled && this.config.activeCoverAppName) {
+      if (
+        this.config.advancedCoverAppsEnabled &&
+        this.config.activeCoverAppName
+      ) {
         coverApplicationsManager.activateCover(this.config.activeCoverAppName);
       }
 
@@ -101,7 +104,7 @@ export class IntelligenceManager {
 
       if (this.config.threatIntelligenceEnabled) {
         scanPromises.push(
-          threatIntelligenceEngine.assessThreat({}).then(threat => {
+          threatIntelligenceEngine.assessThreat({}).then((threat) => {
             results.threatScore = threat.riskScore;
             if (threat.recommendations.length > 0) {
               results.recommendations.push(...threat.recommendations);
@@ -112,8 +115,11 @@ export class IntelligenceManager {
 
       if (this.config.networkSecurityEnabled) {
         scanPromises.push(
-          networkSecurityManager.monitorConnections().then(issues => {
-            if (issues.length > 0 && issues[0] !== 'No suspicious connections detected') {
+          networkSecurityManager.monitorConnections().then((issues) => {
+            if (
+              issues.length > 0 &&
+              issues[0] !== 'No suspicious connections detected'
+            ) {
               results.networkSecure = false;
               results.recommendations.push('Network security issues detected');
             }
@@ -121,7 +127,7 @@ export class IntelligenceManager {
         );
 
         scanPromises.push(
-          networkSecurityManager.detectVPN().then(vpnDetected => {
+          networkSecurityManager.detectVPN().then((vpnDetected) => {
             if (vpnDetected) {
               results.recommendations.push('VPN connection detected');
             }
@@ -131,7 +137,7 @@ export class IntelligenceManager {
 
       if (this.config.antiDetectionEnabled) {
         scanPromises.push(
-          antiDetectionManager.maskNetworkSignature().then(success => {
+          antiDetectionManager.maskNetworkSignature().then((success) => {
             if (!success) {
               results.stealthActive = false;
               results.recommendations.push('Network signature masking failed');
@@ -155,7 +161,9 @@ export class IntelligenceManager {
         networkSecure: false,
         privacyProtected: false,
         stealthActive: false,
-        recommendations: ['Error performing security scan, manual review recommended'],
+        recommendations: [
+          'Error performing security scan, manual review recommended',
+        ],
       };
     }
   }
@@ -164,8 +172,8 @@ export class IntelligenceManager {
   async setCoverApplication(name: string): Promise<boolean> {
     try {
       const covers = coverApplicationsManager.getAvailableCovers();
-      const coverExists = covers.some(cover => cover.name === name);
-      
+      const coverExists = covers.some((cover) => cover.name === name);
+
       if (!coverExists) {
         console.error(`Cover application "${name}" not found`);
         return false;
@@ -174,7 +182,7 @@ export class IntelligenceManager {
       coverApplicationsManager.activateCover(name);
       this.config.activeCoverAppName = name;
       await this.saveConfig();
-      
+
       return true;
     } catch (error) {
       console.error('Failed to set cover application:', error);
@@ -192,7 +200,10 @@ export class IntelligenceManager {
   }
 
   // Obfuscate user location
-  async obfuscateLocation(location: { lat: number; lng: number }): Promise<{ lat: number; lng: number }> {
+  async obfuscateLocation(location: {
+    lat: number;
+    lng: number;
+  }): Promise<{ lat: number; lng: number }> {
     if (!this.config.privacyEngineEnabled) {
       return location;
     }
@@ -229,7 +240,8 @@ export class IntelligenceManager {
     }
 
     const now = new Date();
-    const timeSinceLastScan = now.getTime() - this.config.lastScanTime.getTime();
+    const timeSinceLastScan =
+      now.getTime() - this.config.lastScanTime.getTime();
     return timeSinceLastScan > this.config.scanInterval;
   }
 
@@ -277,7 +289,9 @@ export class IntelligenceManager {
   }
 
   // Set security level
-  async setSecurityLevel(level: 'standard' | 'enhanced' | 'maximum'): Promise<void> {
+  async setSecurityLevel(
+    level: 'standard' | 'enhanced' | 'maximum'
+  ): Promise<void> {
     this.config.securityLevel = level;
     await this.saveConfig();
   }
@@ -329,12 +343,16 @@ export class IntelligenceManager {
 export const intelligenceManager = IntelligenceManager.getInstance();
 
 // Export helper functions
-export const performSecurityScan = () => intelligenceManager.performSecurityScan();
-export const setCoverApplication = (name: string) => intelligenceManager.setCoverApplication(name);
-export const anonymizeUserData = (data: any) => intelligenceManager.anonymizeUserData(data);
-export const obfuscateLocation = (location: { lat: number; lng: number }) => 
+export const performSecurityScan = () =>
+  intelligenceManager.performSecurityScan();
+export const setCoverApplication = (name: string) =>
+  intelligenceManager.setCoverApplication(name);
+export const anonymizeUserData = (data: any) =>
+  intelligenceManager.anonymizeUserData(data);
+export const obfuscateLocation = (location: { lat: number; lng: number }) =>
   intelligenceManager.obfuscateLocation(location);
-export const activateAntiDetection = () => intelligenceManager.activateAntiDetection();
+export const activateAntiDetection = () =>
+  intelligenceManager.activateAntiDetection();
 export const isScanDue = () => intelligenceManager.isScanDue();
 
 // Import type for IntelligenceManager to use

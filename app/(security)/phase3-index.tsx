@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { phase3 } from '../../lib/phase3Integration';
@@ -17,7 +23,7 @@ export default function Phase3Index() {
         console.error('Failed to initialize Phase 3:', error);
       }
     };
-    
+
     initialize();
   }, []);
 
@@ -27,14 +33,14 @@ export default function Phase3Index() {
       <Text style={styles.subtitle}>
         Advanced Threat Intelligence, Network Security, and Privacy
       </Text>
-      
+
       <View style={styles.featureContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.featureCard}
           onPress={() => {
             // Need to configure navigation properly
             // For now, let's just use an alert
-            alert("This would navigate to the dashboard");
+            alert('This would navigate to the dashboard');
           }}
         >
           <View style={styles.iconContainer}>
@@ -45,13 +51,13 @@ export default function Phase3Index() {
             Complete overview of your security status and protections
           </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.featureCard}
           onPress={() => {
             // Need to configure navigation properly
             // For now, let's just use an alert
-            alert("This would navigate to the intelligence settings");
+            alert('This would navigate to the intelligence settings');
           }}
         >
           <View style={styles.iconContainer}>
@@ -62,13 +68,13 @@ export default function Phase3Index() {
             Configure advanced security and intelligence features
           </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.featureCard}
           onPress={() => {
             // Need to configure navigation properly
             // For now, let's just use an alert
-            alert("This would navigate to the demo features");
+            alert('This would navigate to the demo features');
           }}
         >
           <View style={styles.iconContainer}>
@@ -79,13 +85,15 @@ export default function Phase3Index() {
             Try out blank screen stealth and PIN protection
           </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.featureCard, styles.featureScan]}
           onPress={async () => {
             const results = await phase3.securityScan();
             if (results.securityScore < 70) {
-              alert("Security issues detected. This would navigate to the dashboard.");
+              alert(
+                'Security issues detected. This would navigate to the dashboard.'
+              );
             } else {
               alert('Security scan complete. Your system is secure!');
             }
@@ -97,11 +105,8 @@ export default function Phase3Index() {
           <Text style={styles.scanTitle}>Quick Security Scan</Text>
         </TouchableOpacity>
       </View>
-      
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
+
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color="#fff" />
         <Text style={styles.backButtonText}>Back to Security</Text>
       </TouchableOpacity>

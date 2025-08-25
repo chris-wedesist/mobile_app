@@ -31,7 +31,10 @@ export class PrivacyEngineManager {
     return { ...data, anonymized: true };
   }
 
-  async obfuscateLocation(location: { lat: number; lng: number }): Promise<{ lat: number; lng: number }> {
+  async obfuscateLocation(location: {
+    lat: number;
+    lng: number;
+  }): Promise<{ lat: number; lng: number }> {
     // Placeholder: Location obfuscation logic
     return { lat: 0, lng: 0 };
   }

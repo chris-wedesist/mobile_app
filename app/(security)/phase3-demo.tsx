@@ -11,8 +11,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { BlankScreenStealthComponent } from '../../components/stealth/BlankScreenStealth';
 import { useVideoAccessAuth } from '../../components/security/VideoAccessPin';
-import { 
-  activateBlankScreen, 
+import {
+  activateBlankScreen,
   isBlankScreenActive,
   enableBlankScreenStealth,
 } from '../../lib/stealth';
@@ -27,7 +27,7 @@ export default function Phase3DemoScreen() {
   useEffect(() => {
     // Initialize features
     enableBlankScreenStealth();
-    
+
     // Check blank screen status
     const interval = setInterval(() => {
       setIsBlankActive(isBlankScreenActive());
@@ -79,7 +79,7 @@ export default function Phase3DemoScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <BlankScreenStealthComponent />
       <VideoAccessPinModal />
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Ionicons name="shield-checkmark" size={48} color="#007AFF" />
@@ -92,11 +92,12 @@ export default function Phase3DemoScreen() {
             <Ionicons name="phone-portrait-outline" size={24} color="#333" />
             <Text style={styles.sectionTitle}>Blank Screen Stealth</Text>
           </View>
-          
+
           <Text style={styles.description}>
-            This feature makes your device appear completely off while the app continues running in stealth mode.
+            This feature makes your device appear completely off while the app
+            continues running in stealth mode.
           </Text>
-          
+
           <View style={styles.featureBox}>
             <View style={styles.featureRow}>
               <Ionicons name="eye-off" size={20} color="#007AFF" />
@@ -108,27 +109,33 @@ export default function Phase3DemoScreen() {
             </View>
             <View style={styles.featureRow}>
               <Ionicons name="time" size={20} color="#007AFF" />
-              <Text style={styles.featureText}>Long press (3s) alternative</Text>
+              <Text style={styles.featureText}>
+                Long press (3s) alternative
+              </Text>
             </View>
           </View>
 
           <TouchableOpacity
             style={[
               styles.demoButton,
-              isBlankActive ? styles.demoButtonDisabled : styles.demoButtonActive
+              isBlankActive
+                ? styles.demoButtonDisabled
+                : styles.demoButtonActive,
             ]}
             onPress={handleActivateBlankScreen}
             disabled={isBlankActive}
           >
-            <Ionicons 
-              name={isBlankActive ? "checkmark-circle" : "power"} 
-              size={20} 
-              color={isBlankActive ? "#28a745" : "#fff"} 
+            <Ionicons
+              name={isBlankActive ? 'checkmark-circle' : 'power'}
+              size={20}
+              color={isBlankActive ? '#28a745' : '#fff'}
             />
-            <Text style={[
-              styles.demoButtonText,
-              isBlankActive ? styles.demoButtonTextDisabled : {}
-            ]}>
+            <Text
+              style={[
+                styles.demoButtonText,
+                isBlankActive ? styles.demoButtonTextDisabled : {},
+              ]}
+            >
               {isBlankActive ? 'Blank Screen Active' : 'Try Blank Screen'}
             </Text>
           </TouchableOpacity>
@@ -139,11 +146,12 @@ export default function Phase3DemoScreen() {
             <Ionicons name="videocam" size={24} color="#333" />
             <Text style={styles.sectionTitle}>Video Access PIN</Text>
           </View>
-          
+
           <Text style={styles.description}>
-            Enhanced security requires PIN authentication when accessing videos after new recordings are detected.
+            Enhanced security requires PIN authentication when accessing videos
+            after new recordings are detected.
           </Text>
-          
+
           <View style={styles.featureBox}>
             <View style={styles.featureRow}>
               <Ionicons name="shield" size={20} color="#007AFF" />
@@ -151,7 +159,9 @@ export default function Phase3DemoScreen() {
             </View>
             <View style={styles.featureRow}>
               <Ionicons name="recording" size={20} color="#007AFF" />
-              <Text style={styles.featureText}>Triggered by new recordings</Text>
+              <Text style={styles.featureText}>
+                Triggered by new recordings
+              </Text>
             </View>
             <View style={styles.featureRow}>
               <Ionicons name="key" size={20} color="#007AFF" />
@@ -172,7 +182,9 @@ export default function Phase3DemoScreen() {
             onPress={simulateNewRecording}
           >
             <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
-            <Text style={styles.secondaryButtonText}>Simulate New Recording</Text>
+            <Text style={styles.secondaryButtonText}>
+              Simulate New Recording
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -181,25 +193,30 @@ export default function Phase3DemoScreen() {
             <Ionicons name="information-circle" size={24} color="#6c757d" />
             <Text style={styles.infoTitle}>How to Use</Text>
           </View>
-          
+
           <View style={styles.infoItem}>
             <Text style={styles.infoNumber}>1</Text>
             <Text style={styles.infoText}>
-              <Text style={styles.bold}>Blank Screen:</Text> Tap "Try Blank Screen" above. Screen will go completely black. Triple tap or long press to return.
+              <Text style={styles.bold}>Blank Screen:</Text> Tap "Try Blank
+              Screen" above. Screen will go completely black. Triple tap or long
+              press to return.
             </Text>
           </View>
-          
+
           <View style={styles.infoItem}>
             <Text style={styles.infoNumber}>2</Text>
             <Text style={styles.infoText}>
-              <Text style={styles.bold}>Video PIN:</Text> First access will prompt you to set a PIN. After simulating a new recording, PIN will be required again.
+              <Text style={styles.bold}>Video PIN:</Text> First access will
+              prompt you to set a PIN. After simulating a new recording, PIN
+              will be required again.
             </Text>
           </View>
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            These Phase 3 features provide maximum stealth and security for sensitive situations.
+            These Phase 3 features provide maximum stealth and security for
+            sensitive situations.
           </Text>
         </View>
       </ScrollView>

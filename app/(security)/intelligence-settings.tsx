@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { 
-  intelligenceManager, 
-  performSecurityScan, 
-  setCoverApplication 
+import {
+  intelligenceManager,
+  performSecurityScan,
+  setCoverApplication,
 } from '../../lib/intelligence/intelligenceManager';
 import { useRouter } from 'expo-router';
 import { stealthManager } from '../../lib/stealth';
@@ -17,7 +25,7 @@ export default function IntelligenceSettingsScreen() {
   const [stealthConfig, setStealthConfig] = useState<any>({});
   const [scanningNow, setScanningNow] = useState(false);
   const [scanResults, setScanResults] = useState<any>(null);
-  
+
   useEffect(() => {
     const loadConfig = async () => {
       await intelligenceManager.initialize();
@@ -26,11 +34,13 @@ export default function IntelligenceSettingsScreen() {
       setStealthConfig(stConfig);
       setIsLoading(false);
     };
-    
+
     loadConfig();
   }, []);
 
-  const handleSecurityLevelChange = async (level: 'standard' | 'enhanced' | 'maximum') => {
+  const handleSecurityLevelChange = async (
+    level: 'standard' | 'enhanced' | 'maximum'
+  ) => {
     await intelligenceManager.setSecurityLevel(level);
     setConfig(intelligenceManager.getConfig());
   };
@@ -43,7 +53,10 @@ export default function IntelligenceSettingsScreen() {
     setConfig(intelligenceManager.getConfig());
   };
 
-  const toggleFeature = async (feature: keyof typeof config, value: boolean) => {
+  const toggleFeature = async (
+    feature: keyof typeof config,
+    value: boolean
+  ) => {
     switch (feature) {
       case 'threatIntelligenceEnabled':
         await intelligenceManager.enableThreatIntelligence(value);
@@ -70,17 +83,25 @@ export default function IntelligenceSettingsScreen() {
       const results = await performSecurityScan();
       setScanResults(results);
       setScanningNow(false);
-      
+
       // Show results alert
       Alert.alert(
         'Security Scan Results',
         `Threat Score: ${results.threatScore}/100\n` +
-        `Network Security: ${results.networkSecure ? 'Secure' : 'Issues Detected'}\n` +
-        `Privacy Protection: ${results.privacyProtected ? 'Active' : 'Issues Detected'}\n` +
-        `Stealth Status: ${results.stealthActive ? 'Active' : 'Compromised'}\n\n` +
-        (results.recommendations.length > 0 
-          ? `Recommendations:\n${results.recommendations.map(r => `• ${r}`).join('\n')}`
-          : 'No issues found.')
+          `Network Security: ${
+            results.networkSecure ? 'Secure' : 'Issues Detected'
+          }\n` +
+          `Privacy Protection: ${
+            results.privacyProtected ? 'Active' : 'Issues Detected'
+          }\n` +
+          `Stealth Status: ${
+            results.stealthActive ? 'Active' : 'Compromised'
+          }\n\n` +
+          (results.recommendations.length > 0
+            ? `Recommendations:\n${results.recommendations
+                .map((r) => `• ${r}`)
+                .join('\n')}`
+            : 'No issues found.')
       );
     } catch (error) {
       console.error('Security scan failed:', error);
@@ -97,7 +118,7 @@ export default function IntelligenceSettingsScreen() {
     }
     return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
   };
-  
+
   const getSecurityLevelIcon = (level: string) => {
     switch (level) {
       case 'standard':
@@ -128,7 +149,7 @@ export default function IntelligenceSettingsScreen() {
 
       {/* Security Scan Section */}
       <View style={styles.scanSection}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.scanButton}
           onPress={runSecurityScan}
           disabled={scanningNow}
@@ -147,50 +168,74 @@ export default function IntelligenceSettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Security Level</Text>
         <View style={styles.securityLevelContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.securityLevelButton, 
-              config.securityLevel === 'standard' && styles.securityLevelButtonActive
+              styles.securityLevelButton,
+              config.securityLevel === 'standard' &&
+                styles.securityLevelButtonActive,
             ]}
             onPress={() => handleSecurityLevelChange('standard')}
           >
-            <Ionicons name="shield-outline" size={24} color={config.securityLevel === 'standard' ? "#2196F3" : "#666"} />
-            <Text style={[
-              styles.securityLevelText,
-              config.securityLevel === 'standard' && styles.securityLevelTextActive
-            ]}>
+            <Ionicons
+              name="shield-outline"
+              size={24}
+              color={config.securityLevel === 'standard' ? '#2196F3' : '#666'}
+            />
+            <Text
+              style={[
+                styles.securityLevelText,
+                config.securityLevel === 'standard' &&
+                  styles.securityLevelTextActive,
+              ]}
+            >
               Standard
             </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
-              styles.securityLevelButton, 
-              config.securityLevel === 'enhanced' && styles.securityLevelButtonActive
+              styles.securityLevelButton,
+              config.securityLevel === 'enhanced' &&
+                styles.securityLevelButtonActive,
             ]}
             onPress={() => handleSecurityLevelChange('enhanced')}
           >
-            <Ionicons name="shield-half-outline" size={24} color={config.securityLevel === 'enhanced' ? "#2196F3" : "#666"} />
-            <Text style={[
-              styles.securityLevelText,
-              config.securityLevel === 'enhanced' && styles.securityLevelTextActive
-            ]}>
+            <Ionicons
+              name="shield-half-outline"
+              size={24}
+              color={config.securityLevel === 'enhanced' ? '#2196F3' : '#666'}
+            />
+            <Text
+              style={[
+                styles.securityLevelText,
+                config.securityLevel === 'enhanced' &&
+                  styles.securityLevelTextActive,
+              ]}
+            >
               Enhanced
             </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
-              styles.securityLevelButton, 
-              config.securityLevel === 'maximum' && styles.securityLevelButtonActive
+              styles.securityLevelButton,
+              config.securityLevel === 'maximum' &&
+                styles.securityLevelButtonActive,
             ]}
             onPress={() => handleSecurityLevelChange('maximum')}
           >
-            <Ionicons name="shield" size={24} color={config.securityLevel === 'maximum' ? "#2196F3" : "#666"} />
-            <Text style={[
-              styles.securityLevelText,
-              config.securityLevel === 'maximum' && styles.securityLevelTextActive
-            ]}>
+            <Ionicons
+              name="shield"
+              size={24}
+              color={config.securityLevel === 'maximum' ? '#2196F3' : '#666'}
+            />
+            <Text
+              style={[
+                styles.securityLevelText,
+                config.securityLevel === 'maximum' &&
+                  styles.securityLevelTextActive,
+              ]}
+            >
               Maximum
             </Text>
           </TouchableOpacity>
@@ -200,7 +245,7 @@ export default function IntelligenceSettingsScreen() {
       {/* Intelligence Features */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Intelligence Features</Text>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
             <Text style={styles.settingTitle}>Threat Intelligence</Text>
@@ -210,12 +255,16 @@ export default function IntelligenceSettingsScreen() {
           </View>
           <Switch
             value={config.threatIntelligenceEnabled}
-            onValueChange={(value) => toggleFeature('threatIntelligenceEnabled', value)}
+            onValueChange={(value) =>
+              toggleFeature('threatIntelligenceEnabled', value)
+            }
             trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={config.threatIntelligenceEnabled ? '#2196F3' : '#f4f3f4'}
+            thumbColor={
+              config.threatIntelligenceEnabled ? '#2196F3' : '#f4f3f4'
+            }
           />
         </View>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
             <Text style={styles.settingTitle}>Network Security</Text>
@@ -225,12 +274,14 @@ export default function IntelligenceSettingsScreen() {
           </View>
           <Switch
             value={config.networkSecurityEnabled}
-            onValueChange={(value) => toggleFeature('networkSecurityEnabled', value)}
+            onValueChange={(value) =>
+              toggleFeature('networkSecurityEnabled', value)
+            }
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={config.networkSecurityEnabled ? '#2196F3' : '#f4f3f4'}
           />
         </View>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
             <Text style={styles.settingTitle}>Privacy Engine</Text>
@@ -240,7 +291,9 @@ export default function IntelligenceSettingsScreen() {
           </View>
           <Switch
             value={config.privacyEngineEnabled}
-            onValueChange={(value) => toggleFeature('privacyEngineEnabled', value)}
+            onValueChange={(value) =>
+              toggleFeature('privacyEngineEnabled', value)
+            }
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={config.privacyEngineEnabled ? '#2196F3' : '#f4f3f4'}
           />
@@ -250,7 +303,7 @@ export default function IntelligenceSettingsScreen() {
       {/* Advanced Stealth */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Advanced Stealth</Text>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
             <Text style={styles.settingTitle}>Advanced Cover Apps</Text>
@@ -260,12 +313,14 @@ export default function IntelligenceSettingsScreen() {
           </View>
           <Switch
             value={config.advancedCoverAppsEnabled}
-            onValueChange={(value) => toggleFeature('advancedCoverAppsEnabled', value)}
+            onValueChange={(value) =>
+              toggleFeature('advancedCoverAppsEnabled', value)
+            }
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={config.advancedCoverAppsEnabled ? '#2196F3' : '#f4f3f4'}
           />
         </View>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
             <Text style={styles.settingTitle}>Anti-Detection</Text>
@@ -275,7 +330,9 @@ export default function IntelligenceSettingsScreen() {
           </View>
           <Switch
             value={config.antiDetectionEnabled}
-            onValueChange={(value) => toggleFeature('antiDetectionEnabled', value)}
+            onValueChange={(value) =>
+              toggleFeature('antiDetectionEnabled', value)
+            }
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={config.antiDetectionEnabled ? '#2196F3' : '#f4f3f4'}
           />
@@ -300,7 +357,9 @@ export default function IntelligenceSettingsScreen() {
               setStealthConfig(newConfig);
             }}
             trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={stealthConfig.blankScreenStealthEnabled ? '#2196F3' : '#f4f3f4'}
+            thumbColor={
+              stealthConfig.blankScreenStealthEnabled ? '#2196F3' : '#f4f3f4'
+            }
           />
         </View>
       </View>
@@ -315,7 +374,7 @@ export default function IntelligenceSettingsScreen() {
           style={styles.slider}
           minimumValue={0}
           maximumValue={100}
-          value={((config.scanInterval / (60 * 1000)) - 15) / 105 * 100} // Convert from minutes to slider value
+          value={((config.scanInterval / (60 * 1000) - 15) / 105) * 100} // Convert from minutes to slider value
           onValueChange={() => {}} // For smooth sliding
           onSlidingComplete={handleScanIntervalChange}
           minimumTrackTintColor="#2196F3"
@@ -331,14 +390,14 @@ export default function IntelligenceSettingsScreen() {
 
       {/* Navigation buttons */}
       <View style={styles.navigationButtons}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.navigationButton}
-          onPress={() => router.push("phase3-demo")}
+          onPress={() => router.push('phase3-demo')}
         >
           <Text style={styles.navigationButtonText}>Demo Features</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.navigationButton}
           onPress={() => router.back()}
         >

@@ -11,15 +11,46 @@ export interface ThreatDetectionConfig {
   logSecurityEvents: boolean;
   alertThreshold: number;
   autoResponseEnabled: boolean;
+  
+  // Phase 4 additions
+  scheduledScans: boolean;
+  scanInterval: number; // milliseconds
+  lastScanTime: Date | null;
+  intelligenceDbEnabled: boolean;
+  intelligenceDbLastUpdate: Date | null;
+  userDefinedThreats: string[]; // patterns to look for
+  customThreats: Record<string, ThreatPattern>;
+  sensitivityLevel: 'low' | 'medium' | 'high';
+  threatResponseActions: ThreatResponseAction[];
+}
+
+export interface ThreatPattern {
+  name: string;
+  pattern: string;
+  isRegex: boolean;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  enabled: boolean;
+}
+
+export interface ThreatResponseAction {
+  id: string;
+  name: string;
+  threatTypes: Array<'jailbreak' | 'debugging' | 'tamper' | 'unusual_pattern' | 'custom' | 'unknown'>;
+  minSeverity: 'low' | 'medium' | 'high' | 'critical';
+  action: 'notify' | 'log' | 'block' | 'lockdown' | 'custom';
+  customAction?: string;
+  enabled: boolean;
 }
 
 export interface SecurityThreat {
   id: string;
-  type: 'jailbreak' | 'debugging' | 'tamper' | 'unusual_pattern' | 'unknown';
+  type: 'jailbreak' | 'debugging' | 'tamper' | 'unusual_pattern' | 'custom' | 'unknown';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   timestamp: Date;
   details?: any;
+  patternId?: string;
 }
 
 export interface UsagePattern {
@@ -42,6 +73,34 @@ const DEFAULT_CONFIG: ThreatDetectionConfig = {
   logSecurityEvents: true,
   alertThreshold: 3, // Number of threats before auto-response
   autoResponseEnabled: false,
+  
+  // Phase 4 default configurations
+  scheduledScans: true,
+  scanInterval: 86400000, // 24 hours in milliseconds
+  lastScanTime: null,
+  intelligenceDbEnabled: true,
+  intelligenceDbLastUpdate: null,
+  userDefinedThreats: [],
+  customThreats: {},
+  sensitivityLevel: 'medium',
+  threatResponseActions: [
+    {
+      id: 'default_notify',
+      name: 'Default Notification',
+      threatTypes: ['jailbreak', 'debugging', 'tamper', 'unusual_pattern', 'custom', 'unknown'],
+      minSeverity: 'medium',
+      action: 'notify',
+      enabled: true
+    },
+    {
+      id: 'critical_lockdown',
+      name: 'Critical Lockdown',
+      threatTypes: ['jailbreak', 'tamper'],
+      minSeverity: 'critical',
+      action: 'lockdown',
+      enabled: false
+    }
+  ]
 };
 
 export class ThreatDetectionEngine {
@@ -411,6 +470,287 @@ export class ThreatDetectionEngine {
     };
   }
 
+  // Phase 4 methods
+  
+  // Scheduled scanning
+  async enableScheduledScans(enabled: boolean): Promise<void> {
+    this.config.scheduledScans = enabled;
+    await this.saveConfig();
+    
+    if (enabled) {
+      this.setupScheduledScan();
+    }
+  }
+  
+  async setScanInterval(milliseconds: number): Promise<void> {
+    this.config.scanInterval = Math.max(3600000, milliseconds); // Minimum 1 hour
+    await this.saveConfig();
+    
+    if (this.config.scheduledScans) {
+      this.setupScheduledScan(); // Re-setup with new interval
+    }
+  }
+  
+  private scanTimer: ReturnType<typeof setTimeout> | null = null;
+  
+  private setupScheduledScan(): void {
+    if (this.scanTimer) {
+      clearTimeout(this.scanTimer);
+    }
+    
+    this.scanTimer = setTimeout(() => {
+      this.performSecurityScan();
+      this.setupScheduledScan(); // Schedule next scan
+    }, this.config.scanInterval);
+  }
+  
+  // Enhanced security scan with Phase 4 features
+  private async enhancedSecurityScan(): Promise<SecurityThreat[]> {
+    // Call the base security scan
+    const threats = await this.performSecurityScan();
+    
+    // Then add Phase 4 custom threat checks
+    await this.checkCustomThreats(threats);
+    
+    // Update last scan time
+    this.config.lastScanTime = new Date();
+    await this.saveConfig();
+    
+    return threats;
+    
+    // Check custom threat patterns
+    await this.checkCustomThreats(threats);
+    
+    // Log all detected threats
+    for (const threat of threats) {
+      this.logSecurityThreat(threat);
+    }
+    
+    // Update last scan time
+    this.config.lastScanTime = new Date();
+    await this.saveConfig();
+    
+    return threats;
+  }
+  
+  // Threat Intelligence Database
+  async enableIntelligenceDb(enabled: boolean): Promise<void> {
+    this.config.intelligenceDbEnabled = enabled;
+    await this.saveConfig();
+    
+    if (enabled) {
+      await this.updateThreatIntelligence();
+    }
+  }
+  
+  async updateThreatIntelligence(): Promise<boolean> {
+    try {
+      // In a real implementation, this would fetch updated threat signatures
+      // from a server or other source
+      
+      console.log('Updating threat intelligence database...');
+      
+      // Simulate updating with a delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      this.config.intelligenceDbLastUpdate = new Date();
+      await this.saveConfig();
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to update threat intelligence:', error);
+      return false;
+    }
+  }
+  
+  // Custom threat patterns
+  async addCustomThreatPattern(
+    name: string,
+    pattern: string,
+    isRegex: boolean,
+    severity: 'low' | 'medium' | 'high' | 'critical',
+    description: string
+  ): Promise<string> {
+    const id = `pattern_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    
+    this.config.customThreats[id] = {
+      name,
+      pattern,
+      isRegex,
+      severity,
+      description,
+      enabled: true
+    };
+    
+    await this.saveConfig();
+    return id;
+  }
+  
+  async updateCustomThreatPattern(
+    id: string,
+    updates: Partial<Omit<ThreatPattern, 'id'>>
+  ): Promise<boolean> {
+    if (!this.config.customThreats[id]) {
+      return false;
+    }
+    
+    this.config.customThreats[id] = {
+      ...this.config.customThreats[id],
+      ...updates
+    };
+    
+    await this.saveConfig();
+    return true;
+  }
+  
+  async removeCustomThreatPattern(id: string): Promise<boolean> {
+    if (!this.config.customThreats[id]) {
+      return false;
+    }
+    
+    delete this.config.customThreats[id];
+    await this.saveConfig();
+    
+    return true;
+  }
+  
+  private async checkCustomThreats(threats: SecurityThreat[]): Promise<void> {
+    // In a real implementation, this would scan various system aspects
+    // against custom patterns
+    
+    // For this example, we'll just simulate some basic checks
+    for (const [id, pattern] of Object.entries(this.config.customThreats)) {
+      if (!pattern.enabled) continue;
+      
+      // Simple simulation of pattern matching
+      const shouldMatch = Math.random() < 0.1; // 10% chance of a match for demo
+      
+      if (shouldMatch) {
+        threats.push({
+          id: `custom_${Date.now()}_${id}`,
+          type: 'custom',
+          severity: pattern.severity,
+          description: `Custom threat detected: ${pattern.name}`,
+          timestamp: new Date(),
+          patternId: id,
+          details: { pattern: pattern.pattern }
+        });
+      }
+    }
+  }
+  
+  // Response actions
+  async addThreatResponseAction(
+    name: string,
+    threatTypes: Array<'jailbreak' | 'debugging' | 'tamper' | 'unusual_pattern' | 'custom' | 'unknown'>,
+    minSeverity: 'low' | 'medium' | 'high' | 'critical',
+    action: 'notify' | 'log' | 'block' | 'lockdown' | 'custom',
+    customAction?: string
+  ): Promise<string> {
+    const id = `action_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    
+    const newAction: ThreatResponseAction = {
+      id,
+      name,
+      threatTypes,
+      minSeverity,
+      action,
+      customAction,
+      enabled: true
+    };
+    
+    this.config.threatResponseActions.push(newAction);
+    await this.saveConfig();
+    
+    return id;
+  }
+  
+  async updateThreatResponseAction(
+    id: string,
+    updates: Partial<Omit<ThreatResponseAction, 'id'>>
+  ): Promise<boolean> {
+    const index = this.config.threatResponseActions.findIndex(a => a.id === id);
+    
+    if (index === -1) {
+      return false;
+    }
+    
+    this.config.threatResponseActions[index] = {
+      ...this.config.threatResponseActions[index],
+      ...updates
+    };
+    
+    await this.saveConfig();
+    return true;
+  }
+  
+  async removeThreatResponseAction(id: string): Promise<boolean> {
+    // Don't allow removing default actions
+    if (id === 'default_notify' || id === 'critical_lockdown') {
+      return false;
+    }
+    
+    const initialLength = this.config.threatResponseActions.length;
+    this.config.threatResponseActions = this.config.threatResponseActions.filter(a => a.id !== id);
+    
+    if (initialLength !== this.config.threatResponseActions.length) {
+      await this.saveConfig();
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // Sensitivity configuration
+  async setSensitivityLevel(level: 'low' | 'medium' | 'high'): Promise<void> {
+    this.config.sensitivityLevel = level;
+    
+    switch (level) {
+      case 'low':
+        this.config.alertThreshold = 5;
+        break;
+      case 'medium':
+        this.config.alertThreshold = 3;
+        break;
+      case 'high':
+        this.config.alertThreshold = 1;
+        break;
+    }
+    
+    await this.saveConfig();
+  }
+  
+  // Get custom threats
+  getCustomThreatPatterns(): Record<string, ThreatPattern> {
+    return { ...this.config.customThreats };
+  }
+  
+  // Get threat response actions
+  getThreatResponseActions(): ThreatResponseAction[] {
+    return [...this.config.threatResponseActions];
+  }
+  
+  // Get threat intelligence status
+  getThreatIntelligenceStatus(): {
+    enabled: boolean;
+    lastUpdate: Date | null;
+    isUpToDate: boolean;
+  } {
+    const now = new Date();
+    const lastUpdate = this.config.intelligenceDbLastUpdate;
+    
+    // Consider up to date if updated in the last 7 days
+    const isUpToDate = lastUpdate 
+      ? (now.getTime() - lastUpdate.getTime()) < 7 * 24 * 60 * 60 * 1000 
+      : false;
+    
+    return {
+      enabled: this.config.intelligenceDbEnabled,
+      lastUpdate: this.config.intelligenceDbLastUpdate,
+      isUpToDate
+    };
+  }
+  
   private async saveConfig(): Promise<void> {
     try {
       await AsyncStorage.setItem(
@@ -471,3 +811,25 @@ export const logUsage = (action: string, duration?: number, details?: any) =>
   threatDetectionEngine.logUsagePattern(action, duration, details);
 export const getSecurityStatus = () =>
   threatDetectionEngine.getSecurityStatus();
+  
+// Phase 4 helper exports
+export const enableScheduledScans = (enabled: boolean) =>
+  threatDetectionEngine.enableScheduledScans(enabled);
+export const setScanInterval = (milliseconds: number) =>
+  threatDetectionEngine.setScanInterval(milliseconds);
+export const updateThreatIntelligence = () =>
+  threatDetectionEngine.updateThreatIntelligence();
+export const addCustomThreatPattern = (name: string, pattern: string, isRegex: boolean, severity: 'low' | 'medium' | 'high' | 'critical', description: string) =>
+  threatDetectionEngine.addCustomThreatPattern(name, pattern, isRegex, severity, description);
+export const updateCustomThreatPattern = (id: string, updates: Partial<Omit<ThreatPattern, 'id'>>) =>
+  threatDetectionEngine.updateCustomThreatPattern(id, updates);
+export const removeCustomThreatPattern = (id: string) =>
+  threatDetectionEngine.removeCustomThreatPattern(id);
+export const addThreatResponseAction = (name: string, threatTypes: Array<'jailbreak' | 'debugging' | 'tamper' | 'unusual_pattern' | 'custom' | 'unknown'>, minSeverity: 'low' | 'medium' | 'high' | 'critical', action: 'notify' | 'log' | 'block' | 'lockdown' | 'custom', customAction?: string) =>
+  threatDetectionEngine.addThreatResponseAction(name, threatTypes, minSeverity, action, customAction);
+export const setSensitivityLevel = (level: 'low' | 'medium' | 'high') =>
+  threatDetectionEngine.setSensitivityLevel(level);
+export const getCustomThreatPatterns = () =>
+  threatDetectionEngine.getCustomThreatPatterns();
+export const getThreatResponseActions = () =>
+  threatDetectionEngine.getThreatResponseActions();

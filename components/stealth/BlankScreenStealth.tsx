@@ -69,7 +69,10 @@ export const BlankScreenOverlay: React.FC<BlankScreenOverlayProps> = ({
   const overlayOpacity = 1 - brightnessLevel; // Invert brightness for opacity
 
   return (
-    <View style={[styles.overlay, { opacity: overlayOpacity }]} pointerEvents="box-only">
+    <View
+      style={[styles.overlay, { opacity: overlayOpacity }]}
+      pointerEvents="box-only"
+    >
       <TouchableWithoutFeedback onPress={handleTap}>
         <View style={styles.touchArea} {...panResponder.panHandlers}>
           {/* Completely invisible touch area */}
@@ -120,12 +123,16 @@ export const BlankScreenSettings: React.FC = () => {
     setConfig(blankScreenStealthManager.getConfig());
   }, []);
 
-  const updateActivationMethod = async (method: 'long_press' | 'gesture' | 'both') => {
+  const updateActivationMethod = async (
+    method: 'long_press' | 'gesture' | 'both'
+  ) => {
     await blankScreenStealthManager.setActivationMethod(method);
     setConfig(blankScreenStealthManager.getConfig());
   };
 
-  const updateGestureSequence = async (sequence: 'triple_tap' | 'swipe_up' | 'shake') => {
+  const updateGestureSequence = async (
+    sequence: 'triple_tap' | 'swipe_up' | 'shake'
+  ) => {
     await blankScreenStealthManager.setGestureSequence(sequence);
     setConfig(blankScreenStealthManager.getConfig());
   };
@@ -140,9 +147,13 @@ export const BlankScreenSettings: React.FC = () => {
     if (success) {
       Alert.alert(
         'Blank Screen Activated',
-        `Use ${config.activationMethod === 'long_press' ? 'long press' : 
-              config.activationMethod === 'gesture' ? 'gesture' : 
-              'long press or gesture'} to deactivate.`,
+        `Use ${
+          config.activationMethod === 'long_press'
+            ? 'long press'
+            : config.activationMethod === 'gesture'
+            ? 'gesture'
+            : 'long press or gesture'
+        } to deactivate.`,
         [{ text: 'OK' }]
       );
     }

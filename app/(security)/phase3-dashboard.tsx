@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { phase3 } from '../../lib/phase3Integration';
@@ -17,18 +23,18 @@ export default function Phase3DashboardScreen() {
       try {
         // Initialize Phase 3 systems
         await phase3.initialize();
-        
+
         // Get initial security status
         const status = await phase3.getSecurityStatus();
         setSecurityStatus(status);
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to initialize Phase 3 dashboard:', error);
         setIsLoading(false);
       }
     }
-    
+
     initializePhase3();
   }, []);
 
@@ -38,11 +44,11 @@ export default function Phase3DashboardScreen() {
       setIsLoading(true);
       const results = await phase3.securityScan();
       setScanResults(results);
-      
+
       // Refresh security status
       const status = await phase3.getSecurityStatus();
       setSecurityStatus(status);
-      
+
       setIsLoading(false);
     } catch (error) {
       console.error('Security scan failed:', error);
@@ -55,11 +61,11 @@ export default function Phase3DashboardScreen() {
     try {
       setIsLoading(true);
       await phase3.activateEnhancedSecurity();
-      
+
       // Refresh security status
       const status = await phase3.getSecurityStatus();
       setSecurityStatus(status);
-      
+
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to enhance security:', error);
@@ -72,11 +78,11 @@ export default function Phase3DashboardScreen() {
     try {
       setIsLoading(true);
       await phase3.activatePrivacyMode();
-      
+
       // Refresh security status
       const status = await phase3.getSecurityStatus();
       setSecurityStatus(status);
-      
+
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to activate privacy mode:', error);
@@ -95,11 +101,16 @@ export default function Phase3DashboardScreen() {
   // Get icon name based on threat level
   const getThreatIcon = (level: string) => {
     switch (level) {
-      case 'low': return 'shield-checkmark';
-      case 'medium': return 'shield-half';
-      case 'high': return 'warning';
-      case 'critical': return 'alert-circle';
-      default: return 'shield';
+      case 'low':
+        return 'shield-checkmark';
+      case 'medium':
+        return 'shield-half';
+      case 'high':
+        return 'warning';
+      case 'critical':
+        return 'alert-circle';
+      default:
+        return 'shield';
     }
   };
 
@@ -126,91 +137,98 @@ export default function Phase3DashboardScreen() {
       {/* Security Status Section */}
       <View style={styles.statusSection}>
         <View style={styles.statusHeader}>
-          <Ionicons 
-            name={getThreatIcon(securityStatus?.threatLevel || 'medium')} 
-            size={24} 
-            color={getScoreColor(securityStatus?.securityScore || 50)} 
+          <Ionicons
+            name={getThreatIcon(securityStatus?.threatLevel || 'medium')}
+            size={24}
+            color={getScoreColor(securityStatus?.securityScore || 50)}
           />
           <Text style={styles.statusTitle}>Security Status</Text>
-          <Text style={[
-            styles.threatLevel,
-            { color: getScoreColor(securityStatus?.securityScore || 50) }
-          ]}>
+          <Text
+            style={[
+              styles.threatLevel,
+              { color: getScoreColor(securityStatus?.securityScore || 50) },
+            ]}
+          >
             {securityStatus?.threatLevel?.toUpperCase() || 'UNKNOWN'}
           </Text>
         </View>
-        
+
         <View style={styles.scoreContainer}>
           <View style={styles.scoreItem}>
             <Text style={styles.scoreLabel}>Security</Text>
             <View style={styles.scoreCircle}>
-              <Text style={[
-                styles.scoreValue, 
-                {color: getScoreColor(securityStatus?.securityScore || 50)}
-              ]}>
+              <Text
+                style={[
+                  styles.scoreValue,
+                  { color: getScoreColor(securityStatus?.securityScore || 50) },
+                ]}
+              >
                 {securityStatus?.securityScore || 0}
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.scoreItem}>
             <Text style={styles.scoreLabel}>Privacy</Text>
             <View style={styles.scoreCircle}>
-              <Text style={[
-                styles.scoreValue, 
-                {color: getScoreColor(securityStatus?.privacyScore || 50)}
-              ]}>
+              <Text
+                style={[
+                  styles.scoreValue,
+                  { color: getScoreColor(securityStatus?.privacyScore || 50) },
+                ]}
+              >
                 {securityStatus?.privacyScore || 0}
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.scoreItem}>
             <Text style={styles.scoreLabel}>Stealth</Text>
             <View style={styles.scoreCircle}>
-              <Text style={[
-                styles.scoreValue, 
-                {color: getScoreColor(securityStatus?.stealthScore || 50)}
-              ]}>
+              <Text
+                style={[
+                  styles.scoreValue,
+                  { color: getScoreColor(securityStatus?.stealthScore || 50) },
+                ]}
+              >
                 {securityStatus?.stealthScore || 0}
               </Text>
             </View>
           </View>
         </View>
-        
+
         <View style={styles.divider} />
-        
+
         <Text style={styles.sectionLabel}>Active Protections</Text>
         <View style={styles.protectionsList}>
-          {securityStatus?.activeProtections.map((protection: string, index: number) => (
-            <View key={index} style={styles.protectionItem}>
-              <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
-              <Text style={styles.protectionText}>{protection}</Text>
-            </View>
-          ))}
+          {securityStatus?.activeProtections.map(
+            (protection: string, index: number) => (
+              <View key={index} style={styles.protectionItem}>
+                <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
+                <Text style={styles.protectionText}>{protection}</Text>
+              </View>
+            )
+          )}
         </View>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
-        <TouchableOpacity 
-          style={styles.actionButton} 
-          onPress={runSecurityScan}
-        >
+        <TouchableOpacity style={styles.actionButton} onPress={runSecurityScan}>
           <Ionicons name="scan-circle-outline" size={24} color="#fff" />
           <Text style={styles.actionButtonText}>Security Scan</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#2196F3' }]} 
+
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: '#2196F3' }]}
           onPress={enhanceSecurityMode}
         >
           <Ionicons name="shield" size={24} color="#fff" />
           <Text style={styles.actionButtonText}>Enhance Security</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#9C27B0' }]} 
+
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: '#9C27B0' }]}
           onPress={activatePrivacyMode}
         >
           <Ionicons name="eye-off" size={24} color="#fff" />
@@ -222,17 +240,19 @@ export default function Phase3DashboardScreen() {
       {scanResults && (
         <View style={styles.resultsSection}>
           <Text style={styles.sectionTitle}>Scan Results</Text>
-          
+
           <View style={styles.resultItem}>
             <Text style={styles.resultLabel}>Security Score:</Text>
-            <Text style={[
-              styles.resultValue,
-              { color: getScoreColor(scanResults.securityScore) }
-            ]}>
+            <Text
+              style={[
+                styles.resultValue,
+                { color: getScoreColor(scanResults.securityScore) },
+              ]}
+            >
               {scanResults.securityScore}/100
             </Text>
           </View>
-          
+
           {scanResults.findings.length > 0 && (
             <>
               <Text style={styles.resultSubtitle}>Findings:</Text>
@@ -244,7 +264,7 @@ export default function Phase3DashboardScreen() {
               ))}
             </>
           )}
-          
+
           {scanResults.recommendations.length > 0 && (
             <>
               <Text style={styles.resultSubtitle}>Recommendations:</Text>
@@ -261,15 +281,15 @@ export default function Phase3DashboardScreen() {
 
       {/* Navigation */}
       <View style={styles.navigationSection}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.back()}
         >
           <Ionicons name="settings" size={24} color="#fff" />
           <Text style={styles.navButtonText}>Back to Settings</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.navButton, { backgroundColor: '#424242' }]}
           onPress={() => router.back()}
         >

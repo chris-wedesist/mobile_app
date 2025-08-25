@@ -8,7 +8,7 @@ import { antiDetectionManager } from './stealth-advanced/antiDetection';
 
 /**
  * Phase 3 Integration Module
- * 
+ *
  * This module connects the intelligence features with the stealth system,
  * enabling centralized security management across the app.
  */
@@ -24,7 +24,7 @@ export async function initializePhase3() {
 
     // Setup event listeners to connect systems
     setupCrossSystemEvents();
-    
+
     console.log('Phase 3 systems initialized successfully');
     return true;
   } catch (error) {
@@ -39,7 +39,7 @@ function setupCrossSystemEvents() {
   // Note: These event listeners will need to be implemented in the respective classes
   // For now we're setting up the framework for future implementation
   console.log('Setting up cross-system event handlers');
-  
+
   // In the future:
   // threatIntelligenceEngine.on('criticalThreatDetected', () => {
   //   stealthManager.resetToStealth();
@@ -60,38 +60,42 @@ export async function performIntegratedSecurityScan(): Promise<{
     // Run both security scans
     const [stealthStatus, intelligenceResults] = await Promise.all([
       checkStealthIntegrity(),
-      intelligenceManager.performSecurityScan()
+      intelligenceManager.performSecurityScan(),
     ]);
 
     // Calculate overall security score (0-100)
     const stealthScore = stealthStatus.integrityScore;
     const intelligenceScore = 100 - intelligenceResults.threatScore;
     const securityScore = Math.floor((stealthScore + intelligenceScore) / 2);
-    
+
     // Combine findings and recommendations
     const findings = [
       ...stealthStatus.issues,
       intelligenceResults.networkSecure ? [] : ['Network security compromised'],
-      intelligenceResults.privacyProtected ? [] : ['Privacy protections compromised'],
-      intelligenceResults.stealthActive ? [] : ['Stealth measures compromised']
-    ].flat().filter(Boolean);
+      intelligenceResults.privacyProtected
+        ? []
+        : ['Privacy protections compromised'],
+      intelligenceResults.stealthActive ? [] : ['Stealth measures compromised'],
+    ]
+      .flat()
+      .filter(Boolean);
 
     const recommendations = [
       ...stealthStatus.recommendations,
-      ...intelligenceResults.recommendations
+      ...intelligenceResults.recommendations,
     ];
 
     return {
       securityScore,
       findings,
-      recommendations
+      recommendations,
     };
   } catch (error) {
     console.error('Security scan failed:', error);
     return {
       securityScore: 50, // Default medium risk
       findings: ['Error performing security scan'],
-      recommendations: ['Restart the application and try again']
+      recommendations: ['Restart the application and try again'],
     };
   }
 }
@@ -103,16 +107,16 @@ async function checkStealthIntegrity(): Promise<{
   recommendations: string[];
 }> {
   const stealthConfig = await stealthManager.getConfig();
-  
+
   const issues: string[] = [];
   const recommendations: string[] = [];
-  
+
   // Check for potential security issues
   if (!stealthConfig.securityEnabled) {
     issues.push('Security features disabled');
     recommendations.push('Enable security features');
   }
-  
+
   if (!stealthConfig.biometricRequired) {
     issues.push('Biometric authentication not required');
     recommendations.push('Enable biometric authentication');
@@ -124,12 +128,12 @@ async function checkStealthIntegrity(): Promise<{
   }
 
   // Calculate integrity score
-  const integrityScore = 100 - (issues.length * 15);
-  
+  const integrityScore = 100 - issues.length * 15;
+
   return {
     integrityScore: Math.max(0, integrityScore),
     issues,
-    recommendations
+    recommendations,
   };
 }
 
@@ -141,14 +145,14 @@ export async function activateEnhancedSecurity() {
     await stealthManager.enableScreenProtection();
     await stealthManager.enableThreatDetection();
     await stealthManager.enableBlankScreenStealth();
-    
+
     // Intelligence protections
     await intelligenceManager.enableThreatIntelligence(true);
     await intelligenceManager.enableNetworkSecurity(true);
     await intelligenceManager.enablePrivacyEngine(true);
     await intelligenceManager.enableAntiDetection(true);
     await intelligenceManager.setSecurityLevel('maximum');
-    
+
     // Perform security scan
     return await performIntegratedSecurityScan();
   } catch (error) {
@@ -165,12 +169,12 @@ export async function activatePrivacyMode() {
     await intelligenceManager.setSecurityLevel('maximum');
     await antiDetectionManager.maskNetworkSignature();
     await antiDetectionManager.hideMemoryPatterns();
-    
+
     // Configure optimal privacy settings
     // In future versions, we'll implement a proper API
     // await privacyEngineManager.setProtectionLevel('maximum');
     console.log('Setting privacy protection to maximum level');
-    
+
     return true;
   } catch (error) {
     console.error('Failed to activate privacy mode:', error);
@@ -189,28 +193,42 @@ export async function getSecurityStatus(): Promise<{
   try {
     const stealthConfig = await stealthManager.getConfig();
     const intelligenceConfig = intelligenceManager.getConfig();
-    
+
     // Count active protections
     const activeProtections: string[] = [];
-    
+
     if (stealthConfig.securityEnabled) activeProtections.push('Basic Security');
-    if (stealthConfig.biometricRequired) activeProtections.push('Biometric Auth');
-    if (stealthConfig.screenProtectionEnabled) activeProtections.push('Screen Protection');
-    if (stealthConfig.threatDetectionEnabled) activeProtections.push('Threat Detection');
-    if (stealthConfig.blankScreenStealthEnabled) activeProtections.push('Blank Screen Stealth');
-    if (intelligenceConfig.threatIntelligenceEnabled) activeProtections.push('Threat Intelligence');
-    if (intelligenceConfig.networkSecurityEnabled) activeProtections.push('Network Security');
-    if (intelligenceConfig.privacyEngineEnabled) activeProtections.push('Privacy Protection');
-    if (intelligenceConfig.antiDetectionEnabled) activeProtections.push('Anti-Detection');
-    
+    if (stealthConfig.biometricRequired)
+      activeProtections.push('Biometric Auth');
+    if (stealthConfig.screenProtectionEnabled)
+      activeProtections.push('Screen Protection');
+    if (stealthConfig.threatDetectionEnabled)
+      activeProtections.push('Threat Detection');
+    if (stealthConfig.blankScreenStealthEnabled)
+      activeProtections.push('Blank Screen Stealth');
+    if (intelligenceConfig.threatIntelligenceEnabled)
+      activeProtections.push('Threat Intelligence');
+    if (intelligenceConfig.networkSecurityEnabled)
+      activeProtections.push('Network Security');
+    if (intelligenceConfig.privacyEngineEnabled)
+      activeProtections.push('Privacy Protection');
+    if (intelligenceConfig.antiDetectionEnabled)
+      activeProtections.push('Anti-Detection');
+
     // Calculate scores
-    const securityScore = calculateSecurityScore(stealthConfig, intelligenceConfig);
+    const securityScore = calculateSecurityScore(
+      stealthConfig,
+      intelligenceConfig
+    );
     const privacyScore = calculatePrivacyScore(intelligenceConfig);
-    const stealthScore = calculateStealthScore(stealthConfig, intelligenceConfig);
-    
+    const stealthScore = calculateStealthScore(
+      stealthConfig,
+      intelligenceConfig
+    );
+
     // Determine threat level
     let threatLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    
+
     if (securityScore < 40 || privacyScore < 30 || stealthScore < 30) {
       threatLevel = 'critical';
     } else if (securityScore < 60 || privacyScore < 50 || stealthScore < 50) {
@@ -218,13 +236,13 @@ export async function getSecurityStatus(): Promise<{
     } else if (securityScore < 80 || privacyScore < 70 || stealthScore < 70) {
       threatLevel = 'medium';
     }
-    
+
     return {
       securityScore,
       privacyScore,
       stealthScore,
       threatLevel,
-      activeProtections
+      activeProtections,
     };
   } catch (error) {
     console.error('Failed to get security status:', error);
@@ -233,7 +251,7 @@ export async function getSecurityStatus(): Promise<{
       privacyScore: 50,
       stealthScore: 50,
       threatLevel: 'medium',
-      activeProtections: ['Error calculating protections']
+      activeProtections: ['Error calculating protections'],
     };
   }
 }
@@ -244,7 +262,7 @@ function calculateSecurityScore(
   intelligenceConfig: any
 ): number {
   let score = 50; // Base score
-  
+
   // Add points for enabled security features
   if (stealthConfig.securityEnabled) score += 5;
   if (stealthConfig.biometricRequired) score += 10;
@@ -252,35 +270,36 @@ function calculateSecurityScore(
   if (stealthConfig.threatDetectionEnabled) score += 10;
   if (intelligenceConfig.threatIntelligenceEnabled) score += 10;
   if (intelligenceConfig.networkSecurityEnabled) score += 10;
-  
+
   // Security level bonus
   if (intelligenceConfig.securityLevel === 'maximum') {
     score += 10;
   } else if (intelligenceConfig.securityLevel === 'enhanced') {
     score += 5;
   }
-  
+
   return Math.min(100, Math.max(0, score));
 }
 
 // Helper function to calculate privacy score
 function calculatePrivacyScore(intelligenceConfig: any): number {
   let score = 40; // Base score
-  
+
   // Add points for privacy features
   if (intelligenceConfig.privacyEngineEnabled) score += 30;
-  
+
   // Security level affects privacy as well
   if (intelligenceConfig.securityLevel === 'maximum') {
     score += 15;
   } else if (intelligenceConfig.securityLevel === 'enhanced') {
     score += 10;
   }
-  
+
   // Regular scans improve privacy
-  const hoursSinceLastScan = 
-    (Date.now() - new Date(intelligenceConfig.lastScanTime).getTime()) / (1000 * 60 * 60);
-  
+  const hoursSinceLastScan =
+    (Date.now() - new Date(intelligenceConfig.lastScanTime).getTime()) /
+    (1000 * 60 * 60);
+
   if (hoursSinceLastScan < 24) {
     score += 15;
   } else if (hoursSinceLastScan < 48) {
@@ -288,22 +307,22 @@ function calculatePrivacyScore(intelligenceConfig: any): number {
   } else if (hoursSinceLastScan < 72) {
     score += 5;
   }
-  
+
   return Math.min(100, Math.max(0, score));
 }
 
 // Helper function to calculate stealth score
 function calculateStealthScore(
-  stealthConfig: any, 
+  stealthConfig: any,
   intelligenceConfig: any
 ): number {
   let score = 30; // Base score
-  
+
   // Add points for stealth features
   if (stealthConfig.blankScreenStealthEnabled) score += 20;
   if (intelligenceConfig.antiDetectionEnabled) score += 25;
   if (intelligenceConfig.advancedCoverAppsEnabled) score += 25;
-  
+
   return Math.min(100, Math.max(0, score));
 }
 
@@ -314,7 +333,7 @@ export const phase3 = {
   activateEnhancedSecurity,
   activatePrivacyMode,
   getSecurityStatus,
-  
+
   // Pass-through functions for convenience
   stealthManager,
   intelligenceManager,

@@ -457,7 +457,7 @@ export class StealthManager {
       if (blankScreenStealthManager.isActive()) {
         await blankScreenStealthManager.deactivateBlankScreen();
       }
-      
+
       this.config.blankScreenStealthEnabled = false;
       await this.saveConfig();
       console.log('Blank screen stealth disabled');
@@ -502,8 +502,11 @@ export const resetToStealth = () => stealthManager.resetToStealth();
 export const isStealthMode = () => stealthManager.isStealthMode();
 
 // NEW: Export blank screen stealth helper functions
-export const enableBlankScreenStealth = () => stealthManager.enableBlankScreenStealth();
-export const disableBlankScreenStealth = () => stealthManager.disableBlankScreenStealth();
+export const enableBlankScreenStealth = () =>
+  stealthManager.enableBlankScreenStealth();
+export const disableBlankScreenStealth = () =>
+  stealthManager.disableBlankScreenStealth();
 export const activateBlankScreen = () => stealthManager.activateBlankScreen();
-export const deactivateBlankScreen = () => stealthManager.deactivateBlankScreen();
+export const deactivateBlankScreen = () =>
+  stealthManager.deactivateBlankScreen();
 export const isBlankScreenActive = () => stealthManager.isBlankScreenActive();

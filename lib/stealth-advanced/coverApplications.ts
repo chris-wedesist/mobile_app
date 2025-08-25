@@ -11,9 +11,24 @@ export interface CoverApplication {
 export class CoverApplicationsManager {
   private static instance: CoverApplicationsManager;
   private covers: CoverApplication[] = [
-    { name: 'Calculator', icon: 'calculator', description: 'Basic calculator app', isActive: false },
-    { name: 'Notes', icon: 'document', description: 'Simple notes app', isActive: false },
-    { name: 'Weather', icon: 'cloud', description: 'Weather forecast', isActive: false },
+    {
+      name: 'Calculator',
+      icon: 'calculator',
+      description: 'Basic calculator app',
+      isActive: false,
+    },
+    {
+      name: 'Notes',
+      icon: 'document',
+      description: 'Simple notes app',
+      isActive: false,
+    },
+    {
+      name: 'Weather',
+      icon: 'cloud',
+      description: 'Weather forecast',
+      isActive: false,
+    },
   ];
 
   static getInstance(): CoverApplicationsManager {
@@ -28,11 +43,14 @@ export class CoverApplicationsManager {
   }
 
   activateCover(name: string): void {
-    this.covers = this.covers.map(cover => ({ ...cover, isActive: cover.name === name }));
+    this.covers = this.covers.map((cover) => ({
+      ...cover,
+      isActive: cover.name === name,
+    }));
   }
 
   getActiveCover(): CoverApplication | null {
-    return this.covers.find(cover => cover.isActive) || null;
+    return this.covers.find((cover) => cover.isActive) || null;
   }
 }
 

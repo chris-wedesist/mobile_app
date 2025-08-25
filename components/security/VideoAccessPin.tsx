@@ -87,12 +87,12 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
       } else {
         // Normal authentication
         const result = await authenticateForVideoAccess(pin);
-        
+
         if (result.success) {
           onSuccess();
         } else {
-          setAttempts(prev => prev + 1);
-          
+          setAttempts((prev) => prev + 1);
+
           if (attempts >= 2) {
             Alert.alert(
               'Too Many Attempts',
@@ -102,7 +102,9 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
           } else {
             Alert.alert(
               'Incorrect PIN',
-              `Invalid PIN. ${2 - attempts} attempt${2 - attempts !== 1 ? 's' : ''} remaining.`
+              `Invalid PIN. ${2 - attempts} attempt${
+                2 - attempts !== 1 ? 's' : ''
+              } remaining.`
             );
           }
           setPin('');
@@ -124,7 +126,9 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
             key={index}
             style={[
               styles.pinDot,
-              index < currentPin.length ? styles.pinDotFilled : styles.pinDotEmpty,
+              index < currentPin.length
+                ? styles.pinDotFilled
+                : styles.pinDotEmpty,
             ]}
           />
         ))}
@@ -156,18 +160,18 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
                   onPress={() => {
                     if (key === 'backspace') {
                       if (step === 'confirm') {
-                        setConfirmPin(prev => prev.slice(0, -1));
+                        setConfirmPin((prev) => prev.slice(0, -1));
                       } else {
-                        setPin(prev => prev.slice(0, -1));
+                        setPin((prev) => prev.slice(0, -1));
                       }
                     } else {
                       if (step === 'confirm') {
                         if (confirmPin.length < 6) {
-                          setConfirmPin(prev => prev + key);
+                          setConfirmPin((prev) => prev + key);
                         }
                       } else {
                         if (pin.length < 6) {
-                          setPin(prev => prev + key);
+                          setPin((prev) => prev + key);
                         }
                       }
                     }
@@ -197,7 +201,7 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
 
   const getMessage = () => {
     if (isFirstTimeSetup) {
-      return step === 'enter' 
+      return step === 'enter'
         ? 'Create a PIN to secure access to video recordings'
         : 'Please confirm your PIN';
     }
@@ -223,8 +227,13 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
         </View>
 
         <View style={styles.content}>
-          <Ionicons name="videocam-outline" size={64} color="#007AFF" style={styles.icon} />
-          
+          <Ionicons
+            name="videocam-outline"
+            size={64}
+            color="#007AFF"
+            style={styles.icon}
+          />
+
           <Text style={styles.message}>{getMessage()}</Text>
 
           {renderPinDots(currentPin)}
@@ -234,7 +243,9 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
           <TouchableOpacity
             style={[
               styles.submitButton,
-              currentPin.length >= 4 ? styles.submitButtonActive : styles.submitButtonInactive,
+              currentPin.length >= 4
+                ? styles.submitButtonActive
+                : styles.submitButtonInactive,
             ]}
             onPress={handlePinSubmit}
             disabled={currentPin.length < 4 || isLoading}
@@ -242,19 +253,23 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
             <Text
               style={[
                 styles.submitButtonText,
-                currentPin.length >= 4 ? styles.submitButtonTextActive : styles.submitButtonTextInactive,
+                currentPin.length >= 4
+                  ? styles.submitButtonTextActive
+                  : styles.submitButtonTextInactive,
               ]}
             >
-              {isLoading ? 'Processing...' : 
-               isFirstTimeSetup && step === 'enter' ? 'Continue' : 
-               isFirstTimeSetup && step === 'confirm' ? 'Set PIN' : 'Unlock'}
+              {isLoading
+                ? 'Processing...'
+                : isFirstTimeSetup && step === 'enter'
+                ? 'Continue'
+                : isFirstTimeSetup && step === 'confirm'
+                ? 'Set PIN'
+                : 'Unlock'}
             </Text>
           </TouchableOpacity>
 
           {!isFirstTimeSetup && (
-            <Text style={styles.attemptsText}>
-              Attempts: {attempts}/3
-            </Text>
+            <Text style={styles.attemptsText}>Attempts: {attempts}/3</Text>
           )}
         </View>
       </View>
@@ -266,12 +281,14 @@ export const VideoAccessPinModal: React.FC<VideoAccessPinProps> = ({
 export const useVideoAccessAuth = () => {
   const [showPinModal, setShowPinModal] = useState(false);
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
-  const [onSuccessCallback, setOnSuccessCallback] = useState<(() => void) | null>(null);
+  const [onSuccessCallback, setOnSuccessCallback] = useState<
+    (() => void) | null
+  >(null);
 
   const requestVideoAccess = async (onSuccess: () => void) => {
     try {
       const pinRequired = await isVideoPinRequired();
-      
+
       if (!pinRequired) {
         // No PIN required, proceed directly
         const result = await authenticateForVideoAccess();
@@ -286,7 +303,7 @@ export const useVideoAccessAuth = () => {
       // Check if this is first time setup (no PIN exists)
       const config = biometricAuthManager.getConfig();
       const firstTime = !config.videoAccessPinEnabled;
-      
+
       setIsFirstTimeSetup(firstTime);
       setOnSuccessCallback(() => onSuccess);
       setShowPinModal(true);
