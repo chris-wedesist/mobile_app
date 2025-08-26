@@ -23,7 +23,14 @@ export const ThreatDashboard: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Threat Level</Text>
-      <Text style={[styles.level, styles[`level${threatLevel.charAt(0).toUpperCase() + threatLevel.slice(1)}`]]}>
+      <Text
+        style={[
+          styles.level,
+          styles[
+            `level${threatLevel.charAt(0).toUpperCase() + threatLevel.slice(1)}`
+          ],
+        ]}
+      >
         {threatLevel.toUpperCase()}
       </Text>
       {lastAssessment && (

@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
     if (!deviceId || !appVersion || !platform) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'deviceId, appVersion, and platform are required'
+        message: 'deviceId, appVersion, and platform are required',
       });
     }
 
@@ -69,12 +69,14 @@ router.post('/register', async (req, res) => {
     );
 
     res.status(201).json({
-      message: existingDevice ? 'Device updated successfully' : 'Device registered successfully',
+      message: existingDevice
+        ? 'Device updated successfully'
+        : 'Device registered successfully',
       deviceId,
       tokens: {
         accessToken,
         refreshToken,
-        expiresIn: '24h'
+        expiresIn: '24h',
       },
       device: {
         deviceId,
@@ -82,15 +84,14 @@ router.post('/register', async (req, res) => {
         platform,
         securityConfig: securityConfig || {},
         isOnline: true,
-        registeredAt: new Date().toISOString()
-      }
+        registeredAt: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     logger.error('Device registration error:', error);
     res.status(500).json({
       error: 'Registration failed',
-      message: 'An error occurred during device registration'
+      message: 'An error occurred during device registration',
     });
   }
 });
@@ -103,20 +104,19 @@ router.post('/login', async (req, res) => {
     if (!deviceId) {
       return res.status(400).json({
         error: 'Device ID required',
-        message: 'Please provide a valid device ID'
+        message: 'Please provide a valid device ID',
       });
     }
 
     // Check if device exists
-    const device = await getQuery(
-      'SELECT * FROM devices WHERE device_id = ?',
-      [deviceId]
-    );
+    const device = await getQuery('SELECT * FROM devices WHERE device_id = ?', [
+      deviceId,
+    ]);
 
     if (!device) {
       return res.status(404).json({
         error: 'Device not found',
-        message: 'The specified device is not registered'
+        message: 'The specified device is not registered',
       });
     }
 
@@ -152,22 +152,21 @@ router.post('/login', async (req, res) => {
       tokens: {
         accessToken,
         refreshToken,
-        expiresIn: '24h'
+        expiresIn: '24h',
       },
       device: {
         deviceId: device.device_id,
         appVersion: device.app_version,
         platform: device.platform,
         isOnline: true,
-        lastSeen: new Date().toISOString()
-      }
+        lastSeen: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     logger.error('Device login error:', error);
     res.status(500).json({
       error: 'Login failed',
-      message: 'An error occurred during device login'
+      message: 'An error occurred during device login',
     });
   }
 });
@@ -180,7 +179,7 @@ router.post('/refresh', async (req, res) => {
     if (!refreshToken) {
       return res.status(400).json({
         error: 'Refresh token required',
-        message: 'Please provide a valid refresh token'
+        message: 'Please provide a valid refresh token',
       });
     }
 
@@ -193,15 +192,19 @@ router.post('/refresh', async (req, res) => {
     if (!tokenRecord) {
       return res.status(401).json({
         error: 'Invalid refresh token',
-        message: 'The provided refresh token is invalid or expired'
+        message: 'The provided refresh token is invalid or expired',
       });
     }
 
     // Generate new tokens
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens(tokenRecord.device_id);
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(
+      tokenRecord.device_id
+    );
 
     // Update tokens in database
-    await runQuery('DELETE FROM device_tokens WHERE device_id = ?', [tokenRecord.device_id]);
+    await runQuery('DELETE FROM device_tokens WHERE device_id = ?', [
+      tokenRecord.device_id,
+    ]);
 
     const accessTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -213,7 +216,12 @@ router.post('/refresh', async (req, res) => {
 
     await runQuery(
       'INSERT INTO device_tokens (device_id, token_hash, expires_at, is_refresh_token) VALUES (?, ?, ?, ?)',
-      [tokenRecord.device_id, newRefreshToken, refreshTokenExpiry.toISOString(), 1]
+      [
+        tokenRecord.device_id,
+        newRefreshToken,
+        refreshTokenExpiry.toISOString(),
+        1,
+      ]
     );
 
     res.json({
@@ -221,15 +229,14 @@ router.post('/refresh', async (req, res) => {
       tokens: {
         accessToken,
         refreshToken: newRefreshToken,
-        expiresIn: '24h'
-      }
+        expiresIn: '24h',
+      },
     });
-
   } catch (error) {
     logger.error('Token refresh error:', error);
     res.status(500).json({
       error: 'Token refresh failed',
-      message: 'An error occurred during token refresh'
+      message: 'An error occurred during token refresh',
     });
   }
 });
@@ -242,7 +249,7 @@ router.post('/logout', async (req, res) => {
     if (!deviceId) {
       return res.status(400).json({
         error: 'Device ID required',
-        message: 'Please provide a valid device ID'
+        message: 'Please provide a valid device ID',
       });
     }
 
@@ -250,21 +257,19 @@ router.post('/logout', async (req, res) => {
     await runQuery('DELETE FROM device_tokens WHERE device_id = ?', [deviceId]);
 
     // Update device status
-    await runQuery(
-      'UPDATE devices SET is_online = 0 WHERE device_id = ?',
-      [deviceId]
-    );
+    await runQuery('UPDATE devices SET is_online = 0 WHERE device_id = ?', [
+      deviceId,
+    ]);
 
     res.json({
       message: 'Logout successful',
-      deviceId
+      deviceId,
     });
-
   } catch (error) {
     logger.error('Device logout error:', error);
     res.status(500).json({
       error: 'Logout failed',
-      message: 'An error occurred during device logout'
+      message: 'An error occurred during device logout',
     });
   }
 });
@@ -277,7 +282,7 @@ router.post('/admin/login', async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({
         error: 'Username and password required',
-        message: 'Please provide both username and password'
+        message: 'Please provide both username and password',
       });
     }
 
@@ -290,17 +295,20 @@ router.post('/admin/login', async (req, res) => {
     if (!adminUser) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        message: 'Username or password is incorrect'
+        message: 'Username or password is incorrect',
       });
     }
 
     // Verify password
-    const passwordValid = await bcrypt.compare(password, adminUser.password_hash);
+    const passwordValid = await bcrypt.compare(
+      password,
+      adminUser.password_hash
+    );
 
     if (!passwordValid) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        message: 'Username or password is incorrect'
+        message: 'Username or password is incorrect',
       });
     }
 
@@ -320,15 +328,14 @@ router.post('/admin/login', async (req, res) => {
         id: adminUser.id,
         username: adminUser.username,
         role: adminUser.role,
-        lastLogin: new Date().toISOString()
-      }
+        lastLogin: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     logger.error('Admin login error:', error);
     res.status(500).json({
       error: 'Admin login failed',
-      message: 'An error occurred during admin login'
+      message: 'An error occurred during admin login',
     });
   }
 });

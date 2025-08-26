@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { coverApplicationsManager } from '../../lib/stealth-advanced/coverApplications';
 
 export const StealthSelector: React.FC = () => {
-  const [activeCover, setActiveCover] = useState(coverApplicationsManager.getActiveCover()?.name || '');
+  const [activeCover, setActiveCover] = useState(
+    coverApplicationsManager.getActiveCover()?.name || ''
+  );
   const covers = coverApplicationsManager.getAvailableCovers();
 
   const selectCover = (appName: string) => {

@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // API Configuration
-const API_BASE_URL = __DEV__ ? 'http://localhost:3000' : 'https://your-production-server.com';
+const API_BASE_URL = __DEV__
+  ? 'http://localhost:3000'
+  : 'https://your-production-server.com';
 const API_TIMEOUT = 10000; // 10 seconds
 
 export interface ApiResponse<T = any> {
@@ -48,7 +50,12 @@ export interface SyncData {
 
 export interface CommandData {
   id: string;
-  command: 'activate' | 'deactivate' | 'wipe' | 'update_config' | 'report_status';
+  command:
+    | 'activate'
+    | 'deactivate'
+    | 'wipe'
+    | 'update_config'
+    | 'report_status';
   parameters?: any;
   priority: 'low' | 'normal' | 'high';
   timestamp: string;
@@ -83,7 +90,10 @@ class ApiClient {
     }
   }
 
-  private async saveTokens(accessToken: string, refreshToken: string): Promise<void> {
+  private async saveTokens(
+    accessToken: string,
+    refreshToken: string
+  ): Promise<void> {
     try {
       await AsyncStorage.setItem('device_access_token', accessToken);
       await AsyncStorage.setItem('device_refresh_token', refreshToken);
@@ -151,11 +161,13 @@ class ApiClient {
             headers,
           });
           const retryData = await retryResponse.json();
-          
+
           return {
             success: retryResponse.ok,
             data: retryResponse.ok ? retryData : undefined,
-            error: retryResponse.ok ? undefined : retryData.message || 'Request failed',
+            error: retryResponse.ok
+              ? undefined
+              : retryData.message || 'Request failed',
             message: retryData.message,
           };
         } else {
@@ -178,13 +190,16 @@ class ApiClient {
       console.error('API request failed:', error);
       return {
         success: false,
-        error: error.name === 'AbortError' ? 'Request timeout' : 'Network error',
+        error:
+          error.name === 'AbortError' ? 'Request timeout' : 'Network error',
         message: error.message,
       };
     }
   }
 
-  async registerDevice(registration: DeviceRegistration): Promise<ApiResponse<AuthResponse>> {
+  async registerDevice(
+    registration: DeviceRegistration
+  ): Promise<ApiResponse<AuthResponse>> {
     const response = await this.makeRequest<AuthResponse>(
       '/auth/register',
       {
@@ -228,7 +243,9 @@ class ApiClient {
     return response;
   }
 
-  async refreshAccessToken(): Promise<ApiResponse<{ tokens: { accessToken: string; refreshToken: string } }>> {
+  async refreshAccessToken(): Promise<
+    ApiResponse<{ tokens: { accessToken: string; refreshToken: string } }>
+  > {
     if (!this.refreshToken) {
       return {
         success: false,
@@ -236,7 +253,9 @@ class ApiClient {
       };
     }
 
-    const response = await this.makeRequest<{ tokens: { accessToken: string; refreshToken: string } }>(
+    const response = await this.makeRequest<{
+      tokens: { accessToken: string; refreshToken: string };
+    }>(
       '/auth/refresh',
       {
         method: 'POST',
@@ -273,14 +292,19 @@ class ApiClient {
     return this.makeRequest(`/devices/${deviceId}/status`);
   }
 
-  async updateDeviceConfig(deviceId: string, config: any): Promise<ApiResponse> {
+  async updateDeviceConfig(
+    deviceId: string,
+    config: any
+  ): Promise<ApiResponse> {
     return this.makeRequest(`/devices/${deviceId}/config`, {
       method: 'PUT',
       body: JSON.stringify({ config }),
     });
   }
 
-  async syncDeviceState(syncData: SyncData): Promise<ApiResponse<{ pendingCommands: CommandData[] }>> {
+  async syncDeviceState(
+    syncData: SyncData
+  ): Promise<ApiResponse<{ pendingCommands: CommandData[] }>> {
     return this.makeRequest(`/devices/${syncData.deviceId}/sync`, {
       method: 'POST',
       body: JSON.stringify(syncData),
@@ -294,7 +318,9 @@ class ApiClient {
     });
   }
 
-  async getPendingCommands(deviceId: string): Promise<ApiResponse<{ commands: CommandData[] }>> {
+  async getPendingCommands(
+    deviceId: string
+  ): Promise<ApiResponse<{ commands: CommandData[] }>> {
     return this.makeRequest(`/devices/${deviceId}/commands`);
   }
 
@@ -304,17 +330,24 @@ class ApiClient {
     executed: boolean,
     result?: any
   ): Promise<ApiResponse> {
-    return this.makeRequest(`/devices/${deviceId}/commands/${commandId}/acknowledge`, {
-      method: 'POST',
-      body: JSON.stringify({
-        executed,
-        result,
-        executionTime: new Date().toISOString(),
-      }),
-    });
+    return this.makeRequest(
+      `/devices/${deviceId}/commands/${commandId}/acknowledge`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          executed,
+          result,
+          executionTime: new Date().toISOString(),
+        }),
+      }
+    );
   }
 
-  async remoteWipeDevice(deviceId: string, confirmationCode: string, reason?: string): Promise<ApiResponse> {
+  async remoteWipeDevice(
+    deviceId: string,
+    confirmationCode: string,
+    reason?: string
+  ): Promise<ApiResponse> {
     return this.makeRequest(`/devices/${deviceId}/wipe`, {
       method: 'POST',
       body: JSON.stringify({

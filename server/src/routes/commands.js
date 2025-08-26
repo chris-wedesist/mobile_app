@@ -14,7 +14,7 @@ router.get('/:deviceId/commands', async (req, res) => {
     if (req.device.deviceId !== deviceId) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only access commands for your own device'
+        message: 'You can only access commands for your own device',
       });
     }
 
@@ -28,28 +28,29 @@ router.get('/:deviceId/commands', async (req, res) => {
     );
 
     // Format commands for response
-    const formattedCommands = commands.map(cmd => ({
+    const formattedCommands = commands.map((cmd) => ({
       id: cmd.command_id,
       command: cmd.command,
       parameters: cmd.parameters ? JSON.parse(cmd.parameters) : {},
       priority: cmd.priority,
-      timestamp: cmd.created_at
+      timestamp: cmd.created_at,
     }));
 
-    logger.info(`Retrieved ${commands.length} pending commands for device ${deviceId}`);
+    logger.info(
+      `Retrieved ${commands.length} pending commands for device ${deviceId}`
+    );
 
     res.json({
       commands: formattedCommands,
       deviceId,
       retrievedAt: new Date().toISOString(),
-      totalPending: commands.length
+      totalPending: commands.length,
     });
-
   } catch (error) {
     logger.error('Get commands error:', error);
     res.status(500).json({
       error: 'Failed to retrieve commands',
-      message: 'An error occurred while retrieving pending commands'
+      message: 'An error occurred while retrieving pending commands',
     });
   }
 });
@@ -64,16 +65,22 @@ router.post('/:deviceId/commands', async (req, res) => {
     if (!req.admin) {
       return res.status(403).json({
         error: 'Admin access required',
-        message: 'Creating commands requires admin privileges'
+        message: 'Creating commands requires admin privileges',
       });
     }
 
     // Validate command
-    const validCommands = ['activate', 'deactivate', 'wipe', 'update_config', 'report_status'];
+    const validCommands = [
+      'activate',
+      'deactivate',
+      'wipe',
+      'update_config',
+      'report_status',
+    ];
     if (!validCommands.includes(command)) {
       return res.status(400).json({
         error: 'Invalid command',
-        message: `Command must be one of: ${validCommands.join(', ')}`
+        message: `Command must be one of: ${validCommands.join(', ')}`,
       });
     }
 
@@ -82,7 +89,7 @@ router.post('/:deviceId/commands', async (req, res) => {
     if (!validPriorities.includes(priority)) {
       return res.status(400).json({
         error: 'Invalid priority',
-        message: `Priority must be one of: ${validPriorities.join(', ')}`
+        message: `Priority must be one of: ${validPriorities.join(', ')}`,
       });
     }
 
@@ -95,12 +102,14 @@ router.post('/:deviceId/commands', async (req, res) => {
     if (!device) {
       return res.status(404).json({
         error: 'Device not found',
-        message: 'The specified device was not found'
+        message: 'The specified device was not found',
       });
     }
 
     // Generate command ID
-    const commandId = `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const commandId = `cmd_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
 
     // Create command
     await runQuery(
@@ -111,11 +120,13 @@ router.post('/:deviceId/commands', async (req, res) => {
         command,
         parameters ? JSON.stringify(parameters) : null,
         priority,
-        'pending'
+        'pending',
       ]
     );
 
-    logger.info(`Command ${command} created for device ${deviceId} by admin ${req.admin.username}`);
+    logger.info(
+      `Command ${command} created for device ${deviceId} by admin ${req.admin.username}`
+    );
 
     res.status(201).json({
       message: 'Command created successfully',
@@ -126,14 +137,13 @@ router.post('/:deviceId/commands', async (req, res) => {
       priority,
       status: 'pending',
       createdAt: new Date().toISOString(),
-      createdBy: req.admin.username
+      createdBy: req.admin.username,
     });
-
   } catch (error) {
     logger.error('Create command error:', error);
     res.status(500).json({
       error: 'Failed to create command',
-      message: 'An error occurred while creating the command'
+      message: 'An error occurred while creating the command',
     });
   }
 });
@@ -148,7 +158,7 @@ router.post('/:deviceId/commands/:commandId/acknowledge', async (req, res) => {
     if (req.device.deviceId !== deviceId) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only acknowledge commands for your own device'
+        message: 'You can only acknowledge commands for your own device',
       });
     }
 
@@ -161,14 +171,14 @@ router.post('/:deviceId/commands/:commandId/acknowledge', async (req, res) => {
     if (!command) {
       return res.status(404).json({
         error: 'Command not found',
-        message: 'The specified command was not found for this device'
+        message: 'The specified command was not found for this device',
       });
     }
 
     if (command.status !== 'pending') {
       return res.status(400).json({
         error: 'Command already processed',
-        message: `Command status is already '${command.status}'`
+        message: `Command status is already '${command.status}'`,
       });
     }
 
@@ -178,12 +188,7 @@ router.post('/:deviceId/commands/:commandId/acknowledge', async (req, res) => {
 
     await runQuery(
       'UPDATE commands SET status = ?, executed_at = ?, execution_result = ? WHERE command_id = ?',
-      [
-        newStatus,
-        execTime,
-        result ? JSON.stringify(result) : null,
-        commandId
-      ]
+      [newStatus, execTime, result ? JSON.stringify(result) : null, commandId]
     );
 
     // Log the acknowledgment
@@ -197,13 +202,15 @@ router.post('/:deviceId/commands/:commandId/acknowledge', async (req, res) => {
           command: command.command,
           executed,
           result,
-          executionTime: execTime
+          executionTime: execTime,
         }),
-        'command_execution'
+        'command_execution',
       ]
     );
 
-    logger.info(`Command ${commandId} acknowledged by device ${deviceId}, status: ${newStatus}`);
+    logger.info(
+      `Command ${commandId} acknowledged by device ${deviceId}, status: ${newStatus}`
+    );
 
     res.json({
       message: 'Command acknowledgment received',
@@ -214,14 +221,13 @@ router.post('/:deviceId/commands/:commandId/acknowledge', async (req, res) => {
       executed,
       executionTime: execTime,
       result: result || null,
-      acknowledgedAt: new Date().toISOString()
+      acknowledgedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Command acknowledgment error:', error);
     res.status(500).json({
       error: 'Failed to process acknowledgment',
-      message: 'An error occurred while processing the command acknowledgment'
+      message: 'An error occurred while processing the command acknowledgment',
     });
   }
 });
@@ -236,7 +242,8 @@ router.get('/:deviceId/commands/history', async (req, res) => {
     if (req.device.deviceId !== deviceId && !req.admin) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only access command history for your own device or use admin privileges'
+        message:
+          'You can only access command history for your own device or use admin privileges',
       });
     }
 
@@ -275,7 +282,7 @@ router.get('/:deviceId/commands/history', async (req, res) => {
     );
 
     // Format commands for response
-    const formattedCommands = commands.map(cmd => ({
+    const formattedCommands = commands.map((cmd) => ({
       id: cmd.command_id,
       command: cmd.command,
       parameters: cmd.parameters ? JSON.parse(cmd.parameters) : {},
@@ -283,7 +290,9 @@ router.get('/:deviceId/commands/history', async (req, res) => {
       status: cmd.status,
       createdAt: cmd.created_at,
       executedAt: cmd.executed_at,
-      executionResult: cmd.execution_result ? JSON.parse(cmd.execution_result) : null
+      executionResult: cmd.execution_result
+        ? JSON.parse(cmd.execution_result)
+        : null,
     }));
 
     res.json({
@@ -293,19 +302,18 @@ router.get('/:deviceId/commands/history', async (req, res) => {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalResult.total / limit),
         totalCommands: totalResult.total,
-        commandsPerPage: parseInt(limit)
+        commandsPerPage: parseInt(limit),
       },
       filters: {
         status: status || 'all',
-        command: command || 'all'
-      }
+        command: command || 'all',
+      },
     });
-
   } catch (error) {
     logger.error('Get command history error:', error);
     res.status(500).json({
       error: 'Failed to retrieve command history',
-      message: 'An error occurred while retrieving command history'
+      message: 'An error occurred while retrieving command history',
     });
   }
 });
@@ -319,7 +327,7 @@ router.post('/bulk', async (req, res) => {
     if (!req.admin) {
       return res.status(403).json({
         error: 'Admin access required',
-        message: 'Bulk command creation requires admin privileges'
+        message: 'Bulk command creation requires admin privileges',
       });
     }
 
@@ -327,31 +335,43 @@ router.post('/bulk', async (req, res) => {
     if (!Array.isArray(deviceIds) || deviceIds.length === 0) {
       return res.status(400).json({
         error: 'Device IDs required',
-        message: 'Please provide an array of device IDs'
+        message: 'Please provide an array of device IDs',
       });
     }
 
-    const validCommands = ['activate', 'deactivate', 'wipe', 'update_config', 'report_status'];
+    const validCommands = [
+      'activate',
+      'deactivate',
+      'wipe',
+      'update_config',
+      'report_status',
+    ];
     if (!validCommands.includes(command)) {
       return res.status(400).json({
         error: 'Invalid command',
-        message: `Command must be one of: ${validCommands.join(', ')}`
+        message: `Command must be one of: ${validCommands.join(', ')}`,
       });
     }
 
     // Verify all devices exist
     const existingDevices = await allQuery(
-      `SELECT device_id FROM devices WHERE device_id IN (${deviceIds.map(() => '?').join(',')})`,
+      `SELECT device_id FROM devices WHERE device_id IN (${deviceIds
+        .map(() => '?')
+        .join(',')})`,
       deviceIds
     );
 
-    const existingDeviceIds = existingDevices.map(d => d.device_id);
-    const missingDevices = deviceIds.filter(id => !existingDeviceIds.includes(id));
+    const existingDeviceIds = existingDevices.map((d) => d.device_id);
+    const missingDevices = deviceIds.filter(
+      (id) => !existingDeviceIds.includes(id)
+    );
 
     if (missingDevices.length > 0) {
       return res.status(400).json({
         error: 'Some devices not found',
-        message: `The following devices were not found: ${missingDevices.join(', ')}`
+        message: `The following devices were not found: ${missingDevices.join(
+          ', '
+        )}`,
       });
     }
 
@@ -360,7 +380,9 @@ router.post('/bulk', async (req, res) => {
     const timestamp = new Date().toISOString();
 
     for (const deviceId of deviceIds) {
-      const commandId = `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const commandId = `cmd_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 9)}`;
 
       await runQuery(
         'INSERT INTO commands (command_id, device_id, command, parameters, priority, status) VALUES (?, ?, ?, ?, ?, ?)',
@@ -370,18 +392,20 @@ router.post('/bulk', async (req, res) => {
           command,
           parameters ? JSON.stringify(parameters) : null,
           priority,
-          'pending'
+          'pending',
         ]
       );
 
       commandResults.push({
         commandId,
         deviceId,
-        status: 'created'
+        status: 'created',
       });
     }
 
-    logger.info(`Bulk command ${command} created for ${deviceIds.length} devices by admin ${req.admin.username}`);
+    logger.info(
+      `Bulk command ${command} created for ${deviceIds.length} devices by admin ${req.admin.username}`
+    );
 
     res.status(201).json({
       message: 'Bulk commands created successfully',
@@ -391,14 +415,13 @@ router.post('/bulk', async (req, res) => {
       deviceCount: deviceIds.length,
       commands: commandResults,
       createdAt: timestamp,
-      createdBy: req.admin.username
+      createdBy: req.admin.username,
     });
-
   } catch (error) {
     logger.error('Bulk command creation error:', error);
     res.status(500).json({
       error: 'Failed to create bulk commands',
-      message: 'An error occurred while creating bulk commands'
+      message: 'An error occurred while creating bulk commands',
     });
   }
 });

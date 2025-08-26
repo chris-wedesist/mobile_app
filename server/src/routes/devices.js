@@ -13,20 +13,19 @@ router.get('/:deviceId/status', async (req, res) => {
     if (req.device.deviceId !== deviceId) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only access your own device status'
+        message: 'You can only access your own device status',
       });
     }
 
     // Get device info
-    const device = await getQuery(
-      'SELECT * FROM devices WHERE device_id = ?',
-      [deviceId]
-    );
+    const device = await getQuery('SELECT * FROM devices WHERE device_id = ?', [
+      deviceId,
+    ]);
 
     if (!device) {
       return res.status(404).json({
         error: 'Device not found',
-        message: 'The specified device was not found'
+        message: 'The specified device was not found',
       });
     }
 
@@ -55,15 +54,14 @@ router.get('/:deviceId/status', async (req, res) => {
       pendingCommands: pendingCommands.count,
       status: {
         registeredAt: device.created_at,
-        lastUpdated: device.updated_at
-      }
+        lastUpdated: device.updated_at,
+      },
     });
-
   } catch (error) {
     logger.error('Get device status error:', error);
     res.status(500).json({
       error: 'Failed to get device status',
-      message: 'An error occurred while retrieving device status'
+      message: 'An error occurred while retrieving device status',
     });
   }
 });
@@ -78,14 +76,14 @@ router.put('/:deviceId/config', async (req, res) => {
     if (req.device.deviceId !== deviceId) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only update your own device configuration'
+        message: 'You can only update your own device configuration',
       });
     }
 
     if (!config) {
       return res.status(400).json({
         error: 'Configuration required',
-        message: 'Please provide a valid configuration object'
+        message: 'Please provide a valid configuration object',
       });
     }
 
@@ -109,20 +107,21 @@ router.put('/:deviceId/config', async (req, res) => {
       [deviceId]
     );
 
-    logger.info(`Configuration updated for device ${deviceId}, version ${newVersion}`);
+    logger.info(
+      `Configuration updated for device ${deviceId}, version ${newVersion}`
+    );
 
     res.json({
       message: 'Configuration updated successfully',
       deviceId,
       version: newVersion,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Update device config error:', error);
     res.status(500).json({
       error: 'Failed to update configuration',
-      message: 'An error occurred while updating device configuration'
+      message: 'An error occurred while updating device configuration',
     });
   }
 });
@@ -137,7 +136,7 @@ router.post('/:deviceId/sync', async (req, res) => {
     if (req.device.deviceId !== deviceId) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only sync your own device'
+        message: 'You can only sync your own device',
       });
     }
 
@@ -190,25 +189,26 @@ router.post('/:deviceId/sync', async (req, res) => {
       message: 'Sync completed successfully',
       deviceId,
       syncTime: new Date().toISOString(),
-      pendingCommands: pendingCommands.map(cmd => ({
+      pendingCommands: pendingCommands.map((cmd) => ({
         id: cmd.command_id,
         command: cmd.command,
         parameters: cmd.parameters ? JSON.parse(cmd.parameters) : null,
         priority: cmd.priority,
-        timestamp: cmd.created_at
+        timestamp: cmd.created_at,
       })),
-      serverConfig: latestServerConfig ? {
-        config: JSON.parse(latestServerConfig.config),
-        version: latestServerConfig.version
-      } : null,
-      nextSyncIn: parseInt(process.env.SYNC_INTERVAL_MS) || 900000 // 15 minutes
+      serverConfig: latestServerConfig
+        ? {
+            config: JSON.parse(latestServerConfig.config),
+            version: latestServerConfig.version,
+          }
+        : null,
+      nextSyncIn: parseInt(process.env.SYNC_INTERVAL_MS) || 900000, // 15 minutes
     });
-
   } catch (error) {
     logger.error('Device sync error:', error);
     res.status(500).json({
       error: 'Sync failed',
-      message: 'An error occurred during device sync'
+      message: 'An error occurred during device sync',
     });
   }
 });
@@ -223,7 +223,7 @@ router.post('/:deviceId/status-report', async (req, res) => {
     if (req.device.deviceId !== deviceId) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only report status for your own device'
+        message: 'You can only report status for your own device',
       });
     }
 
@@ -251,25 +251,29 @@ router.post('/:deviceId/status-report', async (req, res) => {
       [threatLevel, deviceId]
     );
 
-    logger.info(`Status report received from device ${deviceId}, threat level: ${threatLevel}`);
+    logger.info(
+      `Status report received from device ${deviceId}, threat level: ${threatLevel}`
+    );
 
     res.json({
       message: 'Status report received successfully',
       deviceId,
       reportTime: new Date().toISOString(),
       threatLevel,
-      recommendations: threatLevel === 'high' ? [
-        'Review security settings',
-        'Check for unauthorized access attempts',
-        'Consider temporary lockdown if necessary'
-      ] : []
+      recommendations:
+        threatLevel === 'high'
+          ? [
+              'Review security settings',
+              'Check for unauthorized access attempts',
+              'Consider temporary lockdown if necessary',
+            ]
+          : [],
     });
-
   } catch (error) {
     logger.error('Status report error:', error);
     res.status(500).json({
       error: 'Failed to process status report',
-      message: 'An error occurred while processing the status report'
+      message: 'An error occurred while processing the status report',
     });
   }
 });
@@ -284,7 +288,7 @@ router.post('/:deviceId/wipe', async (req, res) => {
     if (req.device.deviceId !== deviceId && !req.admin) {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'You can only wipe your own device or use admin privileges'
+        message: 'You can only wipe your own device or use admin privileges',
       });
     }
 
@@ -293,22 +297,27 @@ router.post('/:deviceId/wipe', async (req, res) => {
     if (confirmationCode !== expectedCode) {
       return res.status(400).json({
         error: 'Invalid confirmation code',
-        message: `Please provide the correct confirmation code: ${expectedCode}`
+        message: `Please provide the correct confirmation code: ${expectedCode}`,
       });
     }
 
     // Create wipe command
-    const commandId = `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    
+    const commandId = `cmd_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
+
     await runQuery(
       'INSERT INTO commands (command_id, device_id, command, parameters, priority, status) VALUES (?, ?, ?, ?, ?, ?)',
       [
         commandId,
         deviceId,
         'wipe',
-        JSON.stringify({ reason: reason || 'manual_wipe', timestamp: new Date().toISOString() }),
+        JSON.stringify({
+          reason: reason || 'manual_wipe',
+          timestamp: new Date().toISOString(),
+        }),
         'high',
-        'pending'
+        'pending',
       ]
     );
 
@@ -321,13 +330,15 @@ router.post('/:deviceId/wipe', async (req, res) => {
           action: 'wipe_requested',
           reason,
           requestedBy: req.admin ? req.admin.username : 'device_owner',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
-        'security_event'
+        'security_event',
       ]
     );
 
-    logger.warn(`Remote wipe requested for device ${deviceId}, reason: ${reason}`);
+    logger.warn(
+      `Remote wipe requested for device ${deviceId}, reason: ${reason}`
+    );
 
     res.json({
       message: 'Remote wipe command issued successfully',
@@ -335,14 +346,14 @@ router.post('/:deviceId/wipe', async (req, res) => {
       commandId,
       confirmationCode,
       issuedAt: new Date().toISOString(),
-      warning: 'This action cannot be undone. The device will be wiped on next sync.'
+      warning:
+        'This action cannot be undone. The device will be wiped on next sync.',
     });
-
   } catch (error) {
     logger.error('Remote wipe error:', error);
     res.status(500).json({
       error: 'Failed to issue remote wipe',
-      message: 'An error occurred while issuing the remote wipe command'
+      message: 'An error occurred while issuing the remote wipe command',
     });
   }
 });
@@ -354,7 +365,7 @@ router.get('/', async (req, res) => {
     if (!req.admin) {
       return res.status(403).json({
         error: 'Admin access required',
-        message: 'This endpoint requires admin privileges'
+        message: 'This endpoint requires admin privileges',
       });
     }
 
@@ -376,7 +387,10 @@ router.get('/', async (req, res) => {
       queryParams.push(platform);
     }
 
-    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(' AND ')}`
+        : '';
 
     // Get total count
     const totalResult = await getQuery(
@@ -408,7 +422,7 @@ router.get('/', async (req, res) => {
           ...device,
           securityConfig: JSON.parse(device.security_config || '{}'),
           isOnline: Boolean(device.is_online),
-          pendingCommands: commandsCount.count
+          pendingCommands: commandsCount.count,
         };
       })
     );
@@ -419,19 +433,18 @@ router.get('/', async (req, res) => {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalResult.total / limit),
         totalDevices: totalResult.total,
-        devicesPerPage: parseInt(limit)
+        devicesPerPage: parseInt(limit),
       },
       filters: {
         status: status || 'all',
-        platform: platform || 'all'
-      }
+        platform: platform || 'all',
+      },
     });
-
   } catch (error) {
     logger.error('List devices error:', error);
     res.status(500).json({
       error: 'Failed to list devices',
-      message: 'An error occurred while retrieving devices list'
+      message: 'An error occurred while retrieving devices list',
     });
   }
 });

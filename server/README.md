@@ -5,24 +5,28 @@ A comprehensive remote management server for the DESIST mobile app, providing se
 ## 🚀 Features
 
 ### Device Management
+
 - **Device Registration & Authentication** - Secure device onboarding with JWT tokens
 - **Real-time Status Monitoring** - Live device status updates and health metrics
 - **Configuration Management** - Remote configuration updates and versioning
 - **Threat Level Assessment** - Automatic threat detection and scoring
 
 ### Command & Control
+
 - **Remote Command Execution** - Execute commands on devices remotely
 - **Bulk Operations** - Send commands to multiple devices simultaneously
 - **Command History & Tracking** - Complete audit trail of all commands
 - **Real-time WebSocket Communication** - Instant command delivery
 
 ### Admin Dashboard
+
 - **Comprehensive Analytics** - Device statistics and performance metrics
 - **Device Health Scoring** - Automated health assessment
 - **Activity Monitoring** - Real-time activity feeds and alerts
 - **Multi-filter Device Management** - Advanced filtering and search
 
 ### Security & Compliance
+
 - **JWT Authentication** - Secure token-based authentication
 - **Data Encryption** - Encrypted data storage and transmission
 - **Audit Logging** - Complete activity logging for compliance
@@ -37,23 +41,27 @@ A comprehensive remote management server for the DESIST mobile app, providing se
 ## 🛠️ Installation
 
 1. **Clone and setup the server:**
+
    ```bash
    cd server
    npm install
    ```
 
 2. **Environment Configuration:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Initialize Database:**
+
    ```bash
    npm run db:migrate
    ```
 
 4. **Start Development Server:**
+
    ```bash
    npm run dev
    ```
@@ -66,6 +74,7 @@ A comprehensive remote management server for the DESIST mobile app, providing se
 ## 🔧 Environment Variables
 
 ### Required Configuration
+
 ```env
 # Server
 PORT=3000
@@ -85,6 +94,7 @@ ADMIN_PASSWORD=change-this-secure-password
 ```
 
 ### Optional Configuration
+
 ```env
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
@@ -103,85 +113,92 @@ LOG_LEVEL=info
 ## 📡 API Endpoints
 
 ### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new device |
-| POST | `/api/auth/login` | Device login |
-| POST | `/api/auth/refresh` | Refresh access token |
-| POST | `/api/auth/logout` | Device logout |
-| POST | `/api/auth/admin/login` | Admin login |
+
+| Method | Endpoint                | Description          |
+| ------ | ----------------------- | -------------------- |
+| POST   | `/api/auth/register`    | Register new device  |
+| POST   | `/api/auth/login`       | Device login         |
+| POST   | `/api/auth/refresh`     | Refresh access token |
+| POST   | `/api/auth/logout`      | Device logout        |
+| POST   | `/api/auth/admin/login` | Admin login          |
 
 ### Device Management
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/devices/:deviceId/status` | Get device status |
-| PUT | `/api/devices/:deviceId/config` | Update device config |
-| POST | `/api/devices/:deviceId/sync` | Sync device state |
-| POST | `/api/devices/:deviceId/status-report` | Receive status report |
-| POST | `/api/devices/:deviceId/wipe` | Remote wipe device |
+
+| Method | Endpoint                               | Description           |
+| ------ | -------------------------------------- | --------------------- |
+| GET    | `/api/devices/:deviceId/status`        | Get device status     |
+| PUT    | `/api/devices/:deviceId/config`        | Update device config  |
+| POST   | `/api/devices/:deviceId/sync`          | Sync device state     |
+| POST   | `/api/devices/:deviceId/status-report` | Receive status report |
+| POST   | `/api/devices/:deviceId/wipe`          | Remote wipe device    |
 
 ### Command Control
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/devices/:deviceId/commands` | Get pending commands |
-| POST | `/api/devices/:deviceId/commands` | Create new command |
-| POST | `/api/devices/:deviceId/commands/:commandId/acknowledge` | Acknowledge command |
-| GET | `/api/devices/:deviceId/commands/history` | Get command history |
-| POST | `/api/devices/bulk` | Bulk command creation |
+
+| Method | Endpoint                                                 | Description           |
+| ------ | -------------------------------------------------------- | --------------------- |
+| GET    | `/api/devices/:deviceId/commands`                        | Get pending commands  |
+| POST   | `/api/devices/:deviceId/commands`                        | Create new command    |
+| POST   | `/api/devices/:deviceId/commands/:commandId/acknowledge` | Acknowledge command   |
+| GET    | `/api/devices/:deviceId/commands/history`                | Get command history   |
+| POST   | `/api/devices/bulk`                                      | Bulk command creation |
 
 ### Admin Dashboard
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/dashboard` | Dashboard data |
-| GET | `/api/admin/devices` | Device management |
-| GET | `/api/admin/devices/:deviceId` | Device details |
-| POST | `/api/admin/commands/broadcast` | Broadcast commands |
-| GET | `/api/admin/stats` | System statistics |
+
+| Method | Endpoint                        | Description        |
+| ------ | ------------------------------- | ------------------ |
+| GET    | `/api/admin/dashboard`          | Dashboard data     |
+| GET    | `/api/admin/devices`            | Device management  |
+| GET    | `/api/admin/devices/:deviceId`  | Device details     |
+| POST   | `/api/admin/commands/broadcast` | Broadcast commands |
+| GET    | `/api/admin/stats`              | System statistics  |
 
 ## 🔌 WebSocket Events
 
 ### Device Events
+
 ```javascript
 // Device Registration
 socket.emit('device:register', {
   deviceId: 'device_123',
   appVersion: '1.0.0',
-  platform: 'ios'
+  platform: 'ios',
 });
 
 // Status Updates
 socket.emit('device:status', {
   isActive: true,
   batteryLevel: 85,
-  threatLevel: 'low'
+  threatLevel: 'low',
 });
 
 // Command Acknowledgment
 socket.emit('command:acknowledge', {
   commandId: 'cmd_123',
   executed: true,
-  result: { success: true }
+  result: { success: true },
 });
 ```
 
 ### Admin Events
+
 ```javascript
 // Admin Authentication
 socket.emit('admin:authenticate', {
-  token: 'admin_jwt_token'
+  token: 'admin_jwt_token',
 });
 
 // Execute Command
 socket.emit('command:execute', {
   deviceId: 'device_123',
   command: 'activate',
-  parameters: {}
+  parameters: {},
 });
 ```
 
 ## 📊 Database Schema
 
 ### Core Tables
+
 - **devices** - Device registration and status
 - **device_configs** - Configuration history and versioning
 - **commands** - Command queue and execution history
@@ -193,6 +210,7 @@ socket.emit('command:execute', {
 ## 🚦 Health Scoring Algorithm
 
 Device health scores (0-100) are calculated based on:
+
 - **Threat Level**: High (-40), Medium (-20), Low (0)
 - **Online Status**: Offline (-30)
 - **Last Seen**: >24h (-20), >12h (-10)
@@ -201,18 +219,21 @@ Device health scores (0-100) are calculated based on:
 ## 🔐 Security Features
 
 ### Authentication
+
 - JWT-based device authentication
 - Refresh token rotation
 - Admin role-based access control
 - Token expiration and cleanup
 
 ### Protection
+
 - Rate limiting on all endpoints
 - CORS configuration
 - Helmet security headers
 - Input validation and sanitization
 
 ### Encryption
+
 - Configurable data encryption
 - Secure password hashing (bcrypt)
 - Environment variable protection
@@ -220,12 +241,14 @@ Device health scores (0-100) are calculated based on:
 ## 📈 Monitoring & Logging
 
 ### Winston Logging
+
 - Structured JSON logging
 - Log rotation and archiving
 - Error tracking and reporting
 - Performance monitoring
 
 ### Metrics Tracked
+
 - Device connectivity stats
 - Command execution rates
 - Response time analytics
@@ -247,6 +270,7 @@ npm run lint
 ## 🚀 Deployment
 
 ### Production Setup
+
 1. Set `NODE_ENV=production`
 2. Configure secure JWT secrets
 3. Set up SSL/TLS certificates
@@ -254,6 +278,7 @@ npm run lint
 5. Set up process manager (PM2)
 
 ### Docker Deployment
+
 ```dockerfile
 FROM node:16-alpine
 WORKDIR /app
@@ -265,6 +290,7 @@ CMD ["npm", "start"]
 ```
 
 ### Environment Variables for Production
+
 ```env
 NODE_ENV=production
 JWT_SECRET=secure-production-secret
@@ -297,7 +323,7 @@ private async syncWithServer(): Promise<void> {
         performanceMetrics: this.config.performanceMetrics
       })
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       // Process pending commands from server
@@ -316,6 +342,7 @@ private async syncWithServer(): Promise<void> {
 ## 📞 Support
 
 For support and questions:
+
 - Check the API documentation at `/api`
 - Review server logs in `./logs/`
 - Monitor health status at `/health`
@@ -326,5 +353,5 @@ MIT License - see LICENSE file for details.
 
 ---
 
-*DESIST Management Server v1.0.0*  
-*Secure Device Management & Remote Control*
+_DESIST Management Server v1.0.0_  
+_Secure Device Management & Remote Control_

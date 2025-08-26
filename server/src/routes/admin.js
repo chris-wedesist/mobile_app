@@ -12,9 +12,15 @@ router.use(authenticateAdmin);
 router.get('/dashboard', async (req, res) => {
   try {
     // Get overall statistics
-    const totalDevices = await getQuery('SELECT COUNT(*) as count FROM devices');
-    const onlineDevices = await getQuery('SELECT COUNT(*) as count FROM devices WHERE is_online = 1');
-    const pendingCommands = await getQuery('SELECT COUNT(*) as count FROM commands WHERE status = "pending"');
+    const totalDevices = await getQuery(
+      'SELECT COUNT(*) as count FROM devices'
+    );
+    const onlineDevices = await getQuery(
+      'SELECT COUNT(*) as count FROM devices WHERE is_online = 1'
+    );
+    const pendingCommands = await getQuery(
+      'SELECT COUNT(*) as count FROM commands WHERE status = "pending"'
+    );
     const recentSyncs = await getQuery(
       'SELECT COUNT(*) as count FROM sync_logs WHERE created_at > datetime("now", "-1 hour")'
     );
@@ -62,7 +68,7 @@ router.get('/dashboard', async (req, res) => {
         onlineDevices: onlineDevices.count,
         offlineDevices: totalDevices.count - onlineDevices.count,
         pendingCommands: pendingCommands.count,
-        recentSyncs: recentSyncs.count
+        recentSyncs: recentSyncs.count,
       },
       threatLevels: threatLevels.reduce((acc, tl) => {
         acc[tl.threat_level] = tl.count;
@@ -79,14 +85,13 @@ router.get('/dashboard', async (req, res) => {
         acc[cs.command][cs.status] = cs.count;
         return acc;
       }, {}),
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Admin dashboard error:', error);
     res.status(500).json({
       error: 'Failed to load dashboard data',
-      message: 'An error occurred while loading dashboard data'
+      message: 'An error occurred while loading dashboard data',
     });
   }
 });
@@ -94,7 +99,14 @@ router.get('/dashboard', async (req, res) => {
 // Device management interface
 router.get('/devices', async (req, res) => {
   try {
-    const { page = 1, limit = 20, status, platform, threatLevel, search } = req.query;
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      platform,
+      threatLevel,
+      search,
+    } = req.query;
     const offset = (page - 1) * limit;
 
     // Build query conditions
@@ -122,7 +134,10 @@ router.get('/devices', async (req, res) => {
       queryParams.push(`%${search}%`);
     }
 
-    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(' AND ')}`
+        : '';
 
     // Get total count
     const totalResult = await getQuery(
@@ -131,7 +146,8 @@ router.get('/devices', async (req, res) => {
     );
 
     // Get devices with additional information
-    const devices = await allQuery(`
+    const devices = await allQuery(
+      `
       SELECT 
         d.device_id, d.app_version, d.platform, d.security_config, 
         d.is_online, d.last_seen, d.threat_level, d.created_at, d.updated_at,
@@ -142,10 +158,12 @@ router.get('/devices', async (req, res) => {
       ${whereClause}
       ORDER BY d.last_seen DESC 
       LIMIT ? OFFSET ?
-    `, [...queryParams, parseInt(limit), offset]);
+    `,
+      [...queryParams, parseInt(limit), offset]
+    );
 
     // Format devices for response
-    const formattedDevices = devices.map(device => ({
+    const formattedDevices = devices.map((device) => ({
       deviceId: device.device_id,
       appVersion: device.app_version,
       platform: device.platform,
@@ -158,7 +176,7 @@ router.get('/devices', async (req, res) => {
       pendingCommands: device.pending_commands,
       recentSyncs: device.recent_syncs,
       lastStatusReport: device.last_status_report,
-      healthScore: calculateDeviceHealthScore(device)
+      healthScore: calculateDeviceHealthScore(device),
     }));
 
     res.json({
@@ -167,21 +185,20 @@ router.get('/devices', async (req, res) => {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalResult.total / limit),
         totalDevices: totalResult.total,
-        devicesPerPage: parseInt(limit)
+        devicesPerPage: parseInt(limit),
       },
       filters: {
         status: status || 'all',
         platform: platform || 'all',
         threatLevel: threatLevel || 'all',
-        search: search || ''
-      }
+        search: search || '',
+      },
     });
-
   } catch (error) {
     logger.error('Admin devices list error:', error);
     res.status(500).json({
       error: 'Failed to load devices',
-      message: 'An error occurred while loading devices list'
+      message: 'An error occurred while loading devices list',
     });
   }
 });
@@ -192,15 +209,14 @@ router.get('/devices/:deviceId', async (req, res) => {
     const { deviceId } = req.params;
 
     // Get device information
-    const device = await getQuery(
-      'SELECT * FROM devices WHERE device_id = ?',
-      [deviceId]
-    );
+    const device = await getQuery('SELECT * FROM devices WHERE device_id = ?', [
+      deviceId,
+    ]);
 
     if (!device) {
       return res.status(404).json({
         error: 'Device not found',
-        message: 'The specified device was not found'
+        message: 'The specified device was not found',
       });
     }
 
@@ -238,40 +254,41 @@ router.get('/devices/:deviceId', async (req, res) => {
         lastSeen: device.last_seen,
         threatLevel: device.threat_level,
         createdAt: device.created_at,
-        updatedAt: device.updated_at
+        updatedAt: device.updated_at,
       },
-      configuration: latestConfig ? {
-        config: JSON.parse(latestConfig.config),
-        version: latestConfig.version,
-        updatedAt: latestConfig.created_at
-      } : null,
-      recentCommands: recentCommands.map(cmd => ({
+      configuration: latestConfig
+        ? {
+            config: JSON.parse(latestConfig.config),
+            version: latestConfig.version,
+            updatedAt: latestConfig.created_at,
+          }
+        : null,
+      recentCommands: recentCommands.map((cmd) => ({
         id: cmd.command_id,
         command: cmd.command,
         parameters: cmd.parameters ? JSON.parse(cmd.parameters) : {},
         priority: cmd.priority,
         status: cmd.status,
         createdAt: cmd.created_at,
-        executedAt: cmd.executed_at
+        executedAt: cmd.executed_at,
       })),
-      recentSyncs: recentSyncs.map(sync => ({
+      recentSyncs: recentSyncs.map((sync) => ({
         data: JSON.parse(sync.sync_data),
         type: sync.sync_type,
-        timestamp: sync.created_at
+        timestamp: sync.created_at,
       })),
-      recentStatusReports: recentStatusReports.map(report => ({
+      recentStatusReports: recentStatusReports.map((report) => ({
         data: JSON.parse(report.status_data),
         type: report.report_type,
-        timestamp: report.created_at
+        timestamp: report.created_at,
       })),
-      healthScore: calculateDeviceHealthScore(device)
+      healthScore: calculateDeviceHealthScore(device),
     });
-
   } catch (error) {
     logger.error('Admin device details error:', error);
     res.status(500).json({
       error: 'Failed to load device details',
-      message: 'An error occurred while loading device details'
+      message: 'An error occurred while loading device details',
     });
   }
 });
@@ -279,14 +296,26 @@ router.get('/devices/:deviceId', async (req, res) => {
 // Broadcast command to multiple devices
 router.post('/commands/broadcast', async (req, res) => {
   try {
-    const { deviceIds, command, parameters, priority = 'normal', filters } = req.body;
+    const {
+      deviceIds,
+      command,
+      parameters,
+      priority = 'normal',
+      filters,
+    } = req.body;
 
     // Validate command
-    const validCommands = ['activate', 'deactivate', 'wipe', 'update_config', 'report_status'];
+    const validCommands = [
+      'activate',
+      'deactivate',
+      'wipe',
+      'update_config',
+      'report_status',
+    ];
     if (!validCommands.includes(command)) {
       return res.status(400).json({
         error: 'Invalid command',
-        message: `Command must be one of: ${validCommands.join(', ')}`
+        message: `Command must be one of: ${validCommands.join(', ')}`,
       });
     }
 
@@ -315,25 +344,28 @@ router.post('/commands/broadcast', async (req, res) => {
         queryParams.push(filters.isOnline ? 1 : 0);
       }
 
-      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+      const whereClause =
+        whereConditions.length > 0
+          ? `WHERE ${whereConditions.join(' AND ')}`
+          : '';
 
       const selectedDevices = await allQuery(
         `SELECT device_id FROM devices ${whereClause}`,
         queryParams
       );
 
-      targetDeviceIds = selectedDevices.map(d => d.device_id);
+      targetDeviceIds = selectedDevices.map((d) => d.device_id);
     } else {
       return res.status(400).json({
         error: 'Device selection required',
-        message: 'Please provide either deviceIds array or filters object'
+        message: 'Please provide either deviceIds array or filters object',
       });
     }
 
     if (targetDeviceIds.length === 0) {
       return res.status(400).json({
         error: 'No devices selected',
-        message: 'No devices match the specified criteria'
+        message: 'No devices match the specified criteria',
       });
     }
 
@@ -342,7 +374,9 @@ router.post('/commands/broadcast', async (req, res) => {
     const timestamp = new Date().toISOString();
 
     for (const deviceId of targetDeviceIds) {
-      const commandId = `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const commandId = `cmd_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 9)}`;
 
       await runQuery(
         'INSERT INTO commands (command_id, device_id, command, parameters, priority, status) VALUES (?, ?, ?, ?, ?, ?)',
@@ -352,18 +386,20 @@ router.post('/commands/broadcast', async (req, res) => {
           command,
           parameters ? JSON.stringify(parameters) : null,
           priority,
-          'pending'
+          'pending',
         ]
       );
 
       commandResults.push({
         commandId,
         deviceId,
-        status: 'created'
+        status: 'created',
       });
     }
 
-    logger.info(`Broadcast command ${command} sent to ${targetDeviceIds.length} devices by admin ${req.admin.username}`);
+    logger.info(
+      `Broadcast command ${command} sent to ${targetDeviceIds.length} devices by admin ${req.admin.username}`
+    );
 
     res.status(201).json({
       message: 'Broadcast command sent successfully',
@@ -374,14 +410,13 @@ router.post('/commands/broadcast', async (req, res) => {
       commands: commandResults,
       createdAt: timestamp,
       createdBy: req.admin.username,
-      filters: filters || null
+      filters: filters || null,
     });
-
   } catch (error) {
     logger.error('Broadcast command error:', error);
     res.status(500).json({
       error: 'Failed to broadcast command',
-      message: 'An error occurred while broadcasting the command'
+      message: 'An error occurred while broadcasting the command',
     });
   }
 });
@@ -412,14 +447,20 @@ router.get('/stats', async (req, res) => {
     // Get various statistics
     const stats = await Promise.all([
       // Sync activity
-      getQuery(`SELECT COUNT(*) as count FROM sync_logs WHERE created_at > ${timeFilter}`),
-      
+      getQuery(
+        `SELECT COUNT(*) as count FROM sync_logs WHERE created_at > ${timeFilter}`
+      ),
+
       // Command activity
-      getQuery(`SELECT COUNT(*) as count FROM commands WHERE created_at > ${timeFilter}`),
-      
+      getQuery(
+        `SELECT COUNT(*) as count FROM commands WHERE created_at > ${timeFilter}`
+      ),
+
       // Status reports
-      getQuery(`SELECT COUNT(*) as count FROM status_reports WHERE created_at > ${timeFilter}`),
-      
+      getQuery(
+        `SELECT COUNT(*) as count FROM status_reports WHERE created_at > ${timeFilter}`
+      ),
+
       // Command completion rate
       getQuery(`
         SELECT 
@@ -430,7 +471,7 @@ router.get('/stats', async (req, res) => {
         FROM commands 
         WHERE created_at > ${timeFilter}
       `),
-      
+
       // Average response time (mock calculation)
       getQuery(`
         SELECT AVG(
@@ -438,10 +479,16 @@ router.get('/stats', async (req, res) => {
         ) as avg_response_time_seconds
         FROM commands 
         WHERE executed_at IS NOT NULL AND created_at > ${timeFilter}
-      `)
+      `),
     ]);
 
-    const [syncStats, commandStats, statusStats, completionStats, responseTimeStats] = stats;
+    const [
+      syncStats,
+      commandStats,
+      statusStats,
+      completionStats,
+      responseTimeStats,
+    ] = stats;
 
     res.json({
       period,
@@ -453,18 +500,21 @@ router.get('/stats', async (req, res) => {
         failed: completionStats.failed || 0,
         pending: completionStats.pending || 0,
         total: completionStats.total || 0,
-        successRate: completionStats.total > 0 ? 
-          Math.round((completionStats.completed / completionStats.total) * 100) : 0
+        successRate:
+          completionStats.total > 0
+            ? Math.round(
+                (completionStats.completed / completionStats.total) * 100
+              )
+            : 0,
       },
       averageResponseTime: responseTimeStats.avg_response_time_seconds || 0,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Admin stats error:', error);
     res.status(500).json({
       error: 'Failed to load statistics',
-      message: 'An error occurred while loading system statistics'
+      message: 'An error occurred while loading system statistics',
     });
   }
 });

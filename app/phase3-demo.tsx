@@ -110,7 +110,7 @@ export default function Phase3DemoScreen() {
             text: 'Activate',
             onPress: async () => {
               await blankScreenStealthManager.activateBlankScreen();
-              
+
               // Auto-deactivate after 5 seconds for demo
               setTimeout(async () => {
                 await blankScreenStealthManager.deactivateBlankScreen();
@@ -139,7 +139,11 @@ export default function Phase3DemoScreen() {
 
       Alert.alert(
         'Threat Assessment Complete',
-        `Risk Score: ${threat.riskScore}/100\nSeverity: ${threat.severity}\nConfidence: ${(threat.confidence * 100).toFixed(1)}%\n\nRecommendations:\n${threat.recommendations.join('\n')}`
+        `Risk Score: ${threat.riskScore}/100\nSeverity: ${
+          threat.severity
+        }\nConfidence: ${(threat.confidence * 100).toFixed(
+          1
+        )}%\n\nRecommendations:\n${threat.recommendations.join('\n')}`
       );
     } catch (error) {
       updateFeatureStatus('threat_detection', 'inactive');
@@ -154,7 +158,7 @@ export default function Phase3DemoScreen() {
       const availableCovers = coverApplicationsManager.getAvailableCovers();
       const activeCover = coverApplicationsManager.getActiveCover();
 
-      const coverOptions = availableCovers.map(cover => ({
+      const coverOptions = availableCovers.map((cover) => ({
         text: `${cover.name} ${cover.isActive ? '(Active)' : ''}`,
         onPress: () => {
           coverApplicationsManager.activateCover(cover.name);
@@ -167,11 +171,10 @@ export default function Phase3DemoScreen() {
 
       Alert.alert(
         'Cover Applications Demo',
-        `Current: ${activeCover?.name || 'None'}\n\nSelect a cover application:`,
-        [
-          ...coverOptions,
-          { text: 'Cancel', style: 'cancel' },
-        ]
+        `Current: ${
+          activeCover?.name || 'None'
+        }\n\nSelect a cover application:`,
+        [...coverOptions, { text: 'Cancel', style: 'cancel' }]
       );
     } catch (error) {
       Alert.alert('Error', 'Failed to demonstrate cover applications');
@@ -185,12 +188,15 @@ export default function Phase3DemoScreen() {
 
       Alert.alert(
         'Authentication Demo',
-        `Biometric Auth: ${isEnabled ? 'Enabled' : 'Disabled'}\nVideo PIN: ${hasVideoPin ? 'Set' : 'Not Set'}\n\nWhat would you like to test?`,
+        `Biometric Auth: ${isEnabled ? 'Enabled' : 'Disabled'}\nVideo PIN: ${
+          hasVideoPin ? 'Set' : 'Not Set'
+        }\n\nWhat would you like to test?`,
         [
           {
             text: 'Video Access',
             onPress: async () => {
-              const success = await biometricAuthManager.authenticateForVideoAccess();
+              const success =
+                await biometricAuthManager.authenticateForVideoAccess();
               Alert.alert(
                 'Video Access Result',
                 success ? 'Access granted' : 'Access denied'
@@ -222,7 +228,13 @@ export default function Phase3DemoScreen() {
 
       Alert.alert(
         'Performance Metrics',
-        `Device ID: ${deviceId}\n\nUsage Count: ${metrics.totalUsageCount}\nAvg Duration: ${(metrics.averageDuration / 1000).toFixed(1)}s\nLast Used: ${metrics.lastUsageTimestamp.toLocaleString()}\n\nActivation Time: ${metrics.activationTime}ms\nDeactivation Time: ${metrics.deactivationTime}ms`
+        `Device ID: ${deviceId}\n\nUsage Count: ${
+          metrics.totalUsageCount
+        }\nAvg Duration: ${(metrics.averageDuration / 1000).toFixed(
+          1
+        )}s\nLast Used: ${metrics.lastUsageTimestamp.toLocaleString()}\n\nActivation Time: ${
+          metrics.activationTime
+        }ms\nDeactivation Time: ${metrics.deactivationTime}ms`
       );
     } catch (error) {
       Alert.alert('Error', 'Failed to retrieve performance metrics');
@@ -237,15 +249,22 @@ export default function Phase3DemoScreen() {
 
       Alert.alert(
         'Remote Management Demo',
-        `Status: ${config.remoteManagement.enabled ? 'Enabled' : 'Disabled'}\nSync: ${config.remoteManagement.serverSyncEnabled ? 'Enabled' : 'Disabled'}\nCommands: ${commandCount}\nLast Sync: ${lastSync?.toLocaleString() || 'Never'}\n\nWhat would you like to test?`,
+        `Status: ${
+          config.remoteManagement.enabled ? 'Enabled' : 'Disabled'
+        }\nSync: ${
+          config.remoteManagement.serverSyncEnabled ? 'Enabled' : 'Disabled'
+        }\nCommands: ${commandCount}\nLast Sync: ${
+          lastSync?.toLocaleString() || 'Never'
+        }\n\nWhat would you like to test?`,
         [
           {
             text: 'Add Test Command',
             onPress: async () => {
-              const commandId = await blankScreenStealthManager.addRemoteCommand({
-                command: 'report_status',
-                parameters: { demo: true },
-              });
+              const commandId =
+                await blankScreenStealthManager.addRemoteCommand({
+                  command: 'report_status',
+                  parameters: { demo: true },
+                });
               Alert.alert('Command Added', `Command ID: ${commandId}`);
             },
           },
@@ -264,9 +283,12 @@ export default function Phase3DemoScreen() {
     }
   };
 
-  const updateFeatureStatus = (featureId: string, status: 'active' | 'inactive' | 'testing') => {
-    setFeatures(prev => 
-      prev.map(feature => 
+  const updateFeatureStatus = (
+    featureId: string,
+    status: 'active' | 'inactive' | 'testing'
+  ) => {
+    setFeatures((prev) =>
+      prev.map((feature) =>
         feature.id === featureId ? { ...feature, status } : feature
       )
     );
@@ -287,25 +309,38 @@ export default function Phase3DemoScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return colors.success;
-      case 'testing': return colors.warning;
-      default: return colors.text.muted;
+      case 'active':
+        return colors.success;
+      case 'testing':
+        return colors.warning;
+      default:
+        return colors.text.muted;
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return 'check-circle';
-      case 'testing': return 'hourglass-empty';
-      default: return 'radio-button-unchecked';
+      case 'active':
+        return 'check-circle';
+      case 'testing':
+        return 'hourglass-empty';
+      default:
+        return 'radio-button-unchecked';
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={colors.text.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Phase 3 Demo</Text>
         <View style={styles.placeholder} />
@@ -315,8 +350,8 @@ export default function Phase3DemoScreen() {
         <View style={styles.infoCard}>
           <MaterialIcons name="info" size={24} color={colors.primary} />
           <Text style={styles.infoText}>
-            This demo showcases advanced security features from Phase 3 implementation. 
-            All features are functional and ready for testing.
+            This demo showcases advanced security features from Phase 3
+            implementation. All features are functional and ready for testing.
           </Text>
         </View>
 
@@ -345,13 +380,13 @@ export default function Phase3DemoScreen() {
             disabled={isLoading && feature.status === 'testing'}
           >
             <View style={styles.featureIcon}>
-              <MaterialIcons 
-                name={feature.icon as any} 
-                size={24} 
-                color={colors.primary} 
+              <MaterialIcons
+                name={feature.icon as any}
+                size={24}
+                color={colors.primary}
               />
             </View>
-            
+
             <View style={styles.featureContent}>
               <View style={styles.featureHeader}>
                 <Text style={styles.featureTitle}>{feature.title}</Text>
@@ -363,13 +398,15 @@ export default function Phase3DemoScreen() {
                   />
                 </View>
               </View>
-              <Text style={styles.featureDescription}>{feature.description}</Text>
+              <Text style={styles.featureDescription}>
+                {feature.description}
+              </Text>
             </View>
 
-            <MaterialIcons 
-              name="chevron-right" 
-              size={20} 
-              color={colors.text.muted} 
+            <MaterialIcons
+              name="chevron-right"
+              size={20}
+              color={colors.text.muted}
             />
           </TouchableOpacity>
         ))}

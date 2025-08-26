@@ -22,30 +22,39 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN?.split(',') || ["http://localhost:19006"],
-    credentials: true
-  }
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:19006'],
+    credentials: true,
+  },
 });
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-}));
+  })
+);
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || ["http://localhost:19006"],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-ID', 'X-App-Version']
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:19006'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Device-ID',
+      'X-App-Version',
+    ],
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -53,7 +62,9 @@ const limiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
   message: {
     error: 'Too many requests from this IP, please try again later.',
-    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000)
+    retryAfter: Math.ceil(
+      (parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000
+    ),
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -63,7 +74,11 @@ app.use(limiter);
 
 // General middleware
 app.use(compression());
-app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+app.use(
+  morgan('combined', {
+    stream: { write: (message) => logger.info(message.trim()) },
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -73,7 +88,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
@@ -88,7 +103,7 @@ app.get('/api', (req, res) => {
         'POST /api/auth/register': 'Register new device',
         'POST /api/auth/login': 'Device login',
         'POST /api/auth/refresh': 'Refresh access token',
-        'POST /api/auth/logout': 'Device logout'
+        'POST /api/auth/logout': 'Device logout',
       },
       devices: {
         'GET /api/devices': 'List all devices (admin)',
@@ -96,20 +111,22 @@ app.get('/api', (req, res) => {
         'PUT /api/devices/:deviceId/config': 'Update device configuration',
         'POST /api/devices/:deviceId/sync': 'Sync device state',
         'POST /api/devices/:deviceId/status-report': 'Receive status report',
-        'POST /api/devices/:deviceId/wipe': 'Remote wipe device'
+        'POST /api/devices/:deviceId/wipe': 'Remote wipe device',
       },
       commands: {
         'GET /api/devices/:deviceId/commands': 'Get pending commands',
         'POST /api/devices/:deviceId/commands': 'Create new command',
-        'POST /api/devices/:deviceId/commands/:commandId/acknowledge': 'Acknowledge command execution'
+        'POST /api/devices/:deviceId/commands/:commandId/acknowledge':
+          'Acknowledge command execution',
       },
       admin: {
         'GET /api/admin/dashboard': 'Admin dashboard data',
         'GET /api/admin/devices': 'Device management interface',
-        'POST /api/admin/commands/broadcast': 'Broadcast command to multiple devices'
-      }
+        'POST /api/admin/commands/broadcast':
+          'Broadcast command to multiple devices',
+      },
     },
-    documentation: 'See README.md for detailed API documentation'
+    documentation: 'See README.md for detailed API documentation',
   });
 });
 
@@ -127,7 +144,7 @@ app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Endpoint not found',
     message: `The endpoint ${req.method} ${req.originalUrl} does not exist.`,
-    availableEndpoints: '/api'
+    availableEndpoints: '/api',
   });
 });
 
@@ -163,16 +180,19 @@ async function startServer() {
 
     // Start server
     server.listen(PORT, HOST, () => {
-      logger.info(`🚀 DESIST Management Server running on http://${HOST}:${PORT}`);
-      logger.info(`📋 API Documentation available at http://${HOST}:${PORT}/api`);
+      logger.info(
+        `🚀 DESIST Management Server running on http://${HOST}:${PORT}`
+      );
+      logger.info(
+        `📋 API Documentation available at http://${HOST}:${PORT}/api`
+      );
       logger.info(`💓 Health check available at http://${HOST}:${PORT}/health`);
       logger.info(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-      
+
       if (process.env.WEBSOCKET_ENABLED === 'true') {
         logger.info(`🔌 WebSocket server running on ws://${HOST}:${PORT}`);
       }
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

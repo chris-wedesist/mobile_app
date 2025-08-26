@@ -8,7 +8,7 @@ function errorHandler(err, req, res, next) {
     url: req.originalUrl,
     method: req.method,
     ip: req.ip,
-    userAgent: req.get('User-Agent')
+    userAgent: req.get('User-Agent'),
   });
 
   // Default error response
@@ -48,7 +48,7 @@ function errorHandler(err, req, res, next) {
     statusCode = 500;
     message = 'Database error';
     errorCode = 'DATABASE_ERROR';
-    
+
     // Don't expose database details in production
     if (process.env.NODE_ENV === 'production') {
       message = 'Internal server error';
@@ -72,7 +72,7 @@ function errorHandler(err, req, res, next) {
     message: message,
     timestamp: new Date().toISOString(),
     path: req.originalUrl,
-    method: req.method
+    method: req.method,
   };
 
   // Add error details in development mode
@@ -80,7 +80,7 @@ function errorHandler(err, req, res, next) {
     errorResponse.details = {
       name: err.name,
       stack: err.stack,
-      originalMessage: err.message
+      originalMessage: err.message,
     };
   }
 
@@ -150,5 +150,5 @@ module.exports = {
   ForbiddenError,
   NotFoundError,
   ConflictError,
-  RateLimitError
+  RateLimitError,
 };

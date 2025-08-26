@@ -13,7 +13,7 @@ function setupWebSocket(socketIO) {
     socket.on('device:register', (data) => {
       try {
         const { deviceId, appVersion, platform } = data;
-        
+
         if (!deviceId) {
           socket.emit('error', { message: 'Device ID is required' });
           return;
@@ -24,18 +24,18 @@ function setupWebSocket(socketIO) {
           socketId: socket.id,
           appVersion,
           platform,
-          connectedAt: new Date().toISOString()
+          connectedAt: new Date().toISOString(),
         });
 
         socket.deviceId = deviceId;
         socket.join(`device:${deviceId}`);
 
         logger.info(`Device registered via WebSocket: ${deviceId}`);
-        
+
         socket.emit('device:registered', {
           message: 'Device registered successfully',
           deviceId,
-          connectedAt: new Date().toISOString()
+          connectedAt: new Date().toISOString(),
         });
 
         // Notify admins about new device connection
@@ -43,9 +43,8 @@ function setupWebSocket(socketIO) {
           deviceId,
           appVersion,
           platform,
-          connectedAt: new Date().toISOString()
+          connectedAt: new Date().toISOString(),
         });
-
       } catch (error) {
         logger.error('Device registration error:', error);
         socket.emit('error', { message: 'Registration failed' });
@@ -56,21 +55,23 @@ function setupWebSocket(socketIO) {
     socket.on('admin:authenticate', (data) => {
       try {
         const { token } = data;
-        
+
         // In a real implementation, verify JWT token here
         // For now, we'll use a simple check
         if (token && token.startsWith('admin_')) {
           socket.join('admin');
           socket.isAdmin = true;
-          
+
           logger.info(`Admin authenticated via WebSocket: ${socket.id}`);
-          
+
           socket.emit('admin:authenticated', {
             message: 'Admin authenticated successfully',
-            connectedDevices: Array.from(connectedDevices.entries()).map(([deviceId, info]) => ({
-              deviceId,
-              ...info
-            }))
+            connectedDevices: Array.from(connectedDevices.entries()).map(
+              ([deviceId, info]) => ({
+                deviceId,
+                ...info,
+              })
+            ),
           });
         } else {
           socket.emit('error', { message: 'Invalid admin token' });
@@ -90,9 +91,11 @@ function setupWebSocket(socketIO) {
         }
 
         const { deviceId, command, parameters } = data;
-        
+
         if (!deviceId || !command) {
-          socket.emit('error', { message: 'Device ID and command are required' });
+          socket.emit('error', {
+            message: 'Device ID and command are required',
+          });
           return;
         }
 
@@ -100,18 +103,19 @@ function setupWebSocket(socketIO) {
         io.to(`device:${deviceId}`).emit('command:received', {
           command,
           parameters: parameters || {},
-          commandId: `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          timestamp: new Date().toISOString()
+          commandId: `cmd_${Date.now()}_${Math.random()
+            .toString(36)
+            .substring(2, 9)}`,
+          timestamp: new Date().toISOString(),
         });
 
         logger.info(`Real-time command sent to device ${deviceId}: ${command}`);
-        
+
         socket.emit('command:sent', {
           message: 'Command sent successfully',
           deviceId,
-          command
+          command,
         });
-
       } catch (error) {
         logger.error('Command execution error:', error);
         socket.emit('error', { message: 'Command execution failed' });
@@ -122,7 +126,7 @@ function setupWebSocket(socketIO) {
     socket.on('command:acknowledge', (data) => {
       try {
         const { commandId, executed, result } = data;
-        
+
         if (!socket.deviceId) {
           socket.emit('error', { message: 'Device not registered' });
           return;
@@ -134,11 +138,12 @@ function setupWebSocket(socketIO) {
           commandId,
           executed,
           result,
-          completedAt: new Date().toISOString()
+          completedAt: new Date().toISOString(),
         });
 
-        logger.info(`Command acknowledged by device ${socket.deviceId}: ${commandId}`);
-
+        logger.info(
+          `Command acknowledged by device ${socket.deviceId}: ${commandId}`
+        );
       } catch (error) {
         logger.error('Command acknowledgment error:', error);
         socket.emit('error', { message: 'Acknowledgment failed' });
@@ -157,11 +162,10 @@ function setupWebSocket(socketIO) {
         io.to('admin').emit('device:status_update', {
           deviceId: socket.deviceId,
           status: data,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
         logger.debug(`Status update from device ${socket.deviceId}`);
-
       } catch (error) {
         logger.error('Device status update error:', error);
         socket.emit('error', { message: 'Status update failed' });
@@ -172,7 +176,7 @@ function setupWebSocket(socketIO) {
     socket.on('device:ping', () => {
       if (socket.deviceId) {
         socket.emit('device:pong', { timestamp: new Date().toISOString() });
-        
+
         // Update device connection info
         const deviceInfo = connectedDevices.get(socket.deviceId);
         if (deviceInfo) {
@@ -184,19 +188,21 @@ function setupWebSocket(socketIO) {
 
     // Handle disconnection
     socket.on('disconnect', (reason) => {
-      logger.info(`WebSocket client disconnected: ${socket.id}, reason: ${reason}`);
-      
+      logger.info(
+        `WebSocket client disconnected: ${socket.id}, reason: ${reason}`
+      );
+
       if (socket.deviceId) {
         // Remove device from connected devices
         connectedDevices.delete(socket.deviceId);
-        
+
         // Notify admins about device disconnection
         io.to('admin').emit('device:disconnected', {
           deviceId: socket.deviceId,
           reason,
-          disconnectedAt: new Date().toISOString()
+          disconnectedAt: new Date().toISOString(),
         });
-        
+
         logger.info(`Device disconnected: ${socket.deviceId}`);
       }
     });
@@ -219,12 +225,14 @@ function sendCommandToDevice(deviceId, command, parameters = {}) {
   const commandData = {
     command,
     parameters,
-    commandId: `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-    timestamp: new Date().toISOString()
+    commandId: `cmd_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`,
+    timestamp: new Date().toISOString(),
   };
 
   io.to(`device:${deviceId}`).emit('command:received', commandData);
-  
+
   logger.info(`Command sent to device ${deviceId} via WebSocket: ${command}`);
   return commandData.commandId;
 }
@@ -237,7 +245,7 @@ function broadcastToAdmins(event, data) {
 
   io.to('admin').emit(event, {
     ...data,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -251,7 +259,7 @@ function broadcastToDevices(event, data) {
   for (const deviceId of connectedDevices.keys()) {
     io.to(`device:${deviceId}`).emit(event, {
       ...data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }
@@ -260,7 +268,7 @@ function broadcastToDevices(event, data) {
 function getConnectedDevices() {
   return Array.from(connectedDevices.entries()).map(([deviceId, info]) => ({
     deviceId,
-    ...info
+    ...info,
   }));
 }
 
@@ -275,5 +283,5 @@ module.exports = {
   broadcastToAdmins,
   broadcastToDevices,
   getConnectedDevices,
-  isDeviceConnected
+  isDeviceConnected,
 };

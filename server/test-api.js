@@ -20,15 +20,15 @@ const testDevice = {
   platform: 'ios',
   securityConfig: {
     encryptionEnabled: true,
-    biometricEnabled: true
-  }
+    biometricEnabled: true,
+  },
 };
 
 const testConfig = {
   isEnabled: true,
   activationMethod: 'both',
   longPressDeactivationDuration: 3000,
-  testingMode: true
+  testingMode: true,
 };
 
 // Utility functions
@@ -37,7 +37,10 @@ function log(message) {
 }
 
 function logError(message, error) {
-  console.error(`[${new Date().toLocaleTimeString()}] ❌ ${message}:`, error.response?.data || error.message);
+  console.error(
+    `[${new Date().toLocaleTimeString()}] ❌ ${message}:`,
+    error.response?.data || error.message
+  );
 }
 
 function logSuccess(message) {
@@ -58,9 +61,14 @@ async function testHealthCheck() {
 
 async function testDeviceRegistration() {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/auth/register`, testDevice);
+    const response = await axios.post(
+      `${API_BASE_URL}/api/auth/register`,
+      testDevice
+    );
     authTokens = response.data.tokens;
-    logSuccess(`Device registration successful - Device ID: ${response.data.deviceId}`);
+    logSuccess(
+      `Device registration successful - Device ID: ${response.data.deviceId}`
+    );
     return true;
   } catch (error) {
     logError('Device registration failed', error);
@@ -70,9 +78,12 @@ async function testDeviceRegistration() {
 
 async function testDeviceStatus() {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/status`, {
-      headers: { Authorization: `Bearer ${authTokens.accessToken}` }
-    });
+    const response = await axios.get(
+      `${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/status`,
+      {
+        headers: { Authorization: `Bearer ${authTokens.accessToken}` },
+      }
+    );
     logSuccess(`Device status retrieved - Online: ${response.data.isOnline}`);
     return true;
   } catch (error) {
@@ -83,7 +94,8 @@ async function testDeviceStatus() {
 
 async function testConfigUpdate() {
   try {
-    const response = await axios.put(`${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/config`, 
+    const response = await axios.put(
+      `${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/config`,
       { config: testConfig },
       { headers: { Authorization: `Bearer ${authTokens.accessToken}` } }
     );
@@ -106,18 +118,21 @@ async function testDeviceSync() {
         deactivationTime: 50,
         totalUsageCount: 1,
         averageDuration: 30000,
-        lastUsageTimestamp: new Date().toISOString()
+        lastUsageTimestamp: new Date().toISOString(),
       },
       accessAttempts: 0,
-      isLockedOut: false
+      isLockedOut: false,
     };
 
-    const response = await axios.post(`${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/sync`, 
+    const response = await axios.post(
+      `${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/sync`,
       syncData,
       { headers: { Authorization: `Bearer ${authTokens.accessToken}` } }
     );
-    
-    logSuccess(`Device sync successful - Pending commands: ${response.data.pendingCommands.length}`);
+
+    logSuccess(
+      `Device sync successful - Pending commands: ${response.data.pendingCommands.length}`
+    );
     return true;
   } catch (error) {
     logError('Device sync failed', error);
@@ -136,19 +151,22 @@ async function testStatusReport() {
         deactivationTime: 50,
         totalUsageCount: 1,
         averageDuration: 30000,
-        lastUsageTimestamp: new Date().toISOString()
+        lastUsageTimestamp: new Date().toISOString(),
       },
       accessAttempts: 0,
       isLockedOut: false,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    const response = await axios.post(`${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/status-report`, 
+    const response = await axios.post(
+      `${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/status-report`,
       statusData,
       { headers: { Authorization: `Bearer ${authTokens.accessToken}` } }
     );
-    
-    logSuccess(`Status report sent - Threat level: ${response.data.threatLevel}`);
+
+    logSuccess(
+      `Status report sent - Threat level: ${response.data.threatLevel}`
+    );
     return true;
   } catch (error) {
     logError('Status report failed', error);
@@ -158,11 +176,16 @@ async function testStatusReport() {
 
 async function testPendingCommands() {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/commands`, {
-      headers: { Authorization: `Bearer ${authTokens.accessToken}` }
-    });
-    
-    logSuccess(`Pending commands retrieved - Count: ${response.data.commands.length}`);
+    const response = await axios.get(
+      `${API_BASE_URL}/api/devices/${TEST_DEVICE_ID}/commands`,
+      {
+        headers: { Authorization: `Bearer ${authTokens.accessToken}` },
+      }
+    );
+
+    logSuccess(
+      `Pending commands retrieved - Count: ${response.data.commands.length}`
+    );
     return true;
   } catch (error) {
     logError('Pending commands check failed', error);
@@ -174,11 +197,13 @@ async function testAdminLogin() {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/auth/admin/login`, {
       username: 'admin',
-      password: 'change-this-secure-password'
+      password: 'change-this-secure-password',
     });
-    
+
     adminToken = response.data.token;
-    logSuccess(`Admin login successful - Username: ${response.data.admin.username}`);
+    logSuccess(
+      `Admin login successful - Username: ${response.data.admin.username}`
+    );
     return true;
   } catch (error) {
     logError('Admin login failed', error);
@@ -189,10 +214,12 @@ async function testAdminLogin() {
 async function testAdminDashboard() {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/admin/dashboard`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
-    logSuccess(`Admin dashboard loaded - Total devices: ${response.data.overview.totalDevices}`);
+
+    logSuccess(
+      `Admin dashboard loaded - Total devices: ${response.data.overview.totalDevices}`
+    );
     return true;
   } catch (error) {
     logError('Admin dashboard failed', error);
@@ -203,9 +230,9 @@ async function testAdminDashboard() {
 async function testTokenRefresh() {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-      refreshToken: authTokens.refreshToken
+      refreshToken: authTokens.refreshToken,
     });
-    
+
     authTokens = response.data.tokens;
     logSuccess('Token refresh successful');
     return true;
@@ -218,9 +245,9 @@ async function testTokenRefresh() {
 async function testDeviceLogout() {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/auth/logout`, {
-      deviceId: TEST_DEVICE_ID
+      deviceId: TEST_DEVICE_ID,
     });
-    
+
     logSuccess('Device logout successful');
     return true;
   } catch (error) {
@@ -232,7 +259,7 @@ async function testDeviceLogout() {
 // Main test runner
 async function runTests() {
   console.log('🧪 Starting DESIST Management Server API Tests\n');
-  
+
   const tests = [
     { name: 'Health Check', fn: testHealthCheck },
     { name: 'Device Registration', fn: testDeviceRegistration },
@@ -244,7 +271,7 @@ async function runTests() {
     { name: 'Token Refresh', fn: testTokenRefresh },
     { name: 'Admin Login', fn: testAdminLogin },
     { name: 'Admin Dashboard', fn: testAdminDashboard },
-    { name: 'Device Logout', fn: testDeviceLogout }
+    { name: 'Device Logout', fn: testDeviceLogout },
   ];
 
   let passed = 0;
@@ -269,12 +296,18 @@ async function runTests() {
   console.log('📊 Test Summary:');
   console.log(`✅ Passed: ${passed}`);
   console.log(`❌ Failed: ${failed}`);
-  console.log(`📈 Success Rate: ${Math.round((passed / (passed + failed)) * 100)}%`);
+  console.log(
+    `📈 Success Rate: ${Math.round((passed / (passed + failed)) * 100)}%`
+  );
 
   if (failed === 0) {
-    console.log('\n🎉 All tests passed! The DESIST Management Server is working correctly.');
+    console.log(
+      '\n🎉 All tests passed! The DESIST Management Server is working correctly.'
+    );
   } else {
-    console.log('\n⚠️  Some tests failed. Please check the server logs for details.');
+    console.log(
+      '\n⚠️  Some tests failed. Please check the server logs for details.'
+    );
   }
 
   process.exit(failed === 0 ? 0 : 1);

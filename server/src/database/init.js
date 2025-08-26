@@ -24,7 +24,7 @@ const SCHEMA = {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `,
-  
+
   device_configs: `
     CREATE TABLE IF NOT EXISTS device_configs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +35,7 @@ const SCHEMA = {
       FOREIGN KEY (device_id) REFERENCES devices (device_id) ON DELETE CASCADE
     )
   `,
-  
+
   commands: `
     CREATE TABLE IF NOT EXISTS commands (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +51,7 @@ const SCHEMA = {
       FOREIGN KEY (device_id) REFERENCES devices (device_id) ON DELETE CASCADE
     )
   `,
-  
+
   sync_logs: `
     CREATE TABLE IF NOT EXISTS sync_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +62,7 @@ const SCHEMA = {
       FOREIGN KEY (device_id) REFERENCES devices (device_id) ON DELETE CASCADE
     )
   `,
-  
+
   status_reports: `
     CREATE TABLE IF NOT EXISTS status_reports (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +73,7 @@ const SCHEMA = {
       FOREIGN KEY (device_id) REFERENCES devices (device_id) ON DELETE CASCADE
     )
   `,
-  
+
   admin_users: `
     CREATE TABLE IF NOT EXISTS admin_users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +84,7 @@ const SCHEMA = {
       last_login DATETIME
     )
   `,
-  
+
   device_tokens: `
     CREATE TABLE IF NOT EXISTS device_tokens (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,7 +95,7 @@ const SCHEMA = {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (device_id) REFERENCES devices (device_id) ON DELETE CASCADE
     )
-  `
+  `,
 };
 
 // Indexes for better performance
@@ -108,14 +108,14 @@ const INDEXES = [
   'CREATE INDEX IF NOT EXISTS idx_sync_logs_device_id ON sync_logs (device_id)',
   'CREATE INDEX IF NOT EXISTS idx_status_reports_device_id ON status_reports (device_id)',
   'CREATE INDEX IF NOT EXISTS idx_device_tokens_device_id ON device_tokens (device_id)',
-  'CREATE INDEX IF NOT EXISTS idx_device_tokens_expires_at ON device_tokens (expires_at)'
+  'CREATE INDEX IF NOT EXISTS idx_device_tokens_expires_at ON device_tokens (expires_at)',
 ];
 
 async function initializeDatabase() {
   try {
     // Ensure data directory exists
     await fs.mkdir(DATA_DIR, { recursive: true });
-    
+
     // Create database connection
     db = new sqlite3.Database(DB_PATH, (err) => {
       if (err) {
@@ -127,23 +127,23 @@ async function initializeDatabase() {
 
     // Enable foreign keys
     await runQuery('PRAGMA foreign_keys = ON');
-    
+
     // Create tables
     for (const [tableName, schema] of Object.entries(SCHEMA)) {
       await runQuery(schema);
       logger.info(`Table ${tableName} created/verified`);
     }
-    
+
     // Create indexes
     for (const index of INDEXES) {
       await runQuery(index);
     }
-    
+
     logger.info('Database indexes created/verified');
-    
+
     // Create default admin user if it doesn't exist
     await createDefaultAdminUser();
-    
+
     return db;
   } catch (error) {
     logger.error('Database initialization failed:', error);
@@ -154,21 +154,24 @@ async function initializeDatabase() {
 async function createDefaultAdminUser() {
   const bcrypt = require('bcryptjs');
   const defaultUsername = process.env.ADMIN_USERNAME || 'admin';
-  const defaultPassword = process.env.ADMIN_PASSWORD || 'change-this-secure-password';
-  
+  const defaultPassword =
+    process.env.ADMIN_PASSWORD || 'change-this-secure-password';
+
   try {
     const existingUser = await getQuery(
       'SELECT id FROM admin_users WHERE username = ?',
       [defaultUsername]
     );
-    
+
     if (!existingUser) {
       const passwordHash = await bcrypt.hash(defaultPassword, 12);
       await runQuery(
         'INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)',
         [defaultUsername, passwordHash, 'admin']
       );
-      logger.info(`Default admin user created with username: ${defaultUsername}`);
+      logger.info(
+        `Default admin user created with username: ${defaultUsername}`
+      );
       logger.warn('Please change the default admin password in production!');
     }
   } catch (error) {
@@ -178,7 +181,7 @@ async function createDefaultAdminUser() {
 
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
-    db.run(sql, params, function(err) {
+    db.run(sql, params, function (err) {
       if (err) {
         logger.error('Database query error:', err);
         reject(err);
@@ -239,5 +242,5 @@ module.exports = {
   getQuery,
   allQuery,
   closeDatabase,
-  getDatabase: () => db
+  getDatabase: () => db,
 };
