@@ -139,8 +139,18 @@ export default function Phase3DemoScreen() {
       const deviceBoundKey = await storageManager.generateDeviceBoundKey('crypto_test');
       await storageManager.setItem(deviceBoundKey, testData, { encrypt: true });
       
-      // Get security status
-      const securityStatus = await storageManager.getSecurityStatus();
+      // Get security status with real-time network monitoring
+      const [securityStatus, networkSecurity, currentNetworkState] = await Promise.all([
+        storageManager.getSecurityStatus(),
+        cryptoManager.validateNetworkSecurity(),
+        Promise.resolve(cryptoManager.getCurrentNetworkSecurity())
+      ]);
+
+      // Register a callback to demonstrate real-time monitoring
+      const networkCallback = (securityInfo: any) => {
+        console.log('🔄 Real-time network security update:', securityInfo);
+      };
+      cryptoManager.registerNetworkSecurityCallback(networkCallback);
 
       updateFeatureStatus('enhanced_crypto', 'active');
 
@@ -153,12 +163,27 @@ export default function Phase3DemoScreen() {
         `Device: ${fingerprint.systemInfo.brand} ${fingerprint.systemInfo.model}\n` +
         `Security: ${fingerprint.securityFeatures.isEmulator ? 'Emulator' : 'Physical'}\n` +
         `Network: ${fingerprint.networkInfo.connectionType}\n\n` +
+        `🌐 REAL-TIME NETWORK MONITORING:\n` +
+        `Status: ${currentNetworkState.isMonitoring ? '✅ Active' : '❌ Inactive'}\n` +
+        `Security Level: ${currentNetworkState.securityLevel.toUpperCase()}\n` +
+        `Issues: ${networkSecurity.issues.length} detected\n\n` +
         `🛡️ SECURITY STATUS:\n` +
         `Encryption: ${securityStatus.encryptionActive ? '✅' : '❌'}\n` +
         `Device Integrity: ${securityStatus.deviceIntegrityValid ? '✅' : '⚠️'}\n` +
         `Network Security: ${securityStatus.networkSecure ? '✅' : '⚠️'}\n\n` +
-        `✅ All crypto enhancements working!`,
-        [{ text: 'Excellent!', style: 'default' }]
+        `✅ All crypto enhancements working!\n` +
+        `🔄 Real-time monitoring enabled!`,
+        [
+          { 
+            text: 'Stop Monitoring', 
+            style: 'destructive',
+            onPress: () => {
+              cryptoManager.removeNetworkSecurityCallback(networkCallback);
+              console.log('Network monitoring callback removed');
+            }
+          },
+          { text: 'Excellent!', style: 'default' }
+        ]
       );
     } catch (error) {
       updateFeatureStatus('enhanced_crypto', 'inactive');

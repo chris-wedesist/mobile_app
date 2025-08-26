@@ -45,6 +45,9 @@ export class CryptoManager {
   private config: CryptoConfig = DEFAULT_CONFIG;
   private initialized = false;
   private deviceFingerprint: DeviceFingerprint | null = null;
+  private networkStateListener: (() => void) | null = null;
+  private currentNetworkState: any = null;
+  private networkSecurityCallbacks: Array<(securityInfo: any) => void> = [];
 
   static getInstance(): CryptoManager {
     if (!CryptoManager.instance) {
@@ -59,13 +62,18 @@ export class CryptoManager {
     try {
       console.log('Initializing CryptoManager with expo-crypto...');
       
+      // Initialize network monitoring
+      if (this.config.networkSecurityEnabled) {
+        this.initializeNetworkMonitoring();
+      }
+      
       // Generate device fingerprint
       if (this.config.deviceFingerprintEnabled) {
         await this.generateDeviceFingerprint();
       }
 
       this.initialized = true;
-      console.log('CryptoManager initialized successfully');
+      console.log('CryptoManager initialized successfully with network monitoring');
     } catch (error) {
       console.error('Failed to initialize CryptoManager:', error);
       this.initialized = true; // Set as initialized to prevent loops
@@ -293,15 +301,17 @@ export class CryptoManager {
   }
 
   /**
-   * Validate network security state
+   * Validate network security state (enhanced with real-time monitoring)
    */
   async validateNetworkSecurity(): Promise<{
     isSecure: boolean;
     issues: string[];
     recommendations: string[];
+    realTimeAnalysis?: any;
   }> {
     try {
-      const netState = await NetInfo.fetch();
+      // Use current monitored state if available, otherwise fetch fresh
+      const netState = this.currentNetworkState || await NetInfo.fetch();
       const issues: string[] = [];
       const recommendations: string[] = [];
 
@@ -315,6 +325,7 @@ export class CryptoManager {
         // On WiFi - check if it's potentially insecure
         issues.push('Connected to WiFi network');
         recommendations.push('Verify WiFi network security (WPA2/WPA3)');
+        recommendations.push('Avoid public/unsecured WiFi networks');
       }
 
       if (netState.type === 'cellular') {
@@ -325,12 +336,23 @@ export class CryptoManager {
         }
       }
 
+      // Add monitoring-specific insights
+      if (this.networkStateListener) {
+        if (netState.securityAnalysis) {
+          issues.push(...netState.securityAnalysis.threats);
+          recommendations.push(...netState.securityAnalysis.recommendations);
+        }
+      } else {
+        recommendations.push('Enable real-time network monitoring for enhanced security');
+      }
+
       const isSecure = issues.length === 0;
 
       return {
         isSecure,
         issues,
         recommendations,
+        realTimeAnalysis: netState.securityAnalysis || null,
       };
     } catch (error) {
       console.error('Failed to validate network security:', error);
@@ -339,6 +361,158 @@ export class CryptoManager {
         issues: ['Network security validation failed'],
         recommendations: ['Check network connectivity and try again'],
       };
+    }
+  }
+
+  /**
+   * Initialize real-time network monitoring with security callbacks
+   */
+  private initializeNetworkMonitoring(): void {
+    try {
+      console.log('🌐 Initializing real-time network security monitoring...');
+      
+      // Set up NetInfo event listener for real-time network changes
+      this.networkStateListener = NetInfo.addEventListener(state => {
+        console.log('🔄 Network state changed:');
+        console.log('Connection type:', state.type);
+        console.log('Is connected?', state.isConnected);
+        console.log('Is WiFi enabled?', state.type === 'wifi');
+        
+        // Store current network state
+        this.currentNetworkState = state;
+        
+        // Analyze security implications of network change
+        this.analyzeNetworkSecurityChange(state);
+        
+        // Trigger security callbacks
+        this.triggerNetworkSecurityCallbacks(state);
+      });
+      
+      console.log('✅ Network monitoring initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize network monitoring:', error);
+    }
+  }
+
+  /**
+   * Analyze security implications of network state changes
+   */
+  private async analyzeNetworkSecurityChange(state: any): Promise<void> {
+    try {
+      const securityAnalysis = {
+        timestamp: new Date().toISOString(),
+        connectionType: state.type,
+        isConnected: state.isConnected,
+        securityLevel: 'unknown' as 'high' | 'medium' | 'low' | 'unknown',
+        threats: [] as string[],
+        recommendations: [] as string[],
+      };
+
+      // Analyze security level based on connection type
+      if (!state.isConnected) {
+        securityAnalysis.securityLevel = 'low';
+        securityAnalysis.threats.push('No network connection - offline mode');
+        securityAnalysis.recommendations.push('Ensure secure network connection when needed');
+      } else if (state.type === 'wifi') {
+        securityAnalysis.securityLevel = 'medium';
+        securityAnalysis.threats.push('Connected to WiFi - potential security risk');
+        securityAnalysis.recommendations.push('Verify WiFi network security (WPA2/WPA3)');
+        securityAnalysis.recommendations.push('Avoid public/unsecured WiFi networks');
+      } else if (state.type === 'cellular') {
+        securityAnalysis.securityLevel = 'high';
+        
+        // Check cellular generation for additional security assessment
+        if (state.details?.cellularGeneration === '2g') {
+          securityAnalysis.securityLevel = 'medium';
+          securityAnalysis.threats.push('2G connection - lower security encryption');
+          securityAnalysis.recommendations.push('Use 3G/4G/5G when available');
+        }
+      } else if (state.type === 'ethernet') {
+        securityAnalysis.securityLevel = 'high';
+      } else {
+        securityAnalysis.securityLevel = 'low';
+        securityAnalysis.threats.push('Unknown connection type - security risk');
+        securityAnalysis.recommendations.push('Verify network connection security');
+      }
+
+      // Log security analysis
+      console.log('🛡️ Network Security Analysis:', {
+        level: securityAnalysis.securityLevel,
+        threats: securityAnalysis.threats.length,
+        recommendations: securityAnalysis.recommendations.length,
+      });
+
+      // Store analysis for retrieval
+      this.currentNetworkState.securityAnalysis = securityAnalysis;
+
+    } catch (error) {
+      console.error('Failed to analyze network security change:', error);
+    }
+  }
+
+  /**
+   * Register callback for network security changes
+   */
+  registerNetworkSecurityCallback(callback: (securityInfo: any) => void): void {
+    this.networkSecurityCallbacks.push(callback);
+  }
+
+  /**
+   * Remove network security callback
+   */
+  removeNetworkSecurityCallback(callback: (securityInfo: any) => void): void {
+    const index = this.networkSecurityCallbacks.indexOf(callback);
+    if (index > -1) {
+      this.networkSecurityCallbacks.splice(index, 1);
+    }
+  }
+
+  /**
+   * Trigger all registered network security callbacks
+   */
+  private triggerNetworkSecurityCallbacks(state: any): void {
+    try {
+      const securityInfo = {
+        networkState: state,
+        timestamp: new Date().toISOString(),
+        securityAnalysis: state.securityAnalysis || null,
+      };
+
+      this.networkSecurityCallbacks.forEach(callback => {
+        try {
+          callback(securityInfo);
+        } catch (error) {
+          console.error('Network security callback error:', error);
+        }
+      });
+    } catch (error) {
+      console.error('Failed to trigger network security callbacks:', error);
+    }
+  }
+
+  /**
+   * Get current network security status
+   */
+  getCurrentNetworkSecurity(): {
+    state: any;
+    securityLevel: 'high' | 'medium' | 'low' | 'unknown';
+    isMonitoring: boolean;
+  } {
+    return {
+      state: this.currentNetworkState,
+      securityLevel: this.currentNetworkState?.securityAnalysis?.securityLevel || 'unknown',
+      isMonitoring: this.networkStateListener !== null,
+    };
+  }
+
+  /**
+   * Cleanup network monitoring (call when component unmounts)
+   */
+  cleanup(): void {
+    if (this.networkStateListener) {
+      this.networkStateListener();
+      this.networkStateListener = null;
+      console.log('🧹 Network monitoring cleaned up');
     }
   }
 
