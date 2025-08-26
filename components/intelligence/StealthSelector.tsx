@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, spacing, typography } from '../../constants/theme';
 import { coverApplicationsManager } from '../../lib/stealth-advanced/coverApplications';
 
 export const StealthSelector: React.FC = () => {
@@ -34,23 +35,23 @@ export const StealthSelector: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: spacing.lg,
   },
   title: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   option: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    marginBottom: 8,
+    padding: spacing.md,
+    borderRadius: spacing.sm,
+    backgroundColor: colors.surface,
+    marginBottom: spacing.sm,
   },
   selectedOption: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
   },
 });

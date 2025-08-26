@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { stealthManager, AppMode } from '../../lib/stealth';
+import { AppMode, stealthManager } from '../../lib/stealth';
 
 interface StealthContextType {
   currentMode: AppMode;

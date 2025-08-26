@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
   Alert,
   Dimensions,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
   colors,
-  shadows,
   radius,
-  typography,
+  shadows,
   spacing,
+  typography,
 } from '../constants/theme';
 import { stealthManager } from '../lib/stealth';
 import { biometricAuthManager } from '../lib/security/biometricAuth';

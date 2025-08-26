@@ -2,10 +2,10 @@ import * as React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 import {
   useAppState,

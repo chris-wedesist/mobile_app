@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  StyleSheet,
-  Dimensions,
-  TouchableWithoutFeedback,
-  PanResponder,
   Alert,
+  Dimensions,
+  PanResponder,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { blankScreenStealthManager } from '../../lib/security/blankScreenStealth';
 

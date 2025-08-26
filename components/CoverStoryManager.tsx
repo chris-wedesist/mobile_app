@@ -9,10 +9,10 @@ import {
 } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
-  shadows,
   radius,
+  shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 import CoverStoryNotes from './CoverStoryNotes';
 

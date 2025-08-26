@@ -373,8 +373,8 @@ router.get('/', async (req, res) => {
     const offset = (page - 1) * limit;
 
     // Build query conditions
-    let whereConditions = [];
-    let queryParams = [];
+    const whereConditions = [];
+    const queryParams = [];
 
     if (status === 'online') {
       whereConditions.push('is_online = 1');

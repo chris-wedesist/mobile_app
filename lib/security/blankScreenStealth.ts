@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, AppStateStatus } from 'react-native';
-import { Dimensions, StatusBar, BackHandler, Vibration } from 'react-native';
+import { BackHandler, Dimensions, StatusBar, Vibration } from 'react-native';
 
 // Scheduled activation types
 export type ScheduledActivation = {
@@ -522,8 +522,8 @@ export class BlankScreenStealthManager {
       }
 
       console.log(
-        'Blank screen stealth mode activated' +
-          (scheduleId ? ` by schedule ${scheduleId}` : '')
+        `Blank screen stealth mode activated${ 
+          scheduleId ? ` by schedule ${scheduleId}` : ''}`
       );
       return true;
     } catch (error) {

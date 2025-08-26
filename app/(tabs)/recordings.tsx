@@ -145,7 +145,7 @@ export default function RecordingsScreen() {
 
         const downloadResumable = FileSystem.createDownloadResumable(
           recording.video_url,
-          FileSystem.documentDirectory + `${recording.title}.mp4`,
+          `${FileSystem.documentDirectory  }${recording.title}.mp4`,
           {},
           callback
         );

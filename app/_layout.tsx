@@ -8,11 +8,11 @@ import { Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import EmergencyCallButton from '../components/EmergencyCallButton';
 import CustomSplashScreen from '../components/SplashScreen';
-import { colors, typography, spacing } from '../constants/theme';
+import { colors, spacing, typography } from '../constants/theme';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import { errorHandler } from '../utils/errorHandler';
 import { StateManager } from '../utils/stateManager';
-import { stealthManager, AppMode } from '../lib/stealth';
+import { AppMode, stealthManager } from '../lib/stealth';
 
 // Import polyfills for Expo Go compatibility
 import './polyfills';

@@ -96,7 +96,7 @@ export default function PanicButton() {
         },
         {
           isLooping: true,
-          volume: volume,
+          volume,
           shouldPlay: false,
           progressUpdateIntervalMillis: 50,
         }

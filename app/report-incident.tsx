@@ -25,8 +25,8 @@ import {
   colors,
   radius,
   shadows,
-  typography,
   spacing,
+  typography,
 } from '../constants/theme';
 
 const supabase = createClient(

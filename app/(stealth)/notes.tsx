@@ -17,10 +17,10 @@ import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 
 type Note = {

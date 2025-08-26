@@ -313,7 +313,7 @@ class PerformanceBenchmarks {
       }
     });
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
 
     // Calculate overall improvement
     const improvements = this.results.filter(

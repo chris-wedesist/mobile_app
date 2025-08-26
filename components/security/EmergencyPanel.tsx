@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
   Alert,
+  Modal,
   ScrollView,
-  TextInput,
+  StyleSheet,
   Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import {
-  emergencyProtocolManager,
-  EmergencyContact,
-  triggerEmergency,
   addEmergencyContact,
+  EmergencyContact,
+  emergencyProtocolManager,
   registerPanicTap,
+  triggerEmergency,
 } from '../../lib/security/emergencyProtocols';
 
 interface EmergencyPanelProps {

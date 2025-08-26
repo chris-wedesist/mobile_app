@@ -33,7 +33,7 @@ export const HermesTest: React.FC = () => {
       setTestValue('All Tests Passed');
     } catch (error) {
       console.error('Hermes test failed:', error);
-      setTestValue('Test Failed: ' + (error as Error).message);
+      setTestValue(`Test Failed: ${  (error as Error).message}`);
     }
   }, []);
 

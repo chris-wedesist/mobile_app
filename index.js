@@ -5,7 +5,7 @@
       globalThis.console = {};
     }
     // Create ALL possible console methods immediately
-    var methods = [
+    const methods = [
       'log',
       'error',
       'warning',
@@ -31,8 +31,8 @@
       'profileEnd',
       'memory',
     ];
-    for (var i = 0; i < methods.length; i++) {
-      var method = methods[i];
+    for (let i = 0; i < methods.length; i++) {
+      const method = methods[i];
       if (typeof globalThis.console[method] !== 'function') {
         globalThis.console[method] = (function (m) {
           return function () {
@@ -41,8 +41,8 @@
                 typeof console !== 'undefined' &&
                 typeof console.log === 'function'
               ) {
-                var args = Array.prototype.slice.call(arguments);
-                console.log('[' + m.toUpperCase() + ']', args.join(' '));
+                const args = Array.prototype.slice.call(arguments);
+                console.log(`[${  m.toUpperCase()  }]`, args.join(' '));
               }
             } catch (e) {}
           };

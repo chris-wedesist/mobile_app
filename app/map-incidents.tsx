@@ -33,7 +33,7 @@ export default function MapIncidentsScreen() {
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
           'Permission Denied',
@@ -42,7 +42,7 @@ export default function MapIncidentsScreen() {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({});
       setUserLocation(location);
       await fetchIncidents(location);
     })();

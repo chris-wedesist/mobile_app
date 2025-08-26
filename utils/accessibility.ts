@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { 
   AccessibilityInfo, 
-  Platform, 
+  AccessibilityRole, 
+  AccessibilityState,
   findNodeHandle,
-  AccessibilityRole,
-  AccessibilityState
+  Platform
 } from 'react-native';
 
 // Accessibility configuration interface

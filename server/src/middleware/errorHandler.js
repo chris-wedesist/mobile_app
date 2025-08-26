@@ -69,7 +69,7 @@ function errorHandler(err, req, res, next) {
   // Prepare error response
   const errorResponse = {
     error: errorCode,
-    message: message,
+    message,
     timestamp: new Date().toISOString(),
     path: req.originalUrl,
     method: req.method,

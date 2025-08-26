@@ -356,7 +356,7 @@ class RealAppPerformanceTester {
       }
     });
     
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log(`\n⏱️  Total Test Duration: ${totalDuration}ms`);
     console.log(`📈 Average Test Duration: ${(totalDuration / this.testResults.length).toFixed(2)}ms`);
     

@@ -1,14 +1,14 @@
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, typography, spacing, radius } from '../constants/theme';
+import { colors, radius, spacing, typography } from '../constants/theme';
 
 export default function LegalRightsScreen() {
   return (

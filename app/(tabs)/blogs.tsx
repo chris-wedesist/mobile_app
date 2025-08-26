@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { colors, spacing, shadows } from '../../constants/theme';
+import { colors, shadows, spacing } from '../../constants/theme';
 import { getNews, NewsItem } from '../../lib/news';
 
 type LayoutType = 'row' | 'box';
@@ -85,7 +85,7 @@ export default function BlogsScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        console.error('Cannot open URL: ' + url);
+        console.error(`Cannot open URL: ${  url}`);
       }
     } catch (error) {
       console.error('Error opening URL:', error);

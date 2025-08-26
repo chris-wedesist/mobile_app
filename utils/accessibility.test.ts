@@ -2,10 +2,10 @@
  * @jest-environment node
  */
 import { 
-  generateAccessibilityLabel, 
-  generateAccessibilityHint, 
-  createAccessibilityState,
-  accessibilityTestUtils 
+  accessibilityTestUtils, 
+  createAccessibilityState, 
+  generateAccessibilityHint,
+  generateAccessibilityLabel 
 } from './accessibility';
 
 // Mock AccessibilityInfo

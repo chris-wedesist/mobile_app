@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Alert,
+  ScrollView,
+  StyleSheet,
   Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
   colors,
-  typography,
-  spacing,
-  shadows,
   radius,
+  shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { BiometricPrompt } from '../../components/security/BiometricPrompt';

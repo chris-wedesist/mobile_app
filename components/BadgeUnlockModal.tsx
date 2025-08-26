@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 
 type BadgeUnlockModalProps = {

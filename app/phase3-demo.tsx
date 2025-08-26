@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Alert,
+  ScrollView,
+  StyleSheet,
   Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, typography, spacing, shadows } from '../constants/theme';
+import { colors, shadows, spacing, typography } from '../constants/theme';
 import { blankScreenStealthManager } from '../lib/security/blankScreenStealth';
 import { threatIntelligenceEngine } from '../lib/intelligence/threatIntelligence';
 import { coverApplicationsManager } from '../lib/stealth-advanced/coverApplications';

@@ -3,10 +3,10 @@ import * as React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 import { useTranslation } from '../hooks/useTranslation';
 import { AccessibleButton } from './AccessibleButton';

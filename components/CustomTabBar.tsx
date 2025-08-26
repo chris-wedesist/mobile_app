@@ -36,7 +36,7 @@ export default function CustomTabBar() {
 
   const isActive = (tabName: string) => {
     const route = getTabRoute(tabName);
-    return pathname === route || pathname.startsWith(route + '/');
+    return pathname === route || pathname.startsWith(`${route  }/`);
   };
 
   const navigateToTab = (tabName: string) => {

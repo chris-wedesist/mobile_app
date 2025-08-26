@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, spacing, typography } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { blankScreenStealthManager } from '../../lib/security/blankScreenStealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
@@ -193,7 +194,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
       {/* Blank Screen Stealth Section */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="phone-portrait-outline" size={24} color="#666" />
+          <Ionicons name="phone-portrait-outline" size={24} color={colors.text.secondary} />
           <Text style={styles.sectionTitle}>Blank Screen Stealth</Text>
         </View>
 
@@ -207,7 +208,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
           <Switch
             value={blankScreenEnabled}
             onValueChange={toggleBlankScreenStealth}
-            trackColor={{ false: '#e9ecef', true: '#007AFF' }}
+            trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
 
@@ -226,7 +227,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
               <Ionicons
                 name={isBlankScreenActive ? 'checkmark-circle' : 'power'}
                 size={20}
-                color={isBlankScreenActive ? '#28a745' : '#fff'}
+                color={isBlankScreenActive ? colors.success : colors.background}
               />
               <Text
                 style={[
@@ -244,7 +245,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
               style={styles.configButton}
               onPress={configureBlankScreenSettings}
             >
-              <Ionicons name="settings-outline" size={20} color="#007AFF" />
+              <Ionicons name="settings-outline" size={20} color={colors.primary} />
               <Text style={styles.configButtonText}>
                 Configure Deactivation
               </Text>
@@ -267,7 +268,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
       {/* Video Access PIN Section */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="videocam" size={24} color="#666" />
+          <Ionicons name="videocam" size={24} color={colors.text.secondary} />
           <Text style={styles.sectionTitle}>Video Access Security</Text>
         </View>
 
@@ -281,7 +282,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
           <Switch
             value={videoAccessPinEnabled}
             onValueChange={toggleVideoAccessPin}
-            trackColor={{ false: '#e9ecef', true: '#007AFF' }}
+            trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
 
@@ -291,7 +292,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
               style={styles.actionButton}
               onPress={testVideoAccess}
             >
-              <Ionicons name="play-circle-outline" size={20} color="#fff" />
+              <Ionicons name="play-circle-outline" size={20} color={colors.background} />
               <Text style={styles.actionButtonText}>Test Video Access</Text>
             </TouchableOpacity>
 
@@ -299,7 +300,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
               style={styles.configButton}
               onPress={simulateNewRecording}
             >
-              <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
+              <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
               <Text style={styles.configButtonText}>
                 Simulate New Recording
               </Text>
@@ -334,7 +335,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
       {/* Security Summary */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="analytics" size={24} color="#666" />
+          <Ionicons name="analytics" size={24} color={colors.text.secondary} />
           <Text style={styles.sectionTitle}>Phase 3 Security Status</Text>
         </View>
 
@@ -343,7 +344,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
             <Ionicons
               name={blankScreenEnabled ? 'checkmark-circle' : 'close-circle'}
               size={24}
-              color={blankScreenEnabled ? '#28a745' : '#dc3545'}
+              color={blankScreenEnabled ? colors.success : colors.error}
             />
             <Text style={styles.securityItemText}>Blank Screen</Text>
           </View>
@@ -352,7 +353,7 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
             <Ionicons
               name={videoAccessPinEnabled ? 'checkmark-circle' : 'close-circle'}
               size={24}
-              color={videoAccessPinEnabled ? '#28a745' : '#dc3545'}
+              color={videoAccessPinEnabled ? colors.success : colors.error}
             />
             <Text style={styles.securityItemText}>Video PIN</Text>
           </View>
@@ -371,62 +372,62 @@ export const Phase3AdvancedStealthSettings: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.surface,
   },
   header: {
     alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    paddingVertical: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
-    marginTop: 10,
-    color: '#333',
+    marginTop: spacing.sm,
+    color: colors.text.primary,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 5,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
   },
   section: {
-    backgroundColor: '#fff',
-    marginTop: 15,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    backgroundColor: colors.background,
+    marginTop: spacing.lg,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: colors.border,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    marginLeft: 10,
-    color: '#333',
+    marginLeft: spacing.sm,
+    color: colors.text.primary,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   settingInfo: {
     flex: 1,
-    marginRight: 15,
+    marginRight: spacing.lg,
   },
   settingTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '500',
-    color: '#333',
-    marginBottom: 5,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   settingDescription: {
     fontSize: 14,

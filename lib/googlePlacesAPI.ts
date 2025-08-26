@@ -70,7 +70,7 @@ export async function searchAttorneysWithGooglePlaces(
     const params = new URLSearchParams({
       location: `${latitude},${longitude}`,
       radius: radius.toString(),
-      keyword: keyword,
+      keyword,
       type: 'lawyer', // Google Places type for legal services
       key: GOOGLE_PLACES_API_KEY
     });
@@ -155,7 +155,7 @@ export async function searchAttorneysByQuery(
     console.log(`🔍 Searching Google Places for: "${query}" near ${latitude}, ${longitude}`);
 
     const params = new URLSearchParams({
-      query: query,
+      query,
       location: `${latitude},${longitude}`,
       radius: radius.toString(),
       type: 'lawyer',

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
   colors,
-  typography,
-  spacing,
-  shadows,
   radius,
+  shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
@@ -330,8 +330,8 @@ export default function SecurityTestScreen() {
               {
                 backgroundColor:
                   overallStatus === 'pass'
-                    ? colors.status.success + '20'
-                    : colors.status.error + '20',
+                    ? `${colors.status.success  }20`
+                    : `${colors.status.error  }20`,
               },
             ]}
           >

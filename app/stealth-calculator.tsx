@@ -90,7 +90,7 @@ export default function StealthCalculatorScreen() {
 
   const handleDecimal = () => {
     if (!display.includes('.')) {
-      setDisplay(display + '.');
+      setDisplay(`${display  }.`);
     }
   };
 

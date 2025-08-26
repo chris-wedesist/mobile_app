@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Alert,
   ScrollView,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlankScreenStealthComponent } from '../../components/stealth/BlankScreenStealth';
 import { useVideoAccessAuth } from '../../components/security/VideoAccessPin';
 import {
   activateBlankScreen,
-  isBlankScreenActive,
   enableBlankScreenStealth,
+  isBlankScreenActive,
 } from '../../lib/stealth';
 import { setNewRecordingDetected } from '../../lib/security/biometricAuth';
+import { colors, spacing, typography } from '../../constants/theme';
 
 export default function Phase3DemoScreen() {
   const [isBlankActive, setIsBlankActive] = useState(false);
-  const [videoAccessEnabled, setVideoAccessEnabled] = useState(false);
 
   const { requestVideoAccess, VideoAccessPinModal } = useVideoAccessAuth();
 
@@ -29,9 +29,10 @@ export default function Phase3DemoScreen() {
     enableBlankScreenStealth();
 
     // Check blank screen status
+    const BLANK_SCREEN_CHECK_INTERVAL = 1000;
     const interval = setInterval(() => {
       setIsBlankActive(isBlankScreenActive());
-    }, 1000);
+    }, BLANK_SCREEN_CHECK_INTERVAL);
 
     return () => clearInterval(interval);
   }, []);
@@ -76,20 +77,20 @@ export default function Phase3DemoScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <BlankScreenStealthComponent />
       <VideoAccessPinModal />
 
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          <Ionicons name="shield-checkmark" size={48} color="#007AFF" />
+          <Ionicons name="shield-checkmark" size={48} color={colors.primary} />
           <Text style={styles.title}>Phase 3 Demo</Text>
           <Text style={styles.subtitle}>Advanced Stealth Features</Text>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="phone-portrait-outline" size={24} color="#333" />
+            <Ionicons name="phone-portrait-outline" size={24} color={colors.text.primary} />
             <Text style={styles.sectionTitle}>Blank Screen Stealth</Text>
           </View>
 
@@ -100,15 +101,15 @@ export default function Phase3DemoScreen() {
 
           <View style={styles.featureBox}>
             <View style={styles.featureRow}>
-              <Ionicons name="eye-off" size={20} color="#007AFF" />
+              <Ionicons name="eye-off" size={20} color={colors.primary} />
               <Text style={styles.featureText}>Completely black screen</Text>
             </View>
             <View style={styles.featureRow}>
-              <Ionicons name="hand-left" size={20} color="#007AFF" />
+              <Ionicons name="hand-left" size={20} color={colors.primary} />
               <Text style={styles.featureText}>Triple tap to deactivate</Text>
             </View>
             <View style={styles.featureRow}>
-              <Ionicons name="time" size={20} color="#007AFF" />
+              <Ionicons name="time" size={20} color={colors.primary} />
               <Text style={styles.featureText}>
                 Long press (3s) alternative
               </Text>
@@ -128,7 +129,7 @@ export default function Phase3DemoScreen() {
             <Ionicons
               name={isBlankActive ? 'checkmark-circle' : 'power'}
               size={20}
-              color={isBlankActive ? '#28a745' : '#fff'}
+              color={isBlankActive ? colors.success : colors.background}
             />
             <Text
               style={[
@@ -143,7 +144,7 @@ export default function Phase3DemoScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="videocam" size={24} color="#333" />
+            <Ionicons name="videocam" size={24} color={colors.text.primary} />
             <Text style={styles.sectionTitle}>Video Access PIN</Text>
           </View>
 
@@ -154,17 +155,17 @@ export default function Phase3DemoScreen() {
 
           <View style={styles.featureBox}>
             <View style={styles.featureRow}>
-              <Ionicons name="shield" size={20} color="#007AFF" />
+              <Ionicons name="shield" size={20} color={colors.primary} />
               <Text style={styles.featureText}>PIN protection for videos</Text>
             </View>
             <View style={styles.featureRow}>
-              <Ionicons name="recording" size={20} color="#007AFF" />
+              <Ionicons name="recording" size={20} color={colors.primary} />
               <Text style={styles.featureText}>
                 Triggered by new recordings
               </Text>
             </View>
             <View style={styles.featureRow}>
-              <Ionicons name="key" size={20} color="#007AFF" />
+              <Ionicons name="key" size={20} color={colors.primary} />
               <Text style={styles.featureText}>Secure PIN storage</Text>
             </View>
           </View>
@@ -173,7 +174,7 @@ export default function Phase3DemoScreen() {
             style={styles.demoButton}
             onPress={handleVideoAccess}
           >
-            <Ionicons name="play-circle" size={20} color="#fff" />
+            <Ionicons name="play-circle" size={20} color={colors.background} />
             <Text style={styles.demoButtonText}>Test Video Access</Text>
           </TouchableOpacity>
 
@@ -181,7 +182,7 @@ export default function Phase3DemoScreen() {
             style={styles.secondaryButton}
             onPress={simulateNewRecording}
           >
-            <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
+            <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
             <Text style={styles.secondaryButtonText}>
               Simulate New Recording
             </Text>
@@ -190,7 +191,7 @@ export default function Phase3DemoScreen() {
 
         <View style={styles.infoSection}>
           <View style={styles.infoHeader}>
-            <Ionicons name="information-circle" size={24} color="#6c757d" />
+            <Ionicons name="information-circle" size={24} color={colors.text.secondary} />
             <Text style={styles.infoTitle}>How to Use</Text>
           </View>
 
@@ -227,56 +228,56 @@ export default function Phase3DemoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.surface,
   },
   scrollView: {
     flex: 1,
   },
   header: {
     alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    paddingVertical: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.background,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginTop: 15,
-    color: '#333',
+    fontSize: typography.fontSize.display,
+    fontWeight: typography.fontWeight.bold as any,
+    marginTop: spacing.md,
+    color: colors.text.primary,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 5,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
   },
   section: {
-    backgroundColor: '#fff',
-    marginTop: 15,
-    paddingVertical: 25,
-    paddingHorizontal: 20,
+    backgroundColor: colors.background,
+    marginTop: spacing.md,
+    paddingVertical: spacing.lg + spacing.xs,
+    paddingHorizontal: spacing.lg,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: colors.border,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginLeft: 10,
-    color: '#333',
+    fontSize: typography.fontSize.heading,
+    fontWeight: typography.fontWeight.semiBold as any,
+    marginLeft: spacing.sm + spacing.xs,
+    color: colors.text.primary,
   },
   description: {
-    fontSize: 16,
-    color: '#666',
-    lineHeight: 24,
-    marginBottom: 20,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    lineHeight: typography.fontSize.body * typography.lineHeight.normal,
+    marginBottom: spacing.lg,
   },
   featureBox: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.surface,
     padding: 20,
     borderRadius: 12,
     marginBottom: 20,
@@ -287,110 +288,110 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   featureText: {
-    fontSize: 15,
-    color: '#333',
-    marginLeft: 12,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
+    marginLeft: spacing.md,
     flex: 1,
   },
   demoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-    marginBottom: 10,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderRadius: spacing.sm,
+    marginBottom: spacing.sm,
   },
   demoButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
   },
   demoButtonDisabled: {
-    backgroundColor: '#e8f5e8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#28a745',
+    borderColor: colors.success,
   },
   demoButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.background,
+    fontSize: typography.fontSize.body,
     fontWeight: '600',
-    marginLeft: 10,
+    marginLeft: spacing.sm,
   },
   demoButtonTextDisabled: {
-    color: '#28a745',
+    color: colors.success,
   },
   secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: spacing.sm,
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   secondaryButtonText: {
-    color: '#007AFF',
-    fontSize: 15,
+    color: colors.primary,
+    fontSize: typography.fontSize.body,
     fontWeight: '500',
-    marginLeft: 10,
+    marginLeft: spacing.sm,
   },
   infoSection: {
-    backgroundColor: '#fff',
-    marginTop: 15,
-    paddingVertical: 25,
-    paddingHorizontal: 20,
+    backgroundColor: colors.background,
+    marginTop: spacing.lg,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: colors.border,
   },
   infoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   infoTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: '600',
-    marginLeft: 10,
-    color: '#333',
+    marginLeft: spacing.sm,
+    color: colors.text.primary,
   },
   infoItem: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: spacing.lg,
     alignItems: 'flex-start',
   },
   infoNumber: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: 'bold',
-    color: '#007AFF',
-    backgroundColor: '#e7f3ff',
+    color: colors.primary,
+    backgroundColor: colors.surface,
     width: 28,
     height: 28,
     textAlign: 'center',
     lineHeight: 28,
     borderRadius: 14,
-    marginRight: 15,
+    marginRight: spacing.lg,
     marginTop: 2,
   },
   infoText: {
-    fontSize: 15,
-    color: '#666',
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
     flex: 1,
     lineHeight: 22,
   },
   bold: {
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
   },
   footer: {
-    padding: 30,
+    padding: spacing.xxl,
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 20,
     fontStyle: 'italic',

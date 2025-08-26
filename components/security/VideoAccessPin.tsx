@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
   Alert,
-  TextInput,
   Dimensions,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   authenticateForVideoAccess,
+  biometricAuthManager,
   isVideoPinRequired,
   setVideoAccessPin,
-  biometricAuthManager,
 } from '../../lib/security/biometricAuth';
 
 interface VideoAccessPinProps {

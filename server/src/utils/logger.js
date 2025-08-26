@@ -55,7 +55,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Create a stream object for Morgan HTTP logging
 logger.stream = {
-  write: function (message) {
+  write (message) {
     logger.info(message.trim());
   },
 };

@@ -16,10 +16,10 @@ import { useStealthMode } from '../components/StealthModeManager';
 import { useStealthAutoTimeout } from '../hooks/useStealthAutoTimeout';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 
 export default function StealthDocumentScreen() {

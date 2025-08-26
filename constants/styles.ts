@@ -1,5 +1,5 @@
-import { StyleSheet, Platform } from 'react-native';
-import { colors, shadows, radius } from '@/constants/theme';
+import { Platform, StyleSheet } from 'react-native';
+import { colors, radius, shadows } from '@/constants/theme';
 
 export const textStyles = StyleSheet.create({
   h1: {

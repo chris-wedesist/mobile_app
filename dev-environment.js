@@ -1,4 +1,4 @@
-import { Alert, Button, View, Text, StyleSheet } from 'react-native';
+import { Alert, Button, StyleSheet, Text, View } from 'react-native';
 import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 

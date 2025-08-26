@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import {
   AppState,
   AppStateStatus,
-  View,
   Image,
-  Text,
   StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import { ScreenProtector } from '../security/ScreenProtector';
 

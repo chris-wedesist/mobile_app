@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
   RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   colors,
-  shadows,
   radius,
-  typography,
+  shadows,
   spacing,
+  typography,
 } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { biometricAuthManager } from '../../lib/security/biometricAuth';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
 import { emergencyProtocolManager } from '../../lib/security/emergencyProtocols';
 import {
-  threatDetectionEngine,
   SecurityThreat,
+  threatDetectionEngine,
 } from '../../lib/security/threatDetection';
 
 interface SecurityStatus {

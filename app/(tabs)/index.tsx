@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import NoHandsIcon from '../../components/NoHandsIcon';
-import { colors, spacing, shadows } from '../../constants/theme';
+import { colors, shadows, spacing } from '../../constants/theme';
 import { fetchNewsWithOptimization, NewsItem } from '../../lib/news';
 import {
   StateManager,
@@ -69,7 +69,7 @@ export default function HomeScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        console.error('Cannot open URL: ' + url);
+        console.error(`Cannot open URL: ${  url}`);
       }
     } catch (error) {
       console.error('Error opening URL:', error);

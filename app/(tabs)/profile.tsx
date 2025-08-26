@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { colors, typography, spacing } from '../../constants/theme';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { colors, spacing, typography } from '../../constants/theme';
 
 export default function ProfileScreen() {
   return (

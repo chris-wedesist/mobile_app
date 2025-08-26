@@ -1,6 +1,6 @@
 import {
-  preventScreenCaptureAsync,
   allowScreenCaptureAsync,
+  preventScreenCaptureAsync,
 } from 'expo-screen-capture';
 import { AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

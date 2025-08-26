@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  Alert,
+  ScrollView,
   StyleSheet,
   Switch,
+  Text,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -17,6 +17,7 @@ import {
 import { useRouter } from 'expo-router';
 import { stealthManager } from '../../lib/stealth';
 import Slider from '@react-native-community/slider';
+import { colors, spacing, typography } from '../../constants/theme';
 
 export default function IntelligenceSettingsScreen() {
   const router = useRouter();
@@ -96,12 +97,12 @@ export default function IntelligenceSettingsScreen() {
           }\n` +
           `Stealth Status: ${
             results.stealthActive ? 'Active' : 'Compromised'
-          }\n\n` +
-          (results.recommendations.length > 0
+          }\n\n${ 
+          results.recommendations.length > 0
             ? `Recommendations:\n${results.recommendations
                 .map((r) => `• ${r}`)
                 .join('\n')}`
-            : 'No issues found.')
+            : 'No issues found.'}`
       );
     } catch (error) {
       console.error('Security scan failed:', error);
@@ -154,7 +155,7 @@ export default function IntelligenceSettingsScreen() {
           onPress={runSecurityScan}
           disabled={scanningNow}
         >
-          <Ionicons name="scan-circle-outline" size={32} color="#fff" />
+          <Ionicons name="scan-circle-outline" size={32} color={colors.background} />
           <Text style={styles.scanButtonText}>
             {scanningNow ? 'Scanning...' : 'Run Security Scan'}
           </Text>
@@ -179,7 +180,7 @@ export default function IntelligenceSettingsScreen() {
             <Ionicons
               name="shield-outline"
               size={24}
-              color={config.securityLevel === 'standard' ? '#2196F3' : '#666'}
+              color={config.securityLevel === 'standard' ? colors.primary : colors.text.muted}
             />
             <Text
               style={[
@@ -203,7 +204,7 @@ export default function IntelligenceSettingsScreen() {
             <Ionicons
               name="shield-half-outline"
               size={24}
-              color={config.securityLevel === 'enhanced' ? '#2196F3' : '#666'}
+              color={config.securityLevel === 'enhanced' ? colors.primary : colors.text.muted}
             />
             <Text
               style={[
@@ -227,7 +228,7 @@ export default function IntelligenceSettingsScreen() {
             <Ionicons
               name="shield"
               size={24}
-              color={config.securityLevel === 'maximum' ? '#2196F3' : '#666'}
+              color={config.securityLevel === 'maximum' ? colors.primary : colors.text.muted}
             />
             <Text
               style={[
@@ -258,9 +259,9 @@ export default function IntelligenceSettingsScreen() {
             onValueChange={(value) =>
               toggleFeature('threatIntelligenceEnabled', value)
             }
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            trackColor={{ false: colors.text.muted, true: colors.primary }}
             thumbColor={
-              config.threatIntelligenceEnabled ? '#2196F3' : '#f4f3f4'
+              config.threatIntelligenceEnabled ? colors.background : colors.text.secondary
             }
           />
         </View>
@@ -277,8 +278,8 @@ export default function IntelligenceSettingsScreen() {
             onValueChange={(value) =>
               toggleFeature('networkSecurityEnabled', value)
             }
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={config.networkSecurityEnabled ? '#2196F3' : '#f4f3f4'}
+            trackColor={{ false: colors.text.muted, true: colors.primary }}
+            thumbColor={config.networkSecurityEnabled ? colors.background : colors.text.secondary}
           />
         </View>
 
@@ -294,8 +295,8 @@ export default function IntelligenceSettingsScreen() {
             onValueChange={(value) =>
               toggleFeature('privacyEngineEnabled', value)
             }
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={config.privacyEngineEnabled ? '#2196F3' : '#f4f3f4'}
+            trackColor={{ false: colors.text.muted, true: colors.primary }}
+            thumbColor={config.privacyEngineEnabled ? colors.background : colors.text.secondary}
           />
         </View>
       </View>
@@ -316,8 +317,8 @@ export default function IntelligenceSettingsScreen() {
             onValueChange={(value) =>
               toggleFeature('advancedCoverAppsEnabled', value)
             }
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={config.advancedCoverAppsEnabled ? '#2196F3' : '#f4f3f4'}
+            trackColor={{ false: colors.text.muted, true: colors.primary }}
+            thumbColor={config.advancedCoverAppsEnabled ? colors.background : colors.text.secondary}
           />
         </View>
 
@@ -333,8 +334,8 @@ export default function IntelligenceSettingsScreen() {
             onValueChange={(value) =>
               toggleFeature('antiDetectionEnabled', value)
             }
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={config.antiDetectionEnabled ? '#2196F3' : '#f4f3f4'}
+            trackColor={{ false: colors.text.muted, true: colors.primary }}
+            thumbColor={config.antiDetectionEnabled ? colors.background : colors.text.secondary}
           />
         </View>
 
@@ -356,9 +357,9 @@ export default function IntelligenceSettingsScreen() {
               const newConfig = await stealthManager.getConfig();
               setStealthConfig(newConfig);
             }}
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            trackColor={{ false: colors.text.muted, true: colors.primary }}
             thumbColor={
-              stealthConfig.blankScreenStealthEnabled ? '#2196F3' : '#f4f3f4'
+              stealthConfig.blankScreenStealthEnabled ? colors.background : colors.text.secondary
             }
           />
         </View>
@@ -377,9 +378,9 @@ export default function IntelligenceSettingsScreen() {
           value={((config.scanInterval / (60 * 1000) - 15) / 105) * 100} // Convert from minutes to slider value
           onValueChange={() => {}} // For smooth sliding
           onSlidingComplete={handleScanIntervalChange}
-          minimumTrackTintColor="#2196F3"
-          maximumTrackTintColor="#d3d3d3"
-          thumbTintColor="#2196F3"
+          minimumTrackTintColor={colors.primary}
+          maximumTrackTintColor={colors.text.muted}
+          thumbTintColor={colors.primary}
         />
         <View style={styles.sliderLabels}>
           <Text style={styles.sliderLabel}>15m</Text>
@@ -411,8 +412,8 @@ export default function IntelligenceSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
   },
   loadingContainer: {
     flex: 1,
@@ -420,82 +421,82 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
+    fontSize: typography.fontSize.title,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
+    color: colors.text.primary,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
+    fontSize: typography.fontSize.body,
+    color: colors.text.secondary,
+    marginBottom: spacing.lg,
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.subheading,
     fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#333',
+    marginBottom: spacing.lg,
+    color: colors.text.primary,
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   settingTextContainer: {
     flex: 1,
-    paddingRight: 16,
+    paddingRight: spacing.lg,
   },
   settingTitle: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: '500',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   settingDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.small,
+    color: colors.text.secondary,
   },
   scanSection: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   scanButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
     borderRadius: 50,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
   },
   scanButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.background,
+    fontSize: typography.fontSize.subheading,
     fontWeight: 'bold',
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   lastScanText: {
-    marginTop: 8,
-    color: '#666',
-    fontSize: 14,
+    marginTop: spacing.sm,
+    color: colors.text.muted,
+    fontSize: typography.fontSize.small,
   },
   securityLevelContainer: {
     flexDirection: 'row',
@@ -505,54 +506,54 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: '#f9f9f9',
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.surface,
     borderRadius: 8,
-    marginHorizontal: 4,
+    marginHorizontal: spacing.xs,
   },
   securityLevelButtonActive: {
-    backgroundColor: '#e6f2ff',
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#2196F3',
+    borderColor: colors.primary,
   },
   securityLevelText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
+    fontSize: typography.fontSize.small,
+    color: colors.text.muted,
+    marginTop: spacing.sm,
   },
   securityLevelTextActive: {
-    color: '#2196F3',
+    color: colors.primary,
     fontWeight: '500',
   },
   slider: {
     width: '100%',
     height: 40,
-    marginTop: 8,
+    marginTop: spacing.md,
   },
   sliderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: spacing.sm,
   },
   sliderLabel: {
-    color: '#666',
-    fontSize: 12,
+    color: colors.text.muted,
+    fontSize: typography.fontSize.caption,
   },
   navigationButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 16,
+    marginVertical: spacing.lg,
   },
   navigationButton: {
     flex: 1,
-    backgroundColor: '#333',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    borderRadius: spacing.md,
     alignItems: 'center',
-    margin: 4,
+    margin: spacing.xs,
   },
   navigationButtonText: {
-    color: '#fff',
+    color: colors.text.primary,
     fontWeight: 'bold',
   },
 });

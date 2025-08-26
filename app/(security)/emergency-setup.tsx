@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
   Alert,
+  ScrollView,
+  StyleSheet,
   Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
   colors,
-  typography,
-  spacing,
-  shadows,
   radius,
+  shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import {
-  emergencyProtocolManager,
-  EmergencyContact,
   addEmergencyContact,
+  EmergencyContact,
+  emergencyProtocolManager,
 } from '../../lib/security/emergencyProtocols';
 
 export default function EmergencySetupScreen() {

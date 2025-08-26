@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  Alert,
   ScrollView,
   StyleSheet,
-  Alert,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,10 +13,10 @@ import { stealthManager } from '../lib/stealth';
 import { router } from 'expo-router';
 import {
   colors,
-  typography,
-  spacing,
-  shadows,
   radius,
+  shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 
 interface TestResult {

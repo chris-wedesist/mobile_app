@@ -231,7 +231,7 @@ async function runAllBenchmarks() {
   results.push(await benchmarkBatchOperations());
   results.push(await benchmarkRealWorldScenario());
 
-  console.log('\n' + '='.repeat(60));
+  console.log(`\n${  '='.repeat(60)}`);
   
   // Calculate overall improvement
   const improvements = results.filter(r => r.improvement !== undefined);

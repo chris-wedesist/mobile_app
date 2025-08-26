@@ -8,7 +8,7 @@
 const axios = require('axios');
 
 const API_BASE_URL = 'http://localhost:3000';
-const TEST_DEVICE_ID = 'test_device_' + Date.now();
+const TEST_DEVICE_ID = `test_device_${  Date.now()}`;
 
 let authTokens = {};
 let adminToken = '';

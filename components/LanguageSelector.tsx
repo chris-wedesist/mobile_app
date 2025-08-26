@@ -3,10 +3,10 @@ import * as React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   selectedLanguage: {
-    backgroundColor: colors.primary + '20',
+    backgroundColor: `${colors.primary  }20`,
     borderWidth: 1,
     borderColor: colors.primary,
   },

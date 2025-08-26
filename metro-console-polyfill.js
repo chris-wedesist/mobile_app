@@ -99,7 +99,7 @@ const createNuclearConsole = () => {
         } else {
           ORIGINAL_CONSOLE.log.apply(
             ORIGINAL_CONSOLE,
-            ['[' + method.toUpperCase() + ']'].concat(
+            [`[${  method.toUpperCase()  }]`].concat(
               Array.prototype.slice.call(arguments)
             )
           );
@@ -113,7 +113,7 @@ const createNuclearConsole = () => {
   // NUCLEAR OPTION: Use Proxy to handle ANY property access
   if (typeof Proxy !== 'undefined') {
     return new Proxy(safeConsole, {
-      get: function (target, prop) {
+      get (target, prop) {
         // If we have the property, return it
         if (prop in target) {
           return target[prop];
@@ -124,7 +124,7 @@ const createNuclearConsole = () => {
           try {
             ORIGINAL_CONSOLE.log.apply(
               ORIGINAL_CONSOLE,
-              ['[' + String(prop).toUpperCase() + ']'].concat(
+              [`[${  String(prop).toUpperCase()  }]`].concat(
                 Array.prototype.slice.call(arguments)
               )
             );
@@ -134,12 +134,12 @@ const createNuclearConsole = () => {
         };
       },
 
-      set: function (target, prop, value) {
+      set (target, prop, value) {
         target[prop] = value;
         return true;
       },
 
-      has: function (target, prop) {
+      has (target, prop) {
         return true; // We can handle ANY property
       },
     });

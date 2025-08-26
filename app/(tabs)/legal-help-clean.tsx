@@ -15,16 +15,16 @@ import {
 } from 'react-native';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
   tagColors,
+  typography,
 } from '../../constants/theme';
 import {
-  searchAttorneys,
   type Attorney,
   type AttorneyTag,
+  searchAttorneys,
 } from '../../lib/attorneys';
 import { performanceOptimizer } from '../../utils/performanceOptimizer';
 

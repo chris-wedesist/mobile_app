@@ -27,7 +27,10 @@ export class CryptoTestSuite {
       await this.testEnhancedStorage();
       await this.testSecurityVerification();
 
-      console.log('✅ All crypto tests completed successfully!');
+      console.log('✅ Basic crypto test passed!');
+    console.log(`Device fingerprint: ${deviceFingerprint}`);
+    console.log(`Generated hash: ${hash}`);
+    console.log(`Generated salt: ${salt}`);
     } catch (error) {
       console.error('❌ Crypto test suite failed:', error);
     }
@@ -52,9 +55,9 @@ export class CryptoTestSuite {
     // Demonstrate hash variants
     const hashVariants = await this.cryptoManager.generateHashVariants(testData);
     console.log('Hash variants:', {
-      sha256: hashVariants.sha256.substring(0, 16) + '...',
-      sha384: hashVariants.sha384.substring(0, 16) + '...',
-      sha512: hashVariants.sha512.substring(0, 16) + '...',
+      sha256: `${hashVariants.sha256.substring(0, 16)}...`,
+      sha384: `${hashVariants.sha384.substring(0, 16)}...`,
+      sha512: `${hashVariants.sha512.substring(0, 16)}...`,
     });
     
     console.log('✅ Secure hashing test completed');
@@ -69,15 +72,15 @@ export class CryptoTestSuite {
     const fingerprint = await this.cryptoManager.generateDeviceFingerprint();
     
     console.log('Device Fingerprint Generated:');
-    console.log('- Device ID:', fingerprint.deviceId.substring(0, 8) + '...');
-    console.log('- Device Hash:', fingerprint.deviceHash.substring(0, 16) + '...');
+    console.log(`- Device ID: ${fingerprint.deviceId.substring(0, 8)}...`);
+    console.log(`- Device Hash: ${fingerprint.deviceHash.substring(0, 16)}...`);
     console.log('- Model:', fingerprint.systemInfo.model);
     console.log('- Brand:', fingerprint.systemInfo.brand);
     console.log('- System Version:', fingerprint.systemInfo.systemVersion);
     console.log('- Is Emulator:', fingerprint.securityFeatures.isEmulator);
     console.log('- Is Rooted:', fingerprint.securityFeatures.isRooted);
     console.log('- Network Type:', fingerprint.networkInfo.connectionType);
-    console.log('- Fingerprint Hash:', fingerprint.hash.substring(0, 16) + '...');
+    console.log(`- Fingerprint Hash: ${fingerprint.hash.substring(0, 16)}...`);
     
     console.log('✅ Device fingerprinting test completed');
   }
@@ -94,8 +97,8 @@ export class CryptoTestSuite {
     const random64 = await this.cryptoManager.generateSecureRandom(64);
     
     console.log('Secure Random 16 bytes:', random16);
-    console.log('Secure Random 32 bytes:', random32.substring(0, 32) + '...');
-    console.log('Secure Random 64 bytes:', random64.substring(0, 32) + '...');
+    console.log(`Secure Random 32 bytes: ${random32.substring(0, 32)}...`);
+    console.log(`Secure Random 64 bytes: ${random64.substring(0, 32)}...`);
     
     // Verify randomness (no duplicates in multiple generations)
     const randoms = await Promise.all([
@@ -119,8 +122,8 @@ export class CryptoTestSuite {
     const token1 = await this.cryptoManager.generateDeviceBoundToken();
     const token2 = await this.cryptoManager.generateDeviceBoundToken();
     
-    console.log('Device-bound token 1:', token1.substring(0, 32) + '...');
-    console.log('Device-bound token 2:', token2.substring(0, 32) + '...');
+    console.log(`Device-bound token 1: ${token1.substring(0, 32)}...`);
+    console.log(`Device-bound token 2: ${token2.substring(0, 32)}...`);
     
     // Tokens should be different each time but bound to same device
     console.log('Tokens are unique:', token1 !== token2 ? '✅' : '❌');
@@ -155,7 +158,7 @@ export class CryptoTestSuite {
     
     // Test device-bound key generation
     const deviceKey = await this.storageManager.generateDeviceBoundKey('test_key');
-    console.log('Device-bound key:', deviceKey.substring(0, 16) + '...');
+    console.log(`Device-bound key: ${deviceKey.substring(0, 16)}...`);
     
     // Test secure storage operations
     const testValue = 'sensitive_data_with_enhanced_crypto';

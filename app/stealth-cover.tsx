@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 
 type Note = {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   selectedNoteItem: {
-    backgroundColor: colors.accent + '20',
+    backgroundColor: `${colors.accent  }20`,
   },
   noteItemContent: {
     flex: 1,

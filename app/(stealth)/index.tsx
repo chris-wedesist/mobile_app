@@ -1,19 +1,19 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
+  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
   Vibration,
-  Alert,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import { stealthManager } from '../../lib/stealth';
 import { router } from 'expo-router';
@@ -94,7 +94,7 @@ export default function CalculatorScreen() {
 
   const handleDecimal = () => {
     if (!display.includes('.')) {
-      setDisplay(display + '.');
+      setDisplay(`${display  }.`);
     }
   };
 

@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   AppState,
   AppStateStatus,
   Dimensions,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../../constants/theme';
 import { screenProtectionManager } from '../../lib/security/screenProtection';
 

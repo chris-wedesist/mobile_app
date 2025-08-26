@@ -11,10 +11,10 @@ import {
 import { cardStyles, layoutStyles, textStyles } from '../constants/styles';
 import {
   colors,
-  typography,
-  spacing,
   radius,
   shadows,
+  spacing,
+  typography,
 } from '../constants/theme';
 
 const supabase = createClient(

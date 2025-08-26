@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, spacing, typography } from '../../constants/theme';
 import { threatIntelligenceEngine } from '../../lib/intelligence/threatIntelligence';
 
 export const ThreatDashboard: React.FC = () => {
@@ -44,38 +45,38 @@ export const ThreatDashboard: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    margin: 8,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: spacing.sm,
+    margin: spacing.sm,
   },
   title: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   level: {
-    fontSize: 24,
+    fontSize: typography.fontSize.title,
     fontWeight: 'bold',
     textAlign: 'center',
-    padding: 8,
+    padding: spacing.sm,
   },
   levelLow: {
-    color: '#4CAF50',
+    color: colors.success,
   },
   levelMedium: {
-    color: '#FF9800',
+    color: colors.warning,
   },
   levelHigh: {
-    color: '#F44336',
+    color: colors.error,
   },
   levelCritical: {
-    color: '#D32F2F',
+    color: colors.error,
   },
   timestamp: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.secondary,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
 });

@@ -1,8 +1,8 @@
 import { 
   checkFileContent, 
-  generateDataIntegrityReport, 
-  logDataIntegrityFindings,
-  DataIntegrityReport 
+  DataIntegrityReport, 
+  generateDataIntegrityReport,
+  logDataIntegrityFindings 
 } from './dataIntegrityChecker';
 
 /**

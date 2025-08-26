@@ -213,7 +213,7 @@ export class NetworkSecurityMonitorDemo {
     // Implement offline mode logic here
   }
 
-  private verifyWifiSecurity(state: any): void {
+  private verifyWifiSecurity(_state: any): void {
     console.log('🔍 Verifying WiFi security settings');
     // Implement WiFi security verification
     // You could check for WPA2/WPA3, signal strength, etc.
@@ -224,7 +224,7 @@ export class NetworkSecurityMonitorDemo {
     // Enable secure operations and full app functionality
   }
 
-  private updateSecurityPolicies(state: any): void {
+  private updateSecurityPolicies(_state: any): void {
     console.log('📋 Updating security policies based on network state');
     // Update your app's security policies based on current network
   }

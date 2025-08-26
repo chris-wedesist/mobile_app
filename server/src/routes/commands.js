@@ -250,8 +250,8 @@ router.get('/:deviceId/commands/history', async (req, res) => {
     const offset = (page - 1) * limit;
 
     // Build query conditions
-    let whereConditions = ['device_id = ?'];
-    let queryParams = [deviceId];
+    const whereConditions = ['device_id = ?'];
+    const queryParams = [deviceId];
 
     if (status) {
       whereConditions.push('status = ?');
