@@ -86,7 +86,7 @@ export default function HomeScreen() {
         <Text style={styles.newsTitle}>{title}</Text>
         <Pressable
           style={styles.viewAllButton}
-          onPress={() => router.push(`/blogs?category=${category}`)}
+          onPress={() => router.push(`/blogs?category=${category}` as any as any)}
         >
           <Text style={styles.viewAllText}>View All</Text>
         </Pressable>

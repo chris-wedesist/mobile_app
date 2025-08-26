@@ -87,7 +87,7 @@ export default function SettingsScreen() {
       const success = await stealthManager.toggleMode();
       if (success) {
         // Navigate to normal mode
-        router.replace('/(tabs)');
+        router.replace('/(tabs)' as any);
       } else {
         Alert.alert('Error', 'Unable to switch modes at this time.');
       }

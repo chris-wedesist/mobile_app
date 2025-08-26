@@ -205,9 +205,9 @@ export default function StealthTestScreen() {
                       text: 'Navigate',
                       onPress: () => {
                         if (newMode === 'stealth') {
-                          router.replace('/stealth-calculator' as any);
+                          router.replace('/stealth-calculator' as any as any);
                         } else {
-                          router.replace('/(tabs)' as any);
+                          router.replace('/(tabs)' as any as any);
                         }
                       },
                     },

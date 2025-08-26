@@ -76,7 +76,7 @@ export default function DemoWelcomeScreen() {
 
         <TouchableOpacity
           style={styles.startButton as ViewStyle}
-          onPress={() => router.push('/test-panic-flow')}
+          onPress={() => router.push('/test-panic-flow' as any)}
         >
           <Text style={styles.startButtonText as TextStyle}>
             Start Mission Demo

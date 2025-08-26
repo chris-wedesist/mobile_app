@@ -369,7 +369,7 @@ export default function EmergencySetupScreen() {
         <View style={styles.navigationSection}>
           <TouchableOpacity
             style={styles.nextButton}
-            onPress={() => router.push('/security-test' as any)}
+            onPress={() => router.push('/security-test' as any as any)}
           >
             <Text style={styles.nextButtonText}>Test Security Features</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.primary} />

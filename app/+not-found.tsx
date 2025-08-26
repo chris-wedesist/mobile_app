@@ -19,7 +19,7 @@ export default function NotFoundScreen() {
         style={styles.button}
         onPress={() => {
           console.log('Navigating to home from not found screen');
-          router.replace('/(tabs)');
+          router.replace('/(tabs)' as any);
         }}
       >
         <Text style={styles.buttonText}>Go to Home</Text>

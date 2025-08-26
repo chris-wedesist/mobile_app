@@ -184,7 +184,7 @@ const SecurityDashboard: React.FC = () => {
   };
 
   const navigateToSetup = (screen: string) => {
-    router.push(`/${screen}` as any);
+    router.push(`/${screen}` as any as any);
   };
 
   const getSecurityStatusColor = () => {

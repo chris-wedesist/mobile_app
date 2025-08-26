@@ -78,7 +78,7 @@ export function StealthModeProvider({
       setCurrentScreen(settings.cover_story_screen);
 
       // Navigate to cover story screen
-      router.replace(`/stealth-${settings.cover_story_screen}` as any);
+      router.replace(`/stealth-${settings.cover_story_screen}` as any as any);
     } catch (error) {
       console.error('Error activating stealth mode:', error);
       throw error;
@@ -100,7 +100,7 @@ export function StealthModeProvider({
       setCurrentScreen(null);
 
       // Navigate back to main app
-      router.replace('/');
+      router.replace('/' as any);
     } catch (error) {
       console.error('Error deactivating stealth mode:', error);
       throw error;

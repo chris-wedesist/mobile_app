@@ -61,7 +61,7 @@ export default function IncidentListScreen() {
   const renderIncident = ({ item }: { item: Incident }) => (
     <TouchableOpacity
       style={styles.incidentCard}
-      onPress={() => router.push(`/incidents/${item.id}`)}
+      onPress={() => router.push(`/incidents/${item.id}` as any)}
     >
       <View style={styles.cardHeader}>
         <View style={styles.iconContainer}>
@@ -148,7 +148,7 @@ export default function IncidentListScreen() {
           </Text>
           <TouchableOpacity
             style={styles.recordButton}
-            onPress={() => router.push('/(tabs)/record')}
+            onPress={() => router.push('/(tabs)/record' as any)}
           >
             <Text style={styles.recordButtonText}>Record New Incident</Text>
           </TouchableOpacity>

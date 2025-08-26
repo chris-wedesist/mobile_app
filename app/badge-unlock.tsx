@@ -60,7 +60,7 @@ export default function BadgeUnlockScreen() {
 
       // Navigate to home screen with a small delay to ensure state updates
       setTimeout(() => {
-        router.replace('/(tabs)');
+        router.replace('/(tabs)' as any);
       }, 100);
     } catch (error) {
       console.error('Error completing badge unlock:', error);
@@ -68,7 +68,7 @@ export default function BadgeUnlockScreen() {
 
       // Fallback navigation in case of error
       setTimeout(() => {
-        router.replace('/(tabs)');
+        router.replace('/(tabs)' as any);
       }, 100);
     }
   };

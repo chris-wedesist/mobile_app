@@ -313,7 +313,7 @@ export default function BiometricSetupScreen() {
         <View style={styles.navigationSection}>
           <TouchableOpacity
             style={styles.nextButton}
-            onPress={() => router.push('/emergency-setup' as any)}
+            onPress={() => router.push('/emergency-setup' as any as any)}
           >
             <Text style={styles.nextButtonText}>
               Continue to Emergency Setup

@@ -15,7 +15,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            href: '/',
+            href: '/' as any,
           }}
         />
         <Tabs.Screen name="record" />

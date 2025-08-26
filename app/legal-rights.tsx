@@ -110,7 +110,7 @@ export default function LegalRightsScreen() {
 
         <TouchableOpacity
           style={styles.emergencyButton}
-          onPress={() => router.push('./report-incident')}
+          onPress={() => router.push('./report-incident' as any)}
         >
           <Text style={styles.emergencyButtonText}>Report an Incident</Text>
         </TouchableOpacity>

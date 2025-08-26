@@ -234,7 +234,7 @@ export default function SecurityTestScreen() {
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Setup',
-            onPress: () => router.push('/biometric-setup' as any),
+            onPress: () => router.push('/biometric-setup' as any as any),
           },
         ]
       );
@@ -495,7 +495,7 @@ export default function SecurityTestScreen() {
 
           <TouchableOpacity
             style={styles.setupButton}
-            onPress={() => router.push('/biometric-setup' as any)}
+            onPress={() => router.push('/biometric-setup' as any as any)}
           >
             <Text style={styles.setupButtonText}>
               Configure Security Features

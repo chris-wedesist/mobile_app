@@ -183,11 +183,11 @@ export class AppLockManager {
    */
   async unlockApp(method: UnlockMethod, credentials?: string): Promise<{
     success: boolean;
-    error?: string;
+    error: string;
     requiresAuth?: boolean;
   }> {
     if (!this.lockState.isLocked) {
-      return { success: true };
+      return { success: true, error: "" };
     }
 
     try {
@@ -262,7 +262,7 @@ export class AppLockManager {
         
         this.notifyLockStateChange();
         console.log('✅ App unlocked successfully');
-        return { success: true };
+        return { success: true, error: "" };
       } else {
         // Failed unlock attempt
         this.lockState.failedAttempts++;
@@ -310,7 +310,7 @@ export class AppLockManager {
   /**
    * Authenticate using biometric
    */
-  private async authenticateWithBiometric(): Promise<{ success: boolean; error?: string }> {
+  private async authenticateWithBiometric(): Promise<{ success: boolean; error: string }> {
     try {
       if (!this.config.requireBiometricUnlock) {
         return { success: false, error: 'Biometric unlock not enabled' };
@@ -319,7 +319,7 @@ export class AppLockManager {
       const result = await biometricAuthManager.authenticateWithBiometric('Unlock DESIST');
       
       if (result.success) {
-        return { success: true };
+        return { success: true, error: "" };
       } else {
         return { success: false, error: result.error || 'Biometric authentication failed' };
       }
@@ -332,7 +332,7 @@ export class AppLockManager {
   /**
    * Authenticate using PIN
    */
-  private async authenticateWithPin(pin: string): Promise<{ success: boolean; error?: string }> {
+  private async authenticateWithPin(pin: string): Promise<{ success: boolean; error: string }> {
     try {
       if (!this.config.allowPinFallback) {
         return { success: false, error: 'PIN unlock not enabled' };
@@ -346,7 +346,7 @@ export class AppLockManager {
       const storedPinHash = await this.getStoredPinHash();
       
       if (storedPinHash && pinHash === storedPinHash) {
-        return { success: true };
+        return { success: true, error: "" };
       } else {
         return { success: false, error: 'Invalid PIN' };
       }
@@ -359,7 +359,7 @@ export class AppLockManager {
   /**
    * Emergency unlock (should be used sparingly)
    */
-  private async emergencyUnlock(): Promise<{ success: boolean; error?: string }> {
+  private async emergencyUnlock(): Promise<{ success: boolean; error: string }> {
     if (!this.config.emergencyUnlockEnabled) {
       return { success: false, error: 'Emergency unlock not enabled' };
     }
@@ -372,7 +372,7 @@ export class AppLockManager {
       success: true,
     });
     
-    return { success: true };
+    return { success: true, error: "" };
   }
 
   /**

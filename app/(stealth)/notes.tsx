@@ -73,7 +73,7 @@ export default function StealthNotesScreen() {
     try {
       const success = await stealthManager.toggleMode();
       if (success) {
-        router.replace('/(tabs)');
+        router.replace('/(tabs)' as any);
       }
     } catch (error) {
       console.error('Failed to toggle mode:', error);

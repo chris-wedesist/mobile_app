@@ -191,7 +191,7 @@ export default function StealthModeDemoScreen() {
 
           <TouchableOpacity
             style={styles.tryButton}
-            onPress={() => router.push('/stealth-mode')}
+            onPress={() => router.push('/stealth-mode' as any)}
           >
             <Text style={styles.tryButtonText}>Try Stealth Mode</Text>
           </TouchableOpacity>

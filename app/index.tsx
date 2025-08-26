@@ -143,7 +143,7 @@ const HomeScreen: React.FC = () => {
         const result = await biometricAuthManager.authenticateWithBiometric();
         if (result.success) {
           Alert.alert('Success', 'Authentication successful!');
-          router.push('/security-dashboard' as any);
+          router.push('/security-dashboard' as any as any);
         } else {
           Alert.alert('Failed', result.error || 'Authentication failed');
         }
@@ -155,7 +155,7 @@ const HomeScreen: React.FC = () => {
             { text: 'Cancel', style: 'cancel' },
             {
               text: 'Setup',
-              onPress: () => router.push('/biometric-setup' as any),
+              onPress: () => router.push('/biometric-setup' as any as any),
             },
           ]
         );
@@ -362,7 +362,7 @@ const HomeScreen: React.FC = () => {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.primaryAction]}
-            onPress={() => router.push('/security-dashboard' as any)}
+            onPress={() => router.push('/security-dashboard' as any as any)}
           >
             <Ionicons
               name="shield-checkmark"
@@ -422,7 +422,7 @@ const HomeScreen: React.FC = () => {
           <View style={styles.setupGrid}>
             <TouchableOpacity
               style={styles.setupCard}
-              onPress={() => router.push('/biometric-setup' as any)}
+              onPress={() => router.push('/biometric-setup' as any as any)}
             >
               <Ionicons name="finger-print" size={32} color={colors.primary} />
               <Text style={styles.setupTitle}>Biometric</Text>
@@ -431,7 +431,7 @@ const HomeScreen: React.FC = () => {
 
             <TouchableOpacity
               style={styles.setupCard}
-              onPress={() => router.push('/emergency-setup' as any)}
+              onPress={() => router.push('/emergency-setup' as any as any)}
             >
               <Ionicons name="people" size={32} color={colors.warning} />
               <Text style={styles.setupTitle}>Emergency</Text>
@@ -440,7 +440,7 @@ const HomeScreen: React.FC = () => {
 
             <TouchableOpacity
               style={styles.setupCard}
-              onPress={() => router.push('/security-test' as any)}
+              onPress={() => router.push('/security-test' as any as any)}
             >
               <Ionicons
                 name="checkmark-circle"
@@ -453,7 +453,7 @@ const HomeScreen: React.FC = () => {
 
             <TouchableOpacity
               style={styles.setupCard}
-              onPress={() => router.push('/security-dashboard' as any)}
+              onPress={() => router.push('/security-dashboard' as any as any)}
             >
               <Ionicons name="analytics" size={32} color={colors.secondary} />
               <Text style={styles.setupTitle}>Monitor</Text>

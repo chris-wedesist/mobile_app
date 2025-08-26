@@ -56,7 +56,7 @@ export default function MissionSuccessScreen() {
       await AsyncStorage.setItem('demo_completed', 'true');
 
       // Navigate back to home
-      router.replace('/');
+      router.replace('/' as any);
     } catch (error) {
       console.error('Error completing mission:', error);
     }

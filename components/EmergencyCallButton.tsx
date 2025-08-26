@@ -172,7 +172,7 @@ export default function EmergencyCallButton() {
     try {
       const emergencyContact = await AsyncStorage.getItem('emergencyContact');
       if (!emergencyContact) {
-        router.push('/(tabs)/settings?section=emergency');
+        router.push('/(tabs)/settings?section=emergency' as any);
         return;
       }
 

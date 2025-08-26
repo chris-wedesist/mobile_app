@@ -610,7 +610,7 @@ export default function ReportIncidentScreen() {
 
       <TouchableOpacity
         style={styles.legalRightsButton}
-        onPress={() => router.push('/legal-rights')}
+        onPress={() => router.push('/legal-rights' as any)}
       >
         <MaterialIcons name="verified" size={20} color={colors.background} />
         <Text style={styles.legalRightsText}>Know Your Rights</Text>

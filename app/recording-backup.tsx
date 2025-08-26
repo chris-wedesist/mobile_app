@@ -120,7 +120,7 @@ export default function RecordingBackupScreen() {
   };
 
   const handleContinue = () => {
-    router.push('/emergency-sms');
+    router.push('/emergency-sms' as any);
   };
 
   const getStatusColor = (status: UploadStatus['status']) => {

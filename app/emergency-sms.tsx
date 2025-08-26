@@ -136,7 +136,7 @@ export default function EmergencyAlertScreen() {
   };
 
   const handleContinue = () => {
-    router.push('/cover-story-activation');
+    router.push('/cover-story-activation' as any);
   };
 
   return (

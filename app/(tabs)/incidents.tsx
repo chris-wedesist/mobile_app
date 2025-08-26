@@ -309,7 +309,7 @@ export default function IncidentsScreen() {
   const renderIncident = ({ item }: { item: Incident }) => (
     <TouchableOpacity
       style={styles.incidentCard}
-      onPress={() => router.push(`/incidents/${item.id}`)}
+      onPress={() => router.push(`/incidents/${item.id}` as any)}
     >
       <View style={styles.incidentHeader}>
         <Text style={styles.incidentType}>{item.type}</Text>

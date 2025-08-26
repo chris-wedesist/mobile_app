@@ -393,7 +393,7 @@ export default function SettingsScreen() {
           ) : (
             <TouchableOpacity
               style={styles.emergencyContactButton}
-              onPress={() => router.push('/emergency-setup')}
+              onPress={() => router.push('/emergency-setup' as any)}
             >
               <View style={styles.settingInfo}>
                 <MaterialIcons name="phone" size={24} color={colors.accent} />
@@ -438,7 +438,7 @@ export default function SettingsScreen() {
               <Text style={styles.settingText}>Push Notifications</Text>
             </View>
             <TouchableOpacity
-              onPress={() => router.push('/notification-settings')}
+              onPress={() => router.push('/notification-settings' as any)}
             >
               <Text style={styles.configureText}>Configure</Text>
             </TouchableOpacity>
@@ -550,7 +550,7 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Advanced</Text>
           <TouchableOpacity
             style={styles.advancedItem}
-            onPress={() => router.push('/settings-history')}
+            onPress={() => router.push('/settings-history' as any)}
           >
             <View style={styles.advancedItemContent}>
               <MaterialIcons name="history" size={24} color={colors.accent} />

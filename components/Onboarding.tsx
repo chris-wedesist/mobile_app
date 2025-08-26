@@ -94,7 +94,7 @@ export default function Onboarding() {
     try {
       setIsCompleting(true);
       await AsyncStorage.setItem('onboarding_completed', 'true');
-      router.replace('/');
+      router.replace('/' as any);
     } catch (error) {
       console.error('Error completing onboarding:', error);
       setIsCompleting(false);
@@ -116,13 +116,13 @@ export default function Onboarding() {
 
       // Navigate directly to home screen instead of badge unlock
       console.log('Navigating to home screen');
-      router.replace('/(tabs)');
+      router.replace('/(tabs)' as any);
     } catch (error) {
       console.error('Error completing onboarding:', error);
       setIsCompleting(false);
 
       // Fallback navigation in case of error
-      router.replace('/(tabs)');
+      router.replace('/(tabs)' as any);
     }
   };
 

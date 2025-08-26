@@ -50,7 +50,7 @@ export default function SettingsIndexScreen() {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/notification-settings')}
+            onPress={() => router.push('/notification-settings' as any)}
           >
             <View style={styles.settingIcon}>
               <MaterialIcons
@@ -74,7 +74,7 @@ export default function SettingsIndexScreen() {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/stealth-mode')}
+            onPress={() => router.push('/stealth-mode' as any)}
           >
             <View style={styles.settingIcon}>
               <MaterialIcons
@@ -107,7 +107,7 @@ export default function SettingsIndexScreen() {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/emergency-setup')}
+            onPress={() => router.push('/emergency-setup' as any)}
           >
             <View style={styles.settingIcon}>
               <MaterialIcons
@@ -131,7 +131,7 @@ export default function SettingsIndexScreen() {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/settings/incident-management')}
+            onPress={() => router.push('/settings/incident-management' as any)}
           >
             <View style={styles.settingIcon}>
               <MaterialIcons
@@ -155,7 +155,7 @@ export default function SettingsIndexScreen() {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/settings/developer-tools')}
+            onPress={() => router.push('/settings/developer-tools' as any)}
           >
             <View style={styles.settingIcon}>
               <MaterialIcons name="build" size={20} color={colors.accent} />

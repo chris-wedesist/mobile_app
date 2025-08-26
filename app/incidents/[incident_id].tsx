@@ -111,7 +111,7 @@ export default function IncidentDetailScreen() {
                 incident_id as string
               );
               if (result.success) {
-                router.replace('/incidents');
+                router.replace('/incidents' as any);
               } else {
                 Alert.alert(
                   'Error',

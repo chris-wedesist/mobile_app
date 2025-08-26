@@ -424,11 +424,11 @@ export default function Phase3DemoScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.container as any}>
+      <View style={styles.header as any}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={styles.backButton as any}
         >
           <MaterialIcons
             name="arrow-back"
@@ -436,22 +436,22 @@ export default function Phase3DemoScreen() {
             color={colors.text.primary}
           />
         </TouchableOpacity>
-        <Text style={styles.title}>Phase 3 Demo</Text>
-        <View style={styles.placeholder} />
+        <Text style={styles.title as any}>Phase 3 Demo</Text>
+        <View style={styles.placeholder as any} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.infoCard}>
+      <ScrollView style={styles.content as any} showsVerticalScrollIndicator={false}>
+        <View style={styles.infoCard as any}>
           <MaterialIcons name="info" size={24} color={colors.primary} />
-          <Text style={styles.infoText}>
+          <Text style={styles.infoText as any}>
             This demo showcases advanced security features from Phase 3
             implementation. All features are functional and ready for testing.
           </Text>
         </View>
 
-        <View style={styles.settingsCard}>
-          <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Testing Mode</Text>
+        <View style={styles.settingsCard as any}>
+          <View style={styles.settingRow as any}>
+            <Text style={styles.settingLabel as any}>Testing Mode</Text>
             <Switch
               value={testingMode}
               onValueChange={toggleTestingMode}
@@ -459,21 +459,21 @@ export default function Phase3DemoScreen() {
               thumbColor={testingMode ? colors.primary : colors.text.muted}
             />
           </View>
-          <Text style={styles.settingDescription}>
+          <Text style={styles.settingDescription as any}>
             Enable additional logging and diagnostic information
           </Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Demo Features</Text>
+        <Text style={styles.sectionTitle as any}>Demo Features</Text>
 
         {features.map((feature) => (
           <TouchableOpacity
             key={feature.id}
-            style={styles.featureCard}
+            style={styles.featureCard as any}
             onPress={feature.action}
             disabled={isLoading && feature.status === 'testing'}
           >
-            <View style={styles.featureIcon}>
+            <View style={styles.featureIcon as any}>
               <MaterialIcons
                 name={feature.icon as any}
                 size={24}
@@ -481,10 +481,10 @@ export default function Phase3DemoScreen() {
               />
             </View>
 
-            <View style={styles.featureContent}>
-              <View style={styles.featureHeader}>
-                <Text style={styles.featureTitle}>{feature.title}</Text>
-                <View style={styles.statusIndicator}>
+            <View style={styles.featureContent as any}>
+              <View style={styles.featureHeader as any}>
+                <Text style={styles.featureTitle as any}>{feature.title}</Text>
+                <View style={styles.statusIndicator as any}>
                   <MaterialIcons
                     name={getStatusIcon(feature.status) as any}
                     size={16}
@@ -492,7 +492,7 @@ export default function Phase3DemoScreen() {
                   />
                 </View>
               </View>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureDescription as any}>
                 {feature.description}
               </Text>
             </View>
@@ -505,11 +505,11 @@ export default function Phase3DemoScreen() {
           </TouchableOpacity>
         ))}
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
+        <View style={styles.footer as any}>
+          <Text style={styles.footerText as any}>
             Phase 3: Intelligence & Network Security
           </Text>
-          <Text style={styles.versionText}>
+          <Text style={styles.versionText as any}>
             Build Version: 1.0.0 • {new Date().toLocaleDateString()}
           </Text>
         </View>
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.fontSize.title,
     fontFamily: typography.fontFamily.semiBold,
-    fontWeight: typography.fontWeight.semiBold,
+    fontWeight: typography.fontWeight.semiBold as any,
     color: colors.text.primary,
   },
   placeholder: {
