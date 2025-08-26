@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CryptoJS from 'crypto-js';
+import { CryptoManager } from './cryptoManager';
 
 export interface SecureStorageConfig {
   useSecureStore: boolean;
@@ -34,6 +35,7 @@ export class SecureStorageManager {
   private config: SecureStorageConfig = DEFAULT_CONFIG;
   private initialized = false;
   private encryptionKey: string = '';
+  private cryptoManager: CryptoManager;
 
   static getInstance(): SecureStorageManager {
     if (!SecureStorageManager.instance) {
@@ -42,10 +44,17 @@ export class SecureStorageManager {
     return SecureStorageManager.instance;
   }
 
+  constructor() {
+    this.cryptoManager = CryptoManager.getInstance();
+  }
+
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
     try {
+      // Initialize crypto manager first
+      await this.cryptoManager.initialize();
+
       // Load configuration
       const storedConfig = await AsyncStorage.getItem(
         SECURE_STORAGE_CONFIG_KEY
@@ -57,7 +66,7 @@ export class SecureStorageManager {
         };
       }
 
-      // Initialize encryption key
+      // Initialize encryption key using secure crypto
       await this.initializeEncryptionKey();
 
       // Perform cleanup if enabled
@@ -66,7 +75,7 @@ export class SecureStorageManager {
       }
 
       this.initialized = true;
-      console.log('SecureStorageManager initialized');
+      console.log('SecureStorageManager initialized with enhanced crypto');
     } catch (error) {
       console.error('Failed to initialize SecureStorageManager:', error);
       this.config = DEFAULT_CONFIG;
@@ -84,17 +93,18 @@ export class SecureStorageManager {
       if (existingKey) {
         this.encryptionKey = existingKey;
       } else {
-        // Generate new encryption key
-        this.encryptionKey = CryptoJS.lib.WordArray.random(256 / 8).toString();
+        // Generate new encryption key using secure crypto
+        this.encryptionKey = await this.cryptoManager.generateSecureRandom(32);
         await SecureStore.setItemAsync(
           'desist_encryption_key',
           this.encryptionKey
         );
+        console.log('Generated new secure encryption key');
       }
     } catch (error) {
       console.error('Failed to initialize encryption key:', error);
-      // Fallback to a deterministic key (not recommended for production)
-      this.encryptionKey = 'fallback_key_' + Date.now();
+      // Fallback to CryptoJS method if secure generation fails
+      this.encryptionKey = CryptoJS.lib.WordArray.random(256 / 8).toString();
     }
   }
 
@@ -440,9 +450,9 @@ export class SecureStorageManager {
     const overwritePasses = options?.overwritePasses ?? 3;
 
     try {
-      // Overwrite with random data multiple times
+      // Overwrite with random data multiple times using secure crypto
       for (let i = 0; i < overwritePasses; i++) {
-        const randomData = CryptoJS.lib.WordArray.random(1024).toString();
+        const randomData = await this.cryptoManager.generateSecureRandom(128);
         await this.setItem(key, randomData, options);
       }
 
@@ -451,6 +461,80 @@ export class SecureStorageManager {
     } catch (error) {
       console.error(`Failed to securely delete ${key}:`, error);
       return false;
+    }
+  }
+
+  /**
+   * Generate device-bound storage key for enhanced security
+   */
+  async generateDeviceBoundKey(baseKey: string): Promise<string> {
+    try {
+      const deviceFingerprint = await this.cryptoManager.generateDeviceFingerprint();
+      const combinedData = `${baseKey}-${deviceFingerprint.deviceHash}`;
+      return await this.cryptoManager.generateSecureHash(combinedData);
+    } catch (error) {
+      console.error('Failed to generate device-bound key:', error);
+      return baseKey; // Fallback to original key
+    }
+  }
+
+  /**
+   * Verify device integrity before sensitive operations
+   */
+  async verifyDeviceIntegrityForStorage(): Promise<boolean> {
+    try {
+      const storedFingerprint = await this.getItem('device_fingerprint');
+      if (!storedFingerprint) {
+        // First time - store current fingerprint
+        const currentFingerprint = await this.cryptoManager.generateDeviceFingerprint();
+        await this.setItem('device_fingerprint', JSON.stringify(currentFingerprint));
+        return true;
+      }
+
+      const parsedFingerprint = JSON.parse(storedFingerprint);
+      const verification = await this.cryptoManager.verifyDeviceIntegrity(parsedFingerprint);
+      
+      if (verification.securityRisk === 'high') {
+        console.warn('High security risk detected:', verification.differences);
+        return false;
+      }
+
+      return verification.isValid;
+    } catch (error) {
+      console.error('Failed to verify device integrity:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get enhanced security status
+   */
+  async getSecurityStatus(): Promise<{
+    encryptionActive: boolean;
+    deviceIntegrityValid: boolean;
+    networkSecure: boolean;
+    lastSecurityCheck: Date;
+  }> {
+    try {
+      const [deviceIntegrityValid, networkSecurity] = await Promise.all([
+        this.verifyDeviceIntegrityForStorage(),
+        this.cryptoManager.validateNetworkSecurity(),
+      ]);
+
+      return {
+        encryptionActive: this.config.encryptData && !!this.encryptionKey,
+        deviceIntegrityValid,
+        networkSecure: networkSecurity.isSecure,
+        lastSecurityCheck: new Date(),
+      };
+    } catch (error) {
+      console.error('Failed to get security status:', error);
+      return {
+        encryptionActive: false,
+        deviceIntegrityValid: false,
+        networkSecure: false,
+        lastSecurityCheck: new Date(),
+      };
     }
   }
 }

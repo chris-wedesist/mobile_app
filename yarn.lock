@@ -1969,6 +1969,11 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
+"@react-native-community/netinfo@^11.4.1":
+  version "11.4.1"
+  resolved "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-11.4.1.tgz"
+  integrity sha512-B0BYAkghz3Q2V09BF88RA601XursIEA111tnc2JOaN7axJWmNefmfjZqw/KdSxKZp7CZUuPpjBmz/WCR9uaHYg==
+
 "@react-native-community/slider@^4.5.6":
   version "4.5.6"
   resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-4.5.6.tgz"
@@ -3140,7 +3145,7 @@ base64-arraybuffer@^1.0.2:
   resolved "https://registry.npmjs.org/base64-arraybuffer/-/base64-arraybuffer-1.0.2.tgz"
   integrity sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==
 
-base64-js@^1.0.2, base64-js@^1.2.3, base64-js@^1.3.1, base64-js@^1.5.1:
+base64-js@^1.0.2, base64-js@^1.2.3, base64-js@^1.3.0, base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -4820,6 +4825,13 @@ expo-constants@~17.1.7:
   dependencies:
     "@expo/config" "~11.0.12"
     "@expo/env" "~1.0.7"
+
+expo-crypto@^14.1.5:
+  version "14.1.5"
+  resolved "https://registry.npmjs.org/expo-crypto/-/expo-crypto-14.1.5.tgz"
+  integrity sha512-ZXJoUMoUeiMNEoSD4itItFFz3cKrit6YJ/BR0hjuwNC+NczbV9rorvhvmeJmrU9O2cFQHhJQQR1fjQnt45Vu4Q==
+  dependencies:
+    base64-js "^1.3.0"
 
 expo-dev-client@^5.2.4:
   version "5.2.4"
@@ -8448,6 +8460,11 @@ react-native-crypto@^2.2.1:
     pbkdf2 "^3.1.3"
     public-encrypt "^4.0.0"
     randomfill "^1.0.3"
+
+react-native-device-info@^14.0.4:
+  version "14.0.4"
+  resolved "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-14.0.4.tgz"
+  integrity sha512-NX0wMAknSDBeFnEnSFQ8kkAcQrFHrG4Cl0mVjoD+0++iaKrOupiGpBXqs8xR0SeJyPC5zpdPl4h/SaBGly6UxA==
 
 react-native-edge-to-edge@1.6.0:
   version "1.6.0"

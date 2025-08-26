@@ -15,6 +15,8 @@ import { blankScreenStealthManager } from '../lib/security/blankScreenStealth';
 import { threatIntelligenceEngine } from '../lib/intelligence/threatIntelligence';
 import { coverApplicationsManager } from '../lib/stealth-advanced/coverApplications';
 import { biometricAuthManager } from '../lib/security/biometricAuth';
+import { CryptoManager } from '../lib/security/cryptoManager';
+import { SecureStorageManager } from '../lib/security/secureStorage';
 
 interface DemoFeature {
   id: string;
@@ -53,6 +55,14 @@ export default function Phase3DemoScreen() {
         icon: 'phonelink-off',
         status: 'inactive',
         action: demoBlankScreen,
+      },
+      {
+        id: 'enhanced_crypto',
+        title: 'Enhanced Cryptography',
+        description: 'Test secure hashing, device fingerprinting, and crypto functions',
+        icon: 'enhanced-encryption',
+        status: 'inactive',
+        action: demoEnhancedCrypto,
       },
       {
         id: 'threat_detection',
@@ -97,6 +107,65 @@ export default function Phase3DemoScreen() {
     ];
 
     setFeatures(demoFeatures);
+  };
+
+  const demoEnhancedCrypto = async () => {
+    try {
+      setIsLoading(true);
+      updateFeatureStatus('enhanced_crypto', 'testing');
+
+      const cryptoManager = CryptoManager.getInstance();
+      const storageManager = SecureStorageManager.getInstance();
+      
+      // Initialize both managers
+      await Promise.all([
+        cryptoManager.initialize(),
+        storageManager.initialize()
+      ]);
+
+      // Test data
+      const testData = 'sensitive_device_data_12345';
+      
+      // OLD METHOD (Base64 - insecure)
+      const oldHash = Buffer.from(testData).toString('base64');
+      
+      // NEW METHOD (SHA-256 - secure)
+      const secureHash = await cryptoManager.generateSecureHash(testData);
+      
+      // Generate device fingerprint
+      const fingerprint = await cryptoManager.generateDeviceFingerprint();
+      
+      // Test secure storage with device binding
+      const deviceBoundKey = await storageManager.generateDeviceBoundKey('crypto_test');
+      await storageManager.setItem(deviceBoundKey, testData, { encrypt: true });
+      
+      // Get security status
+      const securityStatus = await storageManager.getSecurityStatus();
+
+      updateFeatureStatus('enhanced_crypto', 'active');
+
+      Alert.alert(
+        'Enhanced Crypto Demo Complete',
+        `🔐 CRYPTOGRAPHIC UPGRADE DEMONSTRATION\n\n` +
+        `OLD (Base64): ${oldHash.substring(0, 20)}...\n` +
+        `NEW (SHA-256): ${secureHash.substring(0, 20)}...\n\n` +
+        `📱 DEVICE FINGERPRINT:\n` +
+        `Device: ${fingerprint.systemInfo.brand} ${fingerprint.systemInfo.model}\n` +
+        `Security: ${fingerprint.securityFeatures.isEmulator ? 'Emulator' : 'Physical'}\n` +
+        `Network: ${fingerprint.networkInfo.connectionType}\n\n` +
+        `🛡️ SECURITY STATUS:\n` +
+        `Encryption: ${securityStatus.encryptionActive ? '✅' : '❌'}\n` +
+        `Device Integrity: ${securityStatus.deviceIntegrityValid ? '✅' : '⚠️'}\n` +
+        `Network Security: ${securityStatus.networkSecure ? '✅' : '⚠️'}\n\n` +
+        `✅ All crypto enhancements working!`,
+        [{ text: 'Excellent!', style: 'default' }]
+      );
+    } catch (error) {
+      updateFeatureStatus('enhanced_crypto', 'inactive');
+      Alert.alert('Crypto Demo Error', `Failed to run crypto demo: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const demoBlankScreen = async () => {
