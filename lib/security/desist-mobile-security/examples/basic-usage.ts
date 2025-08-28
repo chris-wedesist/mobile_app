@@ -94,29 +94,25 @@ async function demonstrateAuthentication() {
     lastLogin: new Date()
   };
   
-  // Authenticate user
-  const authResult = await auth.authenticate('john.doe@example.com', 'secure-password-123', userProfile);
-  if (authResult.success && authResult.data) {
-    console.log('Authentication successful!');
-    console.log('JWT Token:', authResult.data.token.substring(0, 50) + '...');
-    console.log('Expires at:', authResult.data.expiresAt);
+  // Demonstrate password hashing and verification
+  const password = 'my-secure-password';
+  const hashedPasswordResult = await auth.hashPassword(password);
+  if (hashedPasswordResult.success && hashedPasswordResult.data) {
+    console.warn('Password hashed successfully');
     
-    // Validate token
-    const validateResult = await auth.validateToken(authResult.data.token);
-    if (validateResult.success && validateResult.data) {
-      console.log('Token validation successful!');
-      console.log('User ID:', validateResult.data.id);
-      console.log('Username:', validateResult.data.username);
-    }
+    const isPasswordValid = await auth.verifyPassword(password, hashedPasswordResult.data as string);
+    console.warn('Password verification:', isPasswordValid.success ? 'Valid' : 'Invalid');
   }
   
-  // Demonstrate password hashing
-  const password = 'my-secure-password';
-  const hashedPassword = await auth.hashPassword(password);
-  console.log('Hashed password:', hashedPassword);
-  
-  const isPasswordValid = await auth.verifyPasswordHash(password, hashedPassword);
-  console.log('Password verification:', isPasswordValid);
+  // Demonstrate MFA
+  const mfaResult = await auth.initiateMFA(userProfile);
+  if (mfaResult.success && mfaResult.data) {
+    console.warn('MFA initiated:', mfaResult.data.method);
+    
+    // Simulate MFA verification
+    const mfaVerifyResult = await auth.verifyMFA('123456', mfaResult.data.challenge);
+    console.warn('MFA verification:', mfaVerifyResult.success ? 'Valid' : 'Invalid');
+  }
   
   console.log('');
 }
