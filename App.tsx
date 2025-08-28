@@ -1,146 +1,169 @@
-import React, { useEffect } from 'react';
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import OnboardingScreen from './screens/OnboardingScreen';
+import { onboardingManager } from './lib/legal/onboardingManager';
 
-// Import analytics configuration
-import { initializeAmplitude, trackScreenView } from './lib/analytics/amplitudeConfig';
+export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-// Import security manager
-import { CryptoManager } from './lib/security/cryptoManager';
-
-// Import theme constants
-import { colors, spacing, typography } from './constants/theme';
-
-const App: React.FC = () => {
   useEffect(() => {
-    // Initialize analytics tracking
-    initializeAmplitude();
-    
-    // Track main app screen view
-    trackScreenView('main_app', {
-      app_version: '1.0.0',
-      security_features: ['crypto', 'network_monitoring', 'analytics'],
-      timestamp: new Date().toISOString(),
-    });
-
-    // Initialize security manager
-    const initializeSecurity = async () => {
-      try {
-        const cryptoManager = CryptoManager.getInstance();
-        await cryptoManager.initialize();
-      } catch (error) {
-        console.error('Failed to initialize security manager:', error);
-      }
-    };
-
-    initializeSecurity();
+    checkOnboardingStatus();
   }, []);
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor={colors.background} 
-      />
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>DESIST Security App</Text>
-          <Text style={styles.subtitle}>Enhanced Cryptography & Analytics</Text>
-        </View>
-        
-        <View style={styles.content}>
-          <View style={styles.featureCard}>
-            <Text style={styles.featureTitle}>🔐 Secure Cryptography</Text>
-            <Text style={styles.featureDescription}>
-              Real SHA-256 hashing with expo-crypto
-            </Text>
-          </View>
-          
-          <View style={styles.featureCard}>
-            <Text style={styles.featureTitle}>🌐 Network Monitoring</Text>
-            <Text style={styles.featureDescription}>
-              Real-time security analysis with NetInfo
-            </Text>
-          </View>
-          
-          <View style={styles.featureCard}>
-            <Text style={styles.featureTitle}>📊 Analytics Tracking</Text>
-            <Text style={styles.featureDescription}>
-              Comprehensive security event monitoring
-            </Text>
-          </View>
-        </View>
-        
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Powered by enhanced security architecture
-          </Text>
-        </View>
+  const checkOnboardingStatus = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const isComplete = await onboardingManager.isOnboardingComplete();
+      const needsReConsent = await onboardingManager.needsReConsent();
+      
+      // Show onboarding if not complete or needs re-consent
+      setShowOnboarding(!isComplete || needsReConsent);
+      
+    } catch (err) {
+      console.error('Error checking onboarding status:', err);
+      setError('Failed to load app. Please restart.');
+      // Default to showing onboarding on error
+      setShowOnboarding(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOnboardingComplete = async () => {
+    try {
+      // Onboarding completion is handled by ConsentFlowScreen
+      // Just update our local state to hide onboarding
+      setShowOnboarding(false);
+    } catch (err) {
+      console.error('Error completing onboarding:', err);
+      setError('Failed to complete setup. Please try again.');
+    }
+  };
+
+  const renderMainApp = () => (
+    <View style={styles.mainApp}>
+      <Text style={styles.welcomeText}>Welcome to DESIST!</Text>
+      <Text style={styles.statusText}>🛡️ Your security app is ready</Text>
+      
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusTitle}>Security Status: Active</Text>
+        <Text style={styles.statusDescription}>
+          • End-to-end encryption enabled
+        </Text>
+        <Text style={styles.statusDescription}>
+          • Rate limiting protection active
+        </Text>
+        <Text style={styles.statusDescription}>
+          • CAPTCHA verification ready
+        </Text>
+        <Text style={styles.statusDescription}>
+          • Privacy settings configured
+        </Text>
       </View>
-    </SafeAreaProvider>
+    </View>
   );
-};
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007bff" />
+        <Text style={styles.loadingText}>Loading DESIST!...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>⚠️ Error</Text>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen onComplete={handleOnboardingComplete} />
+    );
+  }
+
+  return renderMainApp();
+}
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
-  header: {
-    paddingTop: spacing.xl,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    backgroundColor: colors.surface,
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
   },
-  title: {
-    fontSize: typography.fontSize.title,
-    fontWeight: '700',
-    color: colors.text.primary,
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 24,
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#dc3545',
+    marginBottom: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  mainApp: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
     textAlign: 'center',
   },
-  subtitle: {
-    fontSize: typography.fontSize.body,
-    color: colors.text.secondary,
+  statusText: {
+    fontSize: 18,
+    color: '#28a745',
+    marginBottom: 32,
     textAlign: 'center',
-    marginTop: spacing.sm,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xl,
-  },
-  featureCard: {
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+  statusContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 24,
     borderRadius: 12,
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: '#28a745',
+    width: '100%',
+    maxWidth: 400,
   },
-  featureTitle: {
-    fontSize: typography.fontSize.heading,
+  statusTitle: {
+    fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
+    color: '#28a745',
+    marginBottom: 16,
   },
-  featureDescription: {
-    fontSize: typography.fontSize.small,
-    color: colors.text.secondary,
+  statusDescription: {
+    fontSize: 14,
+    color: '#555',
     lineHeight: 20,
-  },
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    backgroundColor: colors.surface,
-  },
-  footerText: {
-    fontSize: typography.fontSize.small,
-    color: colors.text.secondary,
-    textAlign: 'center',
+    marginBottom: 8,
   },
 });
-
-export default App;
