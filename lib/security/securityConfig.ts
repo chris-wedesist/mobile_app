@@ -27,6 +27,7 @@ export interface SecurityConfig {
   captcha: {
     enabled: boolean;
     siteKey: string;
+    secretKey: string;
     baseUrl: string;
     theme: 'light' | 'dark';
     size: 'compact' | 'normal';
@@ -64,6 +65,7 @@ const defaultConfig: SecurityConfig = {
   captcha: {
     enabled: true,
     siteKey: process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY || '6Ld-ALYrAAAAAKW7vP_I_d2wKZ7_lz-g49AWhOl7',
+    secretKey: process.env.EXPO_PUBLIC_RECAPTCHA_SECRET_KEY || '6Ld-ALYrAAAAABAjYRpVcK7j6TZPIzcSjBFD7FYr',
     baseUrl: process.env.EXPO_PUBLIC_APP_URL || '',
     theme: 'light',
     size: 'normal',
@@ -105,6 +107,10 @@ export function validateSecurityConfig(config: SecurityConfig): string[] {
   const errors: string[] = [];
 
   if (config.captcha.enabled && !config.captcha.siteKey) {
+  }
+
+  if (config.captcha.enabled && !config.captcha.secretKey) {
+    errors.push('CAPTCHA is enabled but no secret key is configured');
     errors.push('CAPTCHA is enabled but no site key is configured');
   }
 

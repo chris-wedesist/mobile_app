@@ -310,3 +310,100 @@ For questions or issues with rate limiting and CAPTCHA functionality:
 2. Check the test files for examples
 3. Consult the security configuration
 4. Review security event logs for insights
+
+## Server-Side CAPTCHA Verification
+
+### Secret Key Configuration
+
+The reCAPTCHA secret key is used for server-side verification of CAPTCHA tokens. This provides an additional layer of security beyond client-side validation.
+
+#### Environment Variables
+
+Add these to your server environment:
+
+```env
+# reCAPTCHA Keys
+EXPO_PUBLIC_RECAPTCHA_SITE_KEY=6Ld-ALYrAAAAAKW7vP_I_d2wKZ7_lz-g49AWhOl7
+EXPO_PUBLIC_RECAPTCHA_SECRET_KEY=6Ld-ALYrAAAAABAjYRpVcK7j6TZPIzcSjBFD7FYr
+```
+
+**Security Note**: The secret key should ONLY be used on your server/backend. Never expose it in client-side code.
+
+### Server-Side Verification
+
+```typescript
+import { verifyCaptchaToken, verifyWithSecurityChecks } from '../lib/security/captchaVerification';
+
+// Basic verification
+const result = await verifyCaptchaToken(token);
+if (result.success) {
+  // Token is valid
+  proceedWithAction();
+}
+
+// Advanced verification with score checking (reCAPTCHA v3)
+const advancedResult = await verifyWithSecurityChecks(
+  token,
+  'submit_incident', // expected action
+  0.5, // minimum score
+  clientIP
+);
+```
+
+### API Endpoint Example
+
+```typescript
+// Express.js endpoint for CAPTCHA verification
+app.post('/api/verify-captcha', async (req, res) => {
+  const { token, action } = req.body;
+  
+  const result = await verifyWithSecurityChecks(
+    token,
+    action,
+    0.5,
+    req.ip
+  );
+  
+  if (result.success) {
+    res.json({ success: true, score: result.score });
+  } else {
+    res.status(400).json({ success: false, error: result.reason });
+  }
+});
+```
+
+### Security Best Practices
+
+1. **Never expose the secret key** in client-side code
+2. **Always verify tokens server-side** for critical operations
+3. **Use score-based verification** for reCAPTCHA v3
+4. **Log verification attempts** for security monitoring
+5. **Set appropriate score thresholds** based on your security requirements
+
+### Integration with Mobile App
+
+The mobile app should send the CAPTCHA token to your server for verification:
+
+```typescript
+// In your React Native component
+const submitWithCaptcha = async (token: string) => {
+  try {
+    const response = await fetch('/api/verify-captcha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        token,
+        action: 'submit_incident',
+        data: formData
+      })
+    });
+    
+    const result = await response.json();
+    if (result.success) {
+      // Proceed with the protected action
+    }
+  } catch (error) {
+    // Handle verification error
+  }
+};
+```
