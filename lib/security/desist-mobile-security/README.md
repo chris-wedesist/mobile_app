@@ -1,31 +1,94 @@
-# Desist Mobile Security
+# DESIST! Mobile Security Platform
 
-A comprehensive TypeScript library providing advanced security features for mobile applications, including encryption, authentication, secure storage, and threat detection.
+A comprehensive mobile security and incident reporting platform with enterprise-grade encryption, privacy compliance, and advanced threat protection. Built with React Native, TypeScript, and modern security best practices.
 
-## Features
+## 🛡️ Enterprise Security Features
 
-### 🔐 Encryption Module
-- **AES-256 Encryption**: Support for both GCM and CBC modes
-- **Key Management**: Automated key rotation and secure key derivation
-- **Password-based Encryption**: PBKDF2 with configurable iterations
-- **Secure Hashing**: SHA-512 with salt for password hashing
+### 🔐 Military-Grade Encryption
+- **AES-256 Encryption**: Advanced encryption standard with GCM mode
+- **Automated Key Rotation**: 24-hour key rotation for maximum security
+- **Secure Key Management**: Hardware-backed cryptographic key storage
+- **End-to-End Encryption**: Complete data protection in transit and at rest
 
-### 🔑 Authentication Module
-- **JWT Tokens**: Secure token generation and validation
-- **Multi-Factor Authentication**: TOTP and SMS/Email verification
-- **Account Security**: Failed attempt tracking and account lockout
-- **Password Management**: Bcrypt hashing with salt rounds
+### 🔑 Advanced Authentication
+- **Multi-Factor Authentication**: Biometric + password + optional TOTP
+- **JWT Token Management**: Secure session handling with refresh tokens
+- **Rate Limiting**: Device-based request throttling with AsyncStorage
+- **CAPTCHA Integration**: Google reCAPTCHA v3 for bot protection
 
-### 🛡️ Security Features
-- **Threat Detection**: Runtime application self-protection
-- **Network Security**: SSL pinning and request validation
-- **Secure Storage**: Encrypted local data storage
-- **Privacy Protection**: Data anonymization and consent management
+### �️ Comprehensive Security Stack
+- **Runtime Threat Detection**: Real-time application self-protection (RASP)
+- **SSL Certificate Pinning**: Network communication security hardening  
+- **Secure Local Storage**: Encrypted AsyncStorage with key rotation
+- **Privacy by Design**: GDPR/CCPA compliant data protection
 
-## Installation
+### ⚖️ Legal Compliance Framework
+- **GDPR Compliance**: European privacy regulation adherence
+- **CCPA Compliance**: California privacy law implementation
+- **Consent Management**: Granular user consent tracking and withdrawal
+- **Data Rights**: Complete user data access, export, and deletion
+- **Audit Logging**: Comprehensive compliance event tracking
 
+## 📱 Mobile App Features
+
+### 🚨 Incident Reporting
+- **Secure Report Submission**: Encrypted incident reporting with CAPTCHA
+- **Anonymous Reporting**: Privacy-preserving incident documentation
+- **Evidence Upload**: Secure photo/video/document attachment
+- **Real-time Status Tracking**: Investigation progress monitoring
+
+### � Privacy Controls
+- **Granular Permissions**: Individual control over data collection types
+- **Location Services**: Optional location data for incident context
+- **Analytics Control**: User choice for usage data sharing
+- **Marketing Preferences**: Opt-in communication management
+
+### 🆘 Emergency Features
+- **Quick Emergency Access**: One-tap emergency service activation
+- **Safety Check-ins**: Scheduled safety confirmation system
+- **Emergency Contacts**: Rapid notification of designated contacts
+- **Panic Mode**: Discrete emergency activation with location sharing
+
+## 📚 Complete Documentation
+
+### 📖 [Master Documentation Index](docs/README.md)
+- **[User Guide](docs/training/USER_GUIDE.md)** - Complete end-user documentation
+- **[Administrator Training](docs/training/ADMIN_TRAINING_GUIDE.md)** - Comprehensive admin procedures
+- **[Technical Implementation](docs/training/TECHNICAL_IMPLEMENTATION_GUIDE.md)** - Developer reference
+- **[Production Deployment](docs/deployment/PRODUCTION_DEPLOYMENT_GUIDE.md)** - DevOps procedures
+- **[Legal Compliance](README_LEGAL.md)** - Privacy and legal framework
+
+## 🚀 Quick Installation
+
+### Mobile App Setup
 ```bash
-npm install desist-mobile-security
+# Clone repository
+git clone https://github.com/wedesist/mobile-security.git
+cd mobile-security
+
+# Install dependencies  
+npm install
+
+# Start development server
+npm run start
+
+# Run on specific platform
+npm run android  # Android
+npm run ios      # iOS  
+npm run web      # Browser
+```
+
+### Backend Services Setup
+```bash
+# Environment configuration
+cp .env.example .env.production
+# Edit with your secure configuration
+
+# Start with Docker
+docker-compose up -d
+
+# Or deploy to Kubernetes
+kubectl apply -f k8s/
 ```
 
 ## Quick Start
