@@ -9,7 +9,12 @@ const securityConfig: SecurityConfig = {
     deriveKeyFromPassword: true
   },
   authentication: {
-    jwtSecret: process.env.JWT_SECRET || 'fallback-secret-key',
+    jwtSecret: process.env.JWT_SECRET || (() => {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET environment variable is required in production');
+      }
+      return 'development-only-secret-do-not-use-in-production';
+    })(),
     jwtExpiryTime: '1h',
     enableBiometric: true,
     enableMFA: true,
