@@ -63,7 +63,7 @@ const defaultConfig: SecurityConfig = {
   },
   captcha: {
     enabled: true,
-    siteKey: process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY || '',
+    siteKey: process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY || '6Ld-ALYrAAAAAKW7vP_I_d2wKZ7_lz-g49AWhOl7',
     baseUrl: process.env.EXPO_PUBLIC_APP_URL || '',
     theme: 'light',
     size: 'normal',

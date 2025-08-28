@@ -19,7 +19,7 @@ export default function ReportIncidentWithRateLimitAndCaptcha() {
   const [deviceId, setDeviceId] = useState<string>('');
 
   // Add your site key here (register at https://www.google.com/recaptcha/admin)
-  const RECAPTCHA_SITE_KEY = process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY || 'YOUR_RECAPTCHA_SITE_KEY';
+  const RECAPTCHA_SITE_KEY = process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY || '6Ld-ALYrAAAAAKW7vP_I_d2wKZ7_lz-g49AWhOl7';
   const RECAPTCHA_BASE_URL = process.env.EXPO_PUBLIC_APP_URL || 'https://your-app-url.com';
 
   useEffect(() => {
