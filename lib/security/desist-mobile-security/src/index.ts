@@ -2,6 +2,15 @@ export { EncryptionService } from './encryption/index';
 export { AuthenticationService } from './authentication/index';
 export * from './types/index';
 
+// Export incident reporting functionality (services and types only)
+export { IncidentService } from './services/IncidentService';
+export * from './types/incident';
+export * from './constants/incident';
+export * from './constants/theme';
+
+// Note: React components are available in src/components/ but not exported from main index
+// to avoid React Native dependencies in library context
+
 import { EncryptionService } from './encryption/index';
 import { AuthenticationService } from './authentication/index';
 import { SecurityConfig, SecurityResult } from './types/index';

@@ -66,12 +66,12 @@ export const notificationService = {
     return null;
   },
   
-  async sendNotification(): Promise<boolean> {
+  async sendNotification(_data: NotificationData): Promise<boolean> {
     // Mock implementation - always returns false
     return false;
   },
   
-  async sendLocalNotification(): Promise<boolean> {
+  async sendLocalNotification(_data: NotificationData): Promise<boolean> {
     // Mock implementation - always returns false
     return false;
   },
@@ -92,7 +92,7 @@ export const notificationService = {
     };
   },
   
-  async updateNotificationPreferences(): Promise<boolean> {
+  async updateNotificationPreferences(_preferences: Partial<NotificationPreferences>): Promise<boolean> {
     // Mock implementation - always returns true
     return true;
   }
