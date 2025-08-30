@@ -12,15 +12,22 @@ import {
   Location
 } from '../types/incident';
 import {
-  RATE_LIMITING,
-  TIME_CONSTANTS,
-  MS_PER_DAY,
-  VALIDATION,
-  SECURITY,
-  LOCATION,
   ANALYTICS,
-  EARTH_RADIUS_METERS
+  EARTH_RADIUS_METERS,
+  LOCATION,
+  MS_PER_DAY,
+  RATE_LIMITING,
+  SECURITY,
+  TIME_CONSTANTS,
+  VALIDATION
 } from '../constants/incident';
+
+/**
+ * IncidentService Constants
+ */
+const RANDOM_STRING_BASE = 36;
+const RANDOM_STRING_LENGTH = 9;
+const DEGREES_TO_RADIANS = 180;
 
 /**
  * Incident Service
@@ -446,10 +453,10 @@ export class IncidentService {
   }
 
   private generateIncidentId(): string {
-    return `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `incident_${Date.now()}_${Math.random().toString(RANDOM_STRING_BASE).substr(2, RANDOM_STRING_LENGTH)}`;
   }
 
-  private async storeIncident(incident: any): Promise<void> {
+  private async storeIncident(incident: IncidentReport): Promise<void> {
     const existingData = await AsyncStorage.getItem(this.storageKey);
     const incidents = existingData ? JSON.parse(existingData) : [];
     incidents.push(incident);
@@ -487,7 +494,7 @@ export class IncidentService {
               timestamp: new Date(encryptedIncident.timestamp),
               lastUpdated: new Date(encryptedIncident.lastUpdated)
             };
-            delete (incident as any)._encryption;
+            delete (incident as unknown as Record<string, unknown>)._encryption;
             incidents.push(incident);
           }
         } catch (error) {
@@ -521,7 +528,7 @@ export class IncidentService {
     if (!data) return;
 
     const incidents = JSON.parse(data);
-    const index = incidents.findIndex((i: any) => i.id === incident.id);
+    const index = incidents.findIndex((i: IncidentReport) => i.id === incident.id);
     if (index !== -1) {
       // Encrypt updated incident
       const encryptedDescription = await this.encryptionService.encrypt(incident.description);
@@ -547,7 +554,7 @@ export class IncidentService {
 
       const votes: IncidentVote[] = JSON.parse(votesData);
       return votes.find(vote => vote.incidentId === incidentId && vote.userId === userId) || null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -574,10 +581,10 @@ export class IncidentService {
 
   private calculateDistance(loc1: Location, loc2: Location): number {
     const R = EARTH_RADIUS_METERS;
-    const φ1 = loc1.latitude * Math.PI/180;
-    const φ2 = loc2.latitude * Math.PI/180;
-    const Δφ = (loc2.latitude-loc1.latitude) * Math.PI/180;
-    const Δλ = (loc2.longitude-loc1.longitude) * Math.PI/180;
+    const φ1 = loc1.latitude * Math.PI/DEGREES_TO_RADIANS;
+    const φ2 = loc2.latitude * Math.PI/DEGREES_TO_RADIANS;
+    const Δφ = (loc2.latitude-loc1.latitude) * Math.PI/DEGREES_TO_RADIANS;
+    const Δλ = (loc2.longitude-loc1.longitude) * Math.PI/DEGREES_TO_RADIANS;
 
     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
               Math.cos(φ1) * Math.cos(φ2) *

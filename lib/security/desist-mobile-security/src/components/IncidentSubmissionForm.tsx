@@ -17,6 +17,7 @@ import * as Location from 'expo-location';
 import { IncidentSeverity, IncidentSubmission, IncidentType, Location as LocationType } from '../types/incident';
 import { IncidentService } from '../services/IncidentService';
 import { EncryptionService } from '../encryption';
+import { COLORS } from '../constants/theme';
 
 interface IncidentSubmissionFormProps {
   onSubmissionComplete: (wasSuccessful: boolean) => void;
@@ -35,10 +36,10 @@ const incidentTypes: { value: IncidentType; label: string }[] = [
 ];
 
 const severityLevels: { value: IncidentSeverity; label: string; color: string }[] = [
-  { value: 'low', label: 'Low', color: '#4CAF50' },
-  { value: 'medium', label: 'Medium', color: '#FF9800' },
-  { value: 'high', label: 'High', color: '#FF5722' },
-  { value: 'critical', label: 'Critical', color: '#F44336' }
+  { value: 'low', label: 'Low', color: COLORS.severityLow },
+  { value: 'medium', label: 'Medium', color: COLORS.severityMedium },
+  { value: 'high', label: 'High', color: COLORS.severityHigh },
+  { value: 'critical', label: 'Critical', color: COLORS.severityCritical }
 ];
 
 const generateDeviceId = (): string => {
@@ -245,7 +246,7 @@ export const IncidentSubmissionForm: React.FC<IncidentSubmissionFormProps> = ({
       <Text style={styles.sectionTitle}>Location</Text>
       {isGettingLocation ? (
         <View style={styles.locationContainer}>
-          <ActivityIndicator size="small" color="#007AFF" />
+          <ActivityIndicator size="small" color={COLORS.primary} />
           <Text style={styles.locationText}>Getting your location...</Text>
         </View>
       ) : location ? (
@@ -326,7 +327,7 @@ export const IncidentSubmissionForm: React.FC<IncidentSubmissionFormProps> = ({
           disabled={!title.trim() || !description.trim() || !location || isSubmitting}
         >
           {isSubmitting ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
             <Text style={styles.submitButtonText}>Submit Report</Text>
           )}
@@ -339,7 +340,7 @@ export const IncidentSubmissionForm: React.FC<IncidentSubmissionFormProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: COLORS.white
   },
   scrollContainer: {
     flex: 1,
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333333',
+    color: COLORS.dark,
     marginBottom: 20,
     textAlign: 'center'
   },
@@ -358,16 +359,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333333',
+    color: COLORS.dark,
     marginBottom: 8
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#F9F9F9'
+    backgroundColor: COLORS.background
   },
   textArea: {
     minHeight: 100,
@@ -375,7 +376,7 @@ const styles = StyleSheet.create({
   },
   characterCount: {
     fontSize: 12,
-    color: '#666666',
+    color: COLORS.medium,
     textAlign: 'right',
     marginTop: 4
   },
@@ -387,20 +388,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.border,
     marginRight: 10,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: COLORS.white
   },
   typeOptionSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF'
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary
   },
   typeOptionText: {
     fontSize: 14,
-    color: '#333333'
+    color: COLORS.dark
   },
   typeOptionTextSelected: {
-    color: '#FFFFFF'
+    color: COLORS.white
   },
   severityContainer: {
     flexDirection: 'row',
@@ -421,45 +422,45 @@ const styles = StyleSheet.create({
     fontWeight: '600'
   },
   severityOptionTextSelected: {
-    color: '#FFFFFF'
+    color: COLORS.white
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 12,
-    backgroundColor: '#F0F8FF',
+    backgroundColor: COLORS.locationBackground,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#B0D4FF'
+    borderColor: COLORS.locationBorder
   },
   locationText: {
     fontSize: 14,
-    color: '#333333',
+    color: COLORS.dark,
     flex: 1
   },
   refreshLocationButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
     borderRadius: 6
   },
   refreshLocationText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
     fontSize: 12,
     fontWeight: '600'
   },
   getLocationButton: {
     padding: 12,
-    backgroundColor: '#F0F8FF',
+    backgroundColor: COLORS.locationBackground,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#B0D4FF',
+    borderColor: COLORS.locationBorder,
     alignItems: 'center'
   },
   getLocationText: {
     fontSize: 16,
-    color: '#007AFF',
+    color: COLORS.primary,
     fontWeight: '600'
   },
   anonymousToggle: {
@@ -470,27 +471,27 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.border,
     borderRadius: 4,
     marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center'
   },
   checkboxSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF'
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary
   },
   checkmark: {
-    color: '#FFFFFF',
+    color: COLORS.white,
     fontSize: 12,
     fontWeight: 'bold'
   },
   anonymousText: {
     fontSize: 16,
-    color: '#333333'
+    color: COLORS.dark
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -498,10 +499,10 @@ const styles = StyleSheet.create({
     marginBottom: 40
   },
   submitButtonDisabled: {
-    backgroundColor: '#CCCCCC'
+    backgroundColor: COLORS.light
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
     fontSize: 18,
     fontWeight: '600'
   }

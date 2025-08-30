@@ -13,6 +13,17 @@ export { PrivacyService } from './services/PrivacyService';
 export * from './types/privacy';
 export { PRIVACY_CONSTANTS, MS_PER_HOUR } from './constants/privacy';
 
+// Export performance and network monitoring functionality
+export { MonitoringService } from './services/MonitoringService';
+export * from './types/monitoring';
+export {
+  usePerformanceMonitoring,
+  useNetworkMonitoring,
+  useSystemMonitoring,
+  usePerformanceOptimization,
+  useNetworkSpeed
+} from './hooks/useMonitoring';
+
 // Note: React components are available in src/components/ but not exported from main index
 // to avoid React Native dependencies in library context
 

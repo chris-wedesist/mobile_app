@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NotificationPreferences, notificationService } from '../notifications';
+import { COLORS } from '../constants/theme';
 
 export default function NotificationSettingsScreen() {
   const router = useRouter();
@@ -189,8 +190,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.emergencyNotifications}
               onValueChange={(value) => updatePreference('emergencyNotifications', value)}
-              trackColor={{ false: '#767577', true: '#FF4444' }}
-              thumbColor={preferences.emergencyNotifications ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.error }}
+              thumbColor={preferences.emergencyNotifications ? COLORS.white : COLORS.lightGray}
             />
           </View>
 
@@ -202,8 +203,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.incidentAlerts}
               onValueChange={(value) => updatePreference('incidentAlerts', value)}
-              trackColor={{ false: '#767577', true: '#4285F4' }}
-              thumbColor={preferences.incidentAlerts ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.info }}
+              thumbColor={preferences.incidentAlerts ? COLORS.white : COLORS.lightGray}
             />
           </View>
 
@@ -215,8 +216,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.safetyAlerts}
               onValueChange={(value) => updatePreference('safetyAlerts', value)}
-              trackColor={{ false: '#767577', true: '#4285F4' }}
-              thumbColor={preferences.safetyAlerts ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.info }}
+              thumbColor={preferences.safetyAlerts ? COLORS.white : COLORS.lightGray}
             />
           </View>
         </View>
@@ -233,8 +234,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.reportUpdates}
               onValueChange={(value) => updatePreference('reportUpdates', value)}
-              trackColor={{ false: '#767577', true: '#4285F4' }}
-              thumbColor={preferences.reportUpdates ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.info }}
+              thumbColor={preferences.reportUpdates ? COLORS.white : COLORS.lightGray}
             />
           </View>
 
@@ -246,8 +247,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.systemUpdates}
               onValueChange={(value) => updatePreference('systemUpdates', value)}
-              trackColor={{ false: '#767577', true: '#4285F4' }}
-              thumbColor={preferences.systemUpdates ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.info }}
+              thumbColor={preferences.systemUpdates ? COLORS.white : COLORS.lightGray}
             />
           </View>
         </View>
@@ -264,8 +265,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.marketing}
               onValueChange={(value) => updatePreference('marketing', value)}
-              trackColor={{ false: '#767577', true: '#4285F4' }}
-              thumbColor={preferences.marketing ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.info }}
+              thumbColor={preferences.marketing ? COLORS.white : COLORS.lightGray}
             />
           </View>
         </View>
@@ -290,8 +291,8 @@ export default function NotificationSettingsScreen() {
             <Switch
               value={preferences.quietHours.enabled}
               onValueChange={(value) => updateQuietHours('enabled', value)}
-              trackColor={{ false: '#767577', true: '#4285F4' }}
-              thumbColor={preferences.quietHours.enabled ? '#fff' : '#f4f3f4'}
+              trackColor={{ false: COLORS.medium, true: COLORS.info }}
+              thumbColor={preferences.quietHours.enabled ? COLORS.white : COLORS.lightGray}
             />
           </View>
 
@@ -333,7 +334,7 @@ export default function NotificationSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: COLORS.background,
   },
   scrollView: {
     flex: 1,
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.medium,
   },
   errorContainer: {
     flex: 1,
@@ -358,18 +359,18 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#FF4444',
+    color: COLORS.error,
     textAlign: 'center',
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#4285F4',
+    backgroundColor: COLORS.info,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -383,20 +384,20 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    color: '#4285F4',
+    color: COLORS.info,
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: COLORS.dark,
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -405,12 +406,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: COLORS.dark,
     marginBottom: 8,
   },
   sectionDescription: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.medium,
     marginBottom: 16,
     lineHeight: 20,
   },
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.borderLight,
   },
   settingContent: {
     flex: 1,
@@ -428,12 +429,12 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1a1a1a',
+    color: COLORS.dark,
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.medium,
     lineHeight: 18,
   },
   permissionStatus: {
@@ -443,32 +444,32 @@ const styles = StyleSheet.create({
   },
   permissionText: {
     fontSize: 16,
-    color: '#1a1a1a',
+    color: COLORS.dark,
   },
   enableButton: {
-    backgroundColor: '#4285F4',
+    backgroundColor: COLORS.info,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
   },
   enableButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 14,
     fontWeight: '600',
   },
   quietHoursDetails: {
     marginTop: 12,
     padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: COLORS.background,
     borderRadius: 8,
   },
   quietHoursNote: {
     fontSize: 13,
-    color: '#666',
+    color: COLORS.medium,
     lineHeight: 18,
   },
   testButton: {
-    backgroundColor: '#4285F4',
+    backgroundColor: COLORS.info,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -476,25 +477,25 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   testButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.light,
   },
   testButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: '600',
   },
   testButtonTextDisabled: {
-    color: '#999',
+    color: COLORS.lighter,
   },
   footer: {
     marginTop: 20,
     padding: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.borderLight,
     borderRadius: 8,
   },
   footerText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.medium,
     textAlign: 'center',
     lineHeight: 16,
   },

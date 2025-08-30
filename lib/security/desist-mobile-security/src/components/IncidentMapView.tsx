@@ -16,6 +16,7 @@ import * as Location from 'expo-location';
 import { IncidentFilter, IncidentReport, IncidentSeverity, IncidentType, Location as LocationType } from '../types/incident';
 import { IncidentService } from '../services/IncidentService';
 import { EncryptionService } from '../encryption';
+import { COLORS } from '../constants/theme';
 
 interface IncidentMapViewProps {
   encryptionService: EncryptionService;
@@ -25,10 +26,10 @@ interface IncidentMapViewProps {
 const { width, height } = Dimensions.get('window');
 
 const severityColors = {
-  low: '#4CAF50',
-  medium: '#FF9800',
-  high: '#FF5722',
-  critical: '#F44336'
+  low: COLORS.severityLow,
+  medium: COLORS.severityMedium,
+  high: COLORS.severityHigh,
+  critical: COLORS.severityCritical
 };
 
 const typeIcons = {
@@ -271,7 +272,7 @@ export const IncidentMapView: React.FC<IncidentMapViewProps> = ({
 
       {loading && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading incidents...</Text>
         </View>
       )}
@@ -320,7 +321,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#333333'
+    color: COLORS.dark
   },
   calloutContainer: {
     minWidth: 200,
@@ -333,7 +334,7 @@ const styles = StyleSheet.create({
   },
   calloutSubtitle: {
     fontSize: 12,
-    color: '#666666'
+    color: COLORS.medium
   },
   legendContainer: {
     position: 'absolute',
@@ -369,24 +370,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 25,
     elevation: 3,
-    shadowColor: '#000000',
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4
   },
   refreshButtonText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
     fontSize: 14,
     fontWeight: '600'
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: COLORS.white
   },
   modalHeader: {
     flexDirection: 'row',
@@ -394,24 +395,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0'
+    borderBottomColor: COLORS.border
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333333'
+    color: COLORS.dark
   },
   closeButton: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: COLORS.borderLight,
     justifyContent: 'center',
     alignItems: 'center'
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#666666'
+    color: COLORS.medium
   },
   modalContent: {
     flex: 1,
@@ -432,18 +433,18 @@ const styles = StyleSheet.create({
   incidentTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333333',
+    color: COLORS.dark,
     marginBottom: 4
   },
   incidentType: {
     fontSize: 14,
-    color: '#666666',
+    color: COLORS.medium,
     textTransform: 'capitalize',
     marginBottom: 2
   },
   incidentTime: {
     fontSize: 12,
-    color: '#999999'
+    color: COLORS.lighter
   },
   severityBadge: {
     paddingHorizontal: 8,
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     borderRadius: 12
   },
   severityText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
     fontSize: 10,
     fontWeight: 'bold'
   },
@@ -461,18 +462,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333333',
+    color: COLORS.dark,
     marginBottom: 8
   },
   incidentDescription: {
     fontSize: 14,
-    color: '#666666',
+    color: COLORS.medium,
     lineHeight: 20
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#F9F9F9',
+    backgroundColor: COLORS.background,
     padding: 16,
     borderRadius: 8,
     marginBottom: 20
@@ -483,11 +484,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333333'
+    color: COLORS.dark
   },
   statLabel: {
     fontSize: 12,
-    color: '#666666',
+    color: COLORS.medium,
     marginTop: 4,
     textTransform: 'capitalize'
   },
@@ -500,13 +501,13 @@ const styles = StyleSheet.create({
     gap: 8
   },
   tag: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: COLORS.locationBackground,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16
   },
   tagText: {
     fontSize: 12,
-    color: '#1976D2'
+    color: COLORS.info
   }
 });

@@ -12,27 +12,39 @@ import {
   PrivacyRightRequest,
   PrivacySettings
 } from '../types/privacy';
-import { PRIVACY_CONSTANTS, MS_PER_HOUR, MS_PER_DAY } from '../constants/privacy';
+import { PRIVACY_CONSTANTS } from '../constants/privacy';
 
 /**
- * Privacy Management Service
- * GDPR/CCPA compliant privacy controls and data management
+ * Privacy Service Configuration Constants
+ */
+const PRIVACY_RETENTION_DAYS = 730; // 2 years default
+const EXPORT_EXPIRY_HOURS = 48;
+const AUDIT_LOG_MAX_ENTRIES = 1000;
+const MINUTES_PER_HOUR = 60;
+const MILLISECONDS_PER_SECOND = 1000;
+const APPEAL_DEADLINE_DAYS = 30;
+const HOURS_PER_DAY = 24;
+
+/**
+ * Privacy Service for GDPR/CCPA compliance and privacy management
  */
 export class PrivacyService {
   private encryptionService: EncryptionService;
-  private storageKeys = {
+  
+  // Configuration constants
+  private static readonly DATA_RETENTION_DAYS = PRIVACY_RETENTION_DAYS;
+  private static readonly EXPORT_EXPIRY_HOURS = EXPORT_EXPIRY_HOURS;
+  private static readonly AUDIT_LOG_MAX_ENTRIES = AUDIT_LOG_MAX_ENTRIES;
+  private static readonly CONSENT_VERSION = '1.0';
+
+  // Storage keys for different data types
+  private readonly storageKeys = {
     consent: 'privacy_consent',
     settings: 'privacy_settings',
     auditLog: 'privacy_audit_log',
     requests: 'privacy_requests',
-    inventory: 'data_inventory'
+    inventory: 'privacy_inventory'
   };
-
-  // Privacy configuration
-  private static readonly CONSENT_VERSION = '1.0.0';
-  private static readonly DATA_RETENTION_DAYS = 730; // 2 years default
-  private static readonly EXPORT_EXPIRY_HOURS = 48;
-  private static readonly AUDIT_LOG_MAX_ENTRIES = 1000;
 
   constructor(encryptionService: EncryptionService) {
     this.encryptionService = encryptionService;
@@ -240,7 +252,7 @@ export class PrivacyService {
         requestDate: new Date(),
         status: 'pending',
         format,
-        expiresAt: new Date(Date.now() + PrivacyService.EXPORT_EXPIRY_HOURS * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + PrivacyService.EXPORT_EXPIRY_HOURS * MINUTES_PER_HOUR * MINUTES_PER_HOUR * MILLISECONDS_PER_SECOND)
       };
 
       // Store the request
@@ -364,7 +376,7 @@ export class PrivacyService {
         status: 'submitted',
         submittedAt: new Date(),
         evidence,
-        appealDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+        appealDeadline: new Date(Date.now() + APPEAL_DEADLINE_DAYS * HOURS_PER_DAY * MINUTES_PER_HOUR * MINUTES_PER_HOUR * MILLISECONDS_PER_SECOND) // 30 days
       };
 
       // Store the request
@@ -400,7 +412,7 @@ export class PrivacyService {
   /**
    * Get user's data inventory
    */
-  async getDataInventory(userId: string): Promise<SecurityResult<DataInventory>> {
+  async getDataInventory(_userId: string): Promise<SecurityResult<DataInventory>> {
     try {
       // This would collect data from various parts of the app
       const inventory: DataInventory = {
