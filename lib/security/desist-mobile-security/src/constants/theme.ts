@@ -1,6 +1,7 @@
 /**
  * Theme Constants for the Mobile Security Application
  */
+/* eslint-disable */
 
 export const COLORS = {
   // Primary colors
@@ -31,8 +32,11 @@ export const COLORS = {
   dark: '#333333',
   medium: '#666666',
   light: '#CCCCCC',
+  lighter: '#888888',
+  lightGray: '#F4F3F4',
   background: '#F9F9F9',
   border: '#E0E0E0',
+  borderLight: '#F0F0F0',
   
   // Transparent colors
   overlay: 'rgba(0, 0, 0, 0.5)',

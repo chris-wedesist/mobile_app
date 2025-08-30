@@ -1,6 +1,18 @@
-# DESIST! Mobile Security Platform
+# DESIST! Mobile Security Platfor### 🚨 Incident Reporting
+- **Secure Report Submission**: Encrypted incident reporting with CAPTCHA
+- **Anonymous Reporting**: Privacy-preserving incident documentation
+- **Evidence Upload**: Secure photo/video/document attachment
+- **Real-time Status Tracking**: Investigation progress monitoring
+- **Community Features**: Voting, comments, and incident clustering
+- **Location Integration**: Precise incident mapping with privacy controls
 
-A comprehensive mobile security and incident reporting platform with enterprise-grade encryption, privacy compliance, and advanced threat protection. Built with React Native, TypeScript, and modern security best practices.
+### 🔐 Privacy Controls
+- **Granular Permissions**: Individual control over data collection types
+- **Location Services**: Optional location data for incident context
+- **Analytics Control**: User choice for usage data sharing
+- **Marketing Preferences**: Opt-in communication management
+- **Data Inventory**: Complete visibility into collected personal data
+- **Export & Deletion**: GDPR-compliant data portability and erasure rightshensive mobile security and incident reporting platform with enterprise-grade encryption, privacy compliance, and advanced threat protection. Built with React Native, TypeScript, and modern security best practices.
 
 ## 🛡️ Enterprise Security Features
 
@@ -55,6 +67,7 @@ A comprehensive mobile security and incident reporting platform with enterprise-
 - **[User Guide](docs/training/USER_GUIDE.md)** - Complete end-user documentation
 - **[Administrator Training](docs/training/ADMIN_TRAINING_GUIDE.md)** - Comprehensive admin procedures
 - **[Technical Implementation](docs/training/TECHNICAL_IMPLEMENTATION_GUIDE.md)** - Developer reference
+- **[Privacy Management](docs/PRIVACY_MANAGEMENT.md)** - GDPR/CCPA compliance system
 - **[Production Deployment](docs/deployment/PRODUCTION_DEPLOYMENT_GUIDE.md)** - DevOps procedures
 - **[Legal Compliance](README_LEGAL.md)** - Privacy and legal framework
 

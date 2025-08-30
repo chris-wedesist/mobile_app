@@ -8,6 +8,11 @@ export * from './types/incident';
 export * from './constants/incident';
 export * from './constants/theme';
 
+// Export privacy management functionality
+export { PrivacyService } from './services/PrivacyService';
+export * from './types/privacy';
+export { PRIVACY_CONSTANTS, MS_PER_HOUR } from './constants/privacy';
+
 // Note: React components are available in src/components/ but not exported from main index
 // to avoid React Native dependencies in library context
 

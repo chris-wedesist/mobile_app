@@ -1,0 +1,26 @@
+/**
+ * Privacy Management Constants
+ */
+
+// Time periods
+export const PRIVACY_CONSTANTS = {
+  CONSENT_VERSION: '1.0.0',
+  DATA_RETENTION_DAYS: 730, // 2 years default
+  EXPORT_EXPIRY_HOURS: 48,
+  AUDIT_LOG_MAX_ENTRIES: 1000,
+  APPEAL_DEADLINE_DAYS: 30,
+  
+  // Time calculations
+  MINUTES_PER_HOUR: 60,
+  HOURS_PER_DAY: 24,
+  MS_PER_SECOND: 1000,
+  
+  // ID generation
+  RANDOM_STRING_BASE: 36,
+  RANDOM_STRING_START: 2,
+  RANDOM_STRING_LENGTH: 9
+} as const;
+
+// Calculate derived constants
+export const MS_PER_HOUR = PRIVACY_CONSTANTS.MINUTES_PER_HOUR * PRIVACY_CONSTANTS.MINUTES_PER_HOUR * PRIVACY_CONSTANTS.MS_PER_SECOND;
+export const MS_PER_DAY = PRIVACY_CONSTANTS.HOURS_PER_DAY * MS_PER_HOUR;
