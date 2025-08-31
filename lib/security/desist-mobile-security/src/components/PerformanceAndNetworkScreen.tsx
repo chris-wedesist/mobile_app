@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { EncryptionService } from '../encryption';
 import { COLORS } from '../constants/theme';
+import { useTranslation } from '../hooks/useTranslation';
 import {
   useNetworkMonitoring,
   useNetworkSpeed,
@@ -38,6 +39,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
   apiBaseUrl,
   onBack
 }) => {
+  const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'performance' | 'network' | 'system'>('performance');
 
@@ -89,7 +91,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
         refreshStatus()
       ]);
     } catch {
-      Alert.alert('Error', 'Failed to refresh monitoring data');
+      Alert.alert(t('common.error'), t('performance.refreshError'));
     } finally {
       setRefreshing(false);
     }
@@ -99,11 +101,11 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
     try {
       const diagnostics = await runDiagnostics();
       Alert.alert(
-        'Network Diagnostics',
-        `Connectivity: ${diagnostics.connectivity.isReachable ? 'Good' : 'Poor'}\nResponse Time: ${diagnostics.connectivity.responseTime}ms\nDownload Speed: ${diagnostics.bandwidth.downloadSpeed} Mbps\nUpload Speed: ${diagnostics.bandwidth.uploadSpeed} Mbps\nDNS Resolution: ${diagnostics.dns.resolutionTime}ms`
+        t('network.diagnostics'),
+        `${t('network.connectivity')}: ${diagnostics.connectivity.isReachable ? t('common.good') : t('common.poor')}\n${t('network.responseTime')}: ${diagnostics.connectivity.responseTime}ms\n${t('network.downloadSpeed')}: ${diagnostics.bandwidth.downloadSpeed} Mbps\n${t('network.uploadSpeed')}: ${diagnostics.bandwidth.uploadSpeed} Mbps\n${t('network.dnsResolution')}: ${diagnostics.dns.resolutionTime}ms`
       );
     } catch {
-      Alert.alert('Error', 'Failed to run network diagnostics');
+      Alert.alert(t('common.error'), t('network.diagnosticsError'));
     }
   };
 
@@ -111,11 +113,11 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
     try {
       await sync();
       Alert.alert(
-        'Sync Complete',
-        `Sync completed successfully`
+        t('common.syncComplete'),
+        t('common.syncSuccess')
       );
     } catch {
-      Alert.alert('Error', 'Failed to sync data to server');
+      Alert.alert(t('common.error'), t('common.syncError'));
     }
   };
 
@@ -144,7 +146,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
         <>
           {/* Health Score */}
           <View style={styles.healthScoreContainer}>
-            <Text style={styles.sectionTitle}>System Health Score</Text>
+            <Text style={styles.sectionTitle}>{t('performance.healthScore')}</Text>
             <View style={styles.healthScoreCircle}>
               <Text style={[styles.healthScoreText, { color: getHealthScoreColor(healthScore) }]}>
                 {healthScore}
@@ -157,7 +159,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
                 disabled={isOptimizing}
               >
                 <Text style={styles.optimizeButtonText}>
-                  {isOptimizing ? 'Optimizing...' : 'Optimize Performance'}
+                  {isOptimizing ? t('performance.optimizing') : t('performance.optimize')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -165,33 +167,33 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
 
           {/* Performance Metrics */}
           <View style={styles.metricsContainer}>
-            <Text style={styles.sectionTitle}>Performance Metrics</Text>
+            <Text style={styles.sectionTitle}>{t('performance.metrics')}</Text>
             
             <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Battery Level</Text>
+              <Text style={styles.metricLabel}>{t('performance.battery')}</Text>
               <Text style={styles.metricValue}>
-                {performanceMetrics.batteryLevel !== null ? `${performanceMetrics.batteryLevel}%` : 'Unknown'}
+                {performanceMetrics.batteryLevel !== null ? `${performanceMetrics.batteryLevel}%` : t('common.unknown')}
               </Text>
             </View>
 
             <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Memory Usage</Text>
+              <Text style={styles.metricLabel}>{t('performance.memory')}</Text>
               <Text style={styles.metricValue}>
-                {performanceMetrics.memoryUsage !== null ? `${performanceMetrics.memoryUsage} MB` : 'Unknown'}
+                {performanceMetrics.memoryUsage !== null ? `${performanceMetrics.memoryUsage} MB` : t('common.unknown')}
               </Text>
             </View>
 
             <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>CPU Usage</Text>
+              <Text style={styles.metricLabel}>{t('performance.cpu')}</Text>
               <Text style={styles.metricValue}>
-                {performanceMetrics.cpuUsage !== null && performanceMetrics.cpuUsage !== undefined ? `${performanceMetrics.cpuUsage.toFixed(1)}%` : 'Unknown'}
+                {performanceMetrics.cpuUsage !== null && performanceMetrics.cpuUsage !== undefined ? `${performanceMetrics.cpuUsage.toFixed(1)}%` : t('common.unknown')}
               </Text>
             </View>
 
             <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Disk Usage</Text>
+              <Text style={styles.metricLabel}>{t('performance.disk')}</Text>
               <Text style={styles.metricValue}>
-                {performanceMetrics.diskUsage !== null ? `${performanceMetrics.diskUsage}%` : 'Unknown'}
+                {performanceMetrics.diskUsage !== null ? `${performanceMetrics.diskUsage}%` : t('common.unknown')}
               </Text>
             </View>
           </View>
@@ -199,7 +201,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           {/* Recommendations */}
           {recommendations.length > 0 && (
             <View style={styles.recommendationsContainer}>
-              <Text style={styles.sectionTitle}>Optimization Recommendations</Text>
+              <Text style={styles.sectionTitle}>{t('performance.recommendations')}</Text>
               {recommendations.map((rec, index) => (
                 <View key={index} style={styles.recommendationItem}>
                   <Text style={styles.recommendationText}>💡 {rec}</Text>
@@ -216,7 +218,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
     <View style={styles.tabContent}>
       {/* Network Status */}
       <View style={styles.networkStatusContainer}>
-        <Text style={styles.sectionTitle}>Network Status</Text>
+        <Text style={styles.sectionTitle}>{t('network.status')}</Text>
         
         <View style={styles.networkCard}>
           <View style={styles.networkHeader}>
@@ -233,12 +235,12 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           </View>
           
           <Text style={styles.networkDetail}>
-            Status: {networkStatus.isConnected ? 'Connected' : 'Disconnected'}
+            {t('network.statusLabel')}: {networkStatus.isConnected ? t('network.connected') : t('network.disconnected')}
           </Text>
           
           {networkStatus.isVPN !== null && (
             <Text style={styles.networkDetail}>
-              VPN: {networkStatus.isVPN ? 'Active' : 'Inactive'}
+              {t('network.vpn')}: {networkStatus.isVPN ? t('network.active') : t('network.inactive')}
             </Text>
           )}
         </View>
@@ -246,26 +248,26 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
 
       {/* Speed Test */}
       <View style={styles.speedTestContainer}>
-        <Text style={styles.sectionTitle}>Connection Speed</Text>
+        <Text style={styles.sectionTitle}>{t('network.speed')}</Text>
         
         <View style={styles.speedCard}>
           <View style={styles.speedRow}>
-            <Text style={styles.speedLabel}>Download</Text>
+            <Text style={styles.speedLabel}>{t('network.download')}</Text>
             <Text style={styles.speedValue}>
-              {downloadSpeed !== null ? `${downloadSpeed.toFixed(1)} Mbps` : 'Testing...'}
+              {downloadSpeed !== null ? `${downloadSpeed.toFixed(1)} Mbps` : t('network.testing')}
             </Text>
           </View>
           
           <View style={styles.speedRow}>
-            <Text style={styles.speedLabel}>Upload</Text>
+            <Text style={styles.speedLabel}>{t('network.upload')}</Text>
             <Text style={styles.speedValue}>
-              {uploadSpeed !== null ? `${uploadSpeed.toFixed(1)} Mbps` : 'Testing...'}
+              {uploadSpeed !== null ? `${uploadSpeed.toFixed(1)} Mbps` : t('network.testing')}
             </Text>
           </View>
           
           {lastTestTime && (
             <Text style={styles.lastTestText}>
-              Last tested: {lastTestTime.toLocaleTimeString()}
+              {t('network.lastTested')}: {lastTestTime.toLocaleTimeString()}
             </Text>
           )}
           
@@ -275,7 +277,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
             disabled={speedTesting}
           >
             <Text style={styles.testButtonText}>
-              {speedTesting ? 'Testing...' : 'Run Speed Test'}
+              {speedTesting ? t('network.testing') : t('network.runSpeedTest')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -283,7 +285,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
 
       {/* Network Diagnostics */}
       <TouchableOpacity style={styles.diagnosticsButton} onPress={handleNetworkDiagnostics}>
-        <Text style={styles.diagnosticsButtonText}>Run Network Diagnostics</Text>
+        <Text style={styles.diagnosticsButtonText}>{t('network.runDiagnostics')}</Text>
       </TouchableOpacity>
 
       {networkError && (
@@ -302,10 +304,10 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
         <>
           {/* System Overview */}
           <View style={styles.systemOverviewContainer}>
-            <Text style={styles.sectionTitle}>System Overview</Text>
+            <Text style={styles.sectionTitle}>{t('common.systemOverview')}</Text>
             
             <View style={styles.systemCard}>
-              <Text style={styles.systemLabel}>Device</Text>
+              <Text style={styles.systemLabel}>{t('common.device')}</Text>
               <Text style={styles.systemValue}>{systemStatus.device.deviceName}</Text>
               <Text style={styles.systemSubtext}>
                 {systemStatus.device.manufacturer} • {systemStatus.device.operatingSystem} {systemStatus.device.systemVersion}
@@ -313,19 +315,19 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
             </View>
 
             <View style={styles.systemCard}>
-              <Text style={styles.systemLabel}>Uptime</Text>
+              <Text style={styles.systemLabel}>{t('common.uptime')}</Text>
               <Text style={styles.systemValue}>
-                Session Active
+                {t('common.sessionActive')}
               </Text>
             </View>
 
             <View style={styles.systemCard}>
-              <Text style={styles.systemLabel}>App Version</Text>
+              <Text style={styles.systemLabel}>{t('common.appVersion')}</Text>
               <Text style={styles.systemValue}>
                 {systemStatus.device.appVersion}
               </Text>
               <Text style={styles.systemSubtext}>
-                Device ID: {systemStatus.device.deviceId.substring(0, DEVICE_ID_PREVIEW_LENGTH)}...
+                {t('common.deviceId')}: {systemStatus.device.deviceId.substring(0, DEVICE_ID_PREVIEW_LENGTH)}...
               </Text>
             </View>
           </View>
@@ -333,7 +335,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           {/* Alerts */}
           {alerts.length > 0 && (
             <View style={styles.alertsContainer}>
-              <Text style={styles.sectionTitle}>Performance Alerts</Text>
+              <Text style={styles.sectionTitle}>{t('performance.alerts')}</Text>
               {alerts.filter(alert => !alert.resolved).map((alert) => (
                 <View key={alert.id} style={[styles.alertCard, styles[`alert${alert.severity}`]]}>
                   <View style={styles.alertHeader}>
@@ -357,7 +359,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           {/* Sync Controls */}
           <View style={styles.syncContainer}>
             <TouchableOpacity style={styles.syncButton} onPress={handleSync}>
-              <Text style={styles.syncButtonText}>Sync to Server</Text>
+              <Text style={styles.syncButtonText}>{t('common.syncToServer')}</Text>
             </TouchableOpacity>
           </View>
         </>
@@ -376,7 +378,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
         )}
-        <Text style={styles.headerTitle}>Performance & Network</Text>
+        <Text style={styles.headerTitle}>{t('performance.title')}</Text>
       </View>
 
       {/* Tab Navigation */}
@@ -386,7 +388,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           onPress={() => setSelectedTab('performance')}
         >
           <Text style={[styles.tabText, selectedTab === 'performance' && styles.activeTabText]}>
-            Performance
+            {t('performance.tab')}
           </Text>
         </TouchableOpacity>
         
@@ -395,7 +397,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           onPress={() => setSelectedTab('network')}
         >
           <Text style={[styles.tabText, selectedTab === 'network' && styles.activeTabText]}>
-            Network
+            {t('network.tab')}
           </Text>
         </TouchableOpacity>
         
@@ -404,7 +406,7 @@ const PerformanceAndNetworkScreen: React.FC<PerformanceAndNetworkScreenProps> = 
           onPress={() => setSelectedTab('system')}
         >
           <Text style={[styles.tabText, selectedTab === 'system' && styles.activeTabText]}>
-            System
+            {t('common.system')}
           </Text>
         </TouchableOpacity>
       </View>

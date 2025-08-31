@@ -24,6 +24,11 @@ export {
   useNetworkSpeed
 } from './hooks/useMonitoring';
 
+// Export translation functionality
+export { TranslationService } from './services/TranslationService';
+export { useTranslation } from './hooks/useTranslation';
+export * from './types/translation';
+
 // Note: React components are available in src/components/ but not exported from main index
 // to avoid React Native dependencies in library context
 
