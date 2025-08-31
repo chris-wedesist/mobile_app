@@ -2,6 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SupportedLanguage, LocaleConfig, TranslationResource, TranslationService as ITranslationService } from '../types/translation';
 import { en } from '../locales/en';
 import { es } from '../locales/es';
+import { fr } from '../locales/fr';
+import { de } from '../locales/de';
+import { pt } from '../locales/pt';
 
 const STORAGE_KEY = 'desist_app_language';
 
@@ -25,9 +28,9 @@ export class TranslationService implements ITranslationService {
     this.translations = {
       en,
       es,
-      fr: en, // Fallback to English for now
-      de: en, // Fallback to English for now
-      pt: en, // Fallback to English for now
+      fr,
+      de,
+      pt,
       zh: en, // Fallback to English for now
       ja: en, // Fallback to English for now
       ko: en, // Fallback to English for now

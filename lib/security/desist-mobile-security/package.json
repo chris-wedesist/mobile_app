@@ -1,6 +1,6 @@
 {
   "name": "desist-mobile-security",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Comprehensive mobile security library with encryption, authentication, and threat detection",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
