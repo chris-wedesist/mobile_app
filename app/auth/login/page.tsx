@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator 
 import { router } from 'expo-router';
 import { createClient } from '@supabase/supabase-js';
 import { colors, radius, shadows } from '@/constants/theme';
-import { checkRateLimit } from '@/utils/rateLimit';
+// import { checkRateLimit } from '@/utils/rateLimit';
 import { sanitizeInput, getSecureErrorMessage, logAuthenticationFailure } from '@/utils/security';
 import { generateCSRFToken, validateCSRFToken } from '@/utils/csrf';
 import { getCaptchaToken } from '@/utils/captcha';
@@ -33,7 +33,8 @@ export default function LoginPage() {
 
     try {
       // Check rate limiting
-      const canProceed = await checkRateLimit(email);
+      // const canProceed = await checkRateLimit(email);
+      const canProceed = true;
       if (!canProceed) {
         throw new AuthError('TOO_MANY_ATTEMPTS', 'Too many login attempts. Please try again later.');
       }
