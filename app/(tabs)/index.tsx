@@ -4,8 +4,10 @@ import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
 import { getNews, NewsItem } from '@/lib/news';
 import { router } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContextFallback';
 
 export default function HomeScreen() {
+  const { userProfile } = useAuth();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,9 @@ export default function HomeScreen() {
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>Hands Off!</Text>
-        <Text style={styles.subtitle}>Know your rights. Stay protected.</Text>
+        <Text style={styles.subtitle}>
+          {/* <Text style={styles.subtitleBold}>{userProfile?.full_name}! </Text> */}
+           Know your rights. Stay protected.</Text>
         <Text style={styles.description}>
           Document incidents, store important documents, and access critical resources to protect your rights and safety.
         </Text>
@@ -123,6 +127,12 @@ const styles = StyleSheet.create({
     color: colors.accent,
     marginBottom: 24,
     fontFamily: 'Inter-Medium',
+  },
+  subtitleBold: {
+    fontSize: 26,
+    color: colors.text.primary,
+    marginBottom: 24,
+    fontFamily: 'Inter-Bold',
   },
   description: {
     fontSize: 18,

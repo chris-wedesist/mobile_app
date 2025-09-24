@@ -10,53 +10,61 @@ import CustomSplashScreen from '@/components/SplashScreen';
 import { colors } from '@/constants/theme';
 import { View, Text } from 'react-native'
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { AuthProvider, useAuth } from '@/contexts/AuthContextFallback';
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore errors - this happens on web
 });
 
-export default function RootLayout() {
+function AppContent() {
   useFrameworkReady();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    console.log('RootLayout mounted, checking first launch...');
-    checkFirstLaunch();
+    console.log('AppContent mounted, checking authentication...');
+    checkInitialRoute();
+  }, [user, authLoading]);
 
-    // Cleanup function to clear timeout if component unmounts
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const checkFirstLaunch = async () => {
+  const checkInitialRoute = async () => {
     try {
-      console.log('Checking if onboarding is completed...');
-      const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
-      console.log('Onboarding completed:', onboardingCompleted);
-      
-      if (onboardingCompleted !== 'true') {
-        console.log('Setting initial route to onboarding');
-        setInitialRoute('/onboarding');
-      } else {
-        console.log('Setting initial route to tabs');
-        setInitialRoute('/(tabs)');
+      console.log('Checking authentication status...');
+
+      if (authLoading) {
+        console.log('Auth is still loading...');
+        return;
       }
-      
+
+      if (user) {
+        console.log('User is authenticated, checking onboarding...');
+        const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
+        console.log('Onboarding completed:', onboardingCompleted);
+        
+        if (onboardingCompleted !== 'true') {
+          console.log('Setting initial route to onboarding');
+          setInitialRoute('/onboarding');
+        } else {
+          console.log('Setting initial route to tabs');
+          setInitialRoute('/(tabs)');
+        }
+      } else {
+        console.log('User not authenticated, setting initial route to login');
+        setInitialRoute('/login');
+      }
+
       // Short timeout to ensure state updates properly
-      timeoutRef.current = setTimeout(() => {
+      setTimeout(() => {
         console.log('Setting isReady to true');
         setIsReady(true);
       }, 500);
     } catch (error) {
-      console.error('Error checking first launch status:', error);
-      setInitialRoute('/(tabs)'); // Default to tabs on error
+      console.error('Error checking initial route:', error);
+      setInitialRoute('/login'); // Default to login on error
       setIsReady(true);
     }
   };
@@ -66,7 +74,7 @@ export default function RootLayout() {
       console.log('App is ready, navigating to:', initialRoute);
       // Use setTimeout to ensure navigation happens after render
       const navigationTimeout = setTimeout(() => {
-        router.replace(initialRoute);
+        router.replace(initialRoute as any);
         // Hide the native splash screen once navigation is complete
         SplashScreen.hideAsync().catch(() => {
           // Ignore errors - this happens on web
@@ -78,7 +86,7 @@ export default function RootLayout() {
     }
   }, [isReady, initialRoute]);
 
-  if (!isReady || !initialRoute) {
+  if (!isReady || !initialRoute || authLoading) {
     console.log('Showing splash screen');
     return <CustomSplashScreen />;
   }
@@ -90,6 +98,9 @@ export default function RootLayout() {
         headerShown: false,
         contentStyle: { backgroundColor: colors.primary }
       }}>
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="auth-test" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="emergency-setup" options={{ presentation: 'modal' }} />
         <Stack.Screen name="panic-activation" options={{ presentation: 'fullScreenModal' }} />
@@ -104,7 +115,15 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="light" />
 
-      {initialRoute !== '/onboarding' && <EmergencyCallButton />}
+      {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && <EmergencyCallButton />}
     </GestureHandlerRootView>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

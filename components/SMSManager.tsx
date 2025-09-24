@@ -1,12 +1,6 @@
 import { Platform } from 'react-native';
 import * as SMS from 'expo-sms';
-import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const supabase = createClient(
-  'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!
-);
+import { supabase } from '@/lib/supabase';
 
 class SMSManager {
   private static instance: SMSManager;

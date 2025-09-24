@@ -7,8 +7,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { colors, shadows, radius } from '@/constants/theme';
 import { useFocusEffect } from '@react-navigation/native';
-import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContextFallback';
+
 
 interface Incident {
   id: string;
@@ -18,19 +20,8 @@ interface Incident {
   // Add other incident fields as needed
 }
 
-const supabase = createClient(
-  String('https://tscvzrxnxadnvgnsdrqx.supabase.co'!),
-  String('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!),
-  {
-    realtime: {
-      params: {
-        eventsPerSecond: "10",
-      },
-    },
-  }
-);
-
 export default function SettingsScreen() {
+  const { signOut, userProfile } = useAuth();
   const [highQuality, setHighQuality] = useState(true);
   const [enableSound, setEnableSound] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -58,6 +49,15 @@ export default function SettingsScreen() {
 
     configureNotifications();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Navigation will be handled by AuthProvider
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   // Set up real-time incident notifications
   useEffect(() => {
@@ -211,6 +211,39 @@ export default function SettingsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Settings</Text>
         
+        {/* User Profile Section */}
+        {userProfile && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <MaterialIcons name="person" size={20} color={colors.accent} />
+                <View>
+                  <Text style={styles.settingText}>{userProfile.full_name || 'No name set'}</Text>
+                  <Text style={styles.messagePreview}>@{userProfile.username || 'no-username'}</Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <MaterialIcons name="email" size={20} color={colors.accent} />
+                <Text style={styles.settingText}>{userProfile.email}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <MaterialIcons name="logout" size={20} color={colors.text.primary} />
+              <Text style={styles.logoutButtonText}>Sign Out</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.testButton} 
+              onPress={() => router.push('/auth-test')}
+            >
+              <MaterialIcons name="bug-report" size={20} color={colors.text.primary} />
+              <Text style={styles.logoutButtonText}>Test Auth</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={styles.securitySection}>
           <View style={styles.securityHeader}>
             <MaterialIcons name="security" size={20} color={colors.accent} />
@@ -549,6 +582,34 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   saveButtonText: {
+    color: colors.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+  },
+  logoutButton: {
+    backgroundColor: colors.accent,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+    borderRadius: radius.lg,
+    marginTop: 15,
+    gap: 8,
+    ...shadows.sm,
+  },
+  testButton: {
+    backgroundColor: '#4CAF50',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+    borderRadius: radius.lg,
+    marginTop: 10,
+    gap: 8,
+    ...shadows.sm,
+  },
+  logoutButtonText: {
     color: colors.text.primary,
     fontSize: 16,
     fontWeight: '600',

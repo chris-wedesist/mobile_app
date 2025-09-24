@@ -3,16 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing, A
 import { useCameraPermissions, CameraView } from 'expo-camera';
 import { colors, shadows, radius } from '@/constants/theme';
 import { Audio } from 'expo-av';
-import { createClient } from '@supabase/supabase-js';
-import { router } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const supabase = createClient(
-  'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!
-);
 
 // Cloudinary configuration
 const CLOUDINARY_CLOUD_NAME = 'do0qfrr5y';
