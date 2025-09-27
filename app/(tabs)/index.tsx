@@ -4,7 +4,7 @@ import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
 import { getNews, NewsItem } from '@/lib/news';
 import { router } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContextFallback';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomeScreen() {
   const { userProfile } = useAuth();

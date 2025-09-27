@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContextFallback';
+import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -63,7 +63,9 @@ export default function SignupScreen() {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName);
+    // Generate username from email (part before @)
+    const username = email.split('@')[0];
+    const { error } = await signUp(email, password, fullName, username);
     setLoading(false);
 
     if (error) {
@@ -71,11 +73,14 @@ export default function SignupScreen() {
     } else {
       Alert.alert(
         'Success',
-        'Account created successfully! Please check your email to verify your account.',
+        'Account created successfully! Welcome to DESIST!',
         [
           {
             text: 'OK',
-            onPress: () => router.replace('/login'),
+            onPress: () => {
+              // Let the main layout handle routing based on onboarding status
+              router.replace('/' as any);
+            },
           },
         ]
       );

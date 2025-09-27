@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useAuth } from '@/contexts/AuthContextFallback';
+import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 
 export default function AuthTestComponent() {

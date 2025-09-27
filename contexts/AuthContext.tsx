@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   session: Session | null;
@@ -44,8 +43,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     console.log('AuthContext: Initializing...');
-    console.log('AuthContext: Supabase client:', supabase);
-    console.log('AuthContext: Supabase auth:', supabase?.auth);
     
     // Check if supabase and auth are available
     if (!supabase || !supabase.auth) {
@@ -55,45 +52,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('AuthContext: Initial session:', session);
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-      setLoading(false);
-    }).catch((error) => {
-      console.error('AuthContext: Error getting initial session:', error);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    let subscription: any;
-    try {
-      const authStateChange = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('AuthContext: Auth state changed:', event, session);
+    const initializeAuth = async () => {
+      try {
+        const session = supabase.auth.session();
+        console.log('AuthContext: Initial session:', session);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           await fetchUserProfile(session.user.id);
-        } else {
-          setUserProfile(null);
-          // Clear stored session data
-          await AsyncStorage.removeItem('user_session');
         }
         
         setLoading(false);
-      });
-      subscription = authStateChange;
-    } catch (error) {
-      console.error('AuthContext: Error setting up auth state listener:', error);
-    }
+      } catch (error) {
+        console.error('AuthContext: Error initializing auth:', error);
+        setLoading(false);
+      }
+    };
+    
+    initializeAuth();
+
+    // Listen for auth changes
+    const subscription = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthContext: Auth state changed:', event, session);
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
+      
+      setLoading(false);
+    });
 
     return () => {
-      if (subscription && subscription.data && subscription.data.subscription) {
-        subscription.data.subscription.unsubscribe();
+      if (subscription?.data) {
+        subscription.data.unsubscribe();
       }
     };
   }, []);
@@ -105,6 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      console.log('AuthContext: Fetching user profile for ID:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -116,42 +114,60 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      console.log('AuthContext: User profile fetched:', data);
       setUserProfile(data);
-      
-      // Store session data
-      await AsyncStorage.setItem('user_session', JSON.stringify({
-        user: session?.user,
-        profile: data
-      }));
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string, username: string) => {
-    try {
+  try {
       if (!supabase || !supabase.auth) {
         return { error: new Error('Supabase client not available') };
       }
 
-      const { data, error } = await supabase.auth.signUp({
+      const { user: authUser, error: authError } = await supabase.auth.signUp({
         email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            username: username,
-          },
-        },
+        password
       });
 
-      if (error) {
-        return { error };
+      if (authError) {
+        console.error('Auth error:', authError);
+        // Handle duplicate email error specifically
+        if (authError.message.includes('duplicate key') || authError.message.includes('already registered')) {
+          return { error: new Error('An account with this email already exists. Please sign in instead.') };
+        }
+        return { error: authError };
       }
 
-      // The user profile will be created automatically by the trigger
+      if (!authUser) {
+        return { error: new Error('No user data returned') };
+      }
+
+      // Use upsert to handle existing email or create new profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('users')
+        .upsert({
+          id: authUser.id,
+          email: email,
+          full_name: fullName,
+          username: username,
+          created_at: new Date().toISOString()
+        }, {
+          onConflict: 'email'
+        })
+        .select()
+        .single();
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        return { error: profileError };
+      }
+
       return { error: null };
     } catch (error) {
+      console.error('Signup error:', error);
       return { error };
     }
   };
@@ -162,17 +178,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('Supabase client not available') };
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      console.log('AuthContext: Signing in user with Supabase');
+      
+      // Sign in with Supabase Auth
+      const { user: authUser, error: authError } = await supabase.auth.signIn({
         email,
-        password,
+        password
       });
 
-      if (error) {
-        return { error };
+      if (authError) {
+        console.error('Auth error:', authError);
+        return { error: authError };
       }
 
+      if (!authUser) {
+        return { error: new Error('No user data returned') };
+      }
+
+      console.log('AuthContext: User signed in successfully');
       return { error: null };
     } catch (error) {
+      console.error('Signin error:', error);
       return { error };
     }
   };
@@ -185,7 +211,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       await supabase.auth.signOut();
-      await AsyncStorage.removeItem('user_session');
     } catch (error) {
       console.error('Error signing out:', error);
     }

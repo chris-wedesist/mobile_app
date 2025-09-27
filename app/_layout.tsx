@@ -10,7 +10,7 @@ import CustomSplashScreen from '@/components/SplashScreen';
 import { colors } from '@/constants/theme';
 import { View, Text } from 'react-native'
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { AuthProvider, useAuth } from '@/contexts/AuthContextFallback';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
@@ -40,7 +40,7 @@ function AppContent() {
         return;
       }
 
-      if (user) {
+      if (user && user.id) {
         console.log('User is authenticated, checking onboarding...');
         const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
         console.log('Onboarding completed:', onboardingCompleted);
@@ -53,8 +53,16 @@ function AppContent() {
           setInitialRoute('/(tabs)');
         }
       } else {
-        console.log('User not authenticated, setting initial route to login');
-        setInitialRoute('/login');
+        console.log('User not authenticated, checking if onboarding was ever completed...');
+        const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
+        
+        if (onboardingCompleted !== 'true') {
+          console.log('Onboarding never completed, setting initial route to onboarding');
+          setInitialRoute('/onboarding');
+        } else {
+          console.log('Onboarding completed before, setting initial route to login');
+          setInitialRoute('/login');
+        }
       }
 
       // Short timeout to ensure state updates properly
@@ -101,6 +109,7 @@ function AppContent() {
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="signup" options={{ headerShown: false }} />
         <Stack.Screen name="auth-test" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="emergency-setup" options={{ presentation: 'modal' }} />
         <Stack.Screen name="panic-activation" options={{ presentation: 'fullScreenModal' }} />
@@ -115,7 +124,7 @@ function AppContent() {
       </Stack>
       <StatusBar style="light" />
 
-      {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && <EmergencyCallButton />}
+      {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && <EmergencyCallButton />}
     </GestureHandlerRootView>
   );
 }

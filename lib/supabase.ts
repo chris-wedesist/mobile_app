@@ -20,7 +20,12 @@ const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
 // Verify the client is properly created
 console.log('Supabase client created:', !!supabaseClient);
 console.log('Supabase auth available:', !!supabaseClient.auth);
-console.log('Supabase getSession available:', typeof supabaseClient.auth.getSession);
+if (supabaseClient.auth) {
+  console.log('Supabase auth methods:', Object.keys(supabaseClient.auth));
+  console.log('Supabase getSession available:', typeof supabaseClient.auth.getSession);
+  console.log('Supabase getUser available:', typeof supabaseClient.auth.getUser);
+  console.log('Supabase onAuthStateChange available:', typeof supabaseClient.auth.onAuthStateChange);
+}
 
 // Export the client
 export const supabase = supabaseClient;

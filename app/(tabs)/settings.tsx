@@ -9,7 +9,7 @@ import { colors, shadows, radius } from '@/constants/theme';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContextFallback';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 interface Incident {

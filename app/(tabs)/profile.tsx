@@ -1,6 +1,9 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileScreen() {
+  const { userProfile } = useAuth();
+
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
@@ -8,8 +11,8 @@ export default function ProfileScreen() {
           source={{ uri: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg' }}
           style={styles.profileImage}
         />
-        <Text style={styles.name}>John Doe</Text>
-        <Text style={styles.username}>@johndoe</Text>
+        <Text style={styles.name}>{userProfile?.full_name || 'User'}</Text>
+        <Text style={styles.username}>@{userProfile?.username || 'username'}</Text>
       </View>
       
       <View style={styles.statsContainer}>

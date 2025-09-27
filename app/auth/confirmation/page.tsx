@@ -1,10 +1,101 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { colors, radius, shadows } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ConfirmationPage() {
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<'pending' | 'verified' | 'error'>('pending');
+  const searchParams = useLocalSearchParams();
+  const { user, session } = useAuth();
+
+  useEffect(() => {
+    // Check if we have verification parameters from email link
+    if (searchParams.token_hash || searchParams.type === 'signup') {
+      handleEmailVerification();
+    }
+  }, [searchParams]);
+
+  // Check if user is verified when auth state changes
+  useEffect(() => {
+    if (user && user.email_confirmed_at) {
+      setVerificationStatus('verified');
+      // Navigate to onboarding after a short delay
+      setTimeout(() => {
+        router.replace('/onboarding' as any);
+      }, 2000);
+    }
+  }, [user]);
+
+  const handleEmailVerification = async () => {
+    setIsVerifying(true);
+    try {
+      // Check if user is already verified
+      if (user && user.email_confirmed_at) {
+        setVerificationStatus('verified');
+        // Navigate to onboarding after a short delay
+        setTimeout(() => {
+          router.replace('/onboarding' as any);
+        }, 2000);
+      } else {
+        setVerificationStatus('pending');
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      setVerificationStatus('error');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleReturnToLogin = () => {
+    router.push('/auth/login' as any);
+  };
+
+  const handleResendConfirmation = async () => {
+    try {
+      // This would typically resend the confirmation email
+      // For now, we'll just show an alert
+      alert('Confirmation email resent. Please check your inbox.');
+    } catch (error) {
+      console.error('Error resending confirmation:', error);
+      alert('Failed to resend confirmation email. Please try again.');
+    }
+  };
+
+  if (isVerifying) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={styles.title}>Verifying Account...</Text>
+          <Text style={styles.description}>
+            Please wait while we verify your account.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (verificationStatus === 'verified') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <View style={styles.iconContainer}>
+            <MaterialIcons name="check-circle" size={64} color={colors.status.success} />
+          </View>
+          
+          <Text style={styles.title}>Account Verified!</Text>
+          <Text style={styles.description}>
+            Your account has been successfully verified. Redirecting you to get started...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -26,17 +117,14 @@ export default function ConfirmationPage() {
         
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push('/auth/login')}
+          onPress={handleReturnToLogin}
         >
           <Text style={styles.buttonText}>Return to Login</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
           style={styles.resendButton}
-          onPress={() => {
-            // In a real app, this would resend the confirmation email
-            alert('Confirmation email resent. Please check your inbox.');
-          }}
+          onPress={handleResendConfirmation}
         >
           <Text style={styles.resendButtonText}>Resend Confirmation Email</Text>
         </TouchableOpacity>
