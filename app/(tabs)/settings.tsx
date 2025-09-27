@@ -234,13 +234,6 @@ export default function SettingsScreen() {
               <MaterialIcons name="logout" size={20} color={colors.text.primary} />
               <Text style={styles.logoutButtonText}>Sign Out</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.testButton} 
-              onPress={() => router.push('/auth-test')}
-            >
-              <MaterialIcons name="bug-report" size={20} color={colors.text.primary} />
-              <Text style={styles.logoutButtonText}>Test Auth</Text>
-            </TouchableOpacity>
           </View>
         )}
 
@@ -595,17 +588,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: radius.lg,
     marginTop: 15,
-    gap: 8,
-    ...shadows.sm,
-  },
-  testButton: {
-    backgroundColor: '#4CAF50',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 15,
-    borderRadius: radius.lg,
-    marginTop: 10,
     gap: 8,
     ...shadows.sm,
   },
