@@ -21,7 +21,7 @@ interface Incident {
 }
 
 export default function SettingsScreen() {
-  const { signOut, userProfile } = useAuth();
+  const { signOut, userProfile, user, fetchUserProfile } = useAuth();
   const [highQuality, setHighQuality] = useState(true);
   const [enableSound, setEnableSound] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -147,10 +147,15 @@ export default function SettingsScreen() {
       const loadData = async () => {
         await checkPermissions();
         await loadEmergencySettings();
+        // Fetch user profile if user exists but profile is not loaded
+        if (user && !userProfile) {
+          await fetchUserProfile(user.id);
+        }
       };
       loadData();
-    }, [])
+    }, [user, userProfile])
   );
+
 
   const handleEmergencyContactChange = (text: string) => {
     setEmergencyContact(text);

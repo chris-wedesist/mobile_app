@@ -1,16 +1,23 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, username: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    username: string
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: any }>;
+  fetchUserProfile: (userId: string) => Promise<void>;
 }
 
 export interface UserProfile {
@@ -42,26 +49,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthContext: Initializing...');
-    
-    // Check if supabase and auth are available
-    if (!supabase || !supabase.auth) {
-      console.error('AuthContext: Supabase client or auth not available');
-      setLoading(false);
-      return;
-    }
-    
-    // Get initial session
     const initializeAuth = async () => {
       try {
-        const session = supabase.auth.session();
-        console.log('AuthContext: Initial session:', session);
+        setLoading(true);
+        const storedUserId = await AsyncStorage.getItem('user_id');
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserProfile(session.user.id);
+        if (storedUserId) {
+          // User is authenticated - create simple user object
+          const userObject = { id: storedUserId } as User;
+          setUser(userObject);
+        } else {
+          // No stored user ID, user is not authenticated
+          setUser(null);
+          setUserProfile(null);
         }
         
         setLoading(false);
@@ -70,35 +70,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     };
-    
+
     initializeAuth();
-
-    // Listen for auth changes
-    const subscription = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthContext: Auth state changed:', event, session);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
-      } else {
-        setUserProfile(null);
-      }
-      
-      setLoading(false);
-    });
-
-    return () => {
-      if (subscription?.data) {
-        subscription.data.unsubscribe();
-      }
-    };
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
     try {
       if (!supabase) {
-        console.error('Supabase client not available for fetching user profile');
+        console.error(
+          'Supabase client not available for fetching user profile'
+        );
         return;
       }
 
@@ -115,28 +96,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log('AuthContext: User profile fetched:', data);
+      
+      // Create a user object from the profile data
+      const userObject = {
+        id: data.id,
+        email: data.email,
+        created_at: data.created_at,
+        updated_at: data.created_at,
+        aud: 'authenticated',
+        role: 'authenticated',
+        email_confirmed_at: data.created_at,
+        phone: '',
+        confirmed_at: data.created_at,
+        last_sign_in_at: data.created_at,
+        app_metadata: {},
+        user_metadata: { full_name: data.full_name, username: data.username },
+        identities: [],
+        factors: [],
+      } as User;
+      
+      setUser(userObject);
       setUserProfile(data);
+      setLoading(false);
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, username: string) => {
-  try {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    username: string
+  ) => {
+    try {
       if (!supabase || !supabase.auth) {
         return { error: new Error('Supabase client not available') };
       }
 
       const { user: authUser, error: authError } = await supabase.auth.signUp({
         email,
-        password
+        password,
       });
 
       if (authError) {
         console.error('Auth error:', authError);
         // Handle duplicate email error specifically
-        if (authError.message.includes('duplicate key') || authError.message.includes('already registered')) {
-          return { error: new Error('An account with this email already exists. Please sign in instead.') };
+        if (
+          authError.message.includes('duplicate key') ||
+          authError.message.includes('already registered')
+        ) {
+          return {
+            error: new Error(
+              'An account with this email already exists. Please sign in instead.'
+            ),
+          };
         }
         return { error: authError };
       }
@@ -148,15 +162,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Use upsert to handle existing email or create new profile
       const { data: profileData, error: profileError } = await supabase
         .from('users')
-        .upsert({
-          id: authUser.id,
-          email: email,
-          full_name: fullName,
-          username: username,
-          created_at: new Date().toISOString()
-        }, {
-          onConflict: 'email'
-        })
+        .upsert(
+          {
+            id: authUser.id,
+            email: email,
+            full_name: fullName,
+            username: username,
+            created_at: new Date().toISOString(),
+          },
+          {
+            onConflict: 'email',
+          }
+        )
         .select()
         .single();
 
@@ -164,6 +181,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.error('Profile error:', profileError);
         return { error: profileError };
       }
+
+      await AsyncStorage.setItem('user_id', authUser.id);
 
       return { error: null };
     } catch (error) {
@@ -178,12 +197,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('Supabase client not available') };
       }
 
-      console.log('AuthContext: Signing in user with Supabase');
-      
-      // Sign in with Supabase Auth
       const { user: authUser, error: authError } = await supabase.auth.signIn({
         email,
-        password
+        password,
       });
 
       if (authError) {
@@ -195,7 +211,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('No user data returned') };
       }
 
-      console.log('AuthContext: User signed in successfully');
+      await AsyncStorage.setItem('user_id', authUser.id);
+
       return { error: null };
     } catch (error) {
       console.error('Signin error:', error);
@@ -211,6 +228,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       await supabase.auth.signOut();
+
+      // Clear user ID from AsyncStorage
+      await AsyncStorage.removeItem('user_id');
+
+      // Clear local state
+      setUser(null);
+      setUserProfile(null);
+      setSession(null);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -253,6 +278,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signIn,
     signOut,
     updateProfile,
+    fetchUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
