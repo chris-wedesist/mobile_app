@@ -55,16 +55,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUserId = await AsyncStorage.getItem('user_id');
         
         if (storedUserId) {
-          // User is authenticated - create simple user object
-          const userObject = { id: storedUserId } as User;
-          setUser(userObject);
+          fetchUserProfile(storedUserId)
         } else {
-          // No stored user ID, user is not authenticated
           setUser(null);
           setUserProfile(null);
         }
-        
-        setLoading(false);
       } catch (error) {
         console.error('AuthContext: Error initializing auth:', error);
         setLoading(false);

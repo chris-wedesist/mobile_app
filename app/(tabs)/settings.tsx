@@ -217,22 +217,21 @@ export default function SettingsScreen() {
         <Text style={styles.title}>Settings</Text>
         
         {/* User Profile Section */}
-        {userProfile && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Account</Text>
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <MaterialIcons name="person" size={20} color={colors.accent} />
                 <View>
-                  <Text style={styles.settingText}>{userProfile.full_name || 'No name set'}</Text>
-                  <Text style={styles.messagePreview}>@{userProfile.username || 'no-username'}</Text>
+                  <Text style={styles.settingText}>{userProfile?.full_name || 'N/A'}</Text>
+                  <Text style={styles.messagePreview}>@{userProfile?.username || 'N/A'}</Text>
                 </View>
               </View>
             </View>
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <MaterialIcons name="email" size={20} color={colors.accent} />
-                <Text style={styles.settingText}>{userProfile.email}</Text>
+                <Text style={styles.settingText}>{userProfile?.email || 'N/A'}</Text>
               </View>
             </View>
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -240,7 +239,6 @@ export default function SettingsScreen() {
               <Text style={styles.logoutButtonText}>Sign Out</Text>
             </TouchableOpacity>
           </View>
-        )}
 
         <View style={styles.securitySection}>
           <View style={styles.securityHeader}>
