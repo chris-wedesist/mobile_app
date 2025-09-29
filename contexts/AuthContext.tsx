@@ -53,11 +53,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         setLoading(true);
         const storedUserId = await AsyncStorage.getItem('user_id');
-        
-        if (storedUserId) {
+        if (storedUserId !== null) {
           fetchUserProfile(storedUserId)
         } else {
           setUser(null);
+          setLoading(false);
           setUserProfile(null);
         }
       } catch (error) {
@@ -87,6 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('Error fetching user profile:', error);
+        setLoading(false);
         return;
       }
 
@@ -115,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
+      setLoading(false);
     }
   };
 
