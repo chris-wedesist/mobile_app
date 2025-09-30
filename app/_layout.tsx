@@ -53,23 +53,13 @@ function AppContent() {
           setInitialRoute('/(tabs)');
         }
       } else {
-        console.log('User not authenticated, checking if onboarding was ever completed...');
-        const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
-        
-        if (onboardingCompleted !== 'true') {
-          console.log('Onboarding never completed, setting initial route to onboarding');
-          setInitialRoute('/onboarding');
-        } else {
-          console.log('Onboarding completed before, setting initial route to login');
-          setInitialRoute('/login');
-        }
+        console.log('User not authenticated, setting initial route to login');
+        setInitialRoute('/login');
       }
 
-      // Short timeout to ensure state updates properly
-      setTimeout(() => {
-        console.log('Setting isReady to true');
-        setIsReady(true);
-      }, 500);
+      // Set ready state immediately after determining route
+      console.log('Setting isReady to true');
+      setIsReady(true);
     } catch (error) {
       console.error('Error checking initial route:', error);
       setInitialRoute('/login'); // Default to login on error
@@ -80,22 +70,17 @@ function AppContent() {
   useEffect(() => {
     if (isReady && initialRoute) {
       console.log('App is ready, navigating to:', initialRoute);
-      // Use setTimeout to ensure navigation happens after render
-      const navigationTimeout = setTimeout(() => {
-        router.replace(initialRoute as any);
-        // Hide the native splash screen once navigation is complete
-        SplashScreen.hideAsync().catch(() => {
-          // Ignore errors - this happens on web
-        });
-      }, 100);
-
-      // Cleanup navigation timeout
-      return () => clearTimeout(navigationTimeout);
+      // Navigate immediately without timeout
+      router.replace(initialRoute as any);
+      // Hide the native splash screen once navigation is complete
+      SplashScreen.hideAsync().catch(() => {
+        // Ignore errors - this happens on web
+      });
     }
   }, [isReady, initialRoute]);
 
   if (!isReady || !initialRoute || authLoading) {
-    console.log('Showing splash screen');
+    console.log('Showing splash screen - isReady:', isReady, 'initialRoute:', initialRoute, 'authLoading:', authLoading);
     return <CustomSplashScreen />;
   }
 

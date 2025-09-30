@@ -52,13 +52,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuth = async () => {
       try {
         setLoading(true);
-        const storedUserId = await AsyncStorage.getItem('user_id');
-        if (storedUserId !== null) {
-          fetchUserProfile(storedUserId)
-        } else {
-          setUser(null);
+        
+        // Get initial session from Supabase
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('AuthContext: Error getting session:', error);
           setLoading(false);
+          return;
+        }
+
+        if (session?.user) {
+          console.log('AuthContext: Found existing session for user:', session.user.id);
+          setSession(session);
+          setUser(session.user);
+          await fetchUserProfile(session.user.id);
+        } else {
+          console.log('AuthContext: No existing session found');
+          setUser(null);
+          setSession(null);
           setUserProfile(null);
+          setLoading(false);
         }
       } catch (error) {
         console.error('AuthContext: Error initializing auth:', error);
@@ -67,6 +81,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initializeAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('AuthContext: Auth state changed:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          setSession(session);
+          setUser(session.user);
+          await fetchUserProfile(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setUserProfile(null);
+          setLoading(false);
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          setSession(session);
+          setUser(session.user);
+          // Don't refetch profile on token refresh
+        } else if (event === 'INITIAL_SESSION' && session?.user) {
+          // Handle initial session on app startup
+          console.log('AuthContext: Initial session found for user:', session.user.id);
+          setSession(session);
+          setUser(session.user);
+          await fetchUserProfile(session.user.id);
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
@@ -131,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('Supabase client not available') };
       }
 
-      const { user: authUser, error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -152,7 +198,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: authError };
       }
 
-      if (!authUser) {
+      if (!data.user) {
         return { error: new Error('No user data returned') };
       }
 
@@ -161,7 +207,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('users')
         .upsert(
           {
-            id: authUser.id,
+            id: data.user.id,
             email: email,
             full_name: fullName,
             username: username,
@@ -179,8 +225,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: profileError };
       }
 
-      await AsyncStorage.setItem('user_id', authUser.id);
-
+      // The auth state change listener will handle setting user and fetching profile
+      console.log('AuthContext: Sign up successful for user:', data.user.id);
       return { error: null };
     } catch (error) {
       console.error('Signup error:', error);
@@ -194,7 +240,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('Supabase client not available') };
       }
 
-      const { user: authUser, error: authError } = await supabase.auth.signIn({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -204,12 +250,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: authError };
       }
 
-      if (!authUser) {
+      if (!data.user) {
         return { error: new Error('No user data returned') };
       }
 
-      await AsyncStorage.setItem('user_id', authUser.id);
-
+      // The auth state change listener will handle setting user and fetching profile
+      console.log('AuthContext: Sign in successful for user:', data.user.id);
       return { error: null };
     } catch (error) {
       console.error('Signin error:', error);
@@ -225,14 +271,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       await supabase.auth.signOut();
-
-      // Clear user ID from AsyncStorage
-      await AsyncStorage.removeItem('user_id');
-
-      // Clear local state
-      setUser(null);
-      setUserProfile(null);
-      setSession(null);
+      
+      // Clear onboarding status on sign out
+      await AsyncStorage.removeItem('onboarding_completed');
+      
+      // The auth state change listener will handle clearing local state
+      console.log('AuthContext: Sign out successful');
     } catch (error) {
       console.error('Error signing out:', error);
     }

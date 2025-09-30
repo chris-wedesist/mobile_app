@@ -80,36 +80,45 @@ export default function SettingsScreen() {
         const settings = settingsStr ? JSON.parse(settingsStr) : { notification_radius: 50 };
         const radius = settings.notification_radius;
 
-        // Subscribe to new incidents
-        subscription = supabase
-          .from('incidents')
-          .on('INSERT', async (payload: { new: Incident }) => {
-            const newIncident = payload.new;
-            
-            // Calculate distance between user and incident
-            const distance = calculateDistance(
-              latitude,
-              longitude,
-              newIncident.latitude,
-              newIncident.longitude
-            );
+        // Subscribe to new incidents using channel
+        const channel = supabase
+          .channel('incidents')
+          .on('postgres_changes', 
+            { 
+              event: 'INSERT', 
+              schema: 'public', 
+              table: 'incidents' 
+            }, 
+            async (payload: { new: Incident }) => {
+              const newIncident = payload.new;
+              
+              // Calculate distance between user and incident
+              const distance = calculateDistance(
+                latitude,
+                longitude,
+                newIncident.latitude,
+                newIncident.longitude
+              );
 
-            // If incident is within user's radius, send notification
-            if (distance <= radius) {
-              await Notifications.scheduleNotificationAsync({
-                content: {
-                  title: 'New Incident Nearby',
-                  body: `${newIncident.title} - ${distance.toFixed(1)} km away`,
-                  data: { 
-                    type: 'incident',
-                    incidentId: newIncident.id 
+              // If incident is within user's radius, send notification
+              if (distance <= radius) {
+                await Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: 'New Incident Nearby',
+                    body: `${newIncident.title} - ${distance.toFixed(1)} km away`,
+                    data: { 
+                      type: 'incident',
+                      incidentId: newIncident.id 
+                    },
                   },
-                },
-                trigger: null, // Show immediately
-              });
+                  trigger: null, // Show immediately
+                });
+              }
             }
-          })
+          )
           .subscribe();
+        
+        subscription = channel;
       } catch (error) {
         console.error('Error setting up incident notifications:', error);
       }
@@ -149,11 +158,12 @@ export default function SettingsScreen() {
         await loadEmergencySettings();
         // Fetch user profile if user exists but profile is not loaded
         if (user && !userProfile) {
+          console.log('Settings: Fetching user profile for user:', user.id);
           await fetchUserProfile(user.id);
         }
       };
       loadData();
-    }, [user, userProfile])
+    }, [user, userProfile, fetchUserProfile])
   );
 
 
@@ -223,15 +233,21 @@ export default function SettingsScreen() {
               <View style={styles.settingInfo}>
                 <MaterialIcons name="person" size={20} color={colors.accent} />
                 <View>
-                  <Text style={styles.settingText}>{userProfile?.full_name || 'N/A'}</Text>
-                  <Text style={styles.messagePreview}>@{userProfile?.username || 'N/A'}</Text>
+                  <Text style={styles.settingText}>
+                    {userProfile?.full_name || (user?.user_metadata?.full_name) || 'Loading...'}
+                  </Text>
+                  <Text style={styles.messagePreview}>
+                    @{userProfile?.username || (user?.user_metadata?.username) || 'Loading...'}
+                  </Text>
                 </View>
               </View>
             </View>
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <MaterialIcons name="email" size={20} color={colors.accent} />
-                <Text style={styles.settingText}>{userProfile?.email || 'N/A'}</Text>
+                <Text style={styles.settingText}>
+                  {userProfile?.email || user?.email || 'Loading...'}
+                </Text>
               </View>
             </View>
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

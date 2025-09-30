@@ -36,8 +36,8 @@ export default function LoginScreen() {
     if (error) {
       Alert.alert('Login Failed', error.message);
     } else {
-      // Navigation will be handled by AuthProvider
-      router.replace('/(tabs)');
+      // Navigation will be handled by AuthProvider and main layout
+      console.log('Login successful, auth state will update automatically');
     }
   };
 

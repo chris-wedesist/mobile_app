@@ -78,8 +78,8 @@ export default function SignupScreen() {
           {
             text: 'OK',
             onPress: () => {
-              // Let the main layout handle routing based on onboarding status
-              router.replace('/' as any);
+              // Navigation will be handled by AuthProvider and main layout
+              console.log('Signup successful, auth state will update automatically');
             },
           },
         ]
