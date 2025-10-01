@@ -65,6 +65,12 @@ export default function SettingsScreen() {
 
     const setupIncidentNotifications = async () => {
       try {
+        // Check if real-time features are available
+        if (!(supabase as any).channel || typeof (supabase as any).channel !== 'function') {
+          console.log('Real-time features not available in this Supabase version');
+          return;
+        }
+
         // Get user's location
         const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
         if (locationStatus !== 'granted') {
@@ -81,7 +87,7 @@ export default function SettingsScreen() {
         const radius = settings.notification_radius;
 
         // Subscribe to new incidents using channel
-        const channel = supabase
+        const channel = (supabase as any)
           .channel('incidents')
           .on('postgres_changes', 
             { 
@@ -128,7 +134,7 @@ export default function SettingsScreen() {
 
     // Cleanup subscription
     return () => {
-      if (subscription) {
+      if (subscription && typeof subscription.unsubscribe === 'function') {
         subscription.unsubscribe();
       }
     };
