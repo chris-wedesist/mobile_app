@@ -8,6 +8,7 @@ import { WebView } from 'react-native-webview';
 import { Video as ExpoVideo, ResizeMode } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useAuth } from '@/contexts/AuthContext';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -74,6 +75,7 @@ type FormField = {
 };
 
 export default function ReportIncidentScreen() {
+  const { user, userProfile } = useAuth();
   const [selectedType, setSelectedType] = useState('');
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -347,6 +349,11 @@ export default function ReportIncidentScreen() {
       return;
     }
 
+    if (!user) {
+      Alert.alert('Error', 'You must be logged in to report an incident');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -362,7 +369,10 @@ export default function ReportIncidentScreen() {
             longitude: selectedLocation.longitude,
             status: 'active',
             created_at: new Date().toISOString(),
-            video_urls: selectedVideos
+            video_urls: selectedVideos,
+            user_id: user.id,
+            user_email: user.email,
+            user_name: userProfile?.full_name || user.user_metadata?.full_name || 'Anonymous'
           }
         ])
         .select()
