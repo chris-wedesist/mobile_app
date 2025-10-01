@@ -10,13 +10,11 @@ const isNarrowScreen = width < 768;
 export const TAB_BAR_HEIGHT = isNarrowScreen ? 130 : 70; // Two-tier layout is taller
 
 const tabs = [
-  { name: '/', title: 'Home', icon: 'home' as const },
   { name: 'record', title: 'Record', icon: 'videocam' as const },
   { name: 'incidents', title: 'Incidents', icon: 'warning' as const },
   { name: 'badges', title: 'Badges', icon: 'emoji-events' as const },
   { name: 'legal-help', title: 'Legal Help', icon: 'gavel' as const },
   { name: 'documents', title: 'Documents', icon: 'description' as const },
-  { name: 'settings', title: 'Settings', icon: 'settings' as const },
 ];
 
 export default function CustomTabBar() {
@@ -34,7 +32,7 @@ export default function CustomTabBar() {
 
   const navigateToTab = (tabName: string) => {
     // Navigate directly to the tab's root screen
-    router.replace(getTabRoute(tabName));
+    router.replace(getTabRoute(tabName) as any);
   };
 
   const renderIcon = (iconName: string, size: number, color: string) => {
@@ -47,36 +45,11 @@ export default function CustomTabBar() {
   };
 
   if (isNarrowScreen) {
-    // Two-tier layout for narrow screens
-    const firstRow = tabs.slice(0, 4);
-    const secondRow = tabs.slice(4);
-    
     return (
       <View style={styles.container}>
         <View style={styles.twoTierContainer}>
           <View style={styles.tabRow}>
-            {firstRow.map(tab => (
-              <TouchableOpacity
-                key={tab.name}
-                style={[styles.tabButton, isActive(tab.name) && styles.activeTabButton]}
-                onPress={() => navigateToTab(tab.name)}>
-                {renderIcon(
-                  tab.icon,
-                  24,
-                  isActive(tab.name) ? colors.accent : colors.text.muted
-                )}
-                <Text 
-                  style={[
-                    styles.tabLabel, 
-                    isActive(tab.name) && styles.activeTabLabel
-                  ]}>
-                  {tab.title}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View style={styles.tabRow}>
-            {secondRow.map(tab => (
+            {tabs.map(tab => (
               <TouchableOpacity
                 key={tab.name}
                 style={[styles.tabButton, isActive(tab.name) && styles.activeTabButton]}
@@ -159,7 +132,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     color: colors.text.muted,
-    fontSize: 12,
+    fontSize: 10,
     marginTop: 4,
     fontWeight: '500',
     fontFamily: 'Inter-Medium',

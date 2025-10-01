@@ -107,7 +107,6 @@ function AppContent() {
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="light" />
-
       {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && <EmergencyCallButton />}
     </GestureHandlerRootView>
   );

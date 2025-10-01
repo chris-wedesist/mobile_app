@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
 import NoHandsIcon from '../../components/NoHandsIcon';
+import AppHeader from '../../components/AppHeader';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
 import { getNews, NewsItem } from '@/lib/news';
@@ -44,10 +45,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.iconContainer}>
-        <NoHandsIcon size={300} />
-      </View>
+    <View style={styles.container}>
+      <AppHeader />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.iconContainer}>
+          <NoHandsIcon size={300} />
+        </View>
       <View style={styles.content}>
         <Text style={styles.title}>Hands Off!</Text>
         <Text style={styles.subtitle}>
@@ -95,7 +98,8 @@ export default function HomeScreen() {
           <Text style={styles.loadingText}>No news available</Text>
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -103,6 +107,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
+  },
+  scrollView: {
+    flex: 1,
   },
   iconContainer: {
     flex: 1.2,

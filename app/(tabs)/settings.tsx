@@ -10,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import AppHeader from '../../components/AppHeader';
 
 
 interface Incident {
@@ -229,8 +230,8 @@ export default function SettingsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
+      <AppHeader title="Settings" />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Settings</Text>
         
         {/* User Profile Section */}
           <View style={styles.section}>
@@ -525,7 +526,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   scrollContent: {
     paddingBottom: 20, // Extra padding at the bottom

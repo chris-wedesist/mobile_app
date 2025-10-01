@@ -13,12 +13,12 @@ export default function EmergencyCallButton() {
 
   const BUTTON_SIZE = 60;
   
-  // Initialize with a position that's visible on screen
-  const [position, setPosition] = useState({ x: 20, y: 100 });
-  
   // Get screen dimensions
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
+  
+  // Initialize with a position that's visible on screen (bottom right)
+  const [position, setPosition] = useState({ x: screenWidth - BUTTON_SIZE - 20, y: screenHeight - BUTTON_SIZE - 100 });
 
   const [isLongPressing, setIsLongPressing] = useState(false);
   const [requireLongPress, setRequireLongPress] = useState(true);
@@ -82,14 +82,14 @@ export default function EmergencyCallButton() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   
-  const onTouchStart = (e) => {
+  const onTouchStart = (e: any) => {
     const { pageX, pageY } = e.nativeEvent;
     setDragStart({ x: pageX, y: pageY });
     // Small delay before considering it a drag to allow for press detection
     setTimeout(() => setIsDragging(true), 100);
   };
   
-  const onTouchMove = (e) => {
+  const onTouchMove = (e: any) => {
     if (!isDragging) return;
     
     const { pageX, pageY } = e.nativeEvent;
@@ -134,7 +134,7 @@ export default function EmergencyCallButton() {
         makeEmergencyCall();
         setIsLongPressing(false);
         progressAnim.setValue(0);
-      }, 3000);
+      }, 3000) as any;
     } else {
       // If long press is not required, call immediately
       makeEmergencyCall();
@@ -149,7 +149,6 @@ export default function EmergencyCallButton() {
         longPressTimer.current = null;
       }
       // Reset the progress animation
-      Animated.timing(progressAnim).stop();
       progressAnim.setValue(0);
     }
   };
