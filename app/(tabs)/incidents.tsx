@@ -6,7 +6,6 @@ import WebView from 'react-native-webview';
 import { colors, shadows, radius } from '@/constants/theme';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
-import AppHeader from '../../components/AppHeader';
 
 const supabase = createClient(
   'https://example.supabase.co',
@@ -362,7 +361,6 @@ export default function IncidentsScreen() {
 
   return (
     <View style={styles.container}>
-      <AppHeader title="Nearby Incidents" />
       {!isConnected && (
         <View style={styles.connectionStatus}>
           <MaterialIcons name="wifi-off" size={16} color={colors.status.error} />
@@ -373,6 +371,9 @@ export default function IncidentsScreen() {
       )}
       
       <View style={styles.headerContainer}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Nearby Incidents</Text>
+        </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity 
             style={styles.viewToggle} 

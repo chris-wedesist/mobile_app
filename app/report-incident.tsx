@@ -9,7 +9,6 @@ import { Video as ExpoVideo, ResizeMode } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
-import AppHeader from '../components/AppHeader';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -542,9 +541,10 @@ export default function ReportIncidentScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <AppHeader title="Report Incident" showBackButton onBackPress={() => router.back()} />
-      <ScrollView style={styles.scrollView}>
+    <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backButtonText}>Cancel</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.legalRightsButton}
@@ -713,8 +713,7 @@ export default function ReportIncidentScreen() {
           </View>
         </View>
       </Modal>
-      </ScrollView>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -722,9 +721,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1a1a1a',
-  },
-  scrollView: {
-    flex: 1,
   },
   backButton: {
     padding: 20,

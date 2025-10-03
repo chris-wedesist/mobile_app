@@ -10,7 +10,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import AppHeader from '../../components/AppHeader';
 
 
 interface Incident {
@@ -173,6 +172,19 @@ export default function SettingsScreen() {
     }, [user, userProfile, fetchUserProfile])
   );
 
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ').filter(Boolean);
+    if (parts.length === 0) return 'U';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const fullName = (userProfile?.full_name || (user?.user_metadata?.full_name)) as string | undefined;
+  const username = (userProfile?.username || (user?.user_metadata?.username)) as string | undefined;
+  const email = (userProfile?.email || user?.email) as string | undefined;
+  const initials = getInitials(fullName);
+
 
   const handleEmergencyContactChange = (text: string) => {
     setEmergencyContact(text);
@@ -230,38 +242,30 @@ export default function SettingsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <AppHeader title="Settings" />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Settings</Text>
         
-        {/* User Profile Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Account</Text>
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <MaterialIcons name="person" size={20} color={colors.accent} />
-                <View>
-                  <Text style={styles.settingText}>
-                    {userProfile?.full_name || (user?.user_metadata?.full_name) || 'Loading...'}
-                  </Text>
-                  <Text style={styles.messagePreview}>
-                    @{userProfile?.username || (user?.user_metadata?.username) || 'Loading...'}
-                  </Text>
-                </View>
-              </View>
+        {/* Profile Header Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.profileRow}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
             </View>
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <MaterialIcons name="email" size={20} color={colors.accent} />
-                <Text style={styles.settingText}>
-                  {userProfile?.email || user?.email || 'Loading...'}
-                </Text>
-              </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.profileName}>{fullName || 'Loading...'}</Text>
+              <Text style={styles.profileHandle}>@{username || 'loading'}</Text>
+              <Text style={styles.profileEmail}>{email || 'loading@email'}</Text>
             </View>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <MaterialIcons name="logout" size={20} color={colors.text.primary} />
-              <Text style={styles.logoutButtonText}>Sign Out</Text>
+          <View style={styles.profileActions}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/profile')}>
+              <MaterialIcons name="edit" size={20} color={colors.text.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionButton, styles.actionDanger]} onPress={handleLogout}>
+              <MaterialIcons name="logout" size={20} color={colors.primary} />
             </TouchableOpacity>
           </View>
+          </View>
+        </View>
 
         <View style={styles.securitySection}>
           <View style={styles.securityHeader}>
@@ -273,7 +277,7 @@ export default function SettingsScreen() {
           </View>
           <Text style={styles.securitySubtitle}>Advanced protection features coming soon</Text>
 
-          <BlurView intensity={80} style={styles.securityBlurWrapper}>
+          {/* <BlurView intensity={80} style={styles.securityBlurWrapper}> */}
             <View style={styles.stealthModeContainer}>
               <View style={styles.stealthModeContent}>
                 <MaterialIcons name="visibility" size={24} color={colors.accent} style={styles.blurredIcon} />
@@ -320,7 +324,7 @@ export default function SettingsScreen() {
                 </View>
               </View>
             </View>
-          </BlurView>
+          {/* </BlurView> */}
         </View>
         
         <View style={styles.section}>
@@ -526,6 +530,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   scrollContent: {
     paddingBottom: 20, // Extra padding at the bottom
@@ -536,6 +541,79 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: 30,
     fontFamily: 'Inter-Bold',
+  },
+  profileCard: {
+    backgroundColor: colors.secondary,
+    borderRadius: radius.lg,
+    padding: 20,
+    marginBottom: 20,
+    ...shadows.sm,
+    borderWidth: 1,
+    borderColor: `${colors.text.muted}20`,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: `${colors.accent}25`,
+    borderWidth: 1,
+    borderColor: `${colors.accent}60`,
+  },
+  avatarText: {
+    color: colors.accent,
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    color: colors.text.primary,
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+  },
+  profileHandle: {
+    color: colors.text.muted,
+    fontSize: 13,
+    marginTop: 2,
+    fontFamily: 'Inter-Medium',
+  },
+  profileEmail: {
+    color: colors.text.muted,
+    fontSize: 12,
+    marginTop: 2,
+    fontFamily: 'Inter-Regular',
+  },
+  profileActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 20,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  actionDanger: {
+    backgroundColor: colors.text.primary,
+  },
+  actionButtonText: {
+    color: colors.text.primary,
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
   },
   section: {
     backgroundColor: colors.secondary,
@@ -739,8 +817,8 @@ const styles = StyleSheet.create({
   },
   // Stealth Mode Styles
   stealthModeContainer: {
-    paddingVertical: 4,
-    paddingHorizontal: 15,
+    // paddingVertical: 4,
+    // paddingHorizontal: 15,
   },
   stealthModeContent: {
     flexDirection: 'row',
