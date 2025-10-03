@@ -9,6 +9,7 @@ import { Video as ExpoVideo, ResizeMode } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
+import { checkIncidentRestrictions, getUserCurrentLocation, isUserVerified } from '@/utils/incident-restrictions';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -357,6 +358,23 @@ export default function ReportIncidentScreen() {
     try {
       setIsSubmitting(true);
 
+      // Get user's current location for verification
+      const userLocation = await getUserCurrentLocation();
+      
+      // Check incident reporting restrictions
+      const restrictionResult = await checkIncidentRestrictions(
+        user,
+        userLocation,
+        selectedLocation
+      );
+
+      if (!restrictionResult.canReport) {
+        Alert.alert('Cannot Report Incident', restrictionResult.reason);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // If restrictions are passed, proceed with incident submission
       const { data, error } = await supabase
         .from('incidents')
         .insert([
@@ -380,7 +398,11 @@ export default function ReportIncidentScreen() {
 
       if (error) throw error;
 
-      Alert.alert('Success', 'Incident reported successfully');
+      const successMessage = restrictionResult.remainingReports 
+        ? `Incident reported successfully! You have ${restrictionResult.remainingReports - 1} reports remaining this month.`
+        : 'Incident reported successfully!';
+
+      Alert.alert('Success', successMessage);
       router.push({
         pathname: '/(tabs)/incidents',
         params: { newIncident: JSON.stringify(data) }
@@ -667,10 +689,24 @@ export default function ReportIncidentScreen() {
           </React.Fragment>
         )}
 
+        {/* Verification Warning */}
+        {user && !isUserVerified(user) && (
+          <View style={styles.warningContainer}>
+            <MaterialIcons name="warning" size={20} color={colors.status.warning} />
+            <Text style={styles.warningText}>
+              Only verified users can report incidents. Please verify your email address.
+            </Text>
+          </View>
+        )}
+
         <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton, 
+            isSubmitting && styles.submitButtonDisabled,
+            user && !isUserVerified(user) && styles.submitButtonDisabledUnverified
+          ]}
           onPress={handleSubmit}
-          disabled={isSubmitting}>
+          disabled={isSubmitting || user && !isUserVerified(user)}>
           <Text style={styles.submitButtonText}>
             {isSubmitting ? 'Submitting...' : 'Report Activity'}
           </Text>
@@ -863,6 +899,27 @@ const styles = StyleSheet.create({
   },
   submitButtonDisabled: {
     opacity: 0.5,
+  },
+  submitButtonDisabledUnverified: {
+    backgroundColor: '#666',
+    opacity: 0.7,
+  },
+  warningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff3cd',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ffc107',
+  },
+  warningText: {
+    color: '#856404',
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+    fontFamily: 'Inter-Regular',
   },
   submitButtonText: {
     color: '#fff',
