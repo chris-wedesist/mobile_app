@@ -227,6 +227,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       await AsyncStorage.setItem('user_id', authUser.id);
 
+      try {
+        const hydratedUser: User = {
+          id: authUser.id,
+          email: email,
+          created_at: profileData.created_at,
+          updated_at: profileData.created_at,
+          aud: 'authenticated',
+          role: 'authenticated',
+          email_confirmed_at: profileData.created_at,
+          phone: '' as any,
+          confirmed_at: profileData.created_at as any,
+          last_sign_in_at: profileData.created_at as any,
+          app_metadata: {},
+          user_metadata: { full_name: fullName, username: username } as any,
+          identities: [] as any,
+          factors: [] as any,
+        } as User;
+
+        setUser(hydratedUser);
+        setUserProfile(profileData as unknown as UserProfile);
+        setLoading(false);
+      } catch (e) {
+        await fetchUserProfile(authUser.id);
+      }
+
       return { error: null };
     } catch (error) {
       console.error('Signup error:', error);
@@ -255,6 +280,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       await AsyncStorage.setItem('user_id', authUser.id);
+      await fetchUserProfile(authUser.id);
 
       return { error: null };
     } catch (error) {

@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     marginBottom: 16,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     ...shadows.sm,
