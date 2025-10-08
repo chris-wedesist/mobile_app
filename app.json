@@ -46,6 +46,13 @@
       "expo-router",
       "expo-video",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "03e1ecac-14ec-4ac3-a8cc-b4b8332e901b"
+      }
+    },
+    "owner": "alhandilshad"
   }
 }

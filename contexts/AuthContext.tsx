@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { initializePushNotifications } from '@/utils/push-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
@@ -248,8 +249,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(hydratedUser);
         setUserProfile(profileData as unknown as UserProfile);
         setLoading(false);
+
+        // Initialize push notifications for the user
+        await initializePushNotifications(data.user.id);
       } catch (e) {
         await fetchUserProfile(data.user.id);
+        // Initialize push notifications even if profile fetch fails
+        await initializePushNotifications(data.user.id);
       }
 
       return { error: null };
@@ -281,6 +287,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       await AsyncStorage.setItem('user_id', data.user.id);
       await fetchUserProfile(data.user.id);
+
+      // Initialize push notifications for the user
+      await initializePushNotifications(data.user.id);
 
       return { error: null };
     } catch (error) {

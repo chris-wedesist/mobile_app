@@ -59,86 +59,9 @@ export default function SettingsScreen() {
     }
   };
 
-  // Set up real-time incident notifications
-  useEffect(() => {
-    let subscription: any;
-
-    const setupIncidentNotifications = async () => {
-      try {
-        // Check if real-time features are available
-        if (!(supabase as any).channel || typeof (supabase as any).channel !== 'function') {
-          console.log('Real-time features not available in this Supabase version');
-          return;
-        }
-
-        // Get user's location
-        const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
-        if (locationStatus !== 'granted') {
-          console.log('Location permission not granted');
-          return;
-        }
-
-        const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
-
-        // Get user's notification radius from settings
-        const settingsStr = await AsyncStorage.getItem('notification_settings');
-        const settings = settingsStr ? JSON.parse(settingsStr) : { notification_radius: 50 };
-        const radius = settings.notification_radius;
-
-        // Subscribe to new incidents using channel
-        const channel = (supabase as any)
-          .channel('incidents')
-          .on('postgres_changes', 
-            { 
-              event: 'INSERT', 
-              schema: 'public', 
-              table: 'incidents' 
-            }, 
-            async (payload: { new: Incident }) => {
-              const newIncident = payload.new;
-              
-              // Calculate distance between user and incident
-              const distance = calculateDistance(
-                latitude,
-                longitude,
-                newIncident.latitude,
-                newIncident.longitude
-              );
-
-              // If incident is within user's radius, send notification
-              if (distance <= radius) {
-                await Notifications.scheduleNotificationAsync({
-                  content: {
-                    title: 'New Incident Nearby',
-                    body: `${newIncident.title} - ${distance.toFixed(1)} km away`,
-                    data: { 
-                      type: 'incident',
-                      incidentId: newIncident.id 
-                    },
-                  },
-                  trigger: null, // Show immediately
-                });
-              }
-            }
-          )
-          .subscribe();
-        
-        subscription = channel;
-      } catch (error) {
-        console.error('Error setting up incident notifications:', error);
-      }
-    };
-
-    setupIncidentNotifications();
-
-    // Cleanup subscription
-    return () => {
-      if (subscription && typeof subscription.unsubscribe === 'function') {
-        subscription.unsubscribe();
-      }
-    };
-  }, []);
+  // Note: Real-time incident notifications are now handled via push notifications
+  // when incidents are reported, rather than through Supabase real-time subscriptions
+  // This provides better reliability and works across different devices/users
 
   // Helper function to calculate distance between two points
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {

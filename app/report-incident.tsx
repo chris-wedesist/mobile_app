@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkIncidentRestrictions, getUserCurrentLocation, isUserVerified } from '@/utils/incident-restrictions';
+import { sendIncidentNotificationToNearbyUsers } from '@/utils/push-notifications';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -403,6 +404,22 @@ export default function ReportIncidentScreen() {
         : 'Incident reported successfully!';
 
       Alert.alert('Success', successMessage);
+
+      // Send push notifications to nearby users
+      try {
+        await sendIncidentNotificationToNearbyUsers(
+          selectedLocation.latitude,
+          selectedLocation.longitude,
+          selectedType,
+          data.id,
+          50 // 50 mile radius
+        );
+        console.log('Push notifications sent to nearby users');
+      } catch (pushError) {
+        console.error('Error sending push notifications:', pushError);
+        // Don't fail the incident report if push notifications fail
+      }
+
       router.push({
         pathname: '/(tabs)/incidents',
         params: { newIncident: JSON.stringify(data) }
@@ -706,7 +723,7 @@ export default function ReportIncidentScreen() {
             user && !isUserVerified(user) && styles.submitButtonDisabledUnverified
           ]}
           onPress={handleSubmit}
-          disabled={isSubmitting || user && !isUserVerified(user)}>
+          disabled={isSubmitting || (user ? !isUserVerified(user) : false)}>
           <Text style={styles.submitButtonText}>
             {isSubmitting ? 'Submitting...' : 'Report Activity'}
           </Text>
