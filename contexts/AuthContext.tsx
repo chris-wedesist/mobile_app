@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('Supabase client not available') };
       }
 
-      const { user: authUser, error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -198,7 +198,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: authError };
       }
 
-      if (!authUser) {
+      if (!data.user) {
         return { error: new Error('No user data returned') };
       }
 
@@ -207,7 +207,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('users')
         .upsert(
           {
-            id: authUser.id,
+            id: data.user.id,
             email: email,
             full_name: fullName,
             username: username,
@@ -225,11 +225,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: profileError };
       }
 
-      await AsyncStorage.setItem('user_id', authUser.id);
+      await AsyncStorage.setItem('user_id', data.user.id);
 
       try {
         const hydratedUser: User = {
-          id: authUser.id,
+          id: data.user.id,
           email: email,
           created_at: profileData.created_at,
           updated_at: profileData.created_at,
@@ -249,7 +249,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserProfile(profileData as unknown as UserProfile);
         setLoading(false);
       } catch (e) {
-        await fetchUserProfile(authUser.id);
+        await fetchUserProfile(data.user.id);
       }
 
       return { error: null };
@@ -265,7 +265,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('Supabase client not available') };
       }
 
-      const { user: authUser, error: authError } = await supabase.auth.signIn({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -275,12 +275,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: authError };
       }
 
-      if (!authUser) {
+      if (!data.user) {
         return { error: new Error('No user data returned') };
       }
 
-      await AsyncStorage.setItem('user_id', authUser.id);
-      await fetchUserProfile(authUser.id);
+      await AsyncStorage.setItem('user_id', data.user.id);
+      await fetchUserProfile(data.user.id);
 
       return { error: null };
     } catch (error) {
