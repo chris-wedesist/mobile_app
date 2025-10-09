@@ -75,6 +75,9 @@ export async function savePushTokenToProfile(userId: string, token: string): Pro
       return false;
     }
 
+    console.log('🔍 Attempting to save push token for user:', userId);
+    console.log('🔍 Push token:', token);
+
     const tokenData: PushTokenData = {
       token,
       deviceId: Device.osInternalBuildId || 'unknown',
@@ -82,24 +85,31 @@ export async function savePushTokenToProfile(userId: string, token: string): Pro
       lastUpdated: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    console.log('🔍 Token data:', tokenData);
+
+    const { data, error } = await supabase
       .from('users')
-      .update({
-        push_token: token,
-        push_token_data: tokenData,
-        push_token_updated_at: new Date().toISOString(),
-      })
-      .eq('id', userId);
+      .upsert(
+        {
+          id: userId,
+          push_token: token,
+          push_token_data: tokenData,
+          push_token_updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      )
+      .select();
 
     if (error) {
-      console.error('Error saving push token to profile:', error);
+      console.error('❌ Error saving push token to profile:', error);
       return false;
     }
 
-    console.log('Push token saved to user profile successfully');
+    console.log('✅ Push token saved to user profile successfully');
+    console.log('✅ Upsert result:', data);
     return true;
   } catch (error) {
-    console.error('Error in savePushTokenToProfile:', error);
+    console.error('❌ Error in savePushTokenToProfile:', error);
     return false;
   }
 }
@@ -239,28 +249,30 @@ function toRad(value: number): number {
  */
 export async function initializePushNotifications(userId: string): Promise<boolean> {
   try {
-    console.log('Initializing push notifications for user:', userId);
+    console.log('🚀 Initializing push notifications for user:', userId);
     
     // Register for push notifications
     const token = await registerForPushNotificationsAsync();
     
     if (!token) {
-      console.log('Failed to get push token');
+      console.log('❌ Failed to get push token');
       return false;
     }
+
+    console.log('✅ Push token obtained:', token);
 
     // Save token to user profile
     const saved = await savePushTokenToProfile(userId, token);
     
     if (saved) {
-      console.log('Push notifications initialized successfully');
+      console.log('✅ Push notifications initialized successfully');
       return true;
     } else {
-      console.log('Failed to save push token to profile');
+      console.log('❌ Failed to save push token to profile');
       return false;
     }
   } catch (error) {
-    console.error('Error initializing push notifications:', error);
+    console.error('❌ Error initializing push notifications:', error);
     return false;
   }
 }

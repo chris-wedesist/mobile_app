@@ -14,11 +14,12 @@ interface AuthContextType {
     password: string,
     fullName: string,
     username: string
-  ) => Promise<{ error: any }>;
+  ) => Promise<{ error: any; requiresConfirmation?: boolean; message?: string }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: any }>;
   fetchUserProfile: (userId: string) => Promise<void>;
+  resendConfirmation: (email: string) => Promise<{ error: any }>;
 }
 
 export interface UserProfile {
@@ -181,6 +182,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            username: username,
+          },
+        },
       });
 
       if (authError) {
@@ -203,59 +210,97 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('No user data returned') };
       }
 
-      // Use upsert to handle existing email or create new profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('users')
-        .upsert(
-          {
-            id: data.user.id,
-            email: email,
-            full_name: fullName,
-            username: username,
-            created_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'email',
-          }
-        )
-        .select()
-        .single();
+      // Check if email confirmation is required
+      if (data.user && !data.user.email_confirmed_at) {
+        // Try to create user profile in database, but don't fail if it doesn't work
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('users')
+            .insert({
+              id: data.user.id,
+              email: email,
+              full_name: fullName,
+              username: username,
+              created_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
 
-      if (profileError) {
-        console.error('Profile error:', profileError);
-        return { error: profileError };
+          if (profileError) {
+            console.error('Profile creation error (non-fatal):', profileError);
+            // Profile creation failed, but we'll still allow signup to proceed
+            // The profile can be created later when the user verifies their email
+          } else {
+            console.log('User profile created successfully');
+          }
+        } catch (error) {
+          console.error('Profile creation exception (non-fatal):', error);
+          // Continue with signup even if profile creation fails
+        }
+
+        return { 
+          error: null, 
+          requiresConfirmation: true,
+          message: 'Please check your email and click the confirmation link to verify your account.'
+        };
       }
 
-      await AsyncStorage.setItem('user_id', data.user.id);
+      // If email is already confirmed, proceed with login
+      if (data.user && data.user.email_confirmed_at) {
+        // Use upsert to handle existing email or create new profile
+        const { data: profileData, error: profileError } = await supabase
+          .from('users')
+          .upsert(
+            {
+              id: data.user.id,
+              email: email,
+              full_name: fullName,
+              username: username,
+              created_at: new Date().toISOString(),
+            },
+            {
+              onConflict: 'email',
+            }
+          )
+          .select()
+          .single();
 
-      try {
-        const hydratedUser: User = {
-          id: data.user.id,
-          email: email,
-          created_at: profileData.created_at,
-          updated_at: profileData.created_at,
-          aud: 'authenticated',
-          role: 'authenticated',
-          email_confirmed_at: profileData.created_at,
-          phone: '' as any,
-          confirmed_at: profileData.created_at as any,
-          last_sign_in_at: profileData.created_at as any,
-          app_metadata: {},
-          user_metadata: { full_name: fullName, username: username } as any,
-          identities: [] as any,
-          factors: [] as any,
-        } as User;
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          return { error: profileError };
+        }
 
-        setUser(hydratedUser);
-        setUserProfile(profileData as unknown as UserProfile);
-        setLoading(false);
+        await AsyncStorage.setItem('user_id', data.user.id);
 
-        // Initialize push notifications for the user
-        await initializePushNotifications(data.user.id);
-      } catch (e) {
-        await fetchUserProfile(data.user.id);
-        // Initialize push notifications even if profile fetch fails
-        await initializePushNotifications(data.user.id);
+        try {
+          const hydratedUser: User = {
+            id: data.user.id,
+            email: email,
+            created_at: profileData.created_at,
+            updated_at: profileData.created_at,
+            aud: 'authenticated',
+            role: 'authenticated',
+            email_confirmed_at: profileData.created_at,
+            phone: '' as any,
+            confirmed_at: profileData.created_at as any,
+            last_sign_in_at: profileData.created_at as any,
+            app_metadata: {},
+            user_metadata: { full_name: fullName, username: username } as any,
+            identities: [] as any,
+            factors: [] as any,
+          } as User;
+
+          setUser(hydratedUser);
+          setUserProfile(profileData as unknown as UserProfile);
+          setLoading(false);
+
+          // Initialize push notifications for the user
+          await initializePushNotifications(data.user.id);
+        } catch (e) {
+          await fetchUserProfile(data.user.id);
+          // Initialize push notifications even if profile fetch fails
+          await initializePushNotifications(data.user.id);
+        }
       }
 
       return { error: null };
@@ -285,6 +330,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('No user data returned') };
       }
 
+      // Check if email is confirmed
+      if (!data.user.email_confirmed_at) {
+        return { 
+          error: new Error('Please verify your email address before signing in. Check your email for a confirmation link.') 
+        };
+      }
+
       await AsyncStorage.setItem('user_id', data.user.id);
       await fetchUserProfile(data.user.id);
 
@@ -294,6 +346,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { error: null };
     } catch (error) {
       console.error('Signin error:', error);
+      return { error };
+    }
+  };
+
+  const resendConfirmation = async (email: string) => {
+    try {
+      if (!supabase || !supabase.auth) {
+        return { error: new Error('Supabase client not available') };
+      }
+
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) {
+        console.error('Resend confirmation error:', error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error('Resend confirmation error:', error);
       return { error };
     }
   };
@@ -357,6 +432,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     updateProfile,
     fetchUserProfile,
+    resendConfirmation,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

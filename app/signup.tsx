@@ -65,11 +65,24 @@ export default function SignupScreen() {
     setLoading(true);
     // Generate username from email (part before @)
     const username = email.split('@')[0];
-    const { error } = await signUp(email, password, fullName, username);
+    const { error, requiresConfirmation, message } = await signUp(email, password, fullName, username);
     setLoading(false);
 
     if (error) {
       Alert.alert('Signup Failed', error.message);
+    } else if (requiresConfirmation) {
+      Alert.alert(
+        'Email Confirmation Required',
+        message || 'Please check your email and click the confirmation link to verify your account.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              router.push('/auth/confirmation' as any);
+            },
+          },
+        ]
+      );
     } else {
       Alert.alert(
         'Success',
