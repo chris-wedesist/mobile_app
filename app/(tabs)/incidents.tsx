@@ -8,44 +8,24 @@ import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const supabase = createClient(
-  'https://example.supabase.co',
-  'your-supabase-anon-key'
+  'https://tscvzrxnxadnvgnsdrqx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'
 );
 
-// Test data generator
-const generateTestData = (count: number, userLat: number, userLng: number) => {
-  const types = ['ICE Activity', 'Border Patrol Activity', 'Checkpoint', 'Raid in Progress', 'Suspicious Vehicle'];
-  const incidents = [];
-
-  for (let i = 0; i < count; i++) {
-    // Generate random coordinates within 5km of user location
-    const lat = userLat + (Math.random() - 0.5) * 0.045; // ~5km in degrees
-    const lng = userLng + (Math.random() - 0.5) * 0.045; // ~5km in degrees
-
-    incidents.push({
-      id: `test-${i}`,
-      type: types[Math.floor(Math.random() * types.length)],
-      description: `Test incident ${i + 1} - ${types[Math.floor(Math.random() * types.length)]} reported in the area.`,
-      location: `POINT(${lng} ${lat})`,
-      status: 'active',
-      created_at: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24).toISOString(), // Random time in last 24 hours
-      latitude: lat,
-      longitude: lng,
-    });
-  }
-
-  return incidents;
-};
+// Real incidents are now fetched from Supabase database
 
 type Incident = {
   id: string;
   type: string;
   description: string;
-  location: string;
   status: string;
   created_at: string;
   latitude: number;
   longitude: number;
+  user_id?: string;
+  user_email?: string;
+  user_name?: string;
+  video_urls?: string[];
   distance?: number;
 };
 
@@ -150,8 +130,32 @@ export default function IncidentsScreen() {
 
   const fetchIncidents = async (userLocation: Location.LocationObject) => {
     try {  
-      // Generate test data instead of fetching from Supabase
-      const data = generateTestData(10, userLocation.coords.latitude, userLocation.coords.longitude);
+      console.log('Fetching real incidents from Supabase...');
+      
+      // Fetch real incidents from Supabase database
+      const { data, error } = await supabase
+        .from('incidents')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to 50 most recent incidents
+
+      if (error) {
+        console.error('Supabase error:', error);
+        setIsConnected(false);
+        setError('Failed to fetch incidents from database. Please try again.');
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        console.log('No incidents found in database');
+        setIncidents([]);
+        setIsConnected(true);
+        setError(null);
+        return;
+      }
+
+      console.log(`Found ${data.length} incidents in database`);
 
       // Calculate distances for each incident
       const incidentsWithDistance = data.map(incident => {
@@ -226,6 +230,15 @@ export default function IncidentsScreen() {
         <Text style={styles.incidentType}>{item.type}</Text>
       </View>
       <Text style={styles.incidentDescription}>{item.description}</Text>
+      
+      {/* Show reporter info if available */}
+      {item.user_name && (
+        <View style={styles.reporterInfo}>
+          <MaterialIcons name="person" size={16} color={colors.text.muted} />
+          <Text style={styles.reporterText}>Reported by {item.user_name}</Text>
+        </View>
+      )}
+      
       <View style={styles.incidentFooter}>
         <View style={styles.locationInfo}>
           <MaterialIcons name="location-on" size={16} color={colors.text.muted} />
@@ -534,9 +547,21 @@ const styles = StyleSheet.create({
   incidentDescription: {
     color: colors.text.secondary,
     fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 10,
     lineHeight: 22,
     fontFamily: 'Inter-Regular',
+  },
+  reporterInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  reporterText: {
+    color: colors.text.muted,
+    fontSize: 14,
+    marginLeft: 5,
+    fontFamily: 'Inter-Regular',
+    fontStyle: 'italic',
   },
   incidentFooter: {
     flexDirection: 'row',
