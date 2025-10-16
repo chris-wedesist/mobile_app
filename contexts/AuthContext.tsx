@@ -193,7 +193,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (authError) {
-        console.error('Auth error:', authError);
         // Handle duplicate email error specifically
         if (
           authError.message.includes('duplicate key') ||
@@ -296,7 +295,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (authError) {
-        console.error('Auth error:', authError);
+        console.log('Auth error:', authError);
         return { error: authError };
       }
 

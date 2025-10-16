@@ -189,8 +189,20 @@ export default function IncidentsScreen() {
         }
       });
 
-      // Sort incidents by distance
-      const sortedIncidents = incidentsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      // Sort incidents: latest first, then by distance (nearby)
+      const sortedIncidents = incidentsWithDistance.sort((a, b) => {
+        // First, get the most recent incident (latest)
+        const latestIncident = incidentsWithDistance.reduce((latest, current) => {
+          return new Date(current.created_at) > new Date(latest.created_at) ? current : latest;
+        });
+        
+        // If this is the latest incident, put it first
+        if (a.id === latestIncident.id) return -1;
+        if (b.id === latestIncident.id) return 1;
+        
+        // For all other incidents, sort by distance (nearby first)
+        return (a.distance || 0) - (b.distance || 0);
+      });
       
       setIncidents(sortedIncidents);
       setIsConnected(true);
