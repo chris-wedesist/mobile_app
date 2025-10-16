@@ -44,7 +44,7 @@ export async function sendConfirmationEmail(data: EmailConfirmationData): Promis
     }
 
     // Call your custom email service with the code
-    const response = await fetch('http://localhost:8200/api/send-email', {
+    const response = await fetch('https://desist-server.vercel.app/api/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ export async function resendConfirmationEmail(email: string, username: string): 
     }
 
     // Call your custom email service with the new code
-    const response = await fetch('http://localhost:8200/api/send-email', {
+    const response = await fetch('https://desist-server.vercel.app/api/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
