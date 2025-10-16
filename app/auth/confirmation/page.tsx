@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { colors, radius, shadows } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,9 +7,11 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function ConfirmationPage() {
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<'pending' | 'verified' | 'error'>('pending');
+  const [email, setEmail] = useState('');
   const searchParams = useLocalSearchParams();
-  const { user, session } = useAuth();
+  const { user, session, resendConfirmation } = useAuth();
 
   useEffect(() => {
     // Check if we have verification parameters from email link
@@ -55,13 +57,28 @@ export default function ConfirmationPage() {
   };
 
   const handleResendConfirmation = async () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email address');
+      return;
+    }
+
+    setIsResending(true);
     try {
-      // This would typically resend the confirmation email
-      // For now, we'll just show an alert
-      alert('Confirmation email resent. Please check your inbox.');
+      const { error } = await resendConfirmation(email);
+      
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        Alert.alert(
+          'Email Sent',
+          'A new confirmation email has been sent to your email address.'
+        );
+      }
     } catch (error) {
       console.error('Error resending confirmation:', error);
-      alert('Failed to resend confirmation email. Please try again.');
+      Alert.alert('Error', 'Failed to resend confirmation email');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -122,11 +139,30 @@ export default function ConfirmationPage() {
           <Text style={styles.buttonText}>Return to Login</Text>
         </TouchableOpacity>
         
+        <View style={styles.emailInputContainer}>
+          <MaterialIcons name="email" size={20} color={colors.text.muted} style={styles.inputIcon} />
+          <TextInput
+            style={styles.emailInput}
+            placeholder="Enter your email address"
+            placeholderTextColor={colors.text.muted}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+
         <TouchableOpacity
-          style={styles.resendButton}
+          style={[styles.resendButton, isResending && styles.resendButtonDisabled]}
           onPress={handleResendConfirmation}
+          disabled={isResending}
         >
-          <Text style={styles.resendButtonText}>Resend Confirmation Email</Text>
+          {isResending ? (
+            <ActivityIndicator size="small" color={colors.text.primary} />
+          ) : (
+            <Text style={styles.resendButtonText}>Resend Confirmation Email</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -203,12 +239,44 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
+  emailInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    width: '100%',
+    ...shadows.sm,
+  },
+  inputIcon: {
+    marginRight: 12,
+    color: colors.text.muted,
+  },
+  emailInput: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text.primary,
+    fontFamily: 'Inter-Regular',
+  },
   resendButton: {
-    padding: 10,
+    backgroundColor: colors.accent,
+    borderRadius: radius.lg,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 15,
+    ...shadows.md,
+  },
+  resendButtonDisabled: {
+    opacity: 0.6,
   },
   resendButtonText: {
-    color: colors.accent,
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
+    color: colors.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
 });

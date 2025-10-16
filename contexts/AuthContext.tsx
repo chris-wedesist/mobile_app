@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { initializePushNotifications } from '@/utils/push-notifications';
+import { sendConfirmationEmail, resendConfirmationEmail } from '@/utils/email-confirmation';
+import { testUsersTableSchema, testUserProfileCreation } from '@/utils/database-test';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
@@ -210,100 +212,72 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('No user data returned') };
       }
 
-      // Check if email confirmation is required
-      if (data.user && !data.user.email_confirmed_at) {
-        // Try to create user profile in database, but don't fail if it doesn't work
-        try {
-          const { data: profileData, error: profileError } = await supabase
-            .from('users')
-            .insert({
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              username: username,
-              created_at: new Date().toISOString(),
-            })
-            .select()
-            .single();
-
-          if (profileError) {
-            console.error('Profile creation error (non-fatal):', profileError);
-            // Profile creation failed, but we'll still allow signup to proceed
-            // The profile can be created later when the user verifies their email
-          } else {
-            console.log('User profile created successfully');
-          }
-        } catch (error) {
-          console.error('Profile creation exception (non-fatal):', error);
-          // Continue with signup even if profile creation fails
-        }
-
+      // Test database schema first
+      const schemaTest = await testUsersTableSchema();
+      if (!schemaTest.success) {
+        console.error('Database schema test failed:', schemaTest.error);
         return { 
-          error: null, 
-          requiresConfirmation: true,
-          message: 'Please check your email and click the confirmation link to verify your account.'
+          error: new Error(`Database setup issue: ${schemaTest.error}. Please contact support.`) 
         };
       }
 
-      // If email is already confirmed, proceed with login
-      if (data.user && data.user.email_confirmed_at) {
-        // Use upsert to handle existing email or create new profile
+      // Create user profile in database using upsert to handle duplicates
+      try {
         const { data: profileData, error: profileError } = await supabase
           .from('users')
-          .upsert(
-            {
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              username: username,
-              created_at: new Date().toISOString(),
-            },
-            {
-              onConflict: 'email',
-            }
-          )
+          .upsert({
+            id: data.user.id,
+            email: email,
+            full_name: fullName,
+            username: username,
+            created_at: new Date().toISOString(),
+            email_confirmed: false,
+          }, {
+            onConflict: 'id'
+          })
           .select()
           .single();
 
         if (profileError) {
-          console.error('Profile error:', profileError);
-          return { error: profileError };
+          console.error('Profile creation error:', profileError);
+          // If profile creation fails, we can't proceed with email confirmation
+          return { 
+            error: new Error('Failed to create user profile. Please try again.') 
+          };
+        } else {
+          console.log('User profile created successfully');
         }
-
-        await AsyncStorage.setItem('user_id', data.user.id);
-
-        try {
-          const hydratedUser: User = {
-            id: data.user.id,
-            email: email,
-            created_at: profileData.created_at,
-            updated_at: profileData.created_at,
-            aud: 'authenticated',
-            role: 'authenticated',
-            email_confirmed_at: profileData.created_at,
-            phone: '' as any,
-            confirmed_at: profileData.created_at as any,
-            last_sign_in_at: profileData.created_at as any,
-            app_metadata: {},
-            user_metadata: { full_name: fullName, username: username } as any,
-            identities: [] as any,
-            factors: [] as any,
-          } as User;
-
-          setUser(hydratedUser);
-          setUserProfile(profileData as unknown as UserProfile);
-          setLoading(false);
-
-          // Initialize push notifications for the user
-          await initializePushNotifications(data.user.id);
-        } catch (e) {
-          await fetchUserProfile(data.user.id);
-          // Initialize push notifications even if profile fetch fails
-          await initializePushNotifications(data.user.id);
-        }
+      } catch (error) {
+        console.error('Profile creation exception:', error);
+        return { 
+          error: new Error('Failed to create user profile. Please try again.') 
+        };
       }
 
-      return { error: null };
+      // Send custom confirmation email
+      try {
+        const result = await sendConfirmationEmail({
+          email: email,
+          username: fullName,
+          userId: data.user.id,
+        });
+
+        if (!result.success) {
+          console.error('Failed to send confirmation email:', result.error);
+          // Don't fail signup if email sending fails
+        } else {
+          console.log('Confirmation email sent successfully');
+        }
+      } catch (error) {
+        console.error('Error sending confirmation email:', error);
+        // Don't fail signup if email sending fails
+      }
+
+      return { 
+        error: null, 
+        requiresConfirmation: true,
+        message: 'Please check your email and enter the 6-digit confirmation code to verify your account.'
+      };
     } catch (error) {
       console.error('Signup error:', error);
       return { error };
@@ -330,10 +304,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { error: new Error('No user data returned') };
       }
 
-      // Check if email is confirmed
-      if (!data.user.email_confirmed_at) {
+      // Check if email is confirmed in our users table
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('email_confirmed')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError || !userProfile) {
         return { 
-          error: new Error('Please verify your email address before signing in. Check your email for a confirmation link.') 
+          error: new Error('User profile not found. Please sign up again.') 
+        };
+      }
+
+      if (!userProfile.email_confirmed) {
+        return { 
+          error: new Error('Please verify your email address before signing in. Check your email for a confirmation code.') 
         };
       }
 
@@ -352,18 +338,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const resendConfirmation = async (email: string) => {
     try {
-      if (!supabase || !supabase.auth) {
-        return { error: new Error('Supabase client not available') };
-      }
+      // Get username from email (part before @)
+      const username = email.split('@')[0];
+      
+      const result = await resendConfirmationEmail(email, username);
 
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-      });
-
-      if (error) {
-        console.error('Resend confirmation error:', error);
-        return { error };
+      if (!result.success) {
+        return { error: new Error(result.error || 'Failed to resend confirmation email') };
       }
 
       return { error: null };

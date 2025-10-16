@@ -73,13 +73,14 @@ export default function SignupScreen() {
     } else if (requiresConfirmation) {
       Alert.alert(
         'Email Confirmation Required',
-        message || 'Please check your email and click the confirmation link to verify your account.',
+        message || 'Please check your email and enter the 6-digit confirmation code to verify your account.',
         [
           {
             text: 'OK',
-            onPress: () => {
-              router.push('/auth/confirmation' as any);
-            },
+              onPress: () => {
+                console.log('Navigating to confirm-code page with email:', email);
+                router.push(`/confirm-code?email=${encodeURIComponent(email)}` as any);
+              },
           },
         ]
       );
