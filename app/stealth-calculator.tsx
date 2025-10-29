@@ -8,6 +8,36 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 type Operation = '+' | '-' | '×' | '÷' | '=' | null;
 
+// Format number for display
+const formatDisplay = (value: string | number): string => {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  
+  if (isNaN(num)) return '0';
+  
+  // Handle very large or very small numbers with scientific notation
+  if (Math.abs(num) > 1e15 || (Math.abs(num) < 1e-6 && num !== 0)) {
+    return num.toExponential(6);
+  }
+  
+  // Check if it's a whole number or has decimals
+  const str = num.toString();
+  const hasDecimal = str.includes('.');
+  
+  if (hasDecimal) {
+    // Limit decimal places and remove trailing zeros
+    return parseFloat(num.toFixed(10)).toLocaleString('en-US', {
+      maximumFractionDigits: 10,
+      useGrouping: true
+    });
+  }
+  
+  // Format integers with thousand separators
+  return num.toLocaleString('en-US', {
+    maximumFractionDigits: 0,
+    useGrouping: true
+  });
+};
+
 export default function StealthCalculatorScreen() {
   const { deactivate } = useStealthMode();
   const [display, setDisplay] = useState('0');
@@ -18,23 +48,45 @@ export default function StealthCalculatorScreen() {
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   const { resetTimeout } = useStealthAutoTimeout(10);
 
+  // Check for secret sequence: exactly 5555
+  const checkSecretSequence = (newDisplay: string) => {
+    const currentNum = newDisplay.replace(/,/g, '').replace(/\./g, '');
+    if (currentNum === '5555') {
+      setTimeout(() => {
+        deactivate('secret_sequence');
+      }, 100);
+      return true;
+    }
+    return false;
+  };
+
   const handleLongPress = () => {
     deactivate('gesture');
   };
 
   const handleNumber = (num: string) => {
     resetTimeout(); // Reset timeout on user interaction
+    let newDisplay: string;
+    
     if (clearNext) {
-      setDisplay(num);
+      newDisplay = num;
       setClearNext(false);
     } else {
-      setDisplay(display === '0' ? num : display + num);
+      // Remove formatting before adding new number
+      const currentNum = display.replace(/,/g, '');
+      newDisplay = currentNum === '0' ? num : currentNum + num;
     }
+    
+    setDisplay(newDisplay);
+    
+    // Check for secret sequence (exactly 5555)
+    checkSecretSequence(newDisplay);
   };
 
   const handleOperation = (op: Operation) => {
     resetTimeout(); // Reset timeout on user interaction
-    const currentValue = parseFloat(display);
+    // Remove formatting before parsing
+    const currentValue = parseFloat(display.replace(/,/g, ''));
 
     if (op === '=') {
       if (previousValue !== null && operation) {
@@ -55,7 +107,10 @@ export default function StealthCalculatorScreen() {
           default:
             return;
         }
-        setDisplay(result.toString());
+        
+        // Format result
+        const formattedResult = formatDisplay(result);
+        setDisplay(formattedResult);
         setPreviousValue(null);
         setOperation(null);
       }
@@ -76,8 +131,10 @@ export default function StealthCalculatorScreen() {
 
   const handleDelete = () => {
     resetTimeout(); // Reset timeout on user interaction
-    if (display.length > 1) {
-      setDisplay(display.slice(0, -1));
+    // Remove formatting before deleting
+    const currentNum = display.replace(/,/g, '');
+    if (currentNum.length > 1) {
+      setDisplay(currentNum.slice(0, -1));
     } else {
       setDisplay('0');
     }
@@ -93,19 +150,26 @@ export default function StealthCalculatorScreen() {
   const renderButton = (
     content: string | JSX.Element,
     onPress: () => void,
-    style?: object
-  ) => (
-    <TouchableOpacity
-      style={[styles.button, style]}
-      onPress={onPress}>
-      {typeof content === 'string' ? (
-        <Text style={[
-          styles.buttonText,
-          style === styles.operationButton && styles.operationButtonText
-        ]}>{content}</Text>
-      ) : content}
-    </TouchableOpacity>
-  );
+    style?: object | object[]
+  ) => {
+    const isOperationButton = Array.isArray(style) 
+      ? style.includes(styles.operationButton)
+      : style === styles.operationButton;
+    
+    return (
+      <TouchableOpacity
+        style={[styles.button, style]}
+        onPress={onPress}
+        activeOpacity={0.7}>
+        {typeof content === 'string' ? (
+          <Text style={[
+            styles.buttonText,
+            isOperationButton && styles.operationButtonText
+          ]}>{content}</Text>
+        ) : content}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -119,46 +183,57 @@ export default function StealthCalculatorScreen() {
       >
         <View style={styles.innerContainer}>
           <View style={styles.display}>
-            <Text style={styles.displayText}>{display}</Text>
-            {operation && (
-              <View style={styles.operationIndicator}>
-                <Text style={styles.operationText}>{operation}</Text>
+            {previousValue !== null && (
+              <View style={styles.historyContainer}>
+                <Text style={styles.historyText}>
+                  {formatDisplay(previousValue)} {operation}
+                </Text>
               </View>
             )}
+            <Text 
+              style={[
+                styles.displayText,
+                display.replace(/,/g, '').length > 12 && styles.displayTextSmall
+              ]} 
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatDisplay(display.replace(/,/g, ''))}
+            </Text>
           </View>
 
           <View style={styles.buttonGrid}>
             <View style={styles.row}>
               {renderButton('C', handleClear, styles.clearButton)}
-              {renderButton(<MaterialIcons name="backspace" size={24} color={colors.text.primary} />, handleDelete)}
-              {renderButton(<MaterialIcons name="close" size={24} color={colors.accent} />, () => handleOperation('÷'), styles.operationButton)}
+              {renderButton(<MaterialIcons name="backspace" size={24} color={colors.text.primary} />, handleDelete, styles.deleteButton)}
+              {renderButton('÷', () => handleOperation('÷'), styles.operationButton)}
             </View>
 
             <View style={styles.row}>
-              {renderButton('7', () => handleNumber('7'))}
-              {renderButton('8', () => handleNumber('8'))}
-              {renderButton('9', () => handleNumber('9'))}
-              {renderButton(<MaterialIcons name="close" size={24} color={colors.accent} />, () => handleOperation('×'), styles.operationButton)}
+              {renderButton('7', () => handleNumber('7'), styles.numberButton)}
+              {renderButton('8', () => handleNumber('8'), styles.numberButton)}
+              {renderButton('9', () => handleNumber('9'), styles.numberButton)}
+              {renderButton('×', () => handleOperation('×'), styles.operationButton)}
             </View>
 
             <View style={styles.row}>
-              {renderButton('4', () => handleNumber('4'))}
-              {renderButton('5', () => handleNumber('5'))}
-              {renderButton('6', () => handleNumber('6'))}
-              {renderButton(<MaterialIcons name="remove" size={24} color={colors.accent} />, () => handleOperation('-'), styles.operationButton)}
+              {renderButton('4', () => handleNumber('4'), styles.numberButton)}
+              {renderButton('5', () => handleNumber('5'), styles.numberButton)}
+              {renderButton('6', () => handleNumber('6'), styles.numberButton)}
+              {renderButton('−', () => handleOperation('-'), styles.operationButton)}
             </View>
 
             <View style={styles.row}>
-              {renderButton('1', () => handleNumber('1'))}
-              {renderButton('2', () => handleNumber('2'))}
-              {renderButton('3', () => handleNumber('3'))}
-              {renderButton(<MaterialIcons name="add" size={24} color={colors.accent} />, () => handleOperation('+'), styles.operationButton)}
+              {renderButton('1', () => handleNumber('1'), styles.numberButton)}
+              {renderButton('2', () => handleNumber('2'), styles.numberButton)}
+              {renderButton('3', () => handleNumber('3'), styles.numberButton)}
+              {renderButton('+', () => handleOperation('+'), styles.operationButton)}
             </View>
 
             <View style={styles.row}>
-              {renderButton('0', () => handleNumber('0'), styles.zeroButton)}
-              {renderButton('.', handleDecimal)}
-              {renderButton(<MaterialIcons name="equalizer" size={24} color={colors.text.primary} />, () => handleOperation('='), styles.equalsButton)}
+              {renderButton('0', () => handleNumber('0'), [styles.zeroButton, styles.numberButton])}
+              {renderButton('.', handleDecimal, styles.numberButton)}
+              {renderButton('=', () => handleOperation('='), styles.equalsButton)}
             </View>
           </View>
         </View>
@@ -179,33 +254,34 @@ const styles = StyleSheet.create({
   display: {
     backgroundColor: colors.secondary,
     borderRadius: radius.lg,
-    padding: 20,
-    marginBottom: 20,
-    minHeight: 100,
-    justifyContent: 'center',
+    padding: 24,
+    marginBottom: 24,
+    minHeight: 120,
+    justifyContent: 'flex-end',
     alignItems: 'flex-end',
     ...shadows.sm,
   },
+  historyContainer: {
+    width: '100%',
+    alignItems: 'flex-end',
+    marginBottom: 8,
+    opacity: 0.6,
+  },
+  historyText: {
+    color: colors.text.muted,
+    fontSize: 18,
+    fontWeight: '400',
+    fontFamily: 'Inter-Regular',
+  },
   displayText: {
     color: colors.text.primary,
-    fontSize: 48,
+    fontSize: 56,
     fontWeight: '300',
+    fontFamily: 'Inter-Light',
+    textAlign: 'right',
   },
-  operationIndicator: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: `${colors.accent}20`,
-    borderRadius: radius.round,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  operationText: {
-    color: colors.accent,
-    fontSize: 16,
-    fontWeight: '600',
+  displayTextSmall: {
+    fontSize: 40,
   },
   buttonGrid: {
     flex: 1,
@@ -222,22 +298,32 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     justifyContent: 'center',
     alignItems: 'center',
+    minHeight: 70,
     ...shadows.sm,
   },
   buttonText: {
     color: colors.text.primary,
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Inter-Medium',
+  },
+  numberButton: {
+    backgroundColor: colors.secondary,
   },
   operationButton: {
-    backgroundColor: `${colors.accent}20`,
+    backgroundColor: colors.accent,
   },
   operationButtonText: {
-    color: colors.accent,
+    color: colors.text.primary,
     fontWeight: '600',
+    fontSize: 32,
+    fontFamily: 'Inter-SemiBold',
+  },
+  deleteButton: {
+    backgroundColor: `${colors.text.muted}30`,
   },
   clearButton: {
-    backgroundColor: colors.status.error,
+    backgroundColor: '#ff6b6b',
   },
   equalsButton: {
     backgroundColor: colors.accent,
