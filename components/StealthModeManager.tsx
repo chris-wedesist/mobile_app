@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useRef } from 'react';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,9 +22,13 @@ const StealthModeContext = createContext<StealthModeContextType>({
 export function StealthModeProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
-    loadStealthModeState();
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadStealthModeState();
+    }
   }, []);
 
   const loadStealthModeState = async () => {
@@ -34,7 +38,10 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
       
       if (storedState === 'true') {
         setIsActive(true);
-        setCurrentScreen(storedScreen || 'calculator');
+        const screen = storedScreen || 'calculator';
+        setCurrentScreen(screen);
+        // Don't navigate here - let AppContent handle initial routing
+        // Navigation will happen in AppContent's checkInitialRoute
       }
     } catch (error) {
       console.error('Error loading stealth mode state:', error);

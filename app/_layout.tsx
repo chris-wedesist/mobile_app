@@ -25,19 +25,36 @@ function AppContent() {
   const { user, loading: authLoading } = useAuth();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const hasCheckedRouteRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    console.log('AppContent mounted, checking authentication...');
-    checkInitialRoute();
+    if (!hasCheckedRouteRef.current && !authLoading) {
+      console.log('AppContent mounted, checking authentication...');
+      checkInitialRoute();
+    }
   }, [user, authLoading]);
 
   const checkInitialRoute = async () => {
+    if (hasCheckedRouteRef.current) return; // Prevent multiple calls
+    
     try {
       console.log('Checking authentication status...');
 
       if (authLoading) {
         console.log('Auth is still loading...');
+        return; // Will retry when authLoading changes
+      }
+
+      // Mark as checked to prevent re-entry
+      hasCheckedRouteRef.current = true;
+
+      // Check if stealth mode is active first
+      const stealthModeActive = await AsyncStorage.getItem('stealth_mode_active');
+      if (stealthModeActive === 'true') {
+        console.log('Stealth mode is active, setting initial route to calculator');
+        setInitialRoute('/stealth-calculator');
+        setIsReady(true);
         return;
       }
 
@@ -65,6 +82,7 @@ function AppContent() {
       console.error('Error checking initial route:', error);
       setInitialRoute('/login'); // Default to login on error
       setIsReady(true);
+      hasCheckedRouteRef.current = true;
     }
   };
 
