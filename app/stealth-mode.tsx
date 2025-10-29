@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch 
 import { router } from 'expo-router';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useStealthMode } from '@/components/StealthModeManager';
 
 type CoverStoryType = {
   id: string;
@@ -39,8 +40,8 @@ const COVER_STORIES: CoverStoryType[] = [
 ];
 
 export default function StealthModeScreen() {
-  const [isActive, setIsActive] = useState(false);
-  const [selectedStory, setSelectedStory] = useState('notes');
+  const { isActive, activate, deactivate } = useStealthMode();
+  const [selectedStory, setSelectedStory] = useState('calculator');
   const [autoActivate, setAutoActivate] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,19 +51,16 @@ export default function StealthModeScreen() {
       setIsActivating(true);
       setError(null);
 
-      // Simulate activation process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setIsActive(!isActive);
-      setIsActivating(false);
-      
-      if (!isActive) {
-        // In a real app, this would activate the cover story
-        alert(`Cover story activated: ${selectedStory}`);
+      if (isActive) {
+        await deactivate('manual');
+      } else {
+        await activate('manual');
       }
+      
+      setIsActivating(false);
     } catch (error) {
       console.error('Error toggling stealth mode:', error);
-      setError('Failed to toggle stealth mode');
+      setError('Failed to toggle stealth mode. Please try again.');
       setIsActivating(false);
     }
   };
@@ -85,7 +83,7 @@ export default function StealthModeScreen() {
         </View>
 
         <Text style={styles.description}>
-          Quickly disguise DESIST! as another app if you feel unsafe or are being watched.
+          Quickly disguise DESIST! as a calculator. When enabled, the app transforms into a functional calculator.
         </Text>
 
         {error && (
@@ -96,30 +94,18 @@ export default function StealthModeScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Choose Cover Story</Text>
-          <View style={styles.storiesGrid}>
-            {COVER_STORIES.map(story => (
-              <TouchableOpacity
-                key={story.id}
-                style={[
-                  styles.storyOption,
-                  selectedStory === story.id && styles.selectedStory
-                ]}
-                onPress={() => setSelectedStory(story.id)}>
-                <View style={styles.storyHeader}>
-                  {story.icon}
-                  {selectedStory === story.id && (
-                    <View style={styles.checkmark}>
-                      <MaterialIcons name="check" size={16} color={colors.text.primary} />
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.storyName}>{story.name}</Text>
-                <Text style={styles.storyDescription}>
-                  {story.description}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <Text style={styles.sectionTitle}>Cover Story</Text>
+          <View style={styles.storyOption}>
+            <View style={styles.storyHeader}>
+              <MaterialIcons name="calculate" size={24} color={colors.accent} />
+              <View style={styles.checkmark}>
+                <MaterialIcons name="check" size={16} color={colors.text.primary} />
+              </View>
+            </View>
+            <Text style={styles.storyName}>Calculator</Text>
+            <Text style={styles.storyDescription}>
+              Transform the app into a functional calculator.
+            </Text>
           </View>
         </View>
 
@@ -162,7 +148,7 @@ export default function StealthModeScreen() {
         </TouchableOpacity>
 
         <Text style={styles.tip}>
-          Tip: Press and hold the volume down button for 3 seconds to exit cover story mode
+          Tip: Long press anywhere on the calculator screen for 3 seconds to exit stealth mode
         </Text>
       </ScrollView>
     </View>
@@ -246,10 +232,9 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   storyOption: {
-    width: '47%',
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
-    padding: 15,
+    padding: 20,
     ...shadows.sm,
   },
   selectedStory: {

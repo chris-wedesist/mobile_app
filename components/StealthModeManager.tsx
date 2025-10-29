@@ -1,12 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!
-);
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type StealthModeContextType = {
   isActive: boolean;
@@ -34,14 +29,12 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
 
   const loadStealthModeState = async () => {
     try {
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('stealth_mode_enabled, cover_story_screen')
-        .single();
-
-      if (settings) {
-        setIsActive(settings.stealth_mode_enabled);
-        setCurrentScreen(settings.cover_story_screen);
+      const storedState = await AsyncStorage.getItem('stealth_mode_active');
+      const storedScreen = await AsyncStorage.getItem('stealth_mode_screen');
+      
+      if (storedState === 'true') {
+        setIsActive(true);
+        setCurrentScreen(storedScreen || 'calculator');
       }
     } catch (error) {
       console.error('Error loading stealth mode state:', error);
@@ -50,31 +43,20 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
 
   const activate = async (trigger: string = 'manual') => {
     try {
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('cover_story_screen')
-        .single();
-
-      if (!settings?.cover_story_screen) {
-        throw new Error('No cover story screen selected');
-      }
-
-      // Log activation event
-      await supabase.rpc('activate_cover_story', {
-        p_platform: Platform.OS,
-        p_screen_type: settings.cover_story_screen,
-        p_trigger_type: trigger,
-        p_metadata: {
-          device_info: Platform.constants,
-          activation_method: trigger
-        }
-      });
-
+      // Default to calculator for now
+      const screen = 'calculator';
+      
       setIsActive(true);
-      setCurrentScreen(settings.cover_story_screen);
-
+      setCurrentScreen(screen);
+      
+      // Save to storage
+      await AsyncStorage.setItem('stealth_mode_active', 'true');
+      await AsyncStorage.setItem('stealth_mode_screen', screen);
+      
+      console.log('Stealth mode activated, navigating to calculator...');
+      
       // Navigate to cover story screen
-      router.replace(`/stealth-${settings.cover_story_screen}`);
+      router.replace('/stealth-calculator');
     } catch (error) {
       console.error('Error activating stealth mode:', error);
       throw error;
@@ -83,20 +65,17 @@ export function StealthModeProvider({ children }: { children: React.ReactNode })
 
   const deactivate = async (trigger: string = 'manual') => {
     try {
-      // Log deactivation event
-      await supabase.rpc('deactivate_cover_story', {
-        p_trigger_type: trigger,
-        p_metadata: {
-          deactivation_method: trigger,
-          device_info: Platform.constants
-        }
-      });
-
       setIsActive(false);
       setCurrentScreen(null);
 
+      // Clear from storage
+      await AsyncStorage.removeItem('stealth_mode_active');
+      await AsyncStorage.removeItem('stealth_mode_screen');
+
+      console.log('Stealth mode deactivated, navigating to main app...');
+      
       // Navigate back to main app
-      router.replace('/');
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Error deactivating stealth mode:', error);
       throw error;

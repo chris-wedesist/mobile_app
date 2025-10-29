@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { useStealthMode } from '@/components/StealthModeManager';
 
@@ -8,24 +8,30 @@ import { useStealthMode } from '@/components/StealthModeManager';
  */
 export function useStealthAutoTimeout(timeoutMinutes = 5) {
   const { isActive, deactivate } = useStealthMode();
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
   
   useEffect(() => {
-    if (!isActive) return;
-    
-    let timeoutId: NodeJS.Timeout | null = null;
-    let lastActivity = Date.now();
+    if (!isActive) {
+      // Clear timeout if stealth mode is not active
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
+      return;
+    }
     
     // Function to reset the timeout
     const resetTimeout = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
       }
       
-      lastActivity = Date.now();
+      lastActivityRef.current = Date.now();
       
-      timeoutId = setTimeout(() => {
+      timeoutIdRef.current = setTimeout(() => {
         // Only deactivate if we've been inactive for the specified time
-        const inactiveTime = Date.now() - lastActivity;
+        const inactiveTime = Date.now() - lastActivityRef.current;
         if (inactiveTime >= timeoutMinutes * 60 * 1000) {
           deactivate('auto_timeout');
         }
@@ -42,9 +48,9 @@ export function useStealthAutoTimeout(timeoutMinutes = 5) {
         resetTimeout();
       } else if (nextAppState === 'background') {
         // App went to background, clear the timeout
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = null;
         }
       }
     };
@@ -52,26 +58,31 @@ export function useStealthAutoTimeout(timeoutMinutes = 5) {
     // Listen for app state changes
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     
-    // Listen for user interaction to reset the timeout
-    const touchHandler = () => {
-      resetTimeout();
-    };
-    
-    // Add touch event listener
-    document.addEventListener('touchstart', touchHandler);
-    document.addEventListener('mousemove', touchHandler);
-    document.addEventListener('keydown', touchHandler);
-    
     return () => {
       // Clean up
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
       }
       
       subscription.remove();
-      document.removeEventListener('touchstart', touchHandler);
-      document.removeEventListener('mousemove', touchHandler);
-      document.removeEventListener('keydown', touchHandler);
     };
   }, [isActive, timeoutMinutes, deactivate]);
+  
+  // Return a function that can be called to reset the timeout on user interaction
+  // Components can call this when they detect user interaction
+  return {
+    resetTimeout: () => {
+      if (isActive && timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        lastActivityRef.current = Date.now();
+        timeoutIdRef.current = setTimeout(() => {
+          const inactiveTime = Date.now() - lastActivityRef.current;
+          if (inactiveTime >= timeoutMinutes * 60 * 1000) {
+            deactivate('auto_timeout');
+          }
+        }, timeoutMinutes * 60 * 1000);
+      }
+    }
+  };
 }

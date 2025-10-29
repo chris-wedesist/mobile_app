@@ -11,6 +11,7 @@ import { colors } from '@/constants/theme';
 import { View, Text } from 'react-native'
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { StealthModeProvider } from '@/components/StealthModeManager';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
@@ -100,6 +101,7 @@ function AppContent() {
         <Stack.Screen name="report-incident" options={{ presentation: 'modal' }} />
         <Stack.Screen name="legal-rights" options={{ presentation: 'modal' }} />
         <Stack.Screen name="stealth-mode" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="stealth-calculator" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="incidents" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
@@ -115,7 +117,9 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <AppContent />
+      <StealthModeProvider>
+        <AppContent />
+      </StealthModeProvider>
     </AuthProvider>
   );
 }

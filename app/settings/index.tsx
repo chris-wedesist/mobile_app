@@ -1,9 +1,30 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch } from 'react-native';
 import { router } from 'expo-router';
 import { colors, radius, shadows } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useStealthMode } from '@/components/StealthModeManager';
 
 export default function SettingsIndexScreen() {
+  const { isActive, activate, deactivate } = useStealthMode();
+  const [isToggling, setIsToggling] = React.useState(false);
+
+  const handleStealthToggle = async (value: boolean) => {
+    if (isToggling) return;
+    try {
+      setIsToggling(true);
+      if (value) {
+        await activate('manual');
+      } else {
+        await deactivate('manual');
+      }
+    } catch (error) {
+      console.error('Error toggling stealth mode:', error);
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -46,18 +67,22 @@ export default function SettingsIndexScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security</Text>
           
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => router.push('/stealth-mode')}>
-            <View style={styles.settingIcon}>
-              <MaterialIcons name="visibility" size={20} color={colors.accent} />
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <MaterialIcons name="visibility" size={24} color={colors.accent} />
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingText}>Stealth Mode</Text>
+                <Text style={styles.settingSubtext}>Transform app into calculator</Text>
+              </View>
             </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Stealth Mode</Text>
-              <Text style={styles.settingDescription}>Configure app disguise options</Text>
-            </View>
-            <Text style={styles.settingAction}>Configure</Text>
-          </TouchableOpacity>
+            <Switch
+              value={isActive}
+              onValueChange={handleStealthToggle}
+              disabled={isToggling}
+              trackColor={{ false: colors.text.muted, true: colors.accent }}
+              thumbColor={isActive ? colors.text.primary : colors.text.secondary}
+            />
+          </View>
           
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingIcon}>
@@ -215,6 +240,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+  },
+  settingInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+    flex: 1,
+  },
+  settingTextContainer: {
+    flex: 1,
+  },
+  settingText: {
+    color: colors.text.primary,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    marginBottom: 2,
+  },
+  settingSubtext: {
+    color: colors.text.muted,
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
   },
   infoSection: {
     marginTop: 10,

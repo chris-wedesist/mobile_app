@@ -16,13 +16,14 @@ export default function StealthCalculatorScreen() {
   const [clearNext, setClearNext] = useState(false);
   
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
-  useStealthAutoTimeout(10);
+  const { resetTimeout } = useStealthAutoTimeout(10);
 
   const handleLongPress = () => {
     deactivate('gesture');
   };
 
   const handleNumber = (num: string) => {
+    resetTimeout(); // Reset timeout on user interaction
     if (clearNext) {
       setDisplay(num);
       setClearNext(false);
@@ -32,6 +33,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const handleOperation = (op: Operation) => {
+    resetTimeout(); // Reset timeout on user interaction
     const currentValue = parseFloat(display);
 
     if (op === '=') {
@@ -65,6 +67,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const handleClear = () => {
+    resetTimeout(); // Reset timeout on user interaction
     setDisplay('0');
     setPreviousValue(null);
     setOperation(null);
@@ -72,6 +75,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const handleDelete = () => {
+    resetTimeout(); // Reset timeout on user interaction
     if (display.length > 1) {
       setDisplay(display.slice(0, -1));
     } else {
@@ -80,6 +84,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const handleDecimal = () => {
+    resetTimeout(); // Reset timeout on user interaction
     if (!display.includes('.')) {
       setDisplay(display + '.');
     }
@@ -112,7 +117,7 @@ export default function StealthCalculatorScreen() {
           }
         }}
       >
-        <View style={styles.container}>
+        <View style={styles.innerContainer}>
           <View style={styles.display}>
             <Text style={styles.displayText}>{display}</Text>
             {operation && (
@@ -166,6 +171,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
+  },
+  innerContainer: {
+    flex: 1,
     padding: Platform.OS === 'web' ? 40 : 20,
   },
   display: {

@@ -10,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStealthMode } from '@/components/StealthModeManager';
 
 
 interface Incident {
@@ -22,6 +23,7 @@ interface Incident {
 
 export default function SettingsScreen() {
   const { signOut, userProfile, user, fetchUserProfile } = useAuth();
+  const { isActive, activate, deactivate } = useStealthMode();
   const [highQuality, setHighQuality] = useState(true);
   const [enableSound, setEnableSound] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -32,6 +34,23 @@ export default function SettingsScreen() {
     'EMERGENCY: I need immediate assistance. My location is attached.'
   );
   const [isEditingContact, setIsEditingContact] = useState(false);
+  const [isTogglingStealth, setIsTogglingStealth] = useState(false);
+
+  const handleStealthToggle = async (value: boolean) => {
+    if (isTogglingStealth) return;
+    try {
+      setIsTogglingStealth(true);
+      if (value) {
+        await activate('manual');
+      } else {
+        await deactivate('manual');
+      }
+    } catch (error) {
+      console.error('Error toggling stealth mode:', error);
+    } finally {
+      setIsTogglingStealth(false);
+    }
+  };
 
   useEffect(() => {
     // Configure notification handler
@@ -198,23 +217,25 @@ export default function SettingsScreen() {
               <Text style={styles.betaText}>COMING SOON</Text>
             </View>
           </View>
-          <Text style={styles.securitySubtitle}>Advanced protection features coming soon</Text>
+          <Text style={styles.securitySubtitle}>Advanced protection features</Text>
 
           {/* <BlurView intensity={80} style={styles.securityBlurWrapper}> */}
             <View style={styles.stealthModeContainer}>
-              <View style={styles.stealthModeContent}>
-                <MaterialIcons name="visibility" size={24} color={colors.accent} style={styles.blurredIcon} />
-                <View style={styles.stealthModeTextContainer}>
-                  <View style={styles.stealthModeTitleRow}>
-                    <Text style={styles.stealthModeTitle}>Stealth Mode</Text>
-                    {/* <View style={styles.comingSoonBadge}>
-                      <Text style={styles.comingSoonText}>Coming Soon</Text>
-                    </View> */}
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <MaterialIcons name="visibility" size={24} color={colors.accent} />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingText}>Stealth Mode</Text>
+                    <Text style={styles.settingSubtext}>Transform app into calculator</Text>
                   </View>
-                  <Text style={styles.stealthModeDescription}>
-                    Quickly disguise app as a calculator or notes app
-                  </Text>
                 </View>
+                <Switch
+                  value={isActive}
+                  onValueChange={handleStealthToggle}
+                  disabled={isTogglingStealth}
+                  trackColor={{ false: colors.text.muted, true: colors.accent }}
+                  thumbColor={isActive ? colors.text.primary : colors.text.secondary}
+                />
               </View>
 
               <View style={styles.additionalFeature}>
@@ -570,6 +591,15 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
+  },
+  settingTextContainer: {
+    flex: 1,
+  },
+  settingSubtext: {
+    color: colors.text.muted,
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    marginTop: 2,
   },
   messagePreview: {
     color: colors.text.muted,
