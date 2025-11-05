@@ -71,7 +71,7 @@ export default function Onboarding() {
     try {
       setIsCompleting(true);
       await AsyncStorage.setItem('onboarding_completed', 'true');
-      router.replace('/');
+      router.replace('/login');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       setIsCompleting(false);
@@ -91,15 +91,15 @@ export default function Onboarding() {
       await AsyncStorage.setItem('founding_protector_badge', 'awarded');
       console.log('Founding protector badge awarded');
       
-      // Navigate directly to home screen instead of badge unlock
-      console.log('Navigating to home screen');
-      router.replace('/(tabs)');
+      // Navigate to login screen (user needs to sign up/login after onboarding)
+      console.log('Navigating to login screen');
+      router.replace('/login');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       setIsCompleting(false);
       
       // Fallback navigation in case of error
-      router.replace('/(tabs)');
+      router.replace('/login');
     }
   };
 

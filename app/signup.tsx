@@ -15,12 +15,13 @@ import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignupScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('doxoje4562@fergetic.com');
+  const [password, setPassword] = useState('12345678');
+  const [confirmPassword, setConfirmPassword] = useState('12345678');
+  const [fullName, setFullName] = useState('Doxoje');
 //   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -71,6 +72,14 @@ export default function SignupScreen() {
     if (error) {
       Alert.alert('Signup Failed', error.message);
     } else if (requiresConfirmation) {
+      // Store password temporarily for auto-login after confirmation
+      // This will be cleared after successful login
+      try {
+        await AsyncStorage.setItem('pending_signup_password', password);
+      } catch (error) {
+        console.error('Error storing password:', error);
+      }
+      
       Alert.alert(
         'Email Confirmation Required',
         message || 'Please check your email and enter the 6-digit confirmation code to verify your account.',

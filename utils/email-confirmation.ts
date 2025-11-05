@@ -116,16 +116,10 @@ export async function verifyConfirmationCode(data: VerifyCodeData): Promise<{ su
       return { success: false, error: 'Failed to confirm email' };
     }
 
-    // Also update Supabase auth user
-    const { error: authError } = await supabase.auth.admin.updateUserById(
-      userData.id,
-      { email_confirm: true }
-    );
-
-    if (authError) {
-      console.error('Error updating auth user confirmation:', authError);
-      // Don't fail the request since the user is already confirmed in our table
-    }
+    // Note: We don't update Supabase auth user email confirmation here because:
+    // 1. The admin API requires server-side service role key
+    // 2. Our app logic uses the email_confirmed field in the users table
+    // 3. Users can sign in after email confirmation using our custom logic
 
     return { success: true };
   } catch (error) {

@@ -36,10 +36,39 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const lastUnlockTimeRef = useRef<number>(Date.now());
   const isCheckingRef = useRef(false);
+  const previousUserIdRef = useRef<string | null>(null);
+  const hasInitializedRef = useRef(false);
+
+  // Initialize previousUserIdRef on mount if user already exists (session persistence)
+  useEffect(() => {
+    if (!hasInitializedRef.current && user?.id) {
+      previousUserIdRef.current = user.id;
+      hasInitializedRef.current = true;
+    } else if (!user?.id) {
+      hasInitializedRef.current = false;
+    }
+  }, []);
 
   useEffect(() => {
+    // Check if user just logged in (user changed from null to a user ID)
+    const isFreshLogin = previousUserIdRef.current === null && user?.id !== null;
+    
+    if (isFreshLogin) {
+      console.log('Fresh login detected, unlocking automatically');
+      // On fresh login, unlock automatically and set unlock timestamp
+      setIsLocked(false);
+      AsyncStorage.setItem('last_biometric_unlock', Date.now().toString());
+      lastUnlockTimeRef.current = Date.now();
+      previousUserIdRef.current = user?.id || null;
+      hasInitializedRef.current = true;
+      return;
+    }
+    
+    // Update previous user ID
+    previousUserIdRef.current = user?.id || null;
+    
     if (user?.id && biometricLoginEnabled && biometricAvailable) {
-      // Check if app should be locked when user logs in
+      // Check if app should be locked (only for returning users, not fresh login)
       checkBiometricLogin();
     } else if (!biometricLoginEnabled || !biometricAvailable) {
       // Unlock if biometric login is disabled or not available
@@ -101,10 +130,28 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
       setBiometricLoginEnabled(enabled);
 
       // If enabled and user is authenticated, check if we should lock
+      // On app start with existing session, unlock automatically
+      // Only lock on app foreground (handled by handleAppStateChange)
       if (enabled && user?.id && biometricAvailable) {
-        // Check if we have a recent unlock
-        const shouldLock = await shouldLockApp();
-        setIsLocked(shouldLock);
+        // Check if this is app initialization with existing session
+        // If previousUserIdRef is already set, this is app start with session, not fresh login
+        const isAppStart = previousUserIdRef.current === user.id && !hasInitializedRef.current;
+        const isFreshLogin = previousUserIdRef.current === null;
+        
+        if (isFreshLogin || isAppStart) {
+          // Fresh login or app start with existing session - unlock automatically
+          setIsLocked(false);
+          await AsyncStorage.setItem('last_biometric_unlock', Date.now().toString());
+          lastUnlockTimeRef.current = Date.now();
+          if (!hasInitializedRef.current) {
+            previousUserIdRef.current = user.id;
+            hasInitializedRef.current = true;
+          }
+        } else {
+          // Returning user - check if should lock
+          const shouldLock = await shouldLockApp();
+          setIsLocked(shouldLock);
+        }
       } else {
         setIsLocked(false);
       }
@@ -129,6 +176,8 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
       setBiometricLoginEnabled(false);
       setIsLocked(false);
       setIsInitializing(false); // Mark as initialized when no user
+      previousUserIdRef.current = null; // Reset when user logs out
+      hasInitializedRef.current = false;
     }
   }, [user?.id, biometricAvailable]);
 

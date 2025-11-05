@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,14 +12,28 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { verifyConfirmationCode, resendConfirmationEmail } from '@/utils/email-confirmation';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useAuth } from '@/contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ConfirmCodeScreen() {
   const [code, setCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const { email } = useLocalSearchParams();
+  const { signIn } = useAuth();
 
   console.log('ConfirmCodeScreen loaded with email:', email);
+
+  // Clear stored password if user navigates away (cleanup)
+  useEffect(() => {
+    return () => {
+      // Cleanup: clear stored password when component unmounts
+      // This ensures password doesn't linger if user navigates away
+      AsyncStorage.removeItem('pending_signup_password').catch(() => {
+        // Ignore errors
+      });
+    };
+  }, []);
 
   const handleVerifyCode = async () => {
     if (!code.trim() || code.length !== 6) {
@@ -35,16 +49,58 @@ export default function ConfirmCodeScreen() {
       });
 
       if (result.success) {
-        Alert.alert(
-          'Email Confirmed!',
-          'Your email has been successfully confirmed. You can now sign in to your account.',
-          [
-            {
-              text: 'Sign In',
-              onPress: () => router.push('/login' as any),
-            },
-          ]
-        );
+        // Try to auto-login if password is stored from signup
+        try {
+          const storedPassword = await AsyncStorage.getItem('pending_signup_password');
+          if (storedPassword) {
+            // Clear stored password immediately
+            await AsyncStorage.removeItem('pending_signup_password');
+            
+            // Auto-sign in
+            const signInResult = await signIn(email as string, storedPassword);
+            if (signInResult.error) {
+              // If auto-login fails, show success message and navigate to login
+              Alert.alert(
+                'Email Confirmed!',
+                'Your email has been successfully confirmed. Please sign in to your account.',
+                [
+                  {
+                    text: 'Sign In',
+                    onPress: () => router.push('/login' as any),
+                  },
+                ]
+              );
+            } else {
+              // Auto-login successful - navigation will be handled by AuthProvider
+              // No need to show alert, just let navigation happen automatically
+              console.log('Email confirmed and user signed in successfully');
+            }
+          } else {
+            // No stored password, show success message and navigate to login
+            Alert.alert(
+              'Email Confirmed!',
+              'Your email has been successfully confirmed. Please sign in to your account.',
+              [
+                {
+                  text: 'Sign In',
+                  onPress: () => router.push('/login' as any),
+                },
+              ]
+            );
+          }
+        } catch (error) {
+          console.error('Auto-login error:', error);
+          Alert.alert(
+            'Email Confirmed!',
+            'Your email has been successfully confirmed. Please sign in to your account.',
+            [
+              {
+                text: 'Sign In',
+                onPress: () => router.push('/login' as any),
+              },
+            ]
+          );
+        }
       } else {
         Alert.alert('Verification Failed', result.error || 'Invalid confirmation code');
       }

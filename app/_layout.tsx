@@ -36,9 +36,25 @@ function AppContent() {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const hasCheckedRouteRef = useRef(false);
+  const previousUserRef = useRef<string | null>(null);
+  const isLogoutRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Reset route check if user state changed (sign in/sign out)
+    const currentUserId = user?.id || null;
+    
+    // Detect logout: user was logged in, now logged out
+    isLogoutRef.current = previousUserRef.current !== null && currentUserId === null;
+    
+    if (previousUserRef.current !== currentUserId) {
+      console.log('User state changed, resetting route check');
+      hasCheckedRouteRef.current = false;
+      setIsReady(false); // Reset ready state to trigger re-check
+      setInitialRoute(null); // Reset route to trigger navigation
+      previousUserRef.current = currentUserId;
+    }
+
     if (!hasCheckedRouteRef.current && !authLoading && !isInitializing) {
       console.log('AppContent mounted, checking authentication...');
       checkInitialRoute();
@@ -68,22 +84,35 @@ function AppContent() {
         return;
       }
 
-      if (user && user.id) {
-        console.log('User is authenticated, checking onboarding...');
+      // Check if user just logged out (previousUserRef had a user, now user is null)
+      const isLogout = isLogoutRef.current;
+      
+      // Check onboarding FIRST (before authentication) - but only on first app launch, not after logout
+      if (!isLogout) {
         const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
         console.log('Onboarding completed:', onboardingCompleted);
         
         if (onboardingCompleted !== 'true') {
-          console.log('Setting initial route to onboarding');
+          console.log('Onboarding not completed, showing onboarding first');
           setInitialRoute('/onboarding');
-        } else {
-          console.log('Setting initial route to tabs');
-          setInitialRoute('/(tabs)');
+          setIsReady(true);
+          return;
         }
       } else {
-        console.log('User not authenticated, setting initial route to login');
+        console.log('User logged out, skipping onboarding check');
+      }
+
+      // Onboarding is completed (or user logged out), now check authentication
+      if (user && user.id) {
+        console.log('User is authenticated, navigating to tabs');
+        setInitialRoute('/(tabs)');
+      } else {
+        console.log('User not authenticated, navigating to login');
         setInitialRoute('/login');
       }
+
+      // Reset logout flag after handling
+      isLogoutRef.current = false;
 
       // Set ready state immediately after determining route
       console.log('Setting isReady to true');
@@ -99,12 +128,16 @@ function AppContent() {
   useEffect(() => {
     if (isReady && initialRoute && !isLocked && !isInitializing) {
       console.log('App is ready, navigating to:', initialRoute);
-      // Navigate immediately without timeout
-      router.replace(initialRoute as any);
-      // Hide the native splash screen once navigation is complete
-      SplashScreen.hideAsync().catch(() => {
-        // Ignore errors - this happens on web
-      });
+      // Use a small delay to ensure navigation happens smoothly
+      const timer = setTimeout(() => {
+        router.replace(initialRoute as any);
+        // Hide the native splash screen once navigation is complete
+        SplashScreen.hideAsync().catch(() => {
+          // Ignore errors - this happens on web
+        });
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [isReady, initialRoute, isLocked, isInitializing]);
 

@@ -371,11 +371,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Clear all AsyncStorage items related to auth/session
+      // NOTE: Don't clear onboarding_completed - it should persist across logouts
       const keysToRemove = [
         'user_id',
         'stealth_mode_active',
         'stealth_mode_screen',
-        'onboarding_completed',
       ];
       
       for (const key of keysToRemove) {
