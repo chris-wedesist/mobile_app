@@ -30,6 +30,7 @@ export default function SettingsScreen() {
   const [incidentAlerts, setIncidentAlerts] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [emergencyContact, setEmergencyContact] = useState('');
+  const [emergencyContactName, setEmergencyContactName] = useState('');
   const [emergencyMessage, setEmergencyMessage] = useState(
     'EMERGENCY: I need immediate assistance. My location is attached.'
   );
@@ -148,10 +149,38 @@ export default function SettingsScreen() {
 
   const loadEmergencySettings = async () => {
     try {
-      const contact = await AsyncStorage.getItem('emergencyContact');
-      const message = await AsyncStorage.getItem('emergencyMessage');
-      setEmergencyContact(contact || '');
-      setEmergencyMessage(message || 'EMERGENCY: I need immediate assistance. My location is attached.');
+      if (!user?.id) {
+        // Fallback to AsyncStorage if no user
+        const contact = await AsyncStorage.getItem('emergencyContact');
+        const message = await AsyncStorage.getItem('emergencyMessage');
+        setEmergencyContact(contact || '');
+        setEmergencyContactName('');
+        setEmergencyMessage(message || 'EMERGENCY: I need immediate assistance. My location is attached.');
+        return;
+      }
+
+      // Load from Supabase
+      const { data, error } = await supabase
+        .from('users')
+        .select('emergency_contact_name, emergency_contact_phone, emergency_message')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading emergency settings:', error);
+        // Fallback to AsyncStorage
+        const contact = await AsyncStorage.getItem('emergencyContact');
+        const message = await AsyncStorage.getItem('emergencyMessage');
+        setEmergencyContact(contact || '');
+        setEmergencyContactName('');
+        setEmergencyMessage(message || 'EMERGENCY: I need immediate assistance. My location is attached.');
+        return;
+      }
+
+      // Set both name and phone
+      setEmergencyContactName(data?.emergency_contact_name || '');
+      setEmergencyContact(data?.emergency_contact_phone || '');
+      setEmergencyMessage(data?.emergency_message || 'EMERGENCY: I need immediate assistance. My location is attached.');
     } catch (error) {
       console.error('Error loading emergency settings:', error);
     }
@@ -213,9 +242,6 @@ export default function SettingsScreen() {
           <View style={styles.securityHeader}>
             <MaterialIcons name="security" size={20} color={colors.accent} />
             <Text style={styles.securitySectionTitle}>Security Features</Text>
-            <View style={styles.betaBadge}>
-              <Text style={styles.betaText}>COMING SOON</Text>
-            </View>
           </View>
           <Text style={styles.securitySubtitle}>Advanced protection features</Text>
 
@@ -333,17 +359,17 @@ export default function SettingsScreen() {
                 <MaterialIcons name="phone" size={24} color={colors.accent} />
                 <View>
                   <Text style={styles.settingText}>
-                    {emergencyContact ? 'Edit Emergency Contact' : 'Set Up Emergency Contact'}
+                    {emergencyContact || emergencyContactName ? 'Edit Emergency Contact' : 'Set Up Emergency Contact'}
                   </Text>
-                  {emergencyContact && (
+                  {(emergencyContact || emergencyContactName) && (
                     <Text style={styles.messagePreview} numberOfLines={1}>
-                      Contact: {emergencyContact}
+                      {emergencyContactName ? `${emergencyContactName}` : ''}{emergencyContactName && emergencyContact ? ' • ' : ''}{emergencyContact || ''}
                     </Text>
                   )}
                 </View>
               </View>
-              <Text style={[styles.configureText, emergencyContact && { position: 'absolute', right: 0, top: 15}]}>
-                {emergencyContact ? 'Edit' : 'Configure'}
+              <Text style={[styles.configureText, (emergencyContact || emergencyContactName) && { position: 'absolute', right: 0, top: 15}]}>
+                {(emergencyContact || emergencyContactName) ? 'Edit' : 'Configure'}
               </Text>
             </TouchableOpacity>
           )}
@@ -725,8 +751,6 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 20,
     ...shadows.sm,
-    borderWidth: 2,
-    borderColor: `${colors.accent}30`,
   },
   securityHeader: {
     flexDirection: 'row',

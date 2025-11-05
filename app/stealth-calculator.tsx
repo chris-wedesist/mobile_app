@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
 import { useStealthMode } from '@/components/StealthModeManager';
 import { useStealthAutoTimeout } from '@/hooks/useStealthAutoTimeout';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as SMS from 'expo-sms';
 
 type Operation = '+' | '-' | '×' | '÷' | '=' | null;
 
@@ -40,15 +43,53 @@ const formatDisplay = (value: string | number): string => {
 
 export default function StealthCalculatorScreen() {
   const { deactivate } = useStealthMode();
+  const { user } = useAuth();
   const [display, setDisplay] = useState('0');
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<Operation>(null);
   const [clearNext, setClearNext] = useState(false);
+  const [smsCode, setSmsCode] = useState<string>('');
+  const [smsPhone, setSmsPhone] = useState<string>('');
+  const [emergencyMessage, setEmergencyMessage] = useState<string>('');
   
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   const { resetTimeout } = useStealthAutoTimeout(10);
 
-  // Check for secret sequence: exactly 5555
+  useEffect(() => {
+    if (user?.id) {
+      loadEmergencySettings();
+    }
+  }, [user?.id]);
+
+  const loadEmergencySettings = async () => {
+    try {
+      if (!user?.id) {
+        console.log('No user ID available for loading emergency settings');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('emergency_call_code, emergency_contact_phone, emergency_message')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading emergency settings:', error);
+        return;
+      }
+
+      if (data) {
+        if (data.emergency_call_code) setSmsCode(data.emergency_call_code);
+        if (data.emergency_contact_phone) setSmsPhone(data.emergency_contact_phone);
+        if (data.emergency_message) setEmergencyMessage(data.emergency_message);
+      }
+    } catch (error) {
+      console.error('Error loading emergency settings:', error);
+    }
+  };
+
+  // Check for secret sequence: exactly 5555 to exit stealth mode
   const checkSecretSequence = (newDisplay: string) => {
     const currentNum = newDisplay.replace(/,/g, '').replace(/\./g, '');
     if (currentNum === '5555') {
@@ -56,6 +97,37 @@ export default function StealthCalculatorScreen() {
         deactivate('secret_sequence');
       }, 100);
       return true;
+    }
+    return false;
+  };
+
+  // Check for emergency SMS code and send SMS
+  const checkSmsCode = async (newDisplay: string) => {
+    if (!smsCode || !smsPhone || Platform.OS === 'web') return false;
+    
+    const currentNum = newDisplay.replace(/,/g, '').replace(/\./g, '');
+    
+    // Check if the entered number matches the SMS code
+    if (currentNum === smsCode) {
+      try {
+        const isAvailable = await SMS.isAvailableAsync();
+        if (!isAvailable) {
+          console.error('SMS is not available on this device');
+          return false;
+        }
+
+        const message = emergencyMessage || 'EMERGENCY: I need immediate assistance. My location will be shared when activated.';
+        await SMS.sendSMSAsync([smsPhone], message);
+        
+        // Clear the display after sending SMS
+        setTimeout(() => {
+          setDisplay('0');
+        }, 500);
+        return true;
+      } catch (error) {
+        console.error('Error sending emergency SMS:', error);
+        return false;
+      }
     }
     return false;
   };
@@ -79,8 +151,11 @@ export default function StealthCalculatorScreen() {
     
     setDisplay(newDisplay);
     
-    // Check for secret sequence (exactly 5555)
-    checkSecretSequence(newDisplay);
+    // Check for secret sequence (exactly 5555 to exit stealth mode)
+    if (!checkSecretSequence(newDisplay)) {
+      // If not exit code, check for emergency SMS code
+      checkSmsCode(newDisplay);
+    }
   };
 
   const handleOperation = (op: Operation) => {
@@ -148,7 +223,7 @@ export default function StealthCalculatorScreen() {
   };
 
   const renderButton = (
-    content: string | JSX.Element,
+    content: string | React.ReactNode,
     onPress: () => void,
     style?: object | object[]
   ) => {

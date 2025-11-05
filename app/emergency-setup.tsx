@@ -1,43 +1,71 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Platform, ScrollView, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import * as SMS from 'expo-sms';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, shadows, radius } from '@/constants/theme';
 
 export default function EmergencySetupScreen() {
+  const { user } = useAuth();
   const [contact, setContact] = useState({
     name: '',
     phone: '',
+    callCode: '',
     customMessage: 'EMERGENCY: I need immediate assistance. My location will be shared when activated.',
   });
   const [smsEnabled, setSmsEnabled] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [testMode, setTestMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (user?.id) {
+      loadSettings();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   const loadSettings = async () => {
     try {
-      const name = await AsyncStorage.getItem('emergencyContactName');
-      const phone = await AsyncStorage.getItem('emergencyContact');
-      const message = await AsyncStorage.getItem('emergencyMessage');
-      
+      if (!user?.id) {
+        setError('You must be logged in to load emergency settings');
+        setLoading(false);
+        return;
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('emergency_contact_name, emergency_contact_phone, emergency_call_code, emergency_message, emergency_sms_enabled')
+        .eq('id', user.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching emergency settings:', fetchError);
+        // If user doesn't exist yet, that's okay - they'll start with defaults
+        if (fetchError.code !== 'PGRST116') {
+          setError('Failed to load saved settings');
+        }
+        setLoading(false);
+        return;
+      }
+
       setContact({
-        name: name || '',
-        phone: phone || '',
-        customMessage: message || contact.customMessage,
+        name: data?.emergency_contact_name || '',
+        phone: data?.emergency_contact_phone || '',
+        callCode: data?.emergency_call_code || '',
+        customMessage: data?.emergency_message || contact.customMessage,
       });
       
-      const smsEnabledValue = await AsyncStorage.getItem('emergencySmsEnabled');
-      setSmsEnabled(smsEnabledValue !== 'false');
+      setSmsEnabled(data?.emergency_sms_enabled !== false);
+      setLoading(false);
     } catch (error) {
       console.error('Error loading settings:', error);
       setError('Failed to load saved settings');
+      setLoading(false);
     }
   };
 
@@ -46,16 +74,36 @@ export default function EmergencySetupScreen() {
       setError(null);
       setIsSaving(true);
 
+      if (!user?.id) {
+        setError('You must be logged in to save emergency settings');
+        setIsSaving(false);
+        return;
+      }
+
       // if (!contact.name.trim()) {
       //   setError('Please enter a contact name');
       //   setIsSaving(false);
       //   return;
       // }
 
-      await AsyncStorage.setItem('emergencyContactName', contact.name);
-      await AsyncStorage.setItem('emergencyContact', contact.phone);
-      await AsyncStorage.setItem('emergencyMessage', contact.customMessage || '');
-      await AsyncStorage.setItem('emergencySmsEnabled', smsEnabled ? 'true' : 'false');
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          emergency_contact_name: contact.name,
+          emergency_contact_phone: contact.phone,
+          emergency_call_code: contact.callCode,
+          emergency_message: contact.customMessage || '',
+          emergency_sms_enabled: smsEnabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Error saving emergency settings:', updateError);
+        setError('Failed to save settings');
+        setIsSaving(false);
+        return;
+      }
 
       // Navigate back
       router.back();
@@ -116,14 +164,21 @@ export default function EmergencySetupScreen() {
             Configure your emergency contact who will be notified when you activate emergency mode.
           </Text>
 
-          {error && (
-            <View style={styles.errorContainer}>
-              <MaterialIcons name="error" color={colors.status.error} size={20} />
-              <Text style={styles.errorText}>{error}</Text>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.accent} />
+              <Text style={styles.loadingText}>Loading settings...</Text>
             </View>
-          )}
+          ) : (
+            <>
+              {error && (
+                <View style={styles.errorContainer}>
+                  <MaterialIcons name="error" color={colors.status.error} size={20} />
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              )}
 
-          <View style={styles.formSection}>
+              <View style={styles.formSection}>
             <Text style={styles.label}>Contact Name</Text>
             <View style={styles.inputContainer}>
               <TextInput
@@ -135,16 +190,33 @@ export default function EmergencySetupScreen() {
               />
             </View>
 
-            <Text style={styles.label}>Contact Phone</Text>
+            <Text style={styles.label}>Contact Phone (SMS)</Text>
             <View style={styles.inputContainer}>
               <MaterialIcons name="phone" size={20} color={colors.text.muted} />
               <TextInput
                 style={styles.input}
                 value={contact.phone}
                 onChangeText={(text) => setContact(prev => ({ ...prev, phone: text }))}
-                placeholder="Enter phone number"
+                placeholder="Enter phone number for SMS"
                 placeholderTextColor={colors.text.muted}
                 keyboardType="phone-pad"
+              />
+            </View>
+
+            <Text style={styles.label}>SMS Code</Text>
+            <Text style={styles.labelDescription}>
+              Enter this code in calculator to send emergency SMS to the contact above
+            </Text>
+            <View style={styles.inputContainer}>
+              <MaterialIcons name="dialpad" size={20} color={colors.text.muted} />
+              <TextInput
+                style={styles.input}
+                value={contact.callCode}
+                onChangeText={(text) => setContact(prev => ({ ...prev, callCode: text }))}
+                placeholder="e.g., 9999 or 1234"
+                placeholderTextColor={colors.text.muted}
+                keyboardType="number-pad"
+                maxLength={10}
               />
             </View>
 
@@ -183,16 +255,18 @@ export default function EmergencySetupScreen() {
                 </Text>
               </TouchableOpacity>
             )}
-          </View>
+              </View>
 
-          <TouchableOpacity
-            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={isSaving}>
-            <Text style={styles.saveButtonText}>
-              {isSaving ? 'Saving...' : 'Save Emergency Settings'}
-            </Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+                onPress={handleSave}
+                disabled={isSaving}>
+                <Text style={styles.saveButtonText}>
+                  {isSaving ? 'Saving...' : 'Save Emergency Settings'}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -272,6 +346,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: 'Inter-Medium',
   },
+  labelDescription: {
+    color: colors.text.muted,
+    fontSize: 12,
+    marginBottom: 8,
+    fontFamily: 'Inter-Regular',
+    opacity: 0.7,
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -345,5 +426,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    minHeight: 200,
+  },
+  loadingText: {
+    color: colors.text.secondary,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    marginTop: 16,
   },
 });
