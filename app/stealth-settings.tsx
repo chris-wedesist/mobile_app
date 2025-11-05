@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Alert, BackHandler } from 'react-native';
 import { router } from 'expo-router';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function StealthSettingsScreen() {
   const { deactivate } = useStealthMode();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleExitStealth = async () => {
     try {
@@ -16,6 +16,23 @@ export default function StealthSettingsScreen() {
       router.back();
     } catch (error) {
       console.error('Error exiting stealth mode:', error);
+    }
+  };
+
+  const handleLogoutAndExitApp = async () => {
+    try {
+      await deactivate('logout');
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await signOut();
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      if (Platform.OS === 'android') {
+        BackHandler.exitApp();
+      } else {
+        router.replace('/login' as any);
+      }
+    } catch (error) {
+      console.error('Error logging out and exiting app:', error);
     }
   };
 
@@ -33,11 +50,11 @@ export default function StealthSettingsScreen() {
       <ScrollView style={styles.content}>
         <View style={styles.titleContainer}>
           <MaterialIcons name="settings" size={32} color={colors.accent} />
-          <Text style={styles.title}>Stealth Mode Settings</Text>
+          <Text style={styles.title}>Settings</Text>
         </View>
 
         <Text style={styles.description}>
-          Configure stealth mode preferences and settings.
+          Configure Desist Calculator preferences and settings.
         </Text>
 
         <View style={styles.section}>
@@ -72,11 +89,6 @@ export default function StealthSettingsScreen() {
           </View>
           
           <View style={styles.exitOption}>
-            <MaterialIcons name="touch-app" size={20} color={colors.text.muted} />
-            <Text style={styles.exitOptionText}>Long press anywhere for 3 seconds</Text>
-          </View>
-          
-          <View style={styles.exitOption}>
             <MaterialIcons name="dialpad" size={20} color={colors.text.muted} />
             <Text style={styles.exitOptionText}>Enter code "5555"</Text>
           </View>
@@ -84,9 +96,9 @@ export default function StealthSettingsScreen() {
 
         <TouchableOpacity
           style={styles.exitButton}
-          onPress={handleExitStealth}>
+          onPress={() => handleLogoutAndExitApp()}>
           <MaterialIcons name="exit-to-app" size={24} color={colors.text.primary} />
-          <Text style={styles.exitButtonText}>Exit Stealth Mode</Text>
+          <Text style={styles.exitButtonText}>Clear Data & Close App</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

@@ -393,8 +393,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerButtons: {
+    width: '100%',
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   headerIconButton: {
     padding: 8,
