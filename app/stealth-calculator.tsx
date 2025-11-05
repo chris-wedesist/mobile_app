@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
 import { useStealthMode } from '@/components/StealthModeManager';
@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import * as SMS from 'expo-sms';
 
 type Operation = '+' | '-' | '×' | '÷' | '=' | null;
@@ -51,6 +52,8 @@ export default function StealthCalculatorScreen() {
   const [smsCode, setSmsCode] = useState<string>('');
   const [smsPhone, setSmsPhone] = useState<string>('');
   const [emergencyMessage, setEmergencyMessage] = useState<string>('');
+  const [lastPowerPress, setLastPowerPress] = useState<number>(0);
+  const powerPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Use the auto timeout hook - exit stealth mode after 10 minutes of inactivity
   const { resetTimeout } = useStealthAutoTimeout(10);
@@ -134,6 +137,32 @@ export default function StealthCalculatorScreen() {
 
   const handleLongPress = () => {
     deactivate('gesture');
+  };
+
+  const handlePowerOff = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 500; // 500ms window for double press
+
+    // Clear any existing timeout
+    if (powerPressTimeoutRef.current) {
+      clearTimeout(powerPressTimeoutRef.current);
+      powerPressTimeoutRef.current = null;
+    }
+
+    if (lastPowerPress > 0 && now - lastPowerPress < DOUBLE_PRESS_DELAY) {
+      // Double press detected
+      deactivate('power_button');
+      setLastPowerPress(0); // Reset
+    } else {
+      // First press - record the time
+      setLastPowerPress(now);
+      
+      // Reset after delay if no second press
+      powerPressTimeoutRef.current = setTimeout(() => {
+        setLastPowerPress(0);
+        powerPressTimeoutRef.current = null;
+      }, DOUBLE_PRESS_DELAY);
+    }
   };
 
   const handleNumber = (num: string) => {
@@ -257,6 +286,24 @@ export default function StealthCalculatorScreen() {
         }}
       >
         <View style={styles.innerContainer}>
+          <View style={styles.header}>
+            <View style={styles.headerSpacer} />
+            <View style={styles.headerButtons}>
+              <TouchableOpacity 
+                style={styles.headerIconButton}
+                onPress={() => router.push('/stealth-settings' as any)}
+                activeOpacity={0.7}>
+                <MaterialIcons name="settings" size={24} color={colors.text.muted} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.headerIconButton}
+                onPress={handlePowerOff}
+                activeOpacity={0.7}>
+                <MaterialIcons name="power-settings-new" size={24} color={colors.text.muted} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <View style={styles.display}>
             {previousValue !== null && (
               <View style={styles.historyContainer}>
@@ -280,8 +327,8 @@ export default function StealthCalculatorScreen() {
           <View style={styles.buttonGrid}>
             <View style={styles.row}>
               {renderButton('C', handleClear, styles.clearButton)}
-              {renderButton(<MaterialIcons name="backspace" size={24} color={colors.text.primary} />, handleDelete, styles.deleteButton)}
               {renderButton('÷', () => handleOperation('÷'), styles.operationButton)}
+              {renderButton(<MaterialIcons name="backspace" size={24} color={colors.text.primary} />, handleDelete, styles.deleteButton)}
             </View>
 
             <View style={styles.row}>
@@ -325,9 +372,35 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     padding: Platform.OS === 'web' ? 40 : 20,
+    backgroundColor: colors.secondary,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 16,
+    position: 'absolute',
+    right: 15,
+    top: 50,
+  },
+  headerSpacer: {
+    flex: 1,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerIconButton: {
+    padding: 8,
+    borderRadius: radius.md,
+    backgroundColor: `${colors.text.muted}15`,
   },
   display: {
-    backgroundColor: colors.secondary,
+    backgroundColor: `${colors.text.muted}75`,
     borderRadius: radius.lg,
     padding: 24,
     marginBottom: 24,
@@ -359,13 +432,13 @@ const styles = StyleSheet.create({
     fontSize: 40,
   },
   buttonGrid: {
-    flex: 1,
-    gap: 10,
+    gap: 12,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
   },
   row: {
     flexDirection: 'row',
-    gap: 10,
-    flex: 1,
+    gap: 12,
+    marginBottom: 12,
   },
   button: {
     flex: 1,
@@ -373,7 +446,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: 70,
+    height: 65,
     ...shadows.sm,
   },
   buttonText: {
@@ -383,7 +456,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   numberButton: {
-    backgroundColor: colors.secondary,
+    backgroundColor: `${colors.text.muted}75`,
   },
   operationButton: {
     backgroundColor: colors.accent,
@@ -395,10 +468,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
   },
   deleteButton: {
-    backgroundColor: `${colors.text.muted}30`,
+    backgroundColor: colors.accent,
   },
   clearButton: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: colors.accent,
   },
   equalsButton: {
     backgroundColor: colors.accent,

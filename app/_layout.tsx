@@ -120,6 +120,7 @@ function AppContent() {
         <Stack.Screen name="legal-rights" options={{ presentation: 'modal' }} />
         <Stack.Screen name="stealth-mode" options={{ presentation: 'modal' }} />
         <Stack.Screen name="stealth-calculator" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="stealth-settings" options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="incidents" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
