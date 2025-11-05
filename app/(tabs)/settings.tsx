@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Switch, TextInput, Platform, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, TextInput, Platform, ScrollView, KeyboardAvoidingView, Alert, BackHandler } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useState, useEffect, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStealthMode } from '@/components/StealthModeManager';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { useBiometricLogin } from '@/components/BiometricLoginProvider';
 
 
 interface Incident {
@@ -40,6 +41,9 @@ export default function SettingsScreen() {
   const [biometricLoginEnabled, setBiometricLoginEnabled] = useState(false);
   const [isTogglingBiometricLogin, setIsTogglingBiometricLogin] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [panicModeEnabled, setPanicModeEnabled] = useState(false);
+  const [panicGestureType, setPanicGestureType] = useState<'triple_power' | 'shake' | 'long_press'>('triple_power');
+  const [isTogglingPanicMode, setIsTogglingPanicMode] = useState(false);
 
   const handleStealthToggle = async (value: boolean) => {
     if (isTogglingStealth) return;
@@ -111,6 +115,7 @@ export default function SettingsScreen() {
         await loadEmergencySettings();
         await checkBiometricAvailability();
         await loadBiometricLoginSetting();
+        await loadPanicModeSetting();
         // Fetch user profile if user exists but profile is not loaded
         if (user && !userProfile) {
           console.log('Settings: Fetching user profile for user:', user.id);
@@ -226,6 +231,99 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error('Error loading biometric login setting:', error);
     }
+  };
+
+  const loadPanicModeSetting = async () => {
+    try {
+      if (!user?.id) {
+        setPanicModeEnabled(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('panic_mode_enabled, panic_gesture_type')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading panic mode setting:', error);
+        setPanicModeEnabled(false);
+        return;
+      }
+
+      setPanicModeEnabled(data?.panic_mode_enabled || false);
+      if (data?.panic_gesture_type) {
+        setPanicGestureType(data.panic_gesture_type as 'triple_power' | 'shake' | 'long_press');
+      }
+    } catch (error) {
+      console.error('Error loading panic mode setting:', error);
+    }
+  };
+
+  const handlePanicModeToggle = async (value: boolean) => {
+    if (isTogglingPanicMode) return;
+
+    if (!user?.id) {
+      Alert.alert('Error', 'You must be logged in to save settings');
+      return;
+    }
+
+    try {
+      setIsTogglingPanicMode(true);
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          panic_mode_enabled: value,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving panic mode setting:', error);
+        Alert.alert('Error', 'Failed to save panic mode setting');
+        return;
+      }
+
+      setPanicModeEnabled(value);
+    } catch (error) {
+      console.error('Error toggling panic mode:', error);
+      Alert.alert('Error', 'Failed to update panic mode setting');
+    } finally {
+      setIsTogglingPanicMode(false);
+    }
+  };
+
+  const handleTestPanicMode = async () => {
+    Alert.alert(
+      'Test Panic Mode',
+      'This will sign you out and navigate to login. Are you sure you want to continue?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Test',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Sign out first
+              await signOut();
+              
+              // Navigate to login screen
+              setTimeout(() => {
+                router.replace('/login' as any);
+              }, 100);
+            } catch (error) {
+              console.error('Error executing panic mode:', error);
+              Alert.alert('Error', 'Failed to execute panic mode');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const checkPermissions = async () => {
@@ -376,20 +474,35 @@ export default function SettingsScreen() {
                 />
               </View>
 
-              <View style={styles.additionalFeature}>
-                <MaterialIcons name="vpn-key" size={24} color={colors.accent} style={styles.blurredIcon} />
-                <View style={styles.stealthModeTextContainer}>
-                  <View style={styles.stealthModeTitleRow}>
-                    <Text style={styles.stealthModeTitle}>Panic Mode</Text>
-                    {/* <View style={styles.comingSoonBadge}>
-                      <Text style={styles.comingSoonText}>Coming Soon</Text>
-                    </View> */}
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <MaterialIcons name="vpn-key" size={24} color={colors.accent} />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingText}>Panic Mode</Text>
+                    <Text style={styles.settingSubtext}>
+                      {Platform.OS === 'ios' 
+                        ? 'Triple tap screen or shake device to sign out instantly'
+                        : 'Triple press back button or shake device to sign out instantly'}
+                    </Text>
                   </View>
-                  <Text style={styles.stealthModeDescription}>
-                    Instantly clear sensitive data with emergency gesture
-                  </Text>
                 </View>
+                <Switch
+                  value={panicModeEnabled}
+                  onValueChange={handlePanicModeToggle}
+                  disabled={isTogglingPanicMode}
+                  trackColor={{ false: colors.text.muted, true: colors.accent }}
+                  thumbColor={panicModeEnabled ? colors.text.primary : colors.text.secondary}
+                />
               </View>
+
+              {panicModeEnabled && (
+                <TouchableOpacity 
+                  style={styles.panicModeButton}
+                  onPress={handleTestPanicMode}>
+                  <MaterialIcons name="warning" size={20} color={colors.status.error} />
+                  <Text style={styles.panicModeButtonText}>Test Panic Mode</Text>
+                </TouchableOpacity>
+              )}
             </View>
           {/* </BlurView> */}
         </View>
@@ -952,5 +1065,23 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'Inter-Bold',
     textTransform: 'uppercase',
+  },
+  panicModeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: `${colors.status.error}20`,
+    padding: 12,
+    borderRadius: radius.md,
+    marginTop: 10,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.status.error,
+  },
+  panicModeButtonText: {
+    color: colors.status.error,
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
 });

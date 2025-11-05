@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderWidth: 2,
     borderColor: colors.accent,
-    width: 200,
+    width: '80%',
     textAlign: 'center',
     letterSpacing: 8,
     ...shadows.md,

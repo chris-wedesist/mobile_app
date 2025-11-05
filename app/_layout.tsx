@@ -14,6 +14,8 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { StealthModeProvider, useStealthMode } from '@/components/StealthModeManager';
 import { BiometricLoginProvider, useBiometricLogin } from '@/components/BiometricLoginProvider';
+import { usePanicModeGesture } from '@/hooks/usePanicModeGesture';
+import { PanicModeTripleTap } from '@/components/PanicModeTripleTap';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
@@ -27,6 +29,10 @@ function AppContent() {
   const { user, loading: authLoading } = useAuth();
   const { isLocked, unlock, biometricLoginEnabled, isInitializing } = useBiometricLogin();
   const { isActive: isStealthModeActive } = useStealthMode();
+  
+  // Enable panic mode gesture detection
+  usePanicModeGesture();
+  
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const hasCheckedRouteRef = useRef(false);
@@ -110,40 +116,42 @@ function AppContent() {
   console.log('Rendering main layout');
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ 
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.primary }
-      }}>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="signup" options={{ headerShown: false }} />
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="emergency-setup" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="panic-activation" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="report-incident" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="legal-rights" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="stealth-mode" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="stealth-calculator" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="stealth-settings" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="incidents" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="badge-unlock" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="light" />
-      {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && initialRoute !== '/stealth-calculator' && !isStealthModeActive && <EmergencyCallButton />}
-      
-      {/* Biometric Login Modal */}
-      {user && biometricLoginEnabled && (
-        <BiometricLogin
-          visible={isLocked}
-          onSuccess={unlock}
-          onFail={() => {
-            // Stay locked if authentication fails
-          }}
-        />
-      )}
+      <PanicModeTripleTap>
+        <Stack screenOptions={{ 
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.primary }
+        }}>
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="signup" options={{ headerShown: false }} />
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="emergency-setup" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="panic-activation" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="report-incident" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="legal-rights" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="stealth-mode" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="stealth-calculator" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="stealth-settings" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="incidents" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="badge-unlock" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="light" />
+        {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && initialRoute !== '/stealth-calculator' && !isStealthModeActive && <EmergencyCallButton />}
+        
+        {/* Biometric Login Modal */}
+        {user && biometricLoginEnabled && (
+          <BiometricLogin
+            visible={isLocked}
+            onSuccess={unlock}
+            onFail={() => {
+              // Stay locked if authentication fails
+            }}
+          />
+        )}
+      </PanicModeTripleTap>
     </GestureHandlerRootView>
   );
 }

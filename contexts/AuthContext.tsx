@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(true);
         const storedUserId = await AsyncStorage.getItem('user_id');
         if (storedUserId !== null) {
-          fetchUserProfile(storedUserId)
+          await fetchUserProfile(storedUserId);
 
 
 
@@ -355,22 +355,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
+      console.log('SignOut: Starting sign out process...');
+      
       if (!supabase || !supabase.auth) {
         console.error('Supabase client not available for sign out');
         return;
       }
 
-      await supabase.auth.signOut();
+      // Clear Supabase session first
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.error('Supabase signOut error:', signOutError);
+      } else {
+        console.log('SignOut: Supabase session cleared');
+      }
 
-      // Clear user ID from AsyncStorage
-      await AsyncStorage.removeItem('user_id');
+      // Clear all AsyncStorage items related to auth/session
+      const keysToRemove = [
+        'user_id',
+        'stealth_mode_active',
+        'stealth_mode_screen',
+        'onboarding_completed',
+      ];
+      
+      for (const key of keysToRemove) {
+        try {
+          await AsyncStorage.removeItem(key);
+          console.log(`SignOut: Cleared AsyncStorage key: ${key}`);
+        } catch (error) {
+          console.error(`SignOut: Error removing ${key}:`, error);
+        }
+      }
 
       // Clear local state
       setUser(null);
       setUserProfile(null);
       setSession(null);
+      
+      console.log('SignOut: Sign out completed successfully');
+      
+      // Wait a bit to ensure state updates propagate
+      await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error; // Re-throw to let caller know sign out failed
     }
   };
 
