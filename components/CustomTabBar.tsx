@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Platform } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { colors, shadows, radius } from '@/constants/theme';
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.secondary,
     ...shadows.sm,
+    height: Platform.OS === 'ios' ? 170 : 190,
   },
   twoTierContainer: {
     paddingVertical: 5,
