@@ -375,7 +375,6 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     padding: Platform.OS === 'web' ? 40 : 20,
-    backgroundColor: colors.secondary,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-end',
@@ -459,7 +458,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   numberButton: {
-    backgroundColor: `${colors.text.muted}75`,
+    backgroundColor: `${colors.text.muted}`,
+    ...shadows.sm,
   },
   operationButton: {
     backgroundColor: colors.accent,
