@@ -295,37 +295,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleTestPanicMode = async () => {
-    Alert.alert(
-      'Test Panic Mode',
-      'This will sign you out and navigate to login. Are you sure you want to continue?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Test',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Sign out first
-              await signOut();
-              
-              // Navigate to login screen
-              setTimeout(() => {
-                router.replace('/login' as any);
-              }, 100);
-            } catch (error) {
-              console.error('Error executing panic mode:', error);
-              Alert.alert('Error', 'Failed to execute panic mode');
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const checkPermissions = async () => {
     const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
     setLocationEnabled(locationStatus === 'granted');
@@ -404,28 +373,30 @@ export default function SettingsScreen() {
     >
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Settings</Text>
+
+        <TouchableOpacity 
+              style={[styles.actionButton, styles.actionDanger]} 
+              onPress={handleLogout}
+              activeOpacity={0.7}>
+              <MaterialIcons name="logout" size={18} color={colors.status.error} />
+              <Text style={[styles.actionButtonText, styles.actionDangerText]}>Logout</Text>
+            </TouchableOpacity>
         
         {/* Profile Header Card */}
-        <View style={styles.profileCard}>
+        <TouchableOpacity 
+          style={styles.profileCard}
+          onPress={() => router.push('/profile')}
+          activeOpacity={0.7}>
           <View style={styles.profileRow}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{initials}</Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{fullName || 'Loading...'}</Text>
-              <Text style={styles.profileHandle}>@{username || 'loading'}</Text>
               <Text style={styles.profileEmail}>{email || 'loading@email'}</Text>
             </View>
-          <View style={styles.profileActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/profile')}>
-              <MaterialIcons name="edit" size={20} color={colors.text.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, styles.actionDanger]} onPress={handleLogout}>
-              <MaterialIcons name="logout" size={20} color={colors.primary} />
-            </TouchableOpacity>
           </View>
-          </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.securitySection}>
           <View style={styles.securityHeader}>
@@ -494,15 +465,6 @@ export default function SettingsScreen() {
                   thumbColor={panicModeEnabled ? colors.text.primary : colors.text.secondary}
                 />
               </View>
-
-              {panicModeEnabled && (
-                <TouchableOpacity 
-                  style={styles.panicModeButton}
-                  onPress={handleTestPanicMode}>
-                  <MaterialIcons name="warning" size={20} color={colors.status.error} />
-                  <Text style={styles.panicModeButtonText}>Test Panic Mode</Text>
-                </TouchableOpacity>
-              )}
             </View>
           {/* </BlurView> */}
         </View>
@@ -773,27 +735,36 @@ const styles = StyleSheet.create({
   },
   profileActions: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
-    alignItems: 'flex-start',
+    gap: 12,
+    marginTop: 16,
+    alignItems: 'center',
     justifyContent: 'flex-end',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: colors.accent,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: radius.md,
+    minHeight: 44,
+    width: 'auto',
+    position: 'absolute',
+    top: 5,
+    right: 2,
   },
   actionDanger: {
-    backgroundColor: colors.text.primary,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.status.error,
   },
   actionButtonText: {
     color: colors.text.primary,
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
+  },
+  actionDangerText: {
+    color: colors.status.error,
   },
   section: {
     backgroundColor: colors.secondary,
