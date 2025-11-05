@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Switch, TextInput, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, TextInput, Platform, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useState, useEffect, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
@@ -11,6 +11,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStealthMode } from '@/components/StealthModeManager';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 
 interface Incident {
@@ -36,6 +37,9 @@ export default function SettingsScreen() {
   );
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [isTogglingStealth, setIsTogglingStealth] = useState(false);
+  const [biometricLoginEnabled, setBiometricLoginEnabled] = useState(false);
+  const [isTogglingBiometricLogin, setIsTogglingBiometricLogin] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
 
   const handleStealthToggle = async (value: boolean) => {
     if (isTogglingStealth) return;
@@ -105,6 +109,8 @@ export default function SettingsScreen() {
       const loadData = async () => {
         await checkPermissions();
         await loadEmergencySettings();
+        await checkBiometricAvailability();
+        await loadBiometricLoginSetting();
         // Fetch user profile if user exists but profile is not loaded
         if (user && !userProfile) {
           console.log('Settings: Fetching user profile for user:', user.id);
@@ -135,6 +141,91 @@ export default function SettingsScreen() {
 
   const handleEmergencyMessageChange = (text: string) => {
     setEmergencyMessage(text);
+  };
+
+  const checkBiometricAvailability = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        setBiometricAvailable(false);
+        return;
+      }
+
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      setBiometricAvailable(hasHardware && isEnrolled);
+    } catch (error) {
+      console.error('Error checking biometric availability:', error);
+      setBiometricAvailable(false);
+    }
+  };
+
+  const handleBiometricLoginToggle = async (value: boolean) => {
+    if (isTogglingBiometricLogin) return;
+    
+    if (!biometricAvailable) {
+      Alert.alert(
+        'Biometric Not Available',
+        'Biometric authentication is not available on this device. Please set up Face ID or Touch ID in your device settings.'
+      );
+      return;
+    }
+
+    try {
+      setIsTogglingBiometricLogin(true);
+      
+      if (!user?.id) {
+        Alert.alert('Error', 'You must be logged in to save settings');
+        setIsTogglingBiometricLogin(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          biometric_login_enabled: value,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving biometric login setting:', error);
+        Alert.alert('Error', 'Failed to save biometric login setting');
+        setIsTogglingBiometricLogin(false);
+        return;
+      }
+
+      setBiometricLoginEnabled(value);
+    } catch (error) {
+      console.error('Error toggling biometric login:', error);
+      Alert.alert('Error', 'Failed to update biometric login setting');
+    } finally {
+      setIsTogglingBiometricLogin(false);
+    }
+  };
+
+  const loadBiometricLoginSetting = async () => {
+    try {
+      if (!user?.id) {
+        setBiometricLoginEnabled(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('biometric_login_enabled')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading biometric login setting:', error);
+        setBiometricLoginEnabled(false);
+        return;
+      }
+
+      setBiometricLoginEnabled(data?.biometric_login_enabled || false);
+    } catch (error) {
+      console.error('Error loading biometric login setting:', error);
+    }
   };
 
   const checkPermissions = async () => {
@@ -264,19 +355,25 @@ export default function SettingsScreen() {
                 />
               </View>
 
-              <View style={styles.additionalFeature}>
-                <MaterialIcons name="fingerprint" size={24} color={colors.accent} style={styles.blurredIcon} />
-                <View style={styles.stealthModeTextContainer}>
-                  <View style={styles.stealthModeTitleRow}>
-                    <Text style={styles.stealthModeTitle}>Biometric Lock</Text>
-                    {/* <View style={styles.comingSoonBadge}>
-                      <Text style={styles.comingSoonText}>Coming Soon</Text>
-                    </View> */}
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <MaterialIcons name="lock" size={24} color={colors.accent} />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingText}>Biometric Login</Text>
+                    <Text style={styles.settingSubtext}>
+                      {biometricAvailable 
+                        ? 'Lock app with biometric authentication on launch'
+                        : 'Biometric authentication not available'}
+                    </Text>
                   </View>
-                  <Text style={styles.stealthModeDescription}>
-                    Secure app access with fingerprint or face unlock
-                  </Text>
                 </View>
+                <Switch
+                  value={biometricLoginEnabled}
+                  onValueChange={handleBiometricLoginToggle}
+                  disabled={!biometricAvailable || isTogglingBiometricLogin}
+                  trackColor={{ false: colors.text.muted, true: colors.accent }}
+                  thumbColor={biometricLoginEnabled ? colors.text.primary : colors.text.secondary}
+                />
               </View>
 
               <View style={styles.additionalFeature}>

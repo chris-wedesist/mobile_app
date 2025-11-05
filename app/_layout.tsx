@@ -7,11 +7,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import EmergencyCallButton from '@/components/EmergencyCallButton';
 import CustomSplashScreen from '@/components/SplashScreen';
+import BiometricLogin from '@/components/BiometricLogin';
 import { colors } from '@/constants/theme';
 import { View, Text } from 'react-native'
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { StealthModeProvider } from '@/components/StealthModeManager';
+import { BiometricLoginProvider, useBiometricLogin } from '@/components/BiometricLoginProvider';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
@@ -23,17 +25,18 @@ function AppContent() {
   useFrameworkReady();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { isLocked, unlock, biometricLoginEnabled, isInitializing } = useBiometricLogin();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const hasCheckedRouteRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!hasCheckedRouteRef.current && !authLoading) {
+    if (!hasCheckedRouteRef.current && !authLoading && !isInitializing) {
       console.log('AppContent mounted, checking authentication...');
       checkInitialRoute();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, isInitializing]);
 
   const checkInitialRoute = async () => {
     if (hasCheckedRouteRef.current) return; // Prevent multiple calls
@@ -87,7 +90,7 @@ function AppContent() {
   };
 
   useEffect(() => {
-    if (isReady && initialRoute) {
+    if (isReady && initialRoute && !isLocked && !isInitializing) {
       console.log('App is ready, navigating to:', initialRoute);
       // Navigate immediately without timeout
       router.replace(initialRoute as any);
@@ -96,10 +99,10 @@ function AppContent() {
         // Ignore errors - this happens on web
       });
     }
-  }, [isReady, initialRoute]);
+  }, [isReady, initialRoute, isLocked, isInitializing]);
 
-  if (!isReady || !initialRoute || authLoading) {
-    console.log('Showing splash screen - isReady:', isReady, 'initialRoute:', initialRoute, 'authLoading:', authLoading);
+  if (!isReady || !initialRoute || authLoading || isInitializing) {
+    console.log('Showing splash screen - isReady:', isReady, 'initialRoute:', initialRoute, 'authLoading:', authLoading, 'isInitializing:', isInitializing);
     return <CustomSplashScreen />;
   }
 
@@ -129,6 +132,17 @@ function AppContent() {
       </Stack>
       <StatusBar style="light" />
       {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && <EmergencyCallButton />}
+      
+      {/* Biometric Login Modal */}
+      {user && biometricLoginEnabled && (
+        <BiometricLogin
+          visible={isLocked}
+          onSuccess={unlock}
+          onFail={() => {
+            // Stay locked if authentication fails
+          }}
+        />
+      )}
     </GestureHandlerRootView>
   );
 }
@@ -136,9 +150,11 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StealthModeProvider>
-        <AppContent />
-      </StealthModeProvider>
+      <BiometricLoginProvider>
+        <StealthModeProvider>
+          <AppContent />
+        </StealthModeProvider>
+      </BiometricLoginProvider>
     </AuthProvider>
   );
 }

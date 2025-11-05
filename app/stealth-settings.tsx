@@ -1,29 +1,14 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useStealthMode } from '@/components/StealthModeManager';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function StealthSettingsScreen() {
   const { deactivate } = useStealthMode();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading stealth settings:', error);
-      setLoading(false);
-    }
-  };
 
   const handleExitStealth = async () => {
     try {

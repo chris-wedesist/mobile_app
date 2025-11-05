@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { GestureHandlerRootView, LongPressGestureHandler } from 'react-native-gesture-handler';
 import { useStealthMode } from '@/components/StealthModeManager';
 import { useStealthAutoTimeout } from '@/hooks/useStealthAutoTimeout';
@@ -93,7 +93,7 @@ export default function StealthCalculatorScreen() {
   };
 
   // Check for secret sequence: exactly 5555 to exit stealth mode
-  const checkSecretSequence = (newDisplay: string) => {
+  const checkSecretSequence = async (newDisplay: string) => {
     const currentNum = newDisplay.replace(/,/g, '').replace(/\./g, '');
     if (currentNum === '5555') {
       setTimeout(() => {
@@ -135,11 +135,11 @@ export default function StealthCalculatorScreen() {
     return false;
   };
 
-  const handleLongPress = () => {
+  const handleLongPress = async () => {
     deactivate('gesture');
   };
 
-  const handlePowerOff = () => {
+  const handlePowerOff = async () => {
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 500; // 500ms window for double press
 
@@ -165,7 +165,7 @@ export default function StealthCalculatorScreen() {
     }
   };
 
-  const handleNumber = (num: string) => {
+  const handleNumber = async (num: string) => {
     resetTimeout(); // Reset timeout on user interaction
     let newDisplay: string;
     
@@ -181,8 +181,9 @@ export default function StealthCalculatorScreen() {
     setDisplay(newDisplay);
     
     // Check for secret sequence (exactly 5555 to exit stealth mode)
-    if (!checkSecretSequence(newDisplay)) {
-      // If not exit code, check for emergency SMS code
+    const isExitSequence = await checkSecretSequence(newDisplay);
+    // If not exit code, check for emergency SMS code
+    if (!isExitSequence) {
       checkSmsCode(newDisplay);
     }
   };
@@ -291,7 +292,9 @@ export default function StealthCalculatorScreen() {
             <View style={styles.headerButtons}>
               <TouchableOpacity 
                 style={styles.headerIconButton}
-                onPress={() => router.push('/stealth-settings' as any)}
+                onPress={() => {
+                  router.push('/stealth-settings' as any);
+                }}
                 activeOpacity={0.7}>
                 <MaterialIcons name="settings" size={24} color={colors.text.muted} />
               </TouchableOpacity>

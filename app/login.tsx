@@ -35,9 +35,10 @@ export default function LoginScreen() {
 
     if (error) {
       Alert.alert('Login Failed', error.message);
+      console.log('Login failed:', error.message);
     } else {
-      // Navigation will be handled by AuthProvider and main layout
       console.log('Login successful, auth state will update automatically');
+      console.log('Login successful');
     }
   };
 

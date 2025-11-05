@@ -87,17 +87,15 @@ export async function savePushTokenToProfile(userId: string, token: string): Pro
 
     console.log('🔍 Token data:', tokenData);
 
+    // Use UPDATE instead of UPSERT to avoid creating new rows without required fields
     const { data, error } = await supabase
       .from('users')
-      .upsert(
-        {
-          id: userId,
-          push_token: token,
-          push_token_data: tokenData,
-          push_token_updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'id' }
-      )
+      .update({
+        push_token: token,
+        push_token_data: tokenData,
+        push_token_updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
       .select();
 
     if (error) {
@@ -105,8 +103,13 @@ export async function savePushTokenToProfile(userId: string, token: string): Pro
       return false;
     }
 
+    if (!data || data.length === 0) {
+      console.error('❌ User not found with id:', userId);
+      return false;
+    }
+
     console.log('✅ Push token saved to user profile successfully');
-    console.log('✅ Upsert result:', data);
+    console.log('✅ Update result:', data);
     return true;
   } catch (error) {
     console.error('❌ Error in savePushTokenToProfile:', error);
