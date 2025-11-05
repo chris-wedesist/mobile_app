@@ -402,9 +402,11 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.text.muted}15`,
   },
   display: {
-    backgroundColor: `${colors.text.muted}75`,
+    backgroundColor: colors.secondary,
     borderRadius: radius.lg,
     padding: 24,
+    borderWidth: 1,
+    borderColor: `${colors.text.muted}20`,
     marginBottom: 24,
     minHeight: 120,
     justifyContent: 'flex-end',
