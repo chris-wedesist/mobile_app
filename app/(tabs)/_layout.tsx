@@ -2,8 +2,11 @@ import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import CustomTabBar from '@/components/CustomTabBar';
 import EmergencyCallButton from '@/components/EmergencyCallButton';
+import { useStealthMode } from '@/components/StealthModeManager';
 
 export default function TabLayout() {
+  const { isActive: isStealthModeActive } = useStealthMode();
+  
   return (
     <View style={{ flex: 1 }}>
       <Tabs
@@ -25,7 +28,7 @@ export default function TabLayout() {
         <Tabs.Screen name="documents" />
         <Tabs.Screen name="settings" />
       </Tabs>
-      <EmergencyCallButton />
+      {!isStealthModeActive && <EmergencyCallButton />}
     </View>
   );
 }

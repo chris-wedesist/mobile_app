@@ -12,7 +12,7 @@ import { colors } from '@/constants/theme';
 import { View, Text } from 'react-native'
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { StealthModeProvider } from '@/components/StealthModeManager';
+import { StealthModeProvider, useStealthMode } from '@/components/StealthModeManager';
 import { BiometricLoginProvider, useBiometricLogin } from '@/components/BiometricLoginProvider';
 
 
@@ -26,6 +26,7 @@ function AppContent() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { isLocked, unlock, biometricLoginEnabled, isInitializing } = useBiometricLogin();
+  const { isActive: isStealthModeActive } = useStealthMode();
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const hasCheckedRouteRef = useRef(false);
@@ -131,7 +132,7 @@ function AppContent() {
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="light" />
-      {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && <EmergencyCallButton />}
+      {initialRoute !== '/login' && initialRoute !== '/signup' && initialRoute !== '/onboarding' && initialRoute !== '/auth/confirmation' && initialRoute !== '/stealth-calculator' && !isStealthModeActive && <EmergencyCallButton />}
       
       {/* Biometric Login Modal */}
       {user && biometricLoginEnabled && (
