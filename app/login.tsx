@@ -15,13 +15,14 @@ import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('doxoje4562@fergetic.com');
   const [password, setPassword] = useState('12345678');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmation } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -34,8 +35,43 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Login Failed', error.message);
-      console.log('Login failed:', error.message);
+      // Check if error is about email not being confirmed
+      if (error.message && error.message.includes('verify your email')) {
+        // Store password temporarily for auto-login after confirmation
+        try {
+          await AsyncStorage.setItem('pending_signup_password', password);
+        } catch (storageError) {
+          console.error('Error storing password:', storageError);
+        }
+        
+        // Navigate to confirmation code screen
+        Alert.alert(
+          'Email Verification Required',
+          'Your email address needs to be verified. We will send you a new confirmation code.',
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Send Code',
+              onPress: async () => {
+                // Resend confirmation code
+                const resendResult = await resendConfirmation(email);
+                if (resendResult.error) {
+                  Alert.alert('Error', resendResult.error.message || 'Failed to resend confirmation code');
+                } else {
+                  // Navigate to confirmation code screen
+                  router.push(`/confirm-code?email=${encodeURIComponent(email)}` as any);
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Login Failed', error.message);
+        console.log('Login failed:', error.message);
+      }
     } else {
       console.log('Login successful, auth state will update automatically');
       console.log('Login successful');
@@ -44,6 +80,36 @@ export default function LoginScreen() {
 
   const navigateToSignup = () => {
     router.push('/signup');
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      Alert.alert('Error', 'Please enter your email address first');
+      return;
+    }
+
+    try {
+      const resendResult = await resendConfirmation(email);
+      if (resendResult.error) {
+        Alert.alert('Error', resendResult.error.message || 'Failed to resend confirmation code');
+      } else {
+        Alert.alert(
+          'Code Sent',
+          'A new confirmation code has been sent to your email address.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                router.push(`/confirm-code?email=${encodeURIComponent(email)}` as any);
+              },
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Resend confirmation error:', error);
+      Alert.alert('Error', 'Failed to resend confirmation code');
+    }
   };
 
   return (
@@ -214,6 +280,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   signupLink: {
+    fontSize: 14,
+    color: colors.accent,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+  },
+  confirmLinkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    gap: 6,
+  },
+  confirmLinkText: {
     fontSize: 14,
     color: colors.accent,
     fontWeight: '600',
