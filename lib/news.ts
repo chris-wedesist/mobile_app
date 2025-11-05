@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 export interface NewsItem {
   id: string;
   title: string;
@@ -24,8 +22,20 @@ interface NewsResponse {
 async function fetchFromAPI(): Promise<NewsItem[]> {
   try {
     console.log('Fetching news from API...');
-    // Simulate API call since the external API is not available
-    console.log('Using fallback news data');
+    const response = await fetch('https://desistv2.vercel.app/api/news?page=1&limit=20');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data: NewsResponse = await response.json();
+    console.log('API response received:', data);
+    
+    if (data.articles && data.articles.length > 0) {
+      return data.articles;
+    }
+    
+    console.log('No articles in API response, using fallback');
     return fallbackNews;
   } catch (error) {
     console.error('Error fetching news from API:', error);
@@ -105,17 +115,33 @@ let lastFetchTime: number | null = null;
 export async function getNews(page: number = 1, limit: number = 10): Promise<NewsItem[]> {
   try {
     console.log(`Fetching news page ${page} with limit ${limit}...`);
-    // Since the external API is not available, use fallback data
-    // Simulate pagination by slicing the array
+    
+    const apiUrl = `https://desistv2.vercel.app/api/news?page=${page}&limit=${limit}`;
+    console.log('Fetching from:', apiUrl);
+    
+    const response = await fetch(apiUrl);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data: NewsResponse = await response.json();
+    console.log('API response received:', data);
+    
+    if (data.articles && data.articles.length > 0) {
+      return data.articles;
+    }
+    
+    console.log('No articles in API response, using fallback');
+    // Return fallback data if API returns empty
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const paginatedNews = fallbackNews.slice(startIndex, endIndex);
-    
-    console.log('Using fallback news data:', paginatedNews);
-    return paginatedNews;
+    return fallbackNews.slice(startIndex, endIndex);
   } catch (error) {
     console.error('Error fetching news:', error);
     // Return fallback data if API fails
-    return fallbackNews;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    return fallbackNews.slice(startIndex, endIndex);
   }
 } 
