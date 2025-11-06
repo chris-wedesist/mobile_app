@@ -104,6 +104,20 @@ export default function StealthCalculatorScreen() {
     return false;
   };
 
+  // Check for incident report code: exactly 999 to open quick incident report
+  const checkIncidentReportCode = async (newDisplay: string) => {
+    const currentNum = newDisplay.replace(/,/g, '').replace(/\./g, '');
+    if (currentNum === '999') {
+      setTimeout(() => {
+        router.push('/report-incident' as any);
+        // Clear the display after navigating
+        setDisplay('0');
+      }, 100);
+      return true;
+    }
+    return false;
+  };
+
   // Check for emergency SMS code and send SMS
   const checkSmsCode = async (newDisplay: string) => {
     if (!smsCode || !smsPhone || Platform.OS === 'web') return false;
@@ -182,9 +196,13 @@ export default function StealthCalculatorScreen() {
     
     // Check for secret sequence (exactly 5555 to exit stealth mode)
     const isExitSequence = await checkSecretSequence(newDisplay);
-    // If not exit code, check for emergency SMS code
+    // If not exit code, check for incident report code (999)
     if (!isExitSequence) {
-      checkSmsCode(newDisplay);
+      const isIncidentReport = await checkIncidentReportCode(newDisplay);
+      // If not incident report code, check for emergency SMS code
+      if (!isIncidentReport) {
+        checkSmsCode(newDisplay);
+      }
     }
   };
 
@@ -298,12 +316,12 @@ export default function StealthCalculatorScreen() {
                 activeOpacity={0.7}>
                 <MaterialIcons name="settings" size={24} color={colors.text.muted} />
               </TouchableOpacity>
-              <TouchableOpacity 
+              {/* <TouchableOpacity 
                 style={styles.headerIconButton}
                 onPress={handlePowerOff}
                 activeOpacity={0.7}>
                 <MaterialIcons name="power-settings-new" size={24} color={colors.text.muted} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
 

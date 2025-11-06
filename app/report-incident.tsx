@@ -11,6 +11,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkIncidentRestrictions, getUserCurrentLocation, isUserVerified } from '@/utils/incident-restrictions';
 import { sendIncidentNotificationToNearbyUsers } from '@/utils/push-notifications';
+import * as ImagePicker from 'expo-image-picker';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Audio } from 'expo-av';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
@@ -95,6 +98,15 @@ export default function ReportIncidentScreen() {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const videoRef = useRef<ExpoVideo>(null);
   const [showVideoPicker, setShowVideoPicker] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  const [isRecordingVideo, setIsRecordingVideo] = useState(false);
+  const recordingPromiseRef = useRef<Promise<any> | null>(null);
+
+  // Cloudinary configuration
+  const CLOUDINARY_CLOUD_NAME = 'do0qfrr5y';
+  const CLOUDINARY_UPLOAD_PRESET = 'desist';
 
   useEffect(() => {
     (async () => {
@@ -345,6 +357,178 @@ export default function ReportIncidentScreen() {
     );
   };
 
+  const handleRecordVideo = async () => {
+    if (Platform.OS === 'web') {
+      Alert.alert('Not Available', 'Video recording is only available on mobile devices.');
+      return;
+    }
+
+    if (!cameraPermission?.granted) {
+      const result = await requestCameraPermission();
+      if (!result.granted) {
+        Alert.alert('Permission Required', 'Camera permission is required to record videos.');
+        return;
+      }
+    }
+
+    setShowCamera(true);
+  };
+
+  const handleUploadVideo = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: true,
+        quality: 1,
+        videoMaxDuration: 300, // 5 minutes max
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadVideoToCloudinary(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking video:', error);
+      Alert.alert('Error', 'Failed to pick video. Please try again.');
+    }
+  };
+
+  const uploadVideoToCloudinary = async (videoUri: string) => {
+    try {
+      setIsLoadingVideos(true);
+      
+      const formData = new FormData();
+      formData.append('file', {
+        uri: videoUri,
+        type: 'video/mp4',
+        name: `recording-${Date.now()}.mp4`,
+      } as any);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET || '');
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      const data = await response.json();
+      
+      if (data.secure_url) {
+        // Save to Supabase
+        const { data: recordingData, error } = await supabase
+          .from('recordings')
+          .insert([
+            {
+              video_url: data.secure_url,
+              created_at: new Date().toISOString(),
+              status: 'completed'
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Update local storage
+        try {
+          const existingRecordings = await AsyncStorage.getItem('userRecordings');
+          const recordings = existingRecordings ? JSON.parse(existingRecordings) : [];
+          recordings.push(recordingData.id);
+          await AsyncStorage.setItem('userRecordings', JSON.stringify(recordings));
+        } catch (storageError) {
+          console.error('Error saving to local storage:', storageError);
+        }
+
+        // Refresh recordings list
+        await fetchRecordings();
+        
+        // Automatically select the newly uploaded video
+        setSelectedVideos(prev => [...prev, data.secure_url]);
+        
+        Alert.alert('Success', 'Video uploaded successfully!');
+      } else {
+        throw new Error('No secure URL returned from Cloudinary');
+      }
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      Alert.alert('Error', 'Failed to upload video. Please try again.');
+    } finally {
+      setIsLoadingVideos(false);
+    }
+  };
+
+  const prepareRecording = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const { status: audioStatus } = await Audio.requestPermissionsAsync();
+        if (audioStatus !== 'granted') {
+          throw new Error('Audio recording permission is required');
+        }
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: false,
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Preparation failed:', error);
+      return false;
+    }
+  };
+
+  const startVideoRecording = async () => {
+    if (!cameraRef.current || isRecordingVideo) return;
+
+    try {
+      const prepared = await prepareRecording();
+      if (!prepared) {
+        Alert.alert('Error', 'Failed to prepare recording. Please check permissions.');
+        return;
+      }
+
+      setIsRecordingVideo(true);
+      recordingPromiseRef.current = cameraRef.current.recordAsync({
+        maxDuration: 300, // 5 minutes
+      });
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      Alert.alert('Error', 'Failed to start recording. Please try again.');
+      setIsRecordingVideo(false);
+    }
+  };
+
+  const stopVideoRecording = async () => {
+    if (!isRecordingVideo || !cameraRef.current) return;
+
+    try {
+      setIsRecordingVideo(false);
+      await cameraRef.current.stopRecording();
+      
+      if (recordingPromiseRef.current) {
+        const video = await recordingPromiseRef.current;
+        
+        if (video?.uri) {
+          await uploadVideoToCloudinary(video.uri);
+          setShowCamera(false);
+        } else {
+          throw new Error('No video URI returned');
+        }
+      }
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+      Alert.alert('Error', 'Failed to save recording. Please try again.');
+      setIsRecordingVideo(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedLocation) {
       Alert.alert('Error', 'Please select a location on the map');
@@ -501,37 +685,62 @@ export default function ReportIncidentScreen() {
 
     return (
       <View style={styles.videoPickerContainer}>
-        <FlatList
-  data={recordings}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.videoPickerItem,
-        selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItem
-      ]}
-      onPress={() => toggleVideoSelection(item.video_url)}
-    >
-      <MaterialIcons name="video-label" size={20} color={selectedVideos.includes(item.video_url) ? '#fff' : '#666'} />
-      <Text style={[
-        styles.videoPickerItemText,
-        selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItemText
-      ]}>
-        Recording {new Date(item.created_at).toLocaleDateString()}
-      </Text>
-      {selectedVideos.includes(item.video_url) && (
-        <TouchableOpacity
-          style={styles.removeVideoButton}
-          onPress={() => toggleVideoSelection(item.video_url)}
-        >
-          <MaterialIcons name="close" size={16} color="#fff" />
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  )}
-  keyExtractor={(item) => item.id}
-  scrollEnabled={false}  // 🔧 Important: disable scrolling here
-  style={styles.videoPickerList}
-/>
+        {/* Action Buttons */}
+        <View style={styles.videoActionButtons}>
+          <TouchableOpacity
+            style={styles.videoActionButton}
+            onPress={handleRecordVideo}
+            disabled={Platform.OS === 'web'}
+          >
+            <MaterialIcons name="videocam" size={24} color="#fff" />
+            <Text style={styles.videoActionButtonText}>Record Video</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.videoActionButton}
+            onPress={handleUploadVideo}
+          >
+            <MaterialIcons name="upload" size={24} color="#fff" />
+            <Text style={styles.videoActionButtonText}>Upload Video</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Existing Videos List */}
+        {recordings.length > 0 && (
+          <View style={styles.existingVideosSection}>
+            <Text style={styles.existingVideosTitle}>Existing Recordings</Text>
+            <FlatList
+              data={recordings}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.videoPickerItem,
+                    selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItem
+                  ]}
+                  onPress={() => toggleVideoSelection(item.video_url)}
+                >
+                  <MaterialIcons name="video-label" size={20} color={selectedVideos.includes(item.video_url) ? '#fff' : '#666'} />
+                  <Text style={[
+                    styles.videoPickerItemText,
+                    selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItemText
+                  ]}>
+                    Recording {new Date(item.created_at).toLocaleDateString()}
+                  </Text>
+                  {selectedVideos.includes(item.video_url) && (
+                    <TouchableOpacity
+                      style={styles.removeVideoButton}
+                      onPress={() => toggleVideoSelection(item.video_url)}
+                    >
+                      <MaterialIcons name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              style={styles.videoPickerList}
+            />
+          </View>
+        )}
       </View>
     );
   };
@@ -764,6 +973,86 @@ export default function ReportIncidentScreen() {
               />
             )}
           </View>
+        </View>
+      </Modal>
+
+      {/* Camera Modal for Recording */}
+      <Modal
+        visible={showCamera}
+        animationType="slide"
+        onRequestClose={() => {
+          if (!isRecordingVideo) {
+            setShowCamera(false);
+          }
+        }}
+      >
+        <View style={styles.cameraContainer}>
+          {cameraPermission?.granted ? (
+            <>
+              <CameraView
+                ref={cameraRef}
+                style={styles.cameraView}
+                mode="video"
+                videoStabilizationMode="standard"
+              />
+              <View style={styles.cameraControls}>
+                <TouchableOpacity
+                  style={styles.cameraCloseButton}
+                  onPress={() => {
+                    if (!isRecordingVideo) {
+                      setShowCamera(false);
+                    } else {
+                      Alert.alert(
+                        'Recording in Progress',
+                        'Please stop recording before closing.',
+                        [{ text: 'OK' }]
+                      );
+                    }
+                  }}
+                >
+                  <MaterialIcons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+                
+                <View style={styles.cameraRecordControls}>
+                  {!isRecordingVideo ? (
+                    <TouchableOpacity
+                      style={styles.recordButton}
+                      onPress={startVideoRecording}
+                    >
+                      <View style={styles.recordButtonInner} />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.stopButton}
+                      onPress={stopVideoRecording}
+                    >
+                      <View style={styles.stopButtonInner} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                
+                {isRecordingVideo && (
+                  <View style={styles.recordingIndicator}>
+                    <View style={styles.recordingDot} />
+                    <Text style={styles.recordingText}>Recording...</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          ) : (
+            <View style={styles.cameraPermissionContainer}>
+              <MaterialIcons name="videocam-off" size={64} color="#666" />
+              <Text style={styles.cameraPermissionText}>
+                Camera permission is required to record videos.
+              </Text>
+              <TouchableOpacity
+                style={styles.cameraPermissionButton}
+                onPress={requestCameraPermission}
+              >
+                <Text style={styles.cameraPermissionButtonText}>Grant Permission</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </Modal>
     </ScrollView>
@@ -1139,5 +1428,144 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 12,
     padding: 4,
+  },
+  videoActionButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  videoActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: 12,
+    borderRadius: radius.md,
+    gap: 8,
+  },
+  videoActionButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+  },
+  existingVideosSection: {
+    paddingTop: 10,
+  },
+  existingVideosTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 10,
+    paddingHorizontal: 15,
+    fontFamily: 'Inter-SemiBold',
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  cameraView: {
+    flex: 1,
+  },
+  cameraControls: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+  },
+  cameraCloseButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 10,
+    zIndex: 1,
+  },
+  cameraRecordControls: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  recordButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 4,
+    borderColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recordButtonInner: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ff4757',
+  },
+  stopButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    backgroundColor: '#ff4757',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stopButtonInner: {
+    width: 30,
+    height: 30,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+  },
+  recordingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 15,
+  },
+  recordingDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#ff4757',
+    marginRight: 8,
+  },
+  recordingText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+  },
+  cameraPermissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  cameraPermissionText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 30,
+    fontFamily: 'Inter-Regular',
+  },
+  cameraPermissionButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: radius.lg,
+  },
+  cameraPermissionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
 });
