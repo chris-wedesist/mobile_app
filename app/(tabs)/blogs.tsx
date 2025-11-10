@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Linking, Image } from 'react-native';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
 import { getNews, NewsItem } from '@/lib/news';
@@ -98,6 +98,7 @@ export default function BlogsScreen() {
             onPress={() => handleNewsPress(item.url)}
           >
             <View style={styles.newsContent}>
+              {item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.newsItemImage} />}
               <Text style={styles.newsItemTitle}>{item.title}</Text>
               <Text 
                 style={[
@@ -209,6 +210,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontFamily: 'Inter-Regular',
     lineHeight: 20,
+  },
+  newsItemImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 12,
   },
   newsItemDescriptionBox: {
     fontSize: 12,

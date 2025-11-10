@@ -52,6 +52,7 @@ export default function StealthCalculatorScreen() {
   const [smsCode, setSmsCode] = useState<string>('');
   const [smsPhone, setSmsPhone] = useState<string>('');
   const [emergencyMessage, setEmergencyMessage] = useState<string>('');
+  const [incidentReportCode, setIncidentReportCode] = useState<string>('999');
   const [lastPowerPress, setLastPowerPress] = useState<number>(0);
   const powerPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -73,7 +74,7 @@ export default function StealthCalculatorScreen() {
 
       const { data, error } = await supabase
         .from('users')
-        .select('emergency_call_code, emergency_contact_phone, emergency_message')
+        .select('emergency_call_code, emergency_contact_phone, emergency_message, incident_report_code')
         .eq('id', user.id)
         .single();
 
@@ -86,6 +87,7 @@ export default function StealthCalculatorScreen() {
         if (data.emergency_call_code) setSmsCode(data.emergency_call_code);
         if (data.emergency_contact_phone) setSmsPhone(data.emergency_contact_phone);
         if (data.emergency_message) setEmergencyMessage(data.emergency_message);
+        if (data.incident_report_code) setIncidentReportCode(data.incident_report_code);
       }
     } catch (error) {
       console.error('Error loading emergency settings:', error);
@@ -104,10 +106,11 @@ export default function StealthCalculatorScreen() {
     return false;
   };
 
-  // Check for incident report code: exactly 999 to open quick incident report
+  // Check for incident report code: uses custom code from settings (default: 999)
   const checkIncidentReportCode = async (newDisplay: string) => {
     const currentNum = newDisplay.replace(/,/g, '').replace(/\./g, '');
-    if (currentNum === '999') {
+    const code = incidentReportCode || '999';
+    if (currentNum === code) {
       setTimeout(() => {
         router.push('/report-incident' as any);
         // Clear the display after navigating

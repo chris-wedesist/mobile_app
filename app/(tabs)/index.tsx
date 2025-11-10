@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Linking, Image } from 'react-native';
 import NoHandsIcon from '../../components/NoHandsIcon';
 import { colors } from '@/constants/theme';
 import { useEffect, useState } from 'react';
@@ -78,6 +78,7 @@ export default function HomeScreen() {
               onPress={() => handleNewsPress(item.url)}
             >
               <View style={styles.newsContent}>
+                {item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.newsItemImage} />}
                 <Text style={styles.newsItemTitle}>{item.title}</Text>
                 <Text style={styles.newsItemDescription} numberOfLines={2}>
                   {item.description}
@@ -194,6 +195,12 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginBottom: 12,
     fontFamily: 'Inter-Regular',
+  },
+  newsItemImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 12,
   },
   newsMeta: {
     flexDirection: 'row',

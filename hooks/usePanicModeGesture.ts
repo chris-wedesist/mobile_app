@@ -8,9 +8,9 @@ import { supabase } from '@/lib/supabase';
 /**
  * Hook to detect panic mode gestures
  * Supports: 
- * - Triple back button press (Android)
+ * - 5 back button presses (Android)
  * - Shake device (iOS/Android)
- * Note: Triple tap on screen is handled by PanicModeTripleTap component for iOS
+ * Note: 5 taps on screen is handled by PanicModeTripleTap component for iOS
  */
 export function usePanicModeGesture() {
   const { user, signOut } = useAuth();
@@ -18,7 +18,7 @@ export function usePanicModeGesture() {
   const powerPressCount = useRef(0);
   const lastPowerPressTime = useRef(0);
   const POWER_PRESS_INTERVAL = 2000; // 2 seconds window
-  const REQUIRED_PRESSES = 3; // Triple press
+  const REQUIRED_PRESSES = 5; // 5 clicks
   
   // Shake detection
   const shakeThreshold = useRef(0);

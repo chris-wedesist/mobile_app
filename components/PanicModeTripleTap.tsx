@@ -7,14 +7,14 @@ import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 
 /**
- * Component to detect triple tap gesture for iOS panic mode
+ * Component to detect 5-tap gesture for iOS panic mode
  */
 export function PanicModeTripleTap({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
   const tapCount = useRef(0);
   const lastTapTime = useRef(0);
-  const TAP_INTERVAL = 500; // 500ms window for triple tap
-  const REQUIRED_TAPS = 3;
+  const TAP_INTERVAL = 1000; // 1 second window for 5 taps
+  const REQUIRED_TAPS = 5;
   const panicModeEnabledRef = useRef(false);
   const isTriggeringRef = useRef(false);
 
@@ -77,7 +77,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     
     try {
       isTriggeringRef.current = true;
-      console.log('🚨 Panic Mode triggered by triple tap');
+      console.log('🚨 Panic Mode triggered by 5 taps');
       
       // Step 1: Sign out user completely
       console.log('Panic Mode: Step 1 - Signing out user...');
@@ -122,7 +122,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
   }
 
-  const tripleTapGesture = Gesture.Tap()
+  const fiveTapGesture = Gesture.Tap()
     .numberOfTaps(REQUIRED_TAPS)
     .maxDuration(TAP_INTERVAL * REQUIRED_TAPS)
     .onStart(() => {
@@ -130,7 +130,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     });
 
   return (
-    <GestureDetector gesture={tripleTapGesture}>
+    <GestureDetector gesture={fiveTapGesture}>
       <View style={{ flex: 1 }}>
         {children}
       </View>

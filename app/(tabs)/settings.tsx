@@ -44,6 +44,8 @@ export default function SettingsScreen() {
   const [panicModeEnabled, setPanicModeEnabled] = useState(false);
   const [panicGestureType, setPanicGestureType] = useState<'triple_power' | 'shake' | 'long_press'>('triple_power');
   const [isTogglingPanicMode, setIsTogglingPanicMode] = useState(false);
+  const [incidentReportCode, setIncidentReportCode] = useState<string>('999');
+  const [isEditingIncidentCode, setIsEditingIncidentCode] = useState(false);
 
   const handleStealthToggle = async (value: boolean) => {
     if (isTogglingStealth) return;
@@ -116,6 +118,7 @@ export default function SettingsScreen() {
         await checkBiometricAvailability();
         await loadBiometricLoginSetting();
         await loadPanicModeSetting();
+        await loadIncidentReportCode();
         // Fetch user profile if user exists but profile is not loaded
         if (user && !userProfile) {
           console.log('Settings: Fetching user profile for user:', user.id);
@@ -258,6 +261,67 @@ export default function SettingsScreen() {
       }
     } catch (error) {
       console.error('Error loading panic mode setting:', error);
+    }
+  };
+
+  const loadIncidentReportCode = async () => {
+    try {
+      if (!user?.id) {
+        setIncidentReportCode('999');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('incident_report_code')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading incident report code:', error);
+        setIncidentReportCode('999');
+        return;
+      }
+
+      setIncidentReportCode(data?.incident_report_code || '999');
+    } catch (error) {
+      console.error('Error loading incident report code:', error);
+      setIncidentReportCode('999');
+    }
+  };
+
+  const saveIncidentReportCode = async () => {
+    if (!user?.id) {
+      Alert.alert('Error', 'You must be logged in to save settings');
+      return;
+    }
+
+    // Validate code: must be numeric and 3-6 digits
+    if (!incidentReportCode || !/^\d{3,6}$/.test(incidentReportCode)) {
+      Alert.alert('Invalid Code', 'Incident report code must be 3-6 digits');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          incident_report_code: incidentReportCode,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving incident report code:', error);
+        Alert.alert('Error', 'Failed to save incident report code');
+        return;
+      }
+
+      setIsEditingIncidentCode(false);
+      Alert.alert('Success', 'Incident report code saved successfully');
+    } catch (error) {
+      console.error('Error saving incident report code:', error);
+      Alert.alert('Error', 'Failed to save incident report code');
     }
   };
 
@@ -452,8 +516,8 @@ export default function SettingsScreen() {
                     <Text style={styles.settingText}>Panic Mode</Text>
                     <Text style={styles.settingSubtext}>
                       {Platform.OS === 'ios' 
-                        ? 'Triple tap screen or shake device to sign out instantly'
-                        : 'Triple press back button or shake device to sign out instantly'}
+                        ? '5 taps on screen or shake device to sign out instantly'
+                        : '5 presses on back button or shake device to sign out instantly'}
                     </Text>
                   </View>
                 </View>
@@ -467,6 +531,57 @@ export default function SettingsScreen() {
               </View>
             </View>
           {/* </BlurView> */}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Stealth Mode Codes</Text>
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <MaterialIcons name="report-problem" size={24} color={colors.accent} />
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingText}>Incident Report Code</Text>
+                <Text style={styles.settingSubtext}>
+                  Code to type in calculator to open incident report (default: 999)
+                </Text>
+              </View>
+            </View>
+            {isEditingIncidentCode ? (
+              <View style={styles.codeEditContainer}>
+                <TextInput
+                  style={styles.codeInput}
+                  value={incidentReportCode}
+                  onChangeText={setIncidentReportCode}
+                  keyboardType="numeric"
+                  maxLength={6}
+                  placeholder="999"
+                  placeholderTextColor={colors.text.muted}
+                />
+                <TouchableOpacity
+                  style={styles.codeSaveButton}
+                  onPress={saveIncidentReportCode}
+                >
+                  <MaterialIcons name="check" size={20} color={colors.text.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.codeCancelButton}
+                  onPress={() => {
+                    setIsEditingIncidentCode(false);
+                    loadIncidentReportCode();
+                  }}
+                >
+                  <MaterialIcons name="close" size={20} color={colors.text.primary} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.codeDisplayButton}
+                onPress={() => setIsEditingIncidentCode(true)}
+              >
+                <Text style={styles.codeDisplayText}>{incidentReportCode}</Text>
+                <MaterialIcons name="edit" size={16} color={colors.accent} />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
         
         <View style={styles.section}>
@@ -1054,5 +1169,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
+  },
+  codeEditContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  codeInput: {
+    backgroundColor: colors.secondary,
+    borderRadius: radius.md,
+    padding: 8,
+    paddingHorizontal: 12,
+    color: colors.text.primary,
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    minWidth: 80,
+    textAlign: 'center',
+  },
+  codeSaveButton: {
+    backgroundColor: colors.status.success,
+    borderRadius: radius.md,
+    padding: 8,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  codeCancelButton: {
+    backgroundColor: colors.text.muted,
+    borderRadius: radius.md,
+    padding: 8,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  codeDisplayButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.secondary,
+    borderRadius: radius.md,
+    padding: 8,
+    paddingHorizontal: 12,
+    gap: 6,
+  },
+  codeDisplayText: {
+    color: colors.text.primary,
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    minWidth: 50,
+    textAlign: 'center',
   },
 });
