@@ -323,6 +323,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       await AsyncStorage.setItem('user_id', data.user.id);
+      // Set flag to indicate this is a fresh login (not an app restart)
+      await AsyncStorage.setItem('fresh_login', 'true');
       await fetchUserProfile(data.user.id);
 
       // Initialize push notifications for the user
@@ -376,6 +378,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'user_id',
         'stealth_mode_active',
         'stealth_mode_screen',
+        'fresh_login',
+        'last_biometric_unlock',
       ];
       
       for (const key of keysToRemove) {

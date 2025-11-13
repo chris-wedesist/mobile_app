@@ -9,6 +9,7 @@ import { Video as ExpoVideo, ResizeMode } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRecording } from '@/contexts/RecordingContext';
 import { checkIncidentRestrictions, getUserCurrentLocation, isUserVerified } from '@/utils/incident-restrictions';
 import { sendIncidentNotificationToNearbyUsers } from '@/utils/push-notifications';
 import * as ImagePicker from 'expo-image-picker';
@@ -81,6 +82,7 @@ type FormField = {
 
 export default function ReportIncidentScreen() {
   const { user, userProfile } = useAuth();
+  const { setIsRecording: setGlobalRecording } = useRecording();
   const [selectedType, setSelectedType] = useState('');
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -495,6 +497,7 @@ export default function ReportIncidentScreen() {
       }
 
       setIsRecordingVideo(true);
+      setGlobalRecording(true);
       recordingPromiseRef.current = cameraRef.current.recordAsync({
         maxDuration: 300, // 5 minutes
       });
@@ -502,6 +505,7 @@ export default function ReportIncidentScreen() {
       console.error('Error starting recording:', error);
       Alert.alert('Error', 'Failed to start recording. Please try again.');
       setIsRecordingVideo(false);
+      setGlobalRecording(false);
     }
   };
 
@@ -510,6 +514,7 @@ export default function ReportIncidentScreen() {
 
     try {
       setIsRecordingVideo(false);
+      setGlobalRecording(false);
       await cameraRef.current.stopRecording();
       
       if (recordingPromiseRef.current) {
@@ -518,6 +523,7 @@ export default function ReportIncidentScreen() {
         if (video?.uri) {
           await uploadVideoToCloudinary(video.uri);
           setShowCamera(false);
+          setGlobalRecording(false);
         } else {
           throw new Error('No video URI returned');
         }
@@ -526,6 +532,7 @@ export default function ReportIncidentScreen() {
       console.error('Error stopping recording:', error);
       Alert.alert('Error', 'Failed to save recording. Please try again.');
       setIsRecordingVideo(false);
+      setGlobalRecording(false);
     }
   };
 
@@ -1001,6 +1008,7 @@ export default function ReportIncidentScreen() {
                   onPress={() => {
                     if (!isRecordingVideo) {
                       setShowCamera(false);
+                      setGlobalRecording(false);
                     } else {
                       Alert.alert(
                         'Recording in Progress',

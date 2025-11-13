@@ -14,6 +14,7 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { StealthModeProvider, useStealthMode } from '@/components/StealthModeManager';
 import { BiometricLoginProvider, useBiometricLogin } from '@/components/BiometricLoginProvider';
+import { RecordingProvider } from '@/contexts/RecordingContext';
 import { usePanicModeGesture } from '@/hooks/usePanicModeGesture';
 import { PanicModeTripleTap } from '@/components/PanicModeTripleTap';
 
@@ -192,11 +193,13 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <BiometricLoginProvider>
-        <StealthModeProvider>
-          <AppContent />
-        </StealthModeProvider>
-      </BiometricLoginProvider>
+      <RecordingProvider>
+        <BiometricLoginProvider>
+          <StealthModeProvider>
+            <AppContent />
+          </StealthModeProvider>
+        </BiometricLoginProvider>
+      </RecordingProvider>
     </AuthProvider>
   );
 }

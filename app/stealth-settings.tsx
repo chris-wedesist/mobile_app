@@ -58,25 +58,6 @@ export default function StealthSettingsScreen() {
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Emergency</Text>
-          
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => router.push('/emergency-setup')}>
-            <View style={styles.settingInfo}>
-              <MaterialIcons name="phone" size={24} color={colors.accent} />
-              <View>
-                <Text style={styles.settingTitle}>Emergency Contact</Text>
-                <Text style={styles.settingDescription}>
-                  Configure emergency contact and SMS settings
-                </Text>
-              </View>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color={colors.text.muted} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Exit Options</Text>
           
           <Text style={styles.infoText}>
@@ -98,7 +79,7 @@ export default function StealthSettingsScreen() {
           style={styles.exitButton}
           onPress={() => handleLogoutAndExitApp()}>
           <MaterialIcons name="exit-to-app" size={24} color={colors.text.primary} />
-          <Text style={styles.exitButtonText}>Clear Data & Close App</Text>
+          <Text style={styles.exitButtonText}>Clear App Cache</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

@@ -7,12 +7,14 @@ import { supabase } from '@/lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRecording } from '@/contexts/RecordingContext';
 
 // Cloudinary configuration
 const CLOUDINARY_CLOUD_NAME = 'do0qfrr5y';
 const CLOUDINARY_UPLOAD_PRESET = 'desist';
 
 export default function RecordScreen() {
+  const { setIsRecording: setGlobalRecording } = useRecording();
   const [permission, requestPermission] = useCameraPermissions();
   const [isRecording, setIsRecording] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -59,6 +61,8 @@ export default function RecordScreen() {
       if (isRecording) {
         stopRecording();
       }
+      // Ensure global recording state is reset on unmount
+      setGlobalRecording(false);
     };
   }, []);
 
@@ -269,6 +273,7 @@ export default function RecordScreen() {
       if (!prepared) return;
 
       setIsRecording(true);
+      setGlobalRecording(true);
       recordingStartTime.current = Date.now();
       
       console.log('Starting camera recording...');
@@ -337,6 +342,7 @@ export default function RecordScreen() {
     } finally {
       // Reset states and timers
       setIsRecording(false);
+      setGlobalRecording(false);
       setIsProcessing(false);
       recordingPromise.current = null;
       recordingStartTime.current = null;
@@ -449,6 +455,7 @@ export default function RecordScreen() {
     } finally {
       // Reset states
       setIsRecording(false);
+      setGlobalRecording(false);
       setIsProcessing(false);
       setIsSaving(false);
       recordingPromise.current = null;

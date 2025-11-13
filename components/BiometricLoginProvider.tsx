@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRecording } from '@/contexts/RecordingContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Platform } from 'react-native';
@@ -29,6 +30,7 @@ const BiometricLoginContext = createContext<BiometricLoginContextType>({
 
 export function BiometricLoginProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const { isRecording } = useRecording();
   const [isLocked, setIsLocked] = useState(true); // Start locked by default to prevent flash
   const [biometricLoginEnabled, setBiometricLoginEnabled] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -39,42 +41,72 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
   const previousUserIdRef = useRef<string | null>(null);
   const hasInitializedRef = useRef(false);
 
-  // Initialize previousUserIdRef on mount if user already exists (session persistence)
-  useEffect(() => {
-    if (!hasInitializedRef.current && user?.id) {
-      previousUserIdRef.current = user.id;
-      hasInitializedRef.current = true;
-    } else if (!user?.id) {
-      hasInitializedRef.current = false;
-    }
-  }, []);
+  // Track if this is a fresh login (user just signed in) vs app restart (user loaded from storage)
+  const isFreshLoginRef = useRef(false);
+  const hasCheckedInitialUserRef = useRef(false);
 
+  // Check if this is a fresh login by looking for a flag set during sign-in
   useEffect(() => {
-    // Check if user just logged in (user changed from null to a user ID)
-    const isFreshLogin = previousUserIdRef.current === null && user?.id !== null;
+    const checkFreshLogin = async () => {
+      if (!hasCheckedInitialUserRef.current && user?.id) {
+        hasCheckedInitialUserRef.current = true;
+        
+        // Check if there's a "fresh_login" flag in AsyncStorage
+        // This flag is set during sign-in and cleared after first unlock
+        const freshLoginFlag = await AsyncStorage.getItem('fresh_login');
+        isFreshLoginRef.current = freshLoginFlag === 'true';
+        
+        if (isFreshLoginRef.current) {
+          console.log('Fresh login detected, unlocking automatically');
+          // On fresh login, unlock automatically and set unlock timestamp
+          setIsLocked(false);
+          await AsyncStorage.setItem('last_biometric_unlock', Date.now().toString());
+          await AsyncStorage.removeItem('fresh_login'); // Clear the flag
+          lastUnlockTimeRef.current = Date.now();
+          previousUserIdRef.current = user.id;
+          hasInitializedRef.current = true;
+          return;
+        } else {
+          // App restart with existing session - should check if we need to lock
+          previousUserIdRef.current = user.id;
+          hasInitializedRef.current = true;
+        }
+      }
+    };
     
-    if (isFreshLogin) {
-      console.log('Fresh login detected, unlocking automatically');
-      // On fresh login, unlock automatically and set unlock timestamp
-      setIsLocked(false);
-      AsyncStorage.setItem('last_biometric_unlock', Date.now().toString());
-      lastUnlockTimeRef.current = Date.now();
-      previousUserIdRef.current = user?.id || null;
-      hasInitializedRef.current = true;
-      return;
+    checkFreshLogin();
+  }, [user?.id]);
+    
+  useEffect(() => {
+    // Update previous user ID when user changes
+    if (user?.id) {
+      previousUserIdRef.current = user.id;
+    } else {
+      // User logged out - reset state
+      previousUserIdRef.current = null;
+      hasInitializedRef.current = false;
+      hasCheckedInitialUserRef.current = false;
+      isFreshLoginRef.current = false;
     }
     
-    // Update previous user ID
-    previousUserIdRef.current = user?.id || null;
-    
-    if (user?.id && biometricLoginEnabled && biometricAvailable) {
+    // Only check biometric lock if:
+    // 1. User is authenticated
+    // 2. Biometric login is enabled
+    // 3. Biometric is available
+    // 4. This is NOT a fresh login (already handled above)
+    if (user?.id && biometricLoginEnabled && biometricAvailable && !isFreshLoginRef.current) {
       // Check if app should be locked (only for returning users, not fresh login)
-      checkBiometricLogin();
+      // But skip if recording is active
+      if (!isRecording) {
+        checkBiometricLogin();
+      } else {
+        setIsLocked(false);
+      }
     } else if (!biometricLoginEnabled || !biometricAvailable) {
       // Unlock if biometric login is disabled or not available
       setIsLocked(false);
     }
-  }, [user?.id, biometricLoginEnabled, biometricAvailable]);
+  }, [user?.id, biometricLoginEnabled, biometricAvailable, isRecording]);
 
   useEffect(() => {
     // Check biometric login when app comes to foreground
@@ -129,28 +161,27 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
       const enabled = data?.biometric_login_enabled || false;
       setBiometricLoginEnabled(enabled);
 
+      // Check if this is a fresh login (user just signed in, not app restart)
+      const freshLoginFlag = await AsyncStorage.getItem('fresh_login');
+      const isFreshLogin = freshLoginFlag === 'true';
+
       // If enabled and user is authenticated, check if we should lock
-      // On app start with existing session, unlock automatically
-      // Only lock on app foreground (handled by handleAppStateChange)
       if (enabled && user?.id && biometricAvailable) {
-        // Check if this is app initialization with existing session
-        // If previousUserIdRef is already set, this is app start with session, not fresh login
-        const isAppStart = previousUserIdRef.current === user.id && !hasInitializedRef.current;
-        const isFreshLogin = previousUserIdRef.current === null;
-        
-        if (isFreshLogin || isAppStart) {
-          // Fresh login or app start with existing session - unlock automatically
+        // Don't lock on fresh login - it will be handled by the fresh login check
+        if (isFreshLogin) {
+          console.log('Fresh login detected in loadBiometricLoginSetting, skipping lock');
           setIsLocked(false);
-          await AsyncStorage.setItem('last_biometric_unlock', Date.now().toString());
-          lastUnlockTimeRef.current = Date.now();
-          if (!hasInitializedRef.current) {
-            previousUserIdRef.current = user.id;
-            hasInitializedRef.current = true;
-          }
         } else {
-          // Returning user - check if should lock
+          // App restart with existing session - check if we should lock
+          // Only unlock if unlock was very recent (within 30 seconds)
           const shouldLock = await shouldLockApp();
           setIsLocked(shouldLock);
+        }
+        
+        // Mark that we've initialized for this user
+        if (!hasInitializedRef.current) {
+          previousUserIdRef.current = user.id;
+          hasInitializedRef.current = true;
         }
       } else {
         setIsLocked(false);
@@ -178,6 +209,8 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
       setIsInitializing(false); // Mark as initialized when no user
       previousUserIdRef.current = null; // Reset when user logs out
       hasInitializedRef.current = false;
+      isFreshLoginRef.current = false; // Reset for next login
+      hasCheckedInitialUserRef.current = false; // Reset for next app start
     }
   }, [user?.id, biometricAvailable]);
 
@@ -204,6 +237,11 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
       biometricLoginEnabled &&
       biometricAvailable
     ) {
+      // Don't lock if recording is active (camera conflicts with biometric auth)
+      if (isRecording) {
+        console.log('Recording is active, skipping biometric lock');
+        return;
+      }
       // App came to foreground, lock the app
       setIsLocked(true);
     }
@@ -214,6 +252,13 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
     if (isCheckingRef.current) return;
     
     if (!user?.id || !biometricLoginEnabled || !biometricAvailable) {
+      setIsLocked(false);
+      return;
+    }
+
+    // Don't lock if recording is active (camera conflicts with biometric auth)
+    if (isRecording) {
+      console.log('Recording is active, skipping biometric lock check');
       setIsLocked(false);
       return;
     }
