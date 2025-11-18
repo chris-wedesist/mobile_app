@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useStealthMode } from '@/components/StealthModeManager';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useBiometricLogin } from '@/components/BiometricLoginProvider';
+import { biometricVerify } from '@/components/BiometricAuth';
 
 
 interface Incident {
@@ -188,6 +189,23 @@ export default function SettingsScreen() {
         return;
       }
 
+      // Require biometric authentication before allowing the toggle
+      const authResult = await biometricVerify(
+        value 
+          ? 'Authenticate to enable biometric login' 
+          : 'Authenticate to disable biometric login'
+      );
+
+      if (!authResult.success) {
+        // User cancelled or authentication failed
+        if (authResult.error && !authResult.error.includes('cancelled')) {
+          Alert.alert('Authentication Failed', 'Biometric authentication failed. Please try again.');
+        }
+        setIsTogglingBiometricLogin(false);
+        return;
+      }
+
+      // Authentication successful, proceed with the update
       const { error } = await supabase
         .from('users')
         .update({
@@ -204,6 +222,15 @@ export default function SettingsScreen() {
       }
 
       setBiometricLoginEnabled(value);
+      
+      // Show success message
+      Alert.alert(
+        'Success',
+        value 
+          ? 'Biometric login has been enabled. You will be required to authenticate on app launch.'
+          : 'Biometric login has been disabled.',
+        [{ text: 'OK' }]
+      );
     } catch (error) {
       console.error('Error toggling biometric login:', error);
       Alert.alert('Error', 'Failed to update biometric login setting');
