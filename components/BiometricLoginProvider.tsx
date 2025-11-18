@@ -67,9 +67,9 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
           hasInitializedRef.current = true;
           return;
         } else {
-          // App restart with existing session - should check if we need to lock
+          // App restart with existing session - DON'T set hasInitializedRef here
+          // Let loadBiometricLoginSetting handle initialization after it loads the setting
           previousUserIdRef.current = user.id;
-          hasInitializedRef.current = true;
         }
       }
     };
@@ -94,9 +94,12 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
     // 2. Biometric login is enabled
     // 3. Biometric is available
     // 4. This is NOT a fresh login (already handled above)
-    if (user?.id && biometricLoginEnabled && biometricAvailable && !isFreshLoginRef.current) {
+    // 5. We've already initialized (loadBiometricLoginSetting has run)
+    //    This prevents overriding the lock state on initial app restart
+    if (user?.id && biometricLoginEnabled && biometricAvailable && !isFreshLoginRef.current && hasInitializedRef.current) {
       // Check if app should be locked (only for returning users, not fresh login)
       // But skip if recording is active
+      // This effect is for subsequent changes (like toggling settings), not initial load
       if (!isRecording) {
         checkBiometricLogin();
       } else {
@@ -166,25 +169,32 @@ export function BiometricLoginProvider({ children }: { children: React.ReactNode
       const isFreshLogin = freshLoginFlag === 'true';
 
       // If enabled and user is authenticated, check if we should lock
-      if (enabled && user?.id && biometricAvailable) {
-        // Don't lock on fresh login - it will be handled by the fresh login check
-        if (isFreshLogin) {
+      if (enabled && user?.id) {
+        // If biometric is not available yet, keep locked until it becomes available
+        // This prevents navigation before we can show the biometric modal
+        if (!biometricAvailable) {
+          console.log('Biometric enabled but not available yet, keeping app locked');
+          setIsLocked(true);
+        } else if (isFreshLogin) {
+          // Don't lock on fresh login - it will be handled by the fresh login check
           console.log('Fresh login detected in loadBiometricLoginSetting, skipping lock');
           setIsLocked(false);
         } else {
-          // App restart with existing session - check if we should lock
-          // Only unlock if unlock was very recent (within 30 seconds)
-          const shouldLock = await shouldLockApp();
-          setIsLocked(shouldLock);
-        }
-        
-        // Mark that we've initialized for this user
-        if (!hasInitializedRef.current) {
-          previousUserIdRef.current = user.id;
-          hasInitializedRef.current = true;
+          // App restart with existing session - ALWAYS lock if biometric is enabled
+          // The grace period only applies to foreground/background transitions, not app restarts
+          console.log('App restart detected, locking app (biometric enabled)');
+          setIsLocked(true);
         }
       } else {
+        // Biometric disabled or no user - unlock
         setIsLocked(false);
+      }
+      
+      // Mark that we've initialized for this user (after setting lock state)
+      // This ensures subsequent effects know initialization is complete
+      if (!hasInitializedRef.current && user?.id) {
+        previousUserIdRef.current = user.id;
+        hasInitializedRef.current = true;
       }
       
       setIsInitializing(false);

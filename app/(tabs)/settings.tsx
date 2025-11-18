@@ -168,6 +168,7 @@ export default function SettingsScreen() {
   };
 
   const handleBiometricLoginToggle = async (value: boolean) => {
+    console.log('handleBiometricLoginToggle', value, biometricAvailable);
     if (isTogglingBiometricLogin) return;
     
     if (!biometricAvailable) {

@@ -127,24 +127,68 @@ function AppContent() {
   };
 
   useEffect(() => {
+    // Only navigate when:
+    // 1. Route is determined
+    // 2. App is ready
+    // 3. Biometric initialization is complete
+    // 4. App is NOT locked (biometric not required or already unlocked)
+    // 5. For authenticated users with biometric enabled, ensure we've checked the setting
     if (isReady && initialRoute && !isLocked && !isInitializing) {
-      console.log('App is ready, navigating to:', initialRoute);
-      // Use a small delay to ensure navigation happens smoothly
-      const timer = setTimeout(() => {
-        router.replace(initialRoute as any);
-        // Hide the native splash screen once navigation is complete
-        SplashScreen.hideAsync().catch(() => {
-          // Ignore errors - this happens on web
-        });
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isReady, initialRoute, isLocked, isInitializing]);
+      // Additional check: if user is authenticated and biometric might be enabled,
+      // wait a bit to ensure lock state is properly set
+      const shouldNavigate = () => {
+        // If user is authenticated, make sure biometric check has completed
+        if (user?.id && biometricLoginEnabled !== undefined) {
+          console.log('App is ready, navigating to:', initialRoute, 'isLocked:', isLocked);
+          return true;
+        }
+        // If no user, proceed immediately
+        if (!user?.id) {
+          console.log('App is ready, navigating to:', initialRoute);
+          return true;
+        }
+        return false;
+      };
 
-  if (!isReady || !initialRoute || authLoading || isInitializing) {
-    console.log('Showing splash screen - isReady:', isReady, 'initialRoute:', initialRoute, 'authLoading:', authLoading, 'isInitializing:', isInitializing);
-    return <CustomSplashScreen />;
+      if (shouldNavigate()) {
+        // Use a small delay to ensure navigation happens smoothly
+        const timer = setTimeout(() => {
+          router.replace(initialRoute as any);
+          // Hide the native splash screen once navigation is complete
+          SplashScreen.hideAsync().catch(() => {
+            // Ignore errors - this happens on web
+          });
+        }, 100);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isReady, initialRoute, isLocked, isInitializing, user?.id, biometricLoginEnabled]);
+
+  // Show splash screen if:
+  // - Not ready or no route
+  // - Auth is loading
+  // - Biometric is initializing
+  // - App is locked (biometric required) - prevents any content from showing
+  const shouldShowSplash = !isReady || !initialRoute || authLoading || isInitializing || (isLocked && user && biometricLoginEnabled);
+  
+  if (shouldShowSplash) {
+    console.log('Showing splash screen - isReady:', isReady, 'initialRoute:', initialRoute, 'authLoading:', authLoading, 'isInitializing:', isInitializing, 'isLocked:', isLocked);
+    return (
+      <>
+        <CustomSplashScreen />
+        {/* Render biometric modal even when showing splash screen */}
+        {user && biometricLoginEnabled && isLocked && (
+          <BiometricLogin
+            visible={isLocked}
+            onSuccess={unlock}
+            onFail={() => {
+              // Stay locked if authentication fails
+            }}
+          />
+        )}
+      </>
+    );
   }
 
   console.log('Rendering main layout');
@@ -184,6 +228,19 @@ function AppContent() {
               // Stay locked if authentication fails
             }}
           />
+        )}
+        
+        {/* Overlay to prevent home page from showing when locked */}
+        {isLocked && user && biometricLoginEnabled && (
+          <View style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            backgroundColor: colors.primary,
+            zIndex: 9998 
+          }} />
         )}
       </PanicModeTripleTap>
     </GestureHandlerRootView>
