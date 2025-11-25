@@ -354,36 +354,68 @@ export default function SettingsScreen() {
   };
 
   const handlePanicModeToggle = async (value: boolean) => {
-    if (isTogglingPanicMode) return;
+    if (isTogglingPanicMode) {
+      console.log('⏸️ Panic mode toggle already in progress, skipping...');
+      return;
+    }
 
     if (!user?.id) {
+      console.error('❌ Cannot save panic mode: No user ID');
       Alert.alert('Error', 'You must be logged in to save settings');
       return;
     }
 
+    console.log('💾 Starting panic mode update:', {
+      userId: user.id,
+      newValue: value,
+      currentValue: panicModeEnabled
+    });
+
     try {
       setIsTogglingPanicMode(true);
 
-      const { error } = await supabase
+      const updateData = {
+        panic_mode_enabled: value,
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log('📤 Sending database update:', {
+        table: 'users',
+        userId: user.id,
+        updateData: updateData
+      });
+
+      const { data, error } = await supabase
         .from('users')
-        .update({
-          panic_mode_enabled: value,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
+        .update(updateData)
+        .eq('id', user.id)
+        .select();
+
+      console.log('📥 Database update response:', {
+        data: data,
+        error: error,
+        hasError: !!error
+      });
 
       if (error) {
-        console.error('Error saving panic mode setting:', error);
+        console.error('❌ Error saving panic mode setting:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         Alert.alert('Error', 'Failed to save panic mode setting');
         return;
       }
 
+      console.log('✅ Panic mode successfully updated in database');
+      console.log('📊 Updated data:', data);
+      
       setPanicModeEnabled(value);
+      console.log('✅ Local state updated to:', value);
     } catch (error) {
-      console.error('Error toggling panic mode:', error);
+      console.error('❌ Exception toggling panic mode:', error);
+      console.error('Exception details:', JSON.stringify(error, null, 2));
       Alert.alert('Error', 'Failed to update panic mode setting');
     } finally {
       setIsTogglingPanicMode(false);
+      console.log('🏁 Panic mode toggle completed');
     }
   };
 
