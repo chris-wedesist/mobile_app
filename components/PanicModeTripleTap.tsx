@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { View, Platform } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
@@ -6,7 +6,6 @@ import { BackHandler } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import { useAuth } from '@/contexts/AuthContext';
-import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 
 // Note: Volume button detection requires native modules
@@ -24,6 +23,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
   const TAP_INTERVAL = 2000; // 2 second window for 5 taps
   const REQUIRED_TAPS = 5;
   const panicModeEnabledRef = useRef(false);
+  const [panicModeEnabled, setPanicModeEnabled] = useState(false);
   const isTriggeringRef = useRef(false);
   const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -72,6 +72,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
         const isEnabled = data?.panic_mode_enabled || false;
         const wasEnabled = panicModeEnabledRef.current;
         panicModeEnabledRef.current = isEnabled;
+        setPanicModeEnabled(isEnabled); // Update state to trigger re-render
         
         console.log('📈 Panic mode state:', {
           previous: wasEnabled,
@@ -155,32 +156,22 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
       // This will also clear local state
       console.log('Panic Mode: Step 3 - Signing out user...');
       try {
-        await signOut();
+      await signOut();
         console.log('Panic Mode: ✅ User signed out');
       } catch (signOutError) {
         console.error('Error signing out:', signOutError);
       }
       
       // Step 4: Wait for all state updates to propagate
-      console.log('Panic Mode: Step 4 - Waiting for state updates...');
+      // Navigation to login will happen automatically via AuthContext state change
+      console.log('Panic Mode: Step 4 - Waiting for state updates and automatic navigation...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Step 5: Navigate to login screen
-      console.log('Panic Mode: Step 5 - Navigating to login...');
-      try {
-        router.replace('/login' as any);
-        // Wait for navigation to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log('Panic Mode: ✅ Navigated to login');
-      } catch (navError) {
-        console.error('Error navigating to login:', navError);
-      }
-      
-      // Step 6: On Android, exit app after ensuring everything is complete
+      // Step 5: On Android, exit app after ensuring everything is complete
       // On iOS, just stay on login screen (can't programmatically close app)
       if (Platform.OS === 'android') {
-        console.log('Panic Mode: Step 6 - Exiting app (Android)...');
-        // Wait a bit more to ensure everything is saved
+        console.log('Panic Mode: Step 5 - Exiting app (Android)...');
+        // Wait a bit more to ensure everything is saved and navigation completed
         await new Promise(resolve => setTimeout(resolve, 500));
         BackHandler.exitApp();
       } else {
@@ -189,12 +180,12 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
       
     } catch (error) {
       console.error('Error triggering panic mode:', error);
-      // Fallback: Try to clear everything and navigate
+      // Fallback: Try to clear everything
+      // Navigation will happen automatically via AuthContext state change
       try {
         await AsyncStorage.clear().catch(() => {});
         await supabase.auth.signOut().catch(() => {});
         await signOut().catch(() => {});
-        router.replace('/login' as any);
       } catch (fallbackError) {
         console.error('Error in panic mode fallback:', fallbackError);
       }
@@ -381,6 +372,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
 
   // Create tap gesture that works on both iOS and Android
   // Use a single tap gesture that counts taps manually
+  // Make it simultaneous with other gestures so it doesn't block interactive elements
   const tapGesture = useMemo(() => {
     try {
       console.log('🎯 Creating tap gesture', {
@@ -388,14 +380,24 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
         userId: user?.id
       });
       
+      // Only create active gesture if panic mode is enabled
+      // Otherwise return a passive gesture that doesn't interfere
+      if (!panicModeEnabledRef.current) {
+        return Gesture.Tap().onEnd(() => {});
+      }
+      
       return Gesture.Tap()
         .numberOfTaps(1)
         .maxDuration(2000)
         .shouldCancelWhenOutside(false)
+        .runOnJS(true)
         .onEnd(() => {
-          console.log('👆 Gesture onEnd triggered - calling handleTap via runOnJS');
-          // Use runOnJS to safely call React functions from gesture handler
-          runOnJS(handleTap)();
+          // Double check panic mode is still enabled before processing
+          if (panicModeEnabledRef.current) {
+            console.log('👆 Gesture onEnd triggered - calling handleTap via runOnJS');
+            // Use runOnJS to safely call React functions from gesture handler
+            runOnJS(handleTap)();
+          }
         });
     } catch (error) {
       console.error('❌ Error creating gesture:', error);
@@ -409,18 +411,24 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
   }
 
+  // Only wrap with gesture detector when panic mode is enabled
+  // This prevents the gesture handler from interfering with interactive elements when disabled
+  if (!panicModeEnabled) {
+    return <>{children}</>;
+  }
+
   try {
-    return (
+  return (
       <GestureDetector gesture={tapGesture}>
-        <View style={{ flex: 1 }} collapsable={false}>
-          {children}
-        </View>
-      </GestureDetector>
-    );
+        <View style={{ flex: 1 }} collapsable={false} pointerEvents="box-none">
+        {children}
+      </View>
+    </GestureDetector>
+  );
   } catch (error) {
     // If gesture detector fails, just return children without gesture handling
     console.error('Gesture detector error, falling back to basic view:', error);
-    return <View style={{ flex: 1 }}>{children}</View>;
+    return <View style={{ flex: 1 }} pointerEvents="box-none">{children}</View>;
   }
 }
 
