@@ -36,6 +36,15 @@ export default ({ config }) => {
         ? 'com.ahmedashraf_dev.calculator'
         : 'com.ahmedashraf_dev.desist'
     },
+    plugins: [
+      [
+        'expo-notifications',
+        {
+          sounds: ['./assets/sounds/police.mp3']
+        }
+      ],
+      ...(config.plugins || [])
+    ],
     extra: {
       eas: { projectId: '03e1ecac-14ec-4ac3-a8cc-b4b8332e901b' }
     }

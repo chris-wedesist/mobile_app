@@ -65,8 +65,18 @@ export default function SettingsScreen() {
   };
 
   useEffect(() => {
-    // Configure notification handler
+    // Configure notification handler and set up panic channel
     const configureNotifications = async () => {
+      // Set up panic notification channel (Android) - ensures custom sound works
+      if (Platform.OS === 'android') {
+        try {
+          const { setupPanicNotificationChannel } = await import('@/utils/push-notifications');
+          await setupPanicNotificationChannel();
+        } catch (error) {
+          console.error('Error setting up panic notification channel:', error);
+        }
+      }
+
       await Notifications.setNotificationHandler({
         handleNotification: async () => ({
           shouldShowAlert: true,

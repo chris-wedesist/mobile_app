@@ -149,6 +149,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
           );
           
           // Create panic event in database
+          // Note: This may fail due to rate limiting, but that's OK - panic mode will still proceed
           try {
             const { error: panicError } = await supabase
               .from('incidents')
@@ -167,12 +168,16 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
               ]);
             
             if (panicError) {
-              console.error('Error creating panic event:', panicError);
+              // Log but don't block - panic mode should proceed even if DB insert fails
+              console.warn('⚠️ Could not create panic event in database (rate limited or other issue):', panicError.message);
+              console.log('ℹ️ Panic mode will continue - notifications sent, user will be signed out');
             } else {
               console.log('✅ Panic event created in database');
             }
           } catch (panicEventError) {
-            console.error('Error creating panic event:', panicEventError);
+            // Log but don't block - panic mode should proceed
+            console.warn('⚠️ Exception creating panic event:', panicEventError);
+            console.log('ℹ️ Panic mode will continue - notifications sent, user will be signed out');
           }
           
           // Show alert to user
@@ -493,26 +498,37 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     try {
       console.log('🎯 Creating tap gesture', {
         panicModeEnabled: panicModeEnabledRef.current,
+        panicModeEnabledState: panicModeEnabled,
         userId: user?.id
       });
       
       // Only create active gesture if panic mode is enabled
       // Otherwise return a passive gesture that doesn't interfere
-      if (!panicModeEnabledRef.current) {
+      if (!panicModeEnabledRef.current || !panicModeEnabled) {
+        console.log('⚠️ Panic mode not enabled - creating passive gesture');
         return Gesture.Tap().onEnd(() => {});
       }
       
+      console.log('✅ Creating active panic mode gesture');
+      // Create a tap gesture that detects taps anywhere on screen
+      // The gesture will work alongside other UI elements due to pointerEvents="box-none"
       return Gesture.Tap()
         .numberOfTaps(1)
         .maxDuration(2000)
         .shouldCancelWhenOutside(false)
         .runOnJS(true)
+        .onStart(() => {
+          // Log when gesture starts (tap begins)
+          console.log('👆 Panic gesture onStart - tap detected');
+        })
         .onEnd(() => {
           // Double check panic mode is still enabled before processing
           if (panicModeEnabledRef.current) {
             console.log('👆 Gesture onEnd triggered - calling handleTap via runOnJS');
             // Use runOnJS to safely call React functions from gesture handler
             runOnJS(handleTap)();
+          } else {
+            console.log('⚠️ Panic mode disabled during tap - ignoring');
           }
         });
     } catch (error) {
@@ -520,7 +536,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
       // If gesture creation fails, return a no-op gesture
       return Gesture.Tap().onEnd(() => {});
     }
-  }, [handleTap, user?.id]);
+  }, [handleTap, user?.id, panicModeEnabled]);
 
   // If no user, don't wrap with gesture detector
   if (!user?.id) {
@@ -530,17 +546,23 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
   // Only wrap with gesture detector when panic mode is enabled
   // This prevents the gesture handler from interfering with interactive elements when disabled
   if (!panicModeEnabled) {
+    console.log('⚠️ Panic mode disabled - not wrapping with gesture detector');
     return <>{children}</>;
   }
 
   try {
-  return (
+    console.log('🎯 Rendering GestureDetector with panic mode enabled', {
+      panicModeEnabled,
+      panicModeEnabledRef: panicModeEnabledRef.current,
+      userId: user?.id
+    });
+    return (
       <GestureDetector gesture={tapGesture}>
         <View style={{ flex: 1 }} collapsable={false} pointerEvents="box-none">
-        {children}
-      </View>
-    </GestureDetector>
-  );
+          {children}
+        </View>
+      </GestureDetector>
+    );
   } catch (error) {
     // If gesture detector fails, just return children without gesture handling
     console.error('Gesture detector error, falling back to basic view:', error);

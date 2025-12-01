@@ -14,16 +14,47 @@ export interface PushTokenData {
 /**
  * Registers the device for push notifications and returns the Expo push token
  */
+/**
+ * Sets up the panic mode notification channel with custom sound (Android)
+ * This must be called before sending panic mode notifications
+ * Works in both development builds and production APK builds
+ * The sound file is bundled via app.config.js expo-notifications plugin
+ */
+export async function setupPanicNotificationChannel(): Promise<void> {
+  if (Platform.OS === 'android') {
+    try {
+      // Create or update the panic-mode notification channel
+      // The sound file 'police.mp3' is bundled via app.config.js plugin configuration
+      await Notifications.setNotificationChannelAsync('panic-mode', {
+        name: 'Panic Mode Alerts',
+        importance: Notifications.AndroidImportance.MAX,
+        sound: 'police.mp3', // Custom sound bundled via expo-notifications plugin
+        vibrationPattern: [0, 500, 200, 500, 200, 500, 200, 500],
+        lightColor: '#FF231F7C',
+        showBadge: true,
+      });
+      console.log('✅ Panic mode notification channel configured with custom sound');
+    } catch (error) {
+      console.error('❌ Error setting up panic notification channel:', error);
+      // Don't throw - allow notifications to continue with default sound
+    }
+  }
+}
+
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   let token: string | null = null;
 
   if (Platform.OS === 'android') {
+    // Set up default notification channel
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
     });
+    
+    // Set up panic mode notification channel with custom sound
+    await setupPanicNotificationChannel();
   }
 
   if (Device.isDevice) {
@@ -208,6 +239,10 @@ export async function sendPanicModeNotification(
   data?: any
 ): Promise<boolean> {
   try {
+    // Ensure panic notification channel is set up (Android)
+    // This is important for both development and production builds
+    await setupPanicNotificationChannel();
+
     // Get user's push token from database
     const { data: user, error: fetchError } = await supabase
       .from('users')
@@ -221,11 +256,15 @@ export async function sendPanicModeNotification(
     }
 
     // Send 4 notifications over 3-4 seconds to make device ring continuously
+    // Using custom panic sound: police.mp3
+    // The sound file is configured in app.config.js expo-notifications plugin
+    // For Android: Uses 'panic-mode' notification channel with custom sound
+    // For iOS: Sound file is automatically bundled and works directly
+    // Works in both development builds and production APK builds
     const notifications = [];
     for (let i = 0; i < 4; i++) {
       const message: any = {
         to: user.push_token,
-        sound: 'default',
         title: i === 0 ? title : '', // Only show title on first notification
         body: i === 0 ? body : '🚨', // Show body on first, emoji on others
         data: {
@@ -234,17 +273,20 @@ export async function sendPanicModeNotification(
           isPanicMode: true,
         },
         priority: 'high',
-        // Android-specific: enhanced vibration pattern and sound
+        // Android-specific: use panic-mode channel with custom sound
+        // The channel is configured with police.mp3 sound in setupPanicNotificationChannel()
         android: {
           priority: 'high',
-          sound: 'default',
+          sound: 'police.mp3', // Custom panic sound (configured in app.config.js and channel)
           vibrate: [0, 500, 200, 500, 200, 500, 200, 500], // Strong vibration pattern (rings for ~3 seconds)
-          channelId: 'default',
+          channelId: 'panic-mode', // Use panic-mode channel with custom sound
           importance: 'max',
         },
-        // iOS-specific: urgent sound
+        // iOS-specific: custom panic sound
+        // Sound file is bundled via app.config.js expo-notifications plugin
         ios: {
-          sound: 'default',
+          sound: 'police.mp3', // Custom panic sound (filename with extension)
+          // Falls back to default if file not found in bundle
           badge: 1,
         },
       };
@@ -393,9 +435,11 @@ export async function sendPanicModeNotificationToNearbyUsers(
     console.log(`🚨 Sending panic mode notifications to users within ${radiusMiles} miles...`);
 
     // Get all users with push tokens
+    // Note: Location-based filtering is not available yet (columns don't exist)
+    // For now, send to all users with push tokens - they can check distance when receiving
     const { data: users, error } = await supabase
       .from('users')
-      .select('id, push_token, last_known_latitude, last_known_longitude')
+      .select('id, push_token')
       .not('push_token', 'is', null)
       .neq('id', userId); // Don't notify the user who triggered panic mode
 
@@ -409,22 +453,10 @@ export async function sendPanicModeNotificationToNearbyUsers(
       return { sent: 0, total: 0 };
     }
 
-    // Filter users by distance if they have location data
-    // If no location data, send to all users (they can check distance on their end)
-    const usersToNotify = users.filter((user) => {
-      if (user.last_known_latitude && user.last_known_longitude) {
-        const distance = calculateDistanceInMiles(
-          panicLat,
-          panicLng,
-          user.last_known_latitude,
-          user.last_known_longitude
-        );
-        return distance <= radiusMiles;
-      }
-      // If user doesn't have location, include them anyway
-      // They can check if they're nearby when they receive the notification
-      return true;
-    });
+    // For now, notify all users with push tokens
+    // TODO: Add location columns (last_known_latitude, last_known_longitude) to users table
+    // to enable distance-based filtering
+    const usersToNotify = users;
 
     console.log(`📊 Found ${usersToNotify.length} users to notify (out of ${users.length} total)`);
 
