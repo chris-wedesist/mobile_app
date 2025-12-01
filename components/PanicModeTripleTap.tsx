@@ -1,12 +1,15 @@
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
-import { View, Platform } from 'react-native';
+import { View, Platform, Alert } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { BackHandler } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
+import * as Location from 'expo-location';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { getUserCurrentLocation } from '@/utils/incident-restrictions';
+import { sendPanicModeNotificationToNearbyUsers, sendPanicModeNotification } from '@/utils/push-notifications';
 
 // Note: Volume button detection requires native modules
 // For Expo managed workflow, volume button detection is not available
@@ -17,7 +20,7 @@ import { supabase } from '@/lib/supabase';
  * Also handles volume button presses when panic mode is enabled
  */
 export function PanicModeTripleTap({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, userProfile } = useAuth();
   const tapCount = useRef(0);
   const lastTapTime = useRef(0);
   const TAP_INTERVAL = 2000; // 2 second window for 5 taps
@@ -92,7 +95,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
         console.error('❌ Exception checking panic mode:', error);
         if (isMounted) {
         panicModeEnabledRef.current = false;
-        }
+      }
       }
     };
 
@@ -103,7 +106,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     interval = setInterval(() => {
       if (isMounted) {
         checkPanicModeEnabled().catch(() => {});
-      }
+    }
     }, 5000);
     
     return () => {
@@ -123,6 +126,119 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
     try {
       isTriggeringRef.current = true;
       console.log('🚨 Panic Mode triggered - Complete data wipe and logout');
+      
+      // Step 0: Get user location and send panic notifications BEFORE clearing data
+      console.log('Panic Mode: Step 0 - Getting location and sending alerts...');
+      let userLocation: Location.LocationObject | null = null;
+      let notificationResult = { sent: 0, total: 0 };
+      
+      try {
+        // Get current location
+        userLocation = await getUserCurrentLocation();
+        
+        if (userLocation) {
+          const userName = userProfile?.full_name || user?.user_metadata?.full_name || user?.email || 'A user';
+          
+          // Send notifications to nearby users (within 15 miles)
+          notificationResult = await sendPanicModeNotificationToNearbyUsers(
+            userLocation.coords.latitude,
+            userLocation.coords.longitude,
+            user?.id || '',
+            userName,
+            15 // 15 miles radius
+          );
+          
+          // Create panic event in database
+          try {
+            const { error: panicError } = await supabase
+              .from('incidents')
+              .insert([
+                {
+                  type: 'panic_mode',
+                  description: `Panic mode activated by ${userName}`,
+                  latitude: userLocation.coords.latitude,
+                  longitude: userLocation.coords.longitude,
+                  status: 'active',
+                  created_at: new Date().toISOString(),
+                  user_id: user?.id,
+                  user_email: user?.email,
+                  user_name: userName,
+                }
+              ]);
+            
+            if (panicError) {
+              console.error('Error creating panic event:', panicError);
+            } else {
+              console.log('✅ Panic event created in database');
+            }
+          } catch (panicEventError) {
+            console.error('Error creating panic event:', panicEventError);
+          }
+          
+          // Show alert to user
+          Alert.alert(
+            '🚨 Panic Mode Activated',
+            `Panic mode has been activated. Notifications sent to ${notificationResult.sent} nearby users within 15 miles.\n\nLocation: ${userLocation.coords.latitude.toFixed(4)}, ${userLocation.coords.longitude.toFixed(4)}\n\nThe app will now sign you out and clear all data.`,
+            [{ text: 'OK' }]
+          );
+        } else {
+          // Location not available - still try to send notifications
+          // We'll send to all users since we can't filter by distance
+          console.log('⚠️ Location not available, sending to all users');
+          const userName = userProfile?.full_name || user?.user_metadata?.full_name || user?.email || 'A user';
+          
+          // Get all users with push tokens and send notifications
+          try {
+            const { data: users, error } = await supabase
+              .from('users')
+              .select('id, push_token')
+              .not('push_token', 'is', null)
+              .neq('id', user?.id || '');
+            
+            if (!error && users && users.length > 0) {
+              const notifications = users.map(async (u) => {
+                try {
+                  await sendPanicModeNotification(
+                    u.id,
+                    '🚨 Panic Mode Alert',
+                    `${userName} activated panic mode. Location unavailable.`,
+                    {
+                      type: 'panic_mode',
+                      userId: user?.id || '',
+                      userName,
+                      timestamp: new Date().toISOString(),
+                    }
+                  );
+                  return true;
+                } catch {
+                  return false;
+                }
+              });
+              
+              const results = await Promise.all(notifications);
+              notificationResult = { sent: results.filter(Boolean).length, total: users.length };
+            }
+          } catch (error) {
+            console.error('Error sending notifications without location:', error);
+          }
+          
+          Alert.alert(
+            '🚨 Panic Mode Activated',
+            `Panic mode has been activated. Notifications sent to ${notificationResult.sent} users.\n\nLocation unavailable.\n\nThe app will now sign you out and clear all data.`,
+            [{ text: 'OK' }]
+          );
+        }
+      } catch (notificationError) {
+        console.error('Error sending panic notifications:', notificationError);
+        Alert.alert(
+          '🚨 Panic Mode Activated',
+          'Panic mode has been activated. The app will now sign you out and clear all data.',
+          [{ text: 'OK' }]
+        );
+      }
+      
+      // Wait a moment for alert to be shown
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Step 1: Clear all AsyncStorage cache FIRST (before any other operations)
       console.log('Panic Mode: Step 1 - Clearing all cache...');
@@ -173,7 +289,7 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
         console.log('Panic Mode: Step 5 - Exiting app (Android)...');
         // Wait a bit more to ensure everything is saved and navigation completed
         await new Promise(resolve => setTimeout(resolve, 500));
-        BackHandler.exitApp();
+          BackHandler.exitApp();
       } else {
         console.log('✅ Panic Mode: Complete - User logged out and cache cleared');
       }
@@ -303,8 +419,8 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
             volumePressCount.current = 0;
           }
         }, TAP_INTERVAL);
-      }
-    };
+    }
+  };
 
     // Setup volume detection when panic mode is enabled
     const setupVolumeDetection = async () => {

@@ -124,7 +124,12 @@ export async function sendPushNotificationToUser(
   userId: string,
   title: string,
   body: string,
-  data?: any
+  data?: any,
+  options?: {
+    priority?: 'default' | 'normal' | 'high';
+    sound?: string;
+    vibrate?: number[];
+  }
 ): Promise<boolean> {
   try {
     // Get user's push token from database
@@ -140,13 +145,32 @@ export async function sendPushNotificationToUser(
     }
 
     // Send push notification via Expo's API
-    const message = {
+    const message: any = {
       to: user.push_token,
-      sound: 'default',
+      sound: options?.sound || 'default',
       title,
       body,
       data: data || {},
+      priority: options?.priority || 'default',
     };
+
+    // Add Android-specific options
+    if (Platform.OS === 'android' || options?.vibrate) {
+      message.android = {
+        priority: options?.priority === 'high' ? 'high' : 'default',
+        sound: options?.sound || 'default',
+        vibrate: options?.vibrate || [0, 250, 250, 250],
+        channelId: 'default',
+      };
+    }
+
+    // Add iOS-specific options
+    if (Platform.OS === 'ios') {
+      message.ios = {
+        sound: options?.sound || 'default',
+        priority: options?.priority === 'high' ? 10 : 5,
+      };
+    }
 
     const response = await fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
@@ -169,6 +193,98 @@ export async function sendPushNotificationToUser(
     }
   } catch (error) {
     console.error('Error sending push notification:', error);
+    return false;
+  }
+}
+
+/**
+ * Sends a panic mode notification with enhanced sound and vibration
+ * Sends multiple notifications in quick succession to ring device for 3-4 seconds
+ */
+export async function sendPanicModeNotification(
+  userId: string,
+  title: string,
+  body: string,
+  data?: any
+): Promise<boolean> {
+  try {
+    // Get user's push token from database
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('push_token, push_token_data')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !user?.push_token) {
+      console.error('User push token not found:', fetchError);
+      return false;
+    }
+
+    // Send 4 notifications over 3-4 seconds to make device ring continuously
+    const notifications = [];
+    for (let i = 0; i < 4; i++) {
+      const message: any = {
+        to: user.push_token,
+        sound: 'default',
+        title: i === 0 ? title : '', // Only show title on first notification
+        body: i === 0 ? body : '🚨', // Show body on first, emoji on others
+        data: {
+          ...(data || {}),
+          notificationIndex: i,
+          isPanicMode: true,
+        },
+        priority: 'high',
+        // Android-specific: enhanced vibration pattern and sound
+        android: {
+          priority: 'high',
+          sound: 'default',
+          vibrate: [0, 500, 200, 500, 200, 500, 200, 500], // Strong vibration pattern (rings for ~3 seconds)
+          channelId: 'default',
+          importance: 'max',
+        },
+        // iOS-specific: urgent sound
+        ios: {
+          sound: 'default',
+          badge: 1,
+        },
+      };
+
+      notifications.push(
+        new Promise((resolve) => {
+          setTimeout(async () => {
+            try {
+              const response = await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                  'Accept-encoding': 'gzip, deflate',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+              });
+
+              const result = await response.json();
+              if (result.data && result.data.status === 'ok') {
+                resolve(true);
+              } else {
+                resolve(false);
+              }
+            } catch (error) {
+              console.error(`Error sending panic notification ${i}:`, error);
+              resolve(false);
+            }
+          }, i * 800); // Send every 800ms (4 notifications over ~3.2 seconds)
+        })
+      );
+    }
+
+    const results = await Promise.all(notifications);
+    const successCount = results.filter(Boolean).length;
+    
+    console.log(`Panic mode notification sent: ${successCount}/4 notifications delivered`);
+    return successCount > 0;
+  } catch (error) {
+    console.error('Error sending panic mode notification:', error);
     return false;
   }
 }
@@ -228,8 +344,20 @@ export async function sendIncidentNotificationToNearbyUsers(
 
 /**
  * Calculates distance between two coordinates using Haversine formula
- * This function is kept for future use when user location tracking is implemented
+ * Returns distance in miles
  */
+export function calculateDistanceInMiles(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 3959; // Earth's radius in miles
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // Earth's radius in km
   const dLat = toRad(lat2 - lat1);
@@ -244,6 +372,99 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 function toRad(value: number): number {
   return value * Math.PI / 180;
+}
+
+/**
+ * Sends panic mode alert notifications to nearby users within specified radius
+ * @param panicLat Latitude of panic event
+ * @param panicLng Longitude of panic event
+ * @param userId ID of user who triggered panic mode
+ * @param userName Name of user who triggered panic mode
+ * @param radiusMiles Radius in miles to notify users (default: 15)
+ */
+export async function sendPanicModeNotificationToNearbyUsers(
+  panicLat: number,
+  panicLng: number,
+  userId: string,
+  userName: string | null = null,
+  radiusMiles: number = 15
+): Promise<{ sent: number; total: number }> {
+  try {
+    console.log(`🚨 Sending panic mode notifications to users within ${radiusMiles} miles...`);
+
+    // Get all users with push tokens
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, push_token, last_known_latitude, last_known_longitude')
+      .not('push_token', 'is', null)
+      .neq('id', userId); // Don't notify the user who triggered panic mode
+
+    if (error) {
+      console.error('Error fetching users with push tokens:', error);
+      return { sent: 0, total: 0 };
+    }
+
+    if (!users || users.length === 0) {
+      console.log('No users with push tokens found');
+      return { sent: 0, total: 0 };
+    }
+
+    // Filter users by distance if they have location data
+    // If no location data, send to all users (they can check distance on their end)
+    const usersToNotify = users.filter((user) => {
+      if (user.last_known_latitude && user.last_known_longitude) {
+        const distance = calculateDistanceInMiles(
+          panicLat,
+          panicLng,
+          user.last_known_latitude,
+          user.last_known_longitude
+        );
+        return distance <= radiusMiles;
+      }
+      // If user doesn't have location, include them anyway
+      // They can check if they're nearby when they receive the notification
+      return true;
+    });
+
+    console.log(`📊 Found ${usersToNotify.length} users to notify (out of ${users.length} total)`);
+
+    // Format location for display
+    const locationStr = `${panicLat.toFixed(4)}, ${panicLng.toFixed(4)}`;
+    const displayName = userName || 'A user';
+
+    // Send panic mode notifications with enhanced sound and vibration
+    // These will ring devices for 3-4 seconds
+    const notificationPromises = usersToNotify.map(async (user) => {
+      try {
+        await sendPanicModeNotification(
+          user.id,
+          '🚨 Panic Mode Alert',
+          `${displayName} activated panic mode near location ${locationStr}. Check if you're nearby!`,
+          {
+            type: 'panic_mode',
+            panicLat,
+            panicLng,
+            userId,
+            userName: displayName,
+            timestamp: new Date().toISOString(),
+          }
+        );
+        return true;
+      } catch (error) {
+        console.error(`Error sending notification to user ${user.id}:`, error);
+        return false;
+      }
+    });
+
+    const results = await Promise.all(notificationPromises);
+    const sentCount = results.filter(Boolean).length;
+
+    console.log(`✅ Panic mode notifications sent to ${sentCount} users`);
+    return { sent: sentCount, total: usersToNotify.length };
+  } catch (error) {
+    console.error('Error sending panic mode notifications:', error);
+    return { sent: 0, total: 0 };
+  }
 }
 
 /**

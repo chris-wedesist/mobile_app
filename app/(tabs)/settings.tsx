@@ -375,8 +375,8 @@ export default function SettingsScreen() {
       setIsTogglingPanicMode(true);
 
       const updateData = {
-        panic_mode_enabled: value,
-        updated_at: new Date().toISOString(),
+          panic_mode_enabled: value,
+          updated_at: new Date().toISOString(),
       };
 
       console.log('📤 Sending database update:', {
@@ -406,7 +406,7 @@ export default function SettingsScreen() {
 
       console.log('✅ Panic mode successfully updated in database');
       console.log('📊 Updated data:', data);
-      
+
       setPanicModeEnabled(value);
       console.log('✅ Local state updated to:', value);
     } catch (error) {
