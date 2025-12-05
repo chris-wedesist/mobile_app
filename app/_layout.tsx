@@ -40,6 +40,7 @@ function AppContent() {
   const previousUserRef = useRef<string | null>(null);
   const isLogoutRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isNavigatingRef = useRef(false);
 
   useEffect(() => {
     // Reset route check if user state changed (sign in/sign out)
@@ -53,6 +54,7 @@ function AppContent() {
       hasCheckedRouteRef.current = false;
       setIsReady(false); // Reset ready state to trigger re-check
       setInitialRoute(null); // Reset route to trigger navigation
+      isNavigatingRef.current = false; // Reset navigation flag
       previousUserRef.current = currentUserId;
     }
 
@@ -133,7 +135,8 @@ function AppContent() {
     // 3. Biometric initialization is complete
     // 4. App is NOT locked (biometric not required or already unlocked)
     // 5. For authenticated users with biometric enabled, ensure we've checked the setting
-    if (isReady && initialRoute && !isLocked && !isInitializing) {
+    // 6. Not already navigating (prevent multiple simultaneous navigations)
+    if (isReady && initialRoute && !isLocked && !isInitializing && !isNavigatingRef.current) {
       // Additional check: if user is authenticated and biometric might be enabled,
       // wait a bit to ensure lock state is properly set
       const shouldNavigate = () => {
@@ -151,16 +154,32 @@ function AppContent() {
       };
 
       if (shouldNavigate()) {
-        // Use a small delay to ensure navigation happens smoothly
-        const timer = setTimeout(() => {
-          router.replace(initialRoute as any);
-          // Hide the native splash screen once navigation is complete
-          SplashScreen.hideAsync().catch(() => {
-            // Ignore errors - this happens on web
-          });
-        }, 100);
+        // Mark as navigating to prevent duplicate navigations
+        isNavigatingRef.current = true;
         
-        return () => clearTimeout(timer);
+        // Use a small delay to ensure navigation happens smoothly and auth state has propagated
+        const timer = setTimeout(() => {
+          try {
+            console.log('Navigating to:', initialRoute);
+            router.replace(initialRoute as any);
+            // Hide the native splash screen once navigation is complete
+            SplashScreen.hideAsync().catch(() => {
+              // Ignore errors - this happens on web
+            });
+          } catch (error) {
+            console.error('Navigation error:', error);
+          } finally {
+            // Reset navigation flag after a delay to allow navigation to complete
+            setTimeout(() => {
+              isNavigatingRef.current = false;
+            }, 500);
+          }
+        }, 150); // Slightly longer delay to ensure auth state has fully propagated
+        
+        return () => {
+          clearTimeout(timer);
+          isNavigatingRef.current = false;
+        };
       }
     }
   }, [isReady, initialRoute, isLocked, isInitializing, user?.id, biometricLoginEnabled]);

@@ -61,7 +61,9 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/(tabs)');
+      // Navigation will be handled automatically by _layout.tsx
+      // when the auth state updates. Don't navigate directly here
+      // to avoid race conditions with the layout navigation system.
     } catch (error) {
       await logAuthenticationFailure({
         email,

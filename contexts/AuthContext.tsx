@@ -86,37 +86,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     initializeAuth();
 
+    // Set up Supabase auth state listener to automatically sync session/user
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthContext: Auth state changed:', event, session?.user?.id);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        // User signed in - update state
+        const userId = session.user.id;
+        await AsyncStorage.setItem('user_id', userId);
+        await fetchUserProfile(userId);
+        setSession(session);
+      } else if (event === 'SIGNED_OUT') {
+        // User signed out - clear state
+        setSession(null);
+        setUser(null);
+        setUserProfile(null);
+        await AsyncStorage.removeItem('user_id');
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        // Token refreshed - update session
+        setSession(session);
+      }
+    });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
