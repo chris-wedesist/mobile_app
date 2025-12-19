@@ -15,64 +15,12 @@ import { sendIncidentNotificationToNearbyUsers } from '@/utils/push-notification
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Audio } from 'expo-av';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co'!,
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3Z6cnhueGFkbnZnbnNkcnF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDcxMjgsImV4cCI6MjA2MDMyMzEyOH0.cvE6KoZXbSnigKUpbFzFwLtN-O6H4SxIyu5bn9rU1lY'!
 );
-
-const INCIDENT_TYPES = [
-  'ICE Activity',
-  'Border Patrol Activity',
-  'Checkpoint',
-  'Raid in Progress',
-  'Suspicious Vehicle',
-  'Other Activity'
-];
-
-const INCIDENT_DESCRIPTIONS = {
-  'ICE Activity': [
-    { label: 'Number of officers', type: 'text' },
-    { label: 'Vehicle descriptions', type: 'text' },
-    { label: 'Badge numbers (if visible)', type: 'text' },
-    { label: 'Actions being taken', type: 'text' },
-    { label: 'Witnesses present', type: 'text' }
-  ],
-  'Border Patrol Activity': [
-    { label: 'Number of agents', type: 'text' },
-    { label: 'Vehicle descriptions', type: 'text' },
-    { label: 'Actions being taken', type: 'text' },
-    { label: 'Checkpoint or mobile unit', type: 'text' }
-  ],
-  'Checkpoint': [
-    { label: 'Checkpoint location', type: 'text' },
-    { label: 'Type of checkpoint', type: 'text' },
-    { label: 'Number of officers', type: 'text' },
-    { label: 'Vehicle descriptions', type: 'text' },
-    { label: 'Specific activities observed', type: 'text' }
-  ],
-  'Raid in Progress': [
-    { label: 'Location of raid', type: 'text' },
-    { label: 'Number of officers', type: 'text' },
-    { label: 'Vehicle descriptions', type: 'text' },
-    { label: 'Type of location (business/residence)', type: 'text' },
-    { label: 'Actions being taken', type: 'text' }
-  ],
-  'Suspicious Vehicle': [
-    { label: 'Vehicle description', type: 'text' },
-    { label: 'License plate (if visible)', type: 'text' },
-    { label: 'Number of occupants', type: 'text' },
-    { label: 'Observed behavior', type: 'text' },
-    { label: 'Direction of travel', type: 'text' }
-  ],
-  'Other Activity': [
-    { label: 'Please describe the activity in detail', type: 'text' },
-    { label: 'Location', type: 'text' },
-    { label: 'Personnel involved', type: 'text' },
-    { label: 'Vehicles present', type: 'text' },
-    { label: 'Actions observed', type: 'text' }
-  ]
-};
 
 type FormField = {
   label: string;
@@ -82,10 +30,64 @@ type FormField = {
 
 export default function ReportIncidentScreen() {
   const { user, userProfile } = useAuth();
+  const { t } = useLanguage();
   const { setIsRecording: setGlobalRecording } = useRecording();
   const [selectedType, setSelectedType] = useState('');
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const INCIDENT_TYPES = [
+    t.reportIncident.incidentTypes.iceActivity,
+    t.reportIncident.incidentTypes.borderPatrolActivity,
+    t.reportIncident.incidentTypes.checkpoint,
+    t.reportIncident.incidentTypes.raidInProgress,
+    t.reportIncident.incidentTypes.suspiciousVehicle,
+    t.reportIncident.incidentTypes.otherActivity,
+  ];
+
+  const getIncidentDescriptions = () => ({
+    [t.reportIncident.incidentTypes.iceActivity]: [
+      { label: t.reportIncident.incidentDescriptions.iceActivity.numberOfOfficers, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.iceActivity.vehicleDescriptions, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.iceActivity.badgeNumbers, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.iceActivity.actionsBeingTaken, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.iceActivity.witnessesPresent, type: 'text' },
+    ],
+    [t.reportIncident.incidentTypes.borderPatrolActivity]: [
+      { label: t.reportIncident.incidentDescriptions.borderPatrolActivity.numberOfAgents, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.borderPatrolActivity.vehicleDescriptions, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.borderPatrolActivity.actionsBeingTaken, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.borderPatrolActivity.checkpointOrMobile, type: 'text' },
+    ],
+    [t.reportIncident.incidentTypes.checkpoint]: [
+      { label: t.reportIncident.incidentDescriptions.checkpoint.checkpointLocation, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.checkpoint.typeOfCheckpoint, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.checkpoint.numberOfOfficers, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.checkpoint.vehicleDescriptions, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.checkpoint.specificActivities, type: 'text' },
+    ],
+    [t.reportIncident.incidentTypes.raidInProgress]: [
+      { label: t.reportIncident.incidentDescriptions.raidInProgress.locationOfRaid, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.raidInProgress.numberOfOfficers, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.raidInProgress.vehicleDescriptions, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.raidInProgress.typeOfLocation, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.raidInProgress.actionsBeingTaken, type: 'text' },
+    ],
+    [t.reportIncident.incidentTypes.suspiciousVehicle]: [
+      { label: t.reportIncident.incidentDescriptions.suspiciousVehicle.vehicleDescription, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.suspiciousVehicle.licensePlate, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.suspiciousVehicle.numberOfOccupants, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.suspiciousVehicle.observedBehavior, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.suspiciousVehicle.directionOfTravel, type: 'text' },
+    ],
+    [t.reportIncident.incidentTypes.otherActivity]: [
+      { label: t.reportIncident.incidentDescriptions.otherActivity.describeActivity, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.otherActivity.location, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.otherActivity.personnelInvolved, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.otherActivity.vehiclesPresent, type: 'text' },
+      { label: t.reportIncident.incidentDescriptions.otherActivity.actionsObserved, type: 'text' },
+    ],
+  });
   const [selectedLocation, setSelectedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [address, setAddress] = useState<string>('');
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
@@ -116,8 +118,8 @@ export default function ReportIncidentScreen() {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           Alert.alert(
-            'Location Permission Required',
-            'Please enable location access to report incidents accurately.'
+            t.reportIncident.locationPermissionRequired,
+            t.reportIncident.locationPermissionMessage
           );
           return;
         }
@@ -134,8 +136,8 @@ export default function ReportIncidentScreen() {
       } catch (error) {
         console.error('Error getting location:', error);
         Alert.alert(
-          'Location Error',
-          'Failed to get your location. Please try again.'
+          t.reportIncident.locationError,
+          t.reportIncident.locationErrorMessage
         );
       }
     })();
@@ -153,7 +155,7 @@ export default function ReportIncidentScreen() {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Select Location</title>
+          <title>${t.reportIncident.selectLocationTitle}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
           <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
           <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -310,7 +312,8 @@ export default function ReportIncidentScreen() {
 
   const handleTypeSelect = (type: string) => {
     setSelectedType(type);
-    const fields = INCIDENT_DESCRIPTIONS[type as keyof typeof INCIDENT_DESCRIPTIONS]?.map(field => ({
+    const descriptions = getIncidentDescriptions();
+    const fields = descriptions[type as keyof typeof descriptions]?.map(field => ({
       ...field,
       value: ''
     })) || [];
@@ -345,7 +348,7 @@ export default function ReportIncidentScreen() {
       setRecordings(data || []);
     } catch (error) {
       console.error('Error fetching recordings:', error);
-      Alert.alert('Error', 'Failed to load recordings');
+      Alert.alert(t.errors.error, t.reportIncident.loadRecordingsFailed);
     } finally {
       setIsLoadingVideos(false);
     }
@@ -361,14 +364,14 @@ export default function ReportIncidentScreen() {
 
   const handleRecordVideo = async () => {
     if (Platform.OS === 'web') {
-      Alert.alert('Not Available', 'Video recording is only available on mobile devices.');
+      Alert.alert(t.reportIncident.notAvailable, t.reportIncident.videoRecordingMobileOnly);
       return;
     }
 
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
       if (!result.granted) {
-        Alert.alert('Permission Required', 'Camera permission is required to record videos.');
+        Alert.alert(t.reportIncident.permissionRequired, t.reportIncident.cameraPermissionRequired);
         return;
       }
     }
@@ -451,13 +454,13 @@ export default function ReportIncidentScreen() {
         // Automatically select the newly uploaded video
         setSelectedVideos(prev => [...prev, data.secure_url]);
         
-        Alert.alert('Success', 'Video uploaded successfully!');
+        Alert.alert(t.common.success, t.reportIncident.videoUploaded);
       } else {
         throw new Error('No secure URL returned from Cloudinary');
       }
     } catch (error) {
       console.error('Error uploading video:', error);
-      Alert.alert('Error', 'Failed to upload video. Please try again.');
+      Alert.alert(t.errors.error, t.reportIncident.videoUploadFailed);
     } finally {
       setIsLoadingVideos(false);
     }
@@ -492,7 +495,7 @@ export default function ReportIncidentScreen() {
     try {
       const prepared = await prepareRecording();
       if (!prepared) {
-        Alert.alert('Error', 'Failed to prepare recording. Please check permissions.');
+        Alert.alert(t.errors.error, t.reportIncident.recordingFailed);
         return;
       }
 
@@ -503,7 +506,7 @@ export default function ReportIncidentScreen() {
       });
     } catch (error) {
       console.error('Error starting recording:', error);
-      Alert.alert('Error', 'Failed to start recording. Please try again.');
+      Alert.alert(t.errors.error, t.reportIncident.startRecordingFailed);
       setIsRecordingVideo(false);
       setGlobalRecording(false);
     }
@@ -530,7 +533,7 @@ export default function ReportIncidentScreen() {
       }
     } catch (error) {
       console.error('Error stopping recording:', error);
-      Alert.alert('Error', 'Failed to save recording. Please try again.');
+      Alert.alert(t.errors.error, t.reportIncident.saveRecordingFailed);
       setIsRecordingVideo(false);
       setGlobalRecording(false);
     }
@@ -538,12 +541,12 @@ export default function ReportIncidentScreen() {
 
   const handleSubmit = async () => {
     if (!selectedLocation) {
-      Alert.alert('Error', 'Please select a location on the map');
+      Alert.alert(t.errors.error, t.reportIncident.selectLocation);
       return;
     }
 
     if (!user) {
-      Alert.alert('Error', 'You must be logged in to report an incident');
+      Alert.alert(t.errors.error, t.reportIncident.mustBeLoggedIn);
       return;
     }
 
@@ -561,7 +564,7 @@ export default function ReportIncidentScreen() {
       );
 
       if (!restrictionResult.canReport) {
-        Alert.alert('Cannot Report Incident', restrictionResult.reason);
+        Alert.alert(t.reportIncident.cannotReport, restrictionResult.reason);
         setIsSubmitting(false);
         return;
       }
@@ -591,10 +594,10 @@ export default function ReportIncidentScreen() {
       if (error) throw error;
 
       const successMessage = restrictionResult.remainingReports 
-        ? `Incident reported successfully! You have ${restrictionResult.remainingReports - 1} reports remaining this month.`
-        : 'Incident reported successfully!';
+        ? `${t.reportIncident.incidentReported} ${t.common.youHave} ${restrictionResult.remainingReports - 1} ${t.reportIncident.reportsRemaining}`
+        : t.reportIncident.incidentReported;
 
-      Alert.alert('Success', successMessage);
+      Alert.alert(t.common.success, successMessage);
 
       // Send push notifications to nearby users
       try {
@@ -617,7 +620,7 @@ export default function ReportIncidentScreen() {
       });
     } catch (error) {
       console.log('Error reporting incident:', error);
-      Alert.alert('Error', 'Failed to report incident. Please try again.');
+      Alert.alert(t.errors.error, t.errors.failedToSave);
     } finally {
       setIsSubmitting(false);
     }
@@ -700,21 +703,21 @@ export default function ReportIncidentScreen() {
             disabled={Platform.OS === 'web'}
           >
             <MaterialIcons name="videocam" size={24} color="#fff" />
-            <Text style={styles.videoActionButtonText}>Record Video</Text>
+            <Text style={styles.videoActionButtonText}>{t.reportIncident.recordVideo}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.videoActionButton}
             onPress={handleUploadVideo}
           >
             <MaterialIcons name="upload" size={24} color="#fff" />
-            <Text style={styles.videoActionButtonText}>Upload Video</Text>
+            <Text style={styles.videoActionButtonText}>{t.reportIncident.uploadVideo}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Existing Videos List */}
         {recordings.length > 0 && (
           <View style={styles.existingVideosSection}>
-            <Text style={styles.existingVideosTitle}>Existing Recordings</Text>
+            <Text style={styles.existingVideosTitle}>{t.reportIncident.existingRecordings}</Text>
             <FlatList
               data={recordings}
               renderItem={({ item }) => (
@@ -730,7 +733,7 @@ export default function ReportIncidentScreen() {
                     styles.videoPickerItemText,
                     selectedVideos.includes(item.video_url) && styles.selectedVideoPickerItemText
                   ]}>
-                    Recording {new Date(item.created_at).toLocaleDateString()}
+                    {t.record.recording} {new Date(item.created_at).toLocaleDateString()}
                   </Text>
                   {selectedVideos.includes(item.video_url) && (
                     <TouchableOpacity
@@ -757,7 +760,7 @@ export default function ReportIncidentScreen() {
 
     return (
       <View style={styles.selectedVideosContainer}>
-        <Text style={styles.selectedVideosTitle}>Selected Videos</Text>
+        <Text style={styles.selectedVideosTitle}>{t.common.selectedVideos}</Text>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -798,20 +801,20 @@ export default function ReportIncidentScreen() {
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>Cancel</Text>
+        <Text style={styles.backButtonText}>{t.common.cancel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.legalRightsButton}
         onPress={() => router.push('/legal-rights')}>
         <MaterialIcons name="verified" size={20} color="#fff" />
-        <Text style={styles.legalRightsText}>Know Your Rights</Text>
+        <Text style={styles.legalRightsText}>{t.legalHelp.knowYourRights}</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Report Activity</Text>
+      <Text style={styles.title}>{t.reportIncident.title}</Text>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Select Location</Text>
+        <Text style={styles.label}>{t.reportIncident.location}</Text>
         <TouchableOpacity 
           style={styles.locationButton}
           onPress={() => setShowMap(true)}
@@ -821,7 +824,7 @@ export default function ReportIncidentScreen() {
             <ActivityIndicator color="#fff" size="small" style={styles.loadingIndicator} />
           ) : (
             <Text style={styles.locationText} numberOfLines={2}>
-              {address || 'Tap to select location on map'}
+              {address || t.reportIncident.selectLocation}
             </Text>
           )}
         </TouchableOpacity>
@@ -832,7 +835,7 @@ export default function ReportIncidentScreen() {
               style={styles.closeMapButton}
               onPress={() => setShowMap(false)}
             >
-              <Text style={styles.closeMapButtonText}>Close Map</Text>
+              <Text style={styles.closeMapButtonText}>{t.common.close}</Text>
             </TouchableOpacity>
             {Platform.OS === 'web' ? (
               <iframe
@@ -858,7 +861,7 @@ export default function ReportIncidentScreen() {
           </View>
         )}
 
-        <Text style={styles.label}>Activity Type</Text>
+        <Text style={styles.label}>{t.reportIncident.selectType}</Text>
         <View style={styles.typeContainer}>
           {INCIDENT_TYPES.map((type) => (
             <TouchableOpacity
@@ -886,13 +889,13 @@ export default function ReportIncidentScreen() {
 
         {selectedType && (
           <React.Fragment>
-            <Text style={styles.label}>Details</Text>
+            <Text style={styles.label}>{t.reportIncident.description}</Text>
             {formFields.map((field, index) => (
               <View key={index} style={styles.fieldContainer}>
                 <Text style={styles.fieldLabel}>{field.label}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder={`Enter ${field.label.toLowerCase()}...`}
+                  placeholder={`${t.common.enter} ${field.label.toLowerCase()}...`}
                   placeholderTextColor="#666"
                   value={field.value}
                   onChangeText={(value) => handleFieldChange(index, value)}
@@ -902,7 +905,7 @@ export default function ReportIncidentScreen() {
               </View>
             ))}
 
-            <Text style={styles.label}>Attach Videos</Text>
+            <Text style={styles.label}>{t.reportIncident.selectVideo}</Text>
             <TouchableOpacity
               style={styles.videoPickerButton}
               onPress={() => setShowVideoPicker(!showVideoPicker)}
@@ -911,8 +914,8 @@ export default function ReportIncidentScreen() {
                 <MaterialIcons name="video-label" size={20} color="#fff" />
                 <Text style={styles.videoPickerButtonText}>
                   {selectedVideos.length > 0
-                    ? `${selectedVideos.length} video${selectedVideos.length > 1 ? 's' : ''} selected`
-                    : 'Select videos'}
+                    ? `${selectedVideos.length} ${selectedVideos.length > 1 ? t.common.videos : t.common.video} ${t.common.selected}`
+                    : t.reportIncident.selectVideo}
                 </Text>
                 <MaterialIcons name="chevron-right" size={20} color="#fff" />
               </View>
@@ -927,7 +930,7 @@ export default function ReportIncidentScreen() {
           <View style={styles.warningContainer}>
             <MaterialIcons name="warning" size={20} color={colors.status.warning} />
             <Text style={styles.warningText}>
-              Only verified users can report incidents. Please verify your email address.
+              {t.errors.mustBeVerified || 'Only verified users can report incidents. Please verify your email address.'}
             </Text>
           </View>
         )}
@@ -941,7 +944,7 @@ export default function ReportIncidentScreen() {
           onPress={handleSubmit}
           disabled={isSubmitting || (user ? !isUserVerified(user) : false)}>
           <Text style={styles.submitButtonText}>
-            {isSubmitting ? 'Submitting...' : 'Report Activity'}
+            {isSubmitting ? t.reportIncident.submitting : t.reportIncident.submit}
           </Text>
         </TouchableOpacity>
       </View>

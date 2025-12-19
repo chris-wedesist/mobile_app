@@ -9,6 +9,7 @@ import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as SMS from 'expo-sms';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Operation = '+' | '-' | '×' | '÷' | '=' | null;
 
@@ -45,6 +46,7 @@ const formatDisplay = (value: string | number): string => {
 export default function StealthCalculatorScreen() {
   const { deactivate } = useStealthMode();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [display, setDisplay] = useState('0');
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<Operation>(null);
@@ -132,11 +134,11 @@ export default function StealthCalculatorScreen() {
       try {
         const isAvailable = await SMS.isAvailableAsync();
         if (!isAvailable) {
-          console.error('SMS is not available on this device');
+          console.error(t.calculator.smsNotAvailable);
           return false;
         }
 
-        const message = emergencyMessage || 'EMERGENCY: I need immediate assistance. My location will be shared when activated.';
+        const message = emergencyMessage || t.calculator.emergencyMessage;
         await SMS.sendSMSAsync([smsPhone], message);
         
         // Clear the display after sending SMS
@@ -145,7 +147,7 @@ export default function StealthCalculatorScreen() {
         }, 500);
         return true;
       } catch (error) {
-        console.error('Error sending emergency SMS:', error);
+        console.error(t.calculator.errorSendingSMS, error);
         return false;
       }
     }

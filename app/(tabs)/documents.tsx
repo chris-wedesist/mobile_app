@@ -6,6 +6,7 @@ import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Document = {
   id: string;
@@ -14,21 +15,22 @@ type Document = {
   timestamp: number;
 };
 
-const DOCUMENT_TYPES = [
-  "Driver's License",
-  "Passport",
-  "Green Card",
-  "Immigration Documents",
-  "Court Documents",
-  "Birth Certificate",
-  "Social Security Card",
-  "Other ID"
-];
-
 export default function DocumentsScreen() {
+  const { t } = useLanguage();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const DOCUMENT_TYPES = [
+    t.documents.documentTypes.driversLicense,
+    t.documents.documentTypes.passport,
+    t.documents.documentTypes.greenCard,
+    t.documents.documentTypes.immigrationDocuments,
+    t.documents.documentTypes.courtDocuments,
+    t.documents.documentTypes.birthCertificate,
+    t.documents.documentTypes.socialSecurityCard,
+    t.documents.documentTypes.otherID,
+  ];
 
   useEffect(() => {
     loadDocuments();
@@ -47,7 +49,7 @@ export default function DocumentsScreen() {
 
   const pickDocument = async () => {
     if (!selectedType) {
-      alert('Please select a document type first');
+      alert(t.documents.selectDocumentType);
       return;
     }
 
@@ -73,7 +75,7 @@ export default function DocumentsScreen() {
       }
     } catch (error) {
       console.error('Error picking document:', error);
-      alert('Failed to upload document. Please try again.');
+      alert(t.documents.uploadFailed);
     }
   };
 
@@ -84,7 +86,7 @@ export default function DocumentsScreen() {
       await AsyncStorage.setItem('userDocuments', JSON.stringify(updatedDocuments));
     } catch (error) {
       console.error('Error deleting document:', error);
-      alert('Failed to delete document. Please try again.');
+      alert(t.documents.deleteFailed);
     }
   };
 
@@ -92,7 +94,7 @@ export default function DocumentsScreen() {
     try {
       const fileInfo = await FileSystem.getInfoAsync(uri);
       if (!fileInfo.exists) {
-        Alert.alert('Error', 'Document not found');
+        Alert.alert(t.errors.error, t.documents.documentNotFound);
         return;
       }
 
@@ -113,10 +115,10 @@ export default function DocumentsScreen() {
         return;
       }
 
-      Alert.alert('Error', 'Unsupported file type');
+      Alert.alert(t.errors.error, t.documents.unsupportedFileType);
     } catch (error) {
       console.error('Error viewing document:', error);
-      Alert.alert('Error', 'Could not open the document. Please try again.');
+      Alert.alert(t.errors.error, t.documents.couldNotOpen);
     }
   };
 
@@ -125,7 +127,7 @@ export default function DocumentsScreen() {
       // Check if the file exists
       const fileInfo = await FileSystem.getInfoAsync(uri);
       if (!fileInfo.exists) {
-        Alert.alert('Error', 'Document not found');
+        Alert.alert(t.errors.error, t.documents.documentNotFound);
         return;
       }
 
@@ -143,14 +145,14 @@ export default function DocumentsScreen() {
         mimeType: fileExtension === 'pdf' ? 'application/pdf' : 
                   ['jpg', 'jpeg'].includes(fileExtension || '') ? 'image/jpeg' :
                   fileExtension === 'png' ? 'image/png' : 'application/octet-stream',
-        dialogTitle: `Download ${type}`,
+        dialogTitle: `${t.documents.download} ${type}`,
         UTI: fileExtension === 'pdf' ? 'com.adobe.pdf' : 'public.image'
       });
 
-      Alert.alert('Success', 'Document downloaded successfully');
+      Alert.alert(t.common.success, t.documents.downloadSuccess);
     } catch (error) {
       console.error('Error downloading document:', error);
-      Alert.alert('Error', 'Could not download the document. Please try again.');
+      Alert.alert(t.errors.error, t.documents.downloadFailed);
     }
   };
 
@@ -164,17 +166,17 @@ export default function DocumentsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Documents</Text>
+      <Text style={styles.title}>{t.documents.title}</Text>
       
       <View style={styles.securityNote}>
         <MaterialIcons name="lock" size={20} color={colors.accent} />
         <Text style={styles.securityText}>
-          Your documents are stored securely on your device
+          {t.documents.securityNote}
         </Text>
       </View>
 
       <View style={styles.uploadSection}>
-        <Text style={styles.sectionTitle}>Upload New Document</Text>
+        <Text style={styles.sectionTitle}>{t.documents.uploadNewDocument}</Text>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -208,20 +210,20 @@ export default function DocumentsScreen() {
           style={styles.uploadButton}
           onPress={pickDocument}>
           <MaterialIcons name="upload" size={24} color={colors.text.primary} />
-          <Text style={styles.uploadButtonText}>Upload Document</Text>
+          <Text style={styles.uploadButtonText}>{t.documents.uploadDocument}</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.sectionTitle}>Your Documents</Text>
+      <Text style={styles.sectionTitle}>{t.documents.yourDocuments}</Text>
       <ScrollView style={styles.documentList} contentContainerStyle={styles.documentListContent}>
         {documents.length === 0 ? (
           <View style={styles.emptyState}>
             <MaterialIcons name="shield" size={48} color={colors.text.muted} />
             <Text style={styles.emptyStateText}>
-              No documents uploaded yet
+              {t.documents.noDocumentsUploaded}
             </Text>
             <Text style={styles.emptyStateSubtext}>
-              Add your important documents to keep them secure and accessible
+              {t.documents.noDocumentsSubtext}
             </Text>
           </View>
         ) : (
@@ -234,7 +236,7 @@ export default function DocumentsScreen() {
               <View style={styles.documentInfo}>
                 <Text style={styles.documentType}>{doc.type}</Text>
                 <Text style={styles.documentDate}>
-                  Added {formatDate(doc.timestamp)}
+                  {t.documents.added} {formatDate(doc.timestamp)}
                 </Text>
               </View>
               <View style={styles.documentActions}>
@@ -273,7 +275,7 @@ export default function DocumentsScreen() {
             style={styles.modalCloseButton}
             onPress={() => setSelectedImage(null)}
           >
-            <Text style={styles.modalCloseText}>Close</Text>
+            <Text style={styles.modalCloseText}>{t.documents.close}</Text>
           </TouchableOpacity>
           <Image
             source={{ uri: selectedImage || '' }}

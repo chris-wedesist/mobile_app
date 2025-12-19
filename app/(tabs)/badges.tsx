@@ -4,6 +4,7 @@ import { colors, shadows, radius } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BadgeUnlockModal from '@/components/BadgeUnlockModal';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Badge = {
   id: string;
@@ -17,52 +18,53 @@ type Badge = {
   };
 };
 
-// Default badge data
-const DEFAULT_BADGES: Badge[] = [
-  {
-    id: 'founding_protector',
-    name: 'Founding Protector',
-    description: 'One of the first to join and complete safety training',
-    icon: <MaterialIcons name="shield" size={32} color={colors.accent} />,
-    unlocked: false
-  },
-  {
-    id: 'shield_builder',
-    name: 'Shield Builder',
-    description: 'Growing the community by helping others stay safe',
-    icon: <MaterialIcons name="group" size={32} color={colors.accent} />,
-    unlocked: false,
-    progress: {
-      current: 0,
-      total: 3
-    }
-  },
-  {
-    id: 'emergency_sentinel',
-    name: 'Emergency Sentinel',
-    description: 'Actively contributing to community safety awareness',
-    icon: <MaterialIcons name="notifications" size={32} color={colors.accent} />,
-    unlocked: false,
-    progress: {
-      current: 0,
-      total: 5
-    }
-  },
-  {
-    id: 'evidence_guardian',
-    name: 'Evidence Guardian',
-    description: 'Helping preserve crucial evidence for justice',
-    icon: <MaterialIcons name="insert-drive-file" size={32} color={colors.accent} />,
-    unlocked: false,
-    progress: {
-      current: 0,
-      total: 10
-    }
-  }
-];
-
 export default function BadgesScreen() {
-  const [badges, setBadges] = useState<Badge[]>(DEFAULT_BADGES);
+  const { t } = useLanguage();
+  
+  const getDefaultBadges = (): Badge[] => [
+    {
+      id: 'founding_protector',
+      name: t.badges.foundingProtector,
+      description: t.badges.foundingProtectorDesc,
+      icon: <MaterialIcons name="shield" size={32} color={colors.accent} />,
+      unlocked: false
+    },
+    {
+      id: 'shield_builder',
+      name: t.badges.shieldBuilder,
+      description: t.badges.shieldBuilderDesc,
+      icon: <MaterialIcons name="group" size={32} color={colors.accent} />,
+      unlocked: false,
+      progress: {
+        current: 0,
+        total: 3
+      }
+    },
+    {
+      id: 'emergency_sentinel',
+      name: t.badges.emergencySentinel,
+      description: t.badges.emergencySentinelDesc,
+      icon: <MaterialIcons name="notifications" size={32} color={colors.accent} />,
+      unlocked: false,
+      progress: {
+        current: 0,
+        total: 5
+      }
+    },
+    {
+      id: 'evidence_guardian',
+      name: t.badges.evidenceGuardian,
+      description: t.badges.evidenceGuardianDesc,
+      icon: <MaterialIcons name="insert-drive-file" size={32} color={colors.accent} />,
+      unlocked: false,
+      progress: {
+        current: 0,
+        total: 10
+      }
+    }
+  ];
+  
+  const [badges, setBadges] = useState<Badge[]>(getDefaultBadges());
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,19 @@ export default function BadgesScreen() {
 
   useEffect(() => {
     loadBadges();
-  }, []);
+  }, [t]);
+  
+  useEffect(() => {
+    // Update badge names/descriptions when language changes
+    setBadges(prev => prev.map((badge, index) => {
+      const defaultBadges = getDefaultBadges();
+      return {
+        ...badge,
+        name: defaultBadges[index].name,
+        description: defaultBadges[index].description,
+      };
+    }));
+  }, [t]);
 
   const loadBadges = async () => {
     try {
@@ -131,25 +145,25 @@ export default function BadgesScreen() {
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <MaterialIcons name="verified" size={32} color={colors.accent} />
-          <Text style={styles.title}>My Badges</Text>
+          <Text style={styles.title}>{t.badges.myBadges}</Text>
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={styles.loadingText}>Loading badges...</Text>
+            <Text style={styles.loadingText}>{t.badges.loading}</Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
-              <Text style={styles.retryButtonText}>Retry</Text>
+              <Text style={styles.retryButtonText}>{t.common.retry}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <>
             <View style={styles.progressCard}>
-              <Text style={styles.progressTitle}>Badge Progress</Text>
+              <Text style={styles.progressTitle}>{t.badges.progress}</Text>
               <View style={styles.progressBar}>
                 <View 
                   style={[
@@ -159,7 +173,7 @@ export default function BadgesScreen() {
                 />
               </View>
               <Text style={styles.progressText}>
-                {unlockedCount} of {badges.length} Badges Unlocked
+                {unlockedCount} {t.common.of} {badges.length} {t.badges.unlocked}
               </Text>
             </View>
 

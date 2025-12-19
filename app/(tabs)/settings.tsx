@@ -14,6 +14,7 @@ import { useStealthMode } from '@/components/StealthModeManager';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useBiometricLogin } from '@/components/BiometricLoginProvider';
 import { biometricVerify } from '@/components/BiometricAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 interface Incident {
@@ -27,6 +28,7 @@ interface Incident {
 export default function SettingsScreen() {
   const { signOut, userProfile, user, fetchUserProfile } = useAuth();
   const { isActive, activate, deactivate } = useStealthMode();
+  const { language, setLanguage, t } = useLanguage();
   const [highQuality, setHighQuality] = useState(true);
   const [enableSound, setEnableSound] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -184,8 +186,8 @@ export default function SettingsScreen() {
     
     if (!biometricAvailable) {
       Alert.alert(
-        'Biometric Not Available',
-        'Biometric authentication is not available on this device. Please set up Face ID or Touch ID in your device settings.'
+        t.errors.error,
+        t.errors.biometricNotAvailable
       );
       return;
     }
@@ -194,7 +196,7 @@ export default function SettingsScreen() {
       setIsTogglingBiometricLogin(true);
       
       if (!user?.id) {
-        Alert.alert('Error', 'You must be logged in to save settings');
+        Alert.alert(t.errors.error, t.errors.mustBeLoggedIn);
         setIsTogglingBiometricLogin(false);
         return;
       }
@@ -209,7 +211,7 @@ export default function SettingsScreen() {
       if (!authResult.success) {
         // User cancelled or authentication failed
         if (authResult.error && !authResult.error.includes('cancelled')) {
-          Alert.alert('Authentication Failed', 'Biometric authentication failed. Please try again.');
+          Alert.alert(t.errors.authenticationFailed, t.errors.authenticationFailed);
         }
         setIsTogglingBiometricLogin(false);
         return;
@@ -226,7 +228,7 @@ export default function SettingsScreen() {
 
       if (error) {
         console.error('Error saving biometric login setting:', error);
-        Alert.alert('Error', 'Failed to save biometric login setting');
+        Alert.alert(t.errors.error, t.errors.failedToSave);
         setIsTogglingBiometricLogin(false);
         return;
       }
@@ -328,15 +330,16 @@ export default function SettingsScreen() {
     }
   };
 
+
   const saveIncidentReportCode = async () => {
     if (!user?.id) {
-      Alert.alert('Error', 'You must be logged in to save settings');
+      Alert.alert(t.errors.error, t.errors.mustBeLoggedIn);
       return;
     }
 
     // Validate code: must be numeric and 3-6 digits
     if (!incidentReportCode || !/^\d{3,6}$/.test(incidentReportCode)) {
-      Alert.alert('Invalid Code', 'Incident report code must be 3-6 digits');
+      Alert.alert(t.errors.error, 'Incident report code must be 3-6 digits');
       return;
     }
 
@@ -351,15 +354,15 @@ export default function SettingsScreen() {
 
       if (error) {
         console.error('Error saving incident report code:', error);
-        Alert.alert('Error', 'Failed to save incident report code');
+        Alert.alert(t.errors.error, t.errors.failedToSave);
         return;
       }
 
       setIsEditingIncidentCode(false);
-      Alert.alert('Success', 'Incident report code saved successfully');
+      Alert.alert(t.common.success, 'Incident report code saved successfully');
     } catch (error) {
       console.error('Error saving incident report code:', error);
-      Alert.alert('Error', 'Failed to save incident report code');
+      Alert.alert(t.errors.error, t.errors.failedToSave);
     }
   };
 
@@ -371,7 +374,7 @@ export default function SettingsScreen() {
 
     if (!user?.id) {
       console.error('❌ Cannot save panic mode: No user ID');
-      Alert.alert('Error', 'You must be logged in to save settings');
+      Alert.alert(t.errors.error, t.errors.mustBeLoggedIn);
       return;
     }
 
@@ -410,7 +413,7 @@ export default function SettingsScreen() {
       if (error) {
         console.error('❌ Error saving panic mode setting:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
-        Alert.alert('Error', 'Failed to save panic mode setting');
+        Alert.alert(t.errors.error, t.errors.failedToSave);
         return;
       }
 
@@ -422,7 +425,7 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error('❌ Exception toggling panic mode:', error);
       console.error('Exception details:', JSON.stringify(error, null, 2));
-      Alert.alert('Error', 'Failed to update panic mode setting');
+      Alert.alert(t.errors.error, t.errors.failedToSave);
     } finally {
       setIsTogglingPanicMode(false);
       console.log('🏁 Panic mode toggle completed');
@@ -506,14 +509,14 @@ export default function SettingsScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t.settings.title}</Text>
 
         <TouchableOpacity 
               style={[styles.actionButton, styles.actionDanger]} 
               onPress={handleLogout}
               activeOpacity={0.7}>
               <MaterialIcons name="logout" size={18} color={colors.status.error} />
-              <Text style={[styles.actionButtonText, styles.actionDangerText]}>Logout</Text>
+              <Text style={[styles.actionButtonText, styles.actionDangerText]}>{t.settings.logout}</Text>
             </TouchableOpacity>
         
         {/* Profile Header Card */}
@@ -535,9 +538,9 @@ export default function SettingsScreen() {
         <View style={styles.securitySection}>
           <View style={styles.securityHeader}>
             <MaterialIcons name="security" size={20} color={colors.accent} />
-            <Text style={styles.securitySectionTitle}>Security Features</Text>
+            <Text style={styles.securitySectionTitle}>{t.settings.securityFeatures}</Text>
           </View>
-          <Text style={styles.securitySubtitle}>Advanced protection features</Text>
+          <Text style={styles.securitySubtitle}>{t.settings.advancedProtection}</Text>
 
           {/* <BlurView intensity={80} style={styles.securityBlurWrapper}> */}
             <View style={styles.stealthModeContainer}>
@@ -545,8 +548,8 @@ export default function SettingsScreen() {
                 <View style={styles.settingInfo}>
                   <MaterialIcons name="visibility" size={24} color={colors.accent} />
                   <View style={styles.settingTextContainer}>
-                    <Text style={styles.settingText}>Stealth Mode</Text>
-                    <Text style={styles.settingSubtext}>Transform app into calculator</Text>
+                    <Text style={styles.settingText}>{t.settings.stealthMode}</Text>
+                    <Text style={styles.settingSubtext}>{t.settings.stealthModeDescription}</Text>
                   </View>
                 </View>
                 <Switch
@@ -562,11 +565,11 @@ export default function SettingsScreen() {
                 <View style={styles.settingInfo}>
                   <MaterialIcons name="lock" size={24} color={colors.accent} />
                   <View style={styles.settingTextContainer}>
-                    <Text style={styles.settingText}>Biometric Login</Text>
+                    <Text style={styles.settingText}>{t.settings.biometricLogin}</Text>
                     <Text style={styles.settingSubtext}>
                       {biometricAvailable 
-                        ? 'Lock app with biometric authentication on launch'
-                        : 'Biometric authentication not available'}
+                        ? t.settings.biometricLoginDescription
+                        : t.settings.biometricNotAvailable}
                     </Text>
                   </View>
                 </View>
@@ -583,11 +586,11 @@ export default function SettingsScreen() {
                 <View style={styles.settingInfo}>
                   <MaterialIcons name="vpn-key" size={24} color={colors.accent} />
                   <View style={styles.settingTextContainer}>
-                    <Text style={styles.settingText}>Panic Mode</Text>
+                    <Text style={styles.settingText}>{t.settings.panicMode}</Text>
                     <Text style={styles.settingSubtext}>
                       {Platform.OS === 'ios' 
-                        ? '5 taps on screen or shake device to sign out instantly'
-                        : '5 presses on back button or shake device to sign out instantly'}
+                        ? t.settings.panicModeDescriptionIOS
+                        : t.settings.panicModeDescriptionAndroid}
                     </Text>
                   </View>
                 </View>
@@ -604,14 +607,14 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Stealth Mode Codes</Text>
+          <Text style={styles.sectionTitle}>{t.settings.stealthModeCodes}</Text>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="report-problem" size={24} color={colors.accent} />
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingText}>Incident Report Code</Text>
+                <Text style={styles.settingText}>{t.settings.incidentReportCode}</Text>
                 <Text style={styles.settingSubtext}>
-                  Code to type in calculator to open incident report (default: 999)
+                  {t.settings.incidentReportCodeDescription}
                 </Text>
               </View>
             </View>
@@ -655,11 +658,11 @@ export default function SettingsScreen() {
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recording</Text>
+          <Text style={styles.sectionTitle}>{t.settings.recording}</Text>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="video-label" size={24} color={colors.accent} />
-              <Text style={styles.settingText}>High Quality Recording</Text>
+              <Text style={styles.settingText}>{t.settings.highQualityRecording}</Text>
             </View>
             <Switch
               value={highQuality}
@@ -672,7 +675,7 @@ export default function SettingsScreen() {
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="volume-up" size={24} color={colors.accent} />
-              <Text style={styles.settingText}>Enable Sound</Text>
+              <Text style={styles.settingText}>{t.settings.enableSound}</Text>
             </View>
             <Switch
               value={enableSound}
@@ -684,7 +687,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Emergency Contact</Text>
+          <Text style={styles.sectionTitle}>{t.settings.emergencyContact}</Text>
           {isEditingContact ? (
             <View style={styles.emergencyForm}>
               <TextInput
@@ -705,7 +708,7 @@ export default function SettingsScreen() {
                 numberOfLines={3}
               />
               <TouchableOpacity style={styles.saveButton} onPress={saveEmergencySettings}>
-                <Text style={styles.saveButtonText}>Save Emergency Contact</Text>
+                <Text style={styles.saveButtonText}>{t.common.save} {t.settings.emergencyContact}</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -716,7 +719,7 @@ export default function SettingsScreen() {
                 <MaterialIcons name="phone" size={24} color={colors.accent} />
                 <View>
                   <Text style={styles.settingText}>
-                    {emergencyContact || emergencyContactName ? 'Edit Emergency Contact' : 'Set Up Emergency Contact'}
+                    {emergencyContact || emergencyContactName ? t.settings.editEmergencyContact : t.settings.setUpEmergencyContact}
                   </Text>
                   {(emergencyContact || emergencyContactName) && (
                     <Text style={styles.messagePreview} numberOfLines={1}>
@@ -726,21 +729,21 @@ export default function SettingsScreen() {
                 </View>
               </View>
               <Text style={[styles.configureText, (emergencyContact || emergencyContactName) && { position: 'absolute', right: 0, top: 15}]}>
-                {(emergencyContact || emergencyContactName) ? 'Edit' : 'Configure'}
+                {(emergencyContact || emergencyContactName) ? t.settings.edit : t.settings.configure}
               </Text>
             </TouchableOpacity>
           )}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Text style={styles.sectionTitle}>{t.settings.notifications}</Text>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="notifications" size={24} color={colors.accent} />
-              <Text style={styles.settingText}>Push Notifications</Text>
+              <Text style={styles.settingText}>{t.settings.pushNotifications}</Text>
             </View>
             <TouchableOpacity onPress={() => router.push('/notification-settings')}>
-              <Text style={styles.configureText}>Configure</Text>
+              <Text style={styles.configureText}>{t.settings.configure}</Text>
             </TouchableOpacity>
           </View>
 
@@ -785,15 +788,15 @@ export default function SettingsScreen() {
             }}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="notifications" size={24} color={colors.accent} />
-              <Text style={styles.settingText}>Test Notification</Text>
+              <Text style={styles.settingText}>{t.settings.testNotification}</Text>
             </View>
-            <Text style={styles.configureText}>Send Test</Text>
+            <Text style={styles.configureText}>{t.settings.sendTest}</Text>
           </TouchableOpacity>
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="notifications" size={24} color={colors.accent} />
-              <Text style={styles.settingText}>Incident Alerts</Text>
+              <Text style={styles.settingText}>{t.settings.incidentAlerts}</Text>
             </View>
             <Switch
               value={incidentAlerts}
@@ -806,7 +809,7 @@ export default function SettingsScreen() {
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="location-on" size={24} color={colors.accent} />
-              <Text style={styles.settingText}>Location Services</Text>
+              <Text style={styles.settingText}>{t.settings.locationServices}</Text>
             </View>
             <Switch
               value={locationEnabled}
@@ -822,27 +825,76 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Advanced</Text>
+          <Text style={styles.sectionTitle}>{t.settings.language}</Text>
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <MaterialIcons name="language" size={24} color={colors.accent} />
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingText}>{t.settings.appLanguage}</Text>
+                <Text style={styles.settingSubtext}>{t.settings.chooseLanguage}</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.languageOptionsContainer}>
+            <TouchableOpacity
+              style={styles.languageRadioOption}
+              onPress={() => setLanguage('en')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.radioButtonContainer}>
+                <View style={[
+                  styles.radioButton,
+                  language === 'en' && styles.radioButtonSelected
+                ]}>
+                  {language === 'en' && <View style={styles.radioButtonInner} />}
+                </View>
+                <Text style={styles.languageRadioText}>
+                  {t.settings.english}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.languageRadioOption}
+              onPress={() => setLanguage('es')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.radioButtonContainer}>
+                <View style={[
+                  styles.radioButton,
+                  language === 'es' && styles.radioButtonSelected
+                ]}>
+                  {language === 'es' && <View style={styles.radioButtonInner} />}
+                </View>
+                <Text style={styles.languageRadioText}>
+                  {t.settings.spanish}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t.settings.advanced}</Text>
           <TouchableOpacity 
             style={styles.advancedItem}
             onPress={() => router.push('/settings-history')}>
             <View style={styles.advancedItemContent}>
               <MaterialIcons name="history" size={24} color={colors.accent} />
               <View>
-                <Text style={styles.advancedItemTitle}>Settings History</Text>
+                <Text style={styles.advancedItemTitle}>{t.settings.settingsHistory}</Text>
                 <Text style={styles.advancedItemDescription}>
-                  View a log of all changes made to your settings
+                  {t.settings.settingsHistoryDescription}
                 </Text>
               </View>
             </View>
-            <Text style={styles.advancedItemAction}>View</Text>
+            <Text style={styles.advancedItemAction}>{t.settings.view}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>About DESIST!</Text>
-          <Text style={styles.infoText}>Version 1.0.0</Text>
-          <Text style={styles.infoText}>© 2024 DESIST!. All rights reserved.</Text>
+          <Text style={styles.infoTitle}>{t.settings.about}</Text>
+          <Text style={styles.infoText}>{t.settings.version}</Text>
+          <Text style={styles.infoText}>{t.settings.copyright}</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -1289,5 +1341,42 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     minWidth: 50,
     textAlign: 'center',
+  },
+  languageOptionsContainer: {
+    marginTop: 10,
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  languageRadioOption: {
+    marginRight: 20,
+  },
+  radioButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  radioButton: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: colors.text.muted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioButtonSelected: {
+    borderColor: colors.accent,
+  },
+  radioButtonInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.accent,
+  },
+  languageRadioText: {
+    color: colors.text.primary,
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
   },
 });

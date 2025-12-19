@@ -6,6 +6,7 @@ import WebView from 'react-native-webview';
 import { colors, shadows, radius } from '@/constants/theme';
 import { createClient } from '@supabase/supabase-js';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const supabase = createClient(
   'https://tscvzrxnxadnvgnsdrqx.supabase.co',
@@ -33,6 +34,7 @@ const REFRESH_INTERVAL = 30000; // 30 seconds
 const NEARBY_RADIUS = 5000; // 5km
 
 export default function IncidentsScreen() {
+  const { t } = useLanguage();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -218,7 +220,7 @@ export default function IncidentsScreen() {
     } catch (error) {
       console.error('Error fetching incidents:', error);
       setIsConnected(false);
-      setError('Failed to fetch nearby incidents. Please check your connection and try again.');
+      setError(t.incidents.error);
     }
   };
 
@@ -370,14 +372,14 @@ export default function IncidentsScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Nearby Incidents</Text>
+          <Text style={styles.title}>{t.incidents.nearbyIncidents}</Text>
         </View>
         <View style={styles.errorContainer}>
           <MaterialIcons name="error-outline" size={80} color={colors.status.error} />
-          <Text style={styles.errorTitle}>Connection Error</Text>
+          <Text style={styles.errorTitle}>{t.errors.error}</Text>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={checkLocationPermission}>
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Text style={styles.retryButtonText}>{t.common.retry}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -390,14 +392,14 @@ export default function IncidentsScreen() {
         <View style={styles.connectionStatus}>
           <MaterialIcons name="wifi-off" size={16} color={colors.status.error} />
           <Text style={styles.connectionStatusText}>
-            Connection lost. Retrying...
+            {t.errors.networkError}
           </Text>
         </View>
       )}
       
       <View style={styles.headerContainer}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Nearby Incidents</Text>
+          <Text style={styles.title}>{t.incidents.nearbyIncidents}</Text>
         </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity 
@@ -412,7 +414,7 @@ export default function IncidentsScreen() {
           <TouchableOpacity 
             style={styles.reportButton} 
             onPress={() => router.push('/report-incident')}>
-            <Text style={styles.reportButtonText}>Report</Text>
+            <Text style={styles.reportButtonText}>{t.incidents.reportIncident}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -448,10 +450,10 @@ export default function IncidentsScreen() {
             <View style={styles.emptyState}>
               <MaterialIcons name="error-outline" size={80} color={colors.text.muted} />
               <Text style={styles.emptyStateText}>
-                No incidents reported nearby
+                {t.incidents.noIncidents}
               </Text>
               <Text style={styles.emptyStateSubtext}>
-                You'll be notified when activity is reported in your area
+                {t.incidents.loading}
               </Text>
             </View>
           }

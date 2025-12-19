@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Platf
 import { useRouter, usePathname } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { colors, shadows, radius } from '@/constants/theme';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const { width } = Dimensions.get('window');
 const isNarrowScreen = width < 768;
@@ -9,19 +10,20 @@ const isNarrowScreen = width < 768;
 // Export the tab bar height so other components can use it for padding
 export const TAB_BAR_HEIGHT = isNarrowScreen ? 130 : 70; // Two-tier layout is taller
 
-const tabs = [
-  { name: '/', title: 'Home', icon: 'home' as const },
-  { name: 'record', title: 'Record', icon: 'videocam' as const },
-  { name: 'incidents', title: 'Incidents', icon: 'warning' as const },
-  { name: 'badges', title: 'Badges', icon: 'emoji-events' as const },
-  { name: 'legal-help', title: 'Legal Help', icon: 'gavel' as const },
-  { name: 'documents', title: 'Documents', icon: 'description' as const },
-  { name: 'settings', title: 'Settings', icon: 'settings' as const },
-];
-
 export default function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const tabs = [
+    { name: '/', title: t.navigation.home, icon: 'home' as const },
+    { name: 'record', title: t.navigation.record, icon: 'videocam' as const },
+    { name: 'incidents', title: t.navigation.incidents, icon: 'warning' as const },
+    { name: 'badges', title: t.navigation.badges, icon: 'emoji-events' as const },
+    { name: 'legal-help', title: t.navigation.legalHelp, icon: 'gavel' as const },
+    { name: 'documents', title: t.navigation.documents, icon: 'description' as const },
+    { name: 'settings', title: t.navigation.settings, icon: 'settings' as const },
+  ];
   
   const getTabRoute = (tabName: string) => {
     return `/(tabs)/${tabName}`;

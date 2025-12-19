@@ -5,9 +5,11 @@ import { useEffect, useState } from 'react';
 import { getNews, NewsItem } from '@/lib/news';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function HomeScreen() {
   const { userProfile } = useAuth();
+  const { t } = useLanguage();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,27 +51,27 @@ export default function HomeScreen() {
         <NoHandsIcon size={300} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.title}>Hands Off!</Text>
+        <Text style={styles.title}>{t.home.title}</Text>
         <Text style={styles.subtitle}>
           {/* <Text style={styles.subtitleBold}>{userProfile?.full_name}! </Text> */}
-           Know your rights. Stay protected.</Text>
+           {t.home.subtitle}</Text>
         <Text style={styles.description}>
-          Document incidents, store important documents, and access critical resources to protect your rights and safety.
+          {t.home.description}
         </Text>
       </View>
 
       <View style={styles.newsSection}>
         <View style={styles.newsHeader}>
-          <Text style={styles.newsTitle}>Latest Updates</Text>
+          <Text style={styles.newsTitle}>{t.home.latestUpdates}</Text>
           <Pressable 
             style={styles.viewAllButton}
             onPress={() => router.push('/blogs')}
           >
-            <Text style={styles.viewAllText}>View All</Text>
+            <Text style={styles.viewAllText}>{t.home.viewAll}</Text>
           </Pressable>
         </View>
         {loading ? (
-          <Text style={styles.loadingText}>Loading news...</Text>
+          <Text style={styles.loadingText}>{t.home.loadingNews}</Text>
         ) : news.length > 0 ? (
           news.map((item) => (
             <Pressable 
@@ -93,7 +95,7 @@ export default function HomeScreen() {
             </Pressable>
           ))
         ) : (
-          <Text style={styles.loadingText}>No news available</Text>
+          <Text style={styles.loadingText}>{t.home.noNewsAvailable}</Text>
         )}
       </View>
     </ScrollView>

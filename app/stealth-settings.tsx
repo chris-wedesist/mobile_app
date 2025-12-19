@@ -5,10 +5,12 @@ import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useStealthMode } from '@/components/StealthModeManager';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function StealthSettingsScreen() {
   const { deactivate } = useStealthMode();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
 
   const handleExitStealth = async () => {
     try {
@@ -43,35 +45,35 @@ export default function StealthSettingsScreen() {
           style={styles.backButton}
           onPress={() => router.back()}>
           <MaterialIcons name="chevron-left" color={colors.text.primary} size={24} />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>{t.common.back}</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.titleContainer}>
           <MaterialIcons name="settings" size={32} color={colors.accent} />
-          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.title}>{t.calculatorSettings.title}</Text>
         </View>
 
         <Text style={styles.description}>
-          Configure Desist Calculator preferences and settings.
+          {t.calculatorSettings.description}
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Exit Options</Text>
+          <Text style={styles.sectionTitle}>{t.calculatorSettings.exitOptions}</Text>
           
           <Text style={styles.infoText}>
-            You can exit stealth mode by:
+            {t.calculatorSettings.exitOptionsInfo}
           </Text>
           
           <View style={styles.exitOption}>
             <MaterialIcons name="power-settings-new" size={20} color={colors.text.muted} />
-            <Text style={styles.exitOptionText}>Double press the power button</Text>
+            <Text style={styles.exitOptionText}>{t.calculatorSettings.doublePressPower}</Text>
           </View>
           
           <View style={styles.exitOption}>
             <MaterialIcons name="dialpad" size={20} color={colors.text.muted} />
-            <Text style={styles.exitOptionText}>Enter code "5555"</Text>
+            <Text style={styles.exitOptionText}>{t.calculatorSettings.enterCode}</Text>
           </View>
         </View>
 
@@ -79,7 +81,7 @@ export default function StealthSettingsScreen() {
           style={styles.exitButton}
           onPress={() => handleLogoutAndExitApp()}>
           <MaterialIcons name="exit-to-app" size={24} color={colors.text.primary} />
-          <Text style={styles.exitButtonText}>Clear App Cache</Text>
+          <Text style={styles.exitButtonText}>{t.calculatorSettings.clearAppCache}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

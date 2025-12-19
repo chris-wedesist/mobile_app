@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { colors, shadows, radius } from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('doxoje4562@fergetic.com');
@@ -23,10 +24,11 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, resendConfirmation } = useAuth();
+  const { t } = useLanguage();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t.errors.error, t.auth.fillAllFields);
       return;
     }
 
@@ -46,20 +48,20 @@ export default function LoginScreen() {
         
         // Navigate to confirmation code screen
         Alert.alert(
-          'Email Verification Required',
-          'Your email address needs to be verified. We will send you a new confirmation code.',
+          t.auth.emailVerificationRequired,
+          t.auth.emailVerificationMessage,
           [
             {
-              text: 'Cancel',
+              text: t.common.cancel,
               style: 'cancel',
             },
             {
-              text: 'Send Code',
+              text: t.auth.sendCode,
               onPress: async () => {
                 // Resend confirmation code
                 const resendResult = await resendConfirmation(email);
                 if (resendResult.error) {
-                  Alert.alert('Error', resendResult.error.message || 'Failed to resend confirmation code');
+                  Alert.alert(t.errors.error, resendResult.error.message || t.errors.failedToLoad);
                 } else {
                   // Navigate to confirmation code screen
                   router.push(`/confirm-code?email=${encodeURIComponent(email)}` as any);
@@ -69,7 +71,7 @@ export default function LoginScreen() {
           ]
         );
       } else {
-        Alert.alert('Login Failed', error.message);
+        Alert.alert(t.auth.loginFailed, error.message);
         console.log('Login failed:', error.message);
       }
     } else {
@@ -84,21 +86,21 @@ export default function LoginScreen() {
 
   const handleResendConfirmation = async () => {
     if (!email) {
-      Alert.alert('Error', 'Please enter your email address first');
+      Alert.alert(t.errors.error, t.auth.enterEmailFirst);
       return;
     }
 
     try {
       const resendResult = await resendConfirmation(email);
       if (resendResult.error) {
-        Alert.alert('Error', resendResult.error.message || 'Failed to resend confirmation code');
+        Alert.alert(t.errors.error, resendResult.error.message || t.errors.failedToLoad);
       } else {
         Alert.alert(
-          'Code Sent',
-          'A new confirmation code has been sent to your email address.',
+          t.auth.codeSent,
+          t.auth.codeSentMessage,
           [
             {
-              text: 'OK',
+              text: t.common.ok,
               onPress: () => {
                 router.push(`/confirm-code?email=${encodeURIComponent(email)}` as any);
               },
@@ -108,7 +110,7 @@ export default function LoginScreen() {
       }
     } catch (error) {
       console.error('Resend confirmation error:', error);
-      Alert.alert('Error', 'Failed to resend confirmation code');
+      Alert.alert(t.errors.error, t.errors.failedToLoad);
     }
   };
 
@@ -125,7 +127,7 @@ export default function LoginScreen() {
             resizeMode="contain"
           />
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
+          <Text style={styles.subtitle}>{t.auth.signIn}</Text>
         </View>
 
         <View style={styles.form}>
@@ -133,7 +135,7 @@ export default function LoginScreen() {
             <MaterialIcons name="email" size={20} color={colors.text.muted} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t.auth.email}
               placeholderTextColor={colors.text.muted}
               value={email}
               onChangeText={setEmail}
@@ -147,7 +149,7 @@ export default function LoginScreen() {
             <MaterialIcons name="lock" size={20} color={colors.text.muted} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t.auth.password}
               placeholderTextColor={colors.text.muted}
               value={password}
               onChangeText={setPassword}
@@ -173,14 +175,14 @@ export default function LoginScreen() {
             disabled={loading}
           >
             <Text style={styles.loginButtonText}>
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? t.common.loading : t.auth.signIn}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
+            <Text style={styles.signupText}>{t.auth.dontHaveAccount} </Text>
             <TouchableOpacity onPress={navigateToSignup}>
-              <Text style={styles.signupLink}>Sign Up</Text>
+              <Text style={styles.signupLink}>{t.auth.signup}</Text>
             </TouchableOpacity>
           </View>
         </View>
