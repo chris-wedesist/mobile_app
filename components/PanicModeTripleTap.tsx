@@ -148,38 +148,6 @@ export function PanicModeTripleTap({ children }: { children: React.ReactNode }) 
             15 // 15 miles radius
           );
           
-          // Create panic event in database
-          // Note: This may fail due to rate limiting, but that's OK - panic mode will still proceed
-          try {
-            const { error: panicError } = await supabase
-              .from('incidents')
-              .insert([
-                {
-                  type: 'panic_mode',
-                  description: `Panic mode activated by ${userName}`,
-                  latitude: userLocation.coords.latitude,
-                  longitude: userLocation.coords.longitude,
-                  status: 'active',
-                  created_at: new Date().toISOString(),
-                  user_id: user?.id,
-                  user_email: user?.email,
-                  user_name: userName,
-                }
-              ]);
-            
-            if (panicError) {
-              // Log but don't block - panic mode should proceed even if DB insert fails
-              console.warn('⚠️ Could not create panic event in database (rate limited or other issue):', panicError.message);
-              console.log('ℹ️ Panic mode will continue - notifications sent, user will be signed out');
-            } else {
-              console.log('✅ Panic event created in database');
-            }
-          } catch (panicEventError) {
-            // Log but don't block - panic mode should proceed
-            console.warn('⚠️ Exception creating panic event:', panicEventError);
-            console.log('ℹ️ Panic mode will continue - notifications sent, user will be signed out');
-          }
-          
           // Show alert to user
           Alert.alert(
             '🚨 Panic Mode Activated',
