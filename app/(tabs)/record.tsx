@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRecording } from '@/contexts/RecordingContext';
 
 // Cloudinary configuration
@@ -14,6 +15,7 @@ const CLOUDINARY_CLOUD_NAME = 'do0qfrr5y';
 const CLOUDINARY_UPLOAD_PRESET = 'desist';
 
 export default function RecordScreen() {
+  const { t } = useLanguage();
   const { setIsRecording: setGlobalRecording } = useRecording();
   const [permission, requestPermission] = useCameraPermissions();
   const [isRecording, setIsRecording] = useState(false);
@@ -132,12 +134,12 @@ export default function RecordScreen() {
       <View style={styles.container}>
         <View style={styles.webMessage}>
           <MaterialIcons name="error-outline" size={80} color={colors.accent} />
-          <Text style={styles.permissionTitle}>Camera Not Available</Text>
+          <Text style={styles.permissionTitle}>{t.record.cameraNotAvailable}</Text>
           <Text style={styles.permissionText}>
-            Camera recording is only available on mobile devices.
+            {t.record.cameraOnlyOnMobile}
           </Text>
           <Text style={[styles.permissionText, styles.subText]}>
-            Please use the iOS or Android app to record videos.
+            {t.record.useNativeApp}
           </Text>
         </View>
       </View>
@@ -153,13 +155,12 @@ export default function RecordScreen() {
       <View style={styles.container}>
         <View style={styles.permissionContainer}>
           <MaterialIcons name="error-outline" size={80} color={colors.accent} />
-          <Text style={styles.permissionTitle}>Camera Access Required</Text>
+          <Text style={styles.permissionTitle}>{t.record.cameraAccessRequired}</Text>
           <Text style={styles.permissionText}>
-            We need your permission to use the camera for recording incidents.
-            All recordings are encrypted and stored securely.
+            {t.record.cameraPermissionMessage}
           </Text>
           <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text style={styles.permissionButtonText}>{t.record.grantPermission}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -174,7 +175,7 @@ export default function RecordScreen() {
         const { status: audioStatus } = await Audio.requestPermissionsAsync();
         console.log('Audio permission status:', audioStatus);
         if (audioStatus !== 'granted') {
-          throw new Error('Audio recording permission is required');
+          throw new Error(t.record.audioPermissionRequired);
         }
       }
 
@@ -287,7 +288,7 @@ export default function RecordScreen() {
       setIsRecording(false);
       recordingPromise.current = null;
       recordingStartTime.current = null;
-      Alert.alert('Recording Failed', 'Unable to start recording. Please try again.');
+      Alert.alert(t.record.recordingFailedTitle, t.record.unableToStartRecording);
     }
   };
 
@@ -334,11 +335,11 @@ export default function RecordScreen() {
         await saveRecordingToSupabase(cloudinaryUrl);
         console.log('Recording saved to Supabase');
 
-        Alert.alert('Success', 'Video recorded and saved successfully!');
+        Alert.alert(t.record.success, t.record.videoSavedSuccessfully);
       }
     } catch (error) {
       console.error('Error stopping recording:', error);
-      Alert.alert('Error', 'Failed to save recording. Please try again.');
+      Alert.alert(t.record.error, t.record.failedToSaveRecording);
     } finally {
       // Reset states and timers
       setIsRecording(false);
@@ -451,7 +452,7 @@ export default function RecordScreen() {
       }
     } catch (error) {
       console.error('Error during auto-save:', error);
-      Alert.alert('Auto-Save Failed', 'Failed to save recording automatically. Please try recording again.');
+      Alert.alert(t.record.autoSaveFailed, t.record.autoSaveFailedMessage);
     } finally {
       // Reset states
       setIsRecording(false);
@@ -490,7 +491,7 @@ export default function RecordScreen() {
                     <MaterialIcons name="cached" size={48} color={colors.accent} />
                   </Animated.View>
                   <Text style={styles.loadingText}>
-                    {isSaving ? 'Saving...' : isUploading ? 'Uploading...' : 'Processing...'}
+                    {isSaving ? t.record.saving : isUploading ? t.record.uploading : t.record.processing}
                   </Text>
                   {isUploading && (
                     <Text style={styles.loadingSubtext}>
@@ -521,7 +522,7 @@ export default function RecordScreen() {
             {isRecording && !isLongPressing && !isProcessing && !isUploading && !isSaving && (
               <View style={styles.recordingIndicator}>
                 <View style={styles.recordingDot} />
-                <Text style={styles.recordingText}>Recording...</Text>
+                <Text style={styles.recordingText}>{t.record.recording}</Text>
               </View>
             )}
             <TouchableOpacity
@@ -537,8 +538,8 @@ export default function RecordScreen() {
               <MaterialIcons name="video-label" color={isRecording ? colors.accent : colors.text.primary} size={32} />
               <Text style={styles.buttonText}>
                 {isRecording 
-                  ? (isLongPressing ? 'Hold to Save & Quit' : 'Recording...') 
-                  : 'Start Record'}
+                  ? (isLongPressing ? t.record.holdToSaveQuit : t.record.recording) 
+                  : t.record.startRecord}
               </Text>
             </TouchableOpacity>
           </View>
