@@ -1,0 +1,91 @@
+name: Status Updates (every 30 min)
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate and post status update
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const LABELS = ['feature', 'api', 'priority'];
+            const STATUS_TITLE = 'Automated Status Updates';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Find or create the Status issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', per_page: 100
+            });
+            let statusIssue = issues.find(i => i.title === STATUS_TITLE);
+            if (!statusIssue) {
+              const created = await github.rest.issues.create({
+                owner, repo, title: STATUS_TITLE,
+                body: 'This issue receives automated status updates every 30 minutes.'
+              });
+              statusIssue = created.data;
+            }
+
+            // Fetch relevant issues with labels
+            const allIssues = [];
+            for (const label of LABELS) {
+              const { data } = await github.rest.issues.listForRepo({
+                owner, repo, state: 'open', labels: label, per_page: 100
+              });
+              allIssues.push(...data);
+            }
+            // De-duplicate by number
+            const dedup = new Map();
+            for (const i of allIssues) dedup.set(i.number, i);
+            const relevant = Array.from(dedup.values());
+
+            // Parse checklists to estimate progress
+            function checklistProgress(body) {
+              if (!body) return { total: 0, done: 0, pct: 0 };
+              const matches = body.match(/- \[(x|\s)\]/gi) || [];
+              const total = matches.length;
+              const done = matches.filter(m => /\[x\]/i.test(m)).length;
+              const pct = total ? Math.round((done / total) * 100) : 0;
+              return { total, done, pct };
+            }
+
+            // Extract simple due date and owner tags from issue body
+            function extractTag(body, tag) {
+              if (!body) return '';
+              const re = new RegExp(`${tag}:\\s*(.+)`, 'i');
+              const m = body.match(re);
+              return m ? m[1].trim() : '';
+            }
+
+            const lines = [];
+            lines.push(`Repo: ${owner}/${repo}`);
+            lines.push(`Time: ${new Date().toISOString()}`);
+            lines.push(`Issues found: ${relevant.length}`);
+            lines.push('');
+
+            for (const i of relevant) {
+              const { total, done, pct } = checklistProgress(i.body || '');
+              const due = extractTag(i.body || '', 'Due');
+              const ownerTag = extractTag(i.body || '', 'Owner');
+              lines.push(`- #${i.number} ${i.title}`);
+              lines.push(`  Labels: ${i.labels.map(l => l.name).join(', ') || 'none'}`);
+              lines.push(`  Owner: ${ownerTag || 'unspecified'}`);
+              lines.push(`  Due: ${due || 'unspecified'}`);
+              lines.push(`  Progress: ${done}/${total} (${pct}%)`);
+              lines.push(`  Link: ${i.html_url}`);
+            }
+
+            const body = lines.join('\n');
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: statusIssue.number, body
+            });
+            core.info(`Posted status update to issue #${statusIssue.number}`);
