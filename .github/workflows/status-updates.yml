@@ -22,20 +22,22 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Find or create the Status issue
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner, repo, state: 'open', per_page: 100
+            // Find or create (or reopen) the Status issue across ALL states
+            const { data: allIssuesForRepo } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'all', per_page: 100
             });
-            let statusIssue = issues.find(i => i.title === STATUS_TITLE);
+            let statusIssue = allIssuesForRepo.find(i => i.title === STATUS_TITLE);
             if (!statusIssue) {
               const created = await github.rest.issues.create({
                 owner, repo, title: STATUS_TITLE,
                 body: 'This issue receives automated status updates every 30 minutes.'
               });
               statusIssue = created.data;
+            } else if (statusIssue.state !== 'open') {
+              await github.rest.issues.update({ owner, repo, issue_number: statusIssue.number, state: 'open' });
             }
 
-            // Fetch relevant issues with labels
+            // Fetch relevant OPEN issues with target labels
             const allIssues = [];
             for (const label of LABELS) {
               const { data } = await github.rest.issues.listForRepo({
@@ -77,7 +79,7 @@ jobs:
               const due = extractTag(i.body || '', 'Due');
               const ownerTag = extractTag(i.body || '', 'Owner');
               lines.push(`- #${i.number} ${i.title}`);
-              lines.push(`  Labels: ${i.labels.map(l => l.name).join(', ') || 'none'}`);
+              lines.push(`  Labels: ${(i.labels || []).map(l => l.name).join(', ') || 'none'}`);
               lines.push(`  Owner: ${ownerTag || 'unspecified'}`);
               lines.push(`  Due: ${due || 'unspecified'}`);
               lines.push(`  Progress: ${done}/${total} (${pct}%)`);
