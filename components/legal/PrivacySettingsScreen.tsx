@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, Switch, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, Switch, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
+// Optional: For future i18n integration
+// import { useTranslation } from 'react-i18next';
+
+// Legal document URLs
+const POLICY_URLS = {
+  privacy: 'https://wedesist.com/privacy',
+  terms: 'https://wedesist.com/terms',
+  cookies: 'https://wedesist.com/cookies',
+} as const;
 
 interface PrivacySettings {
   dataCollection: boolean;
@@ -65,6 +74,23 @@ export default function PrivacySettingsScreen() {
     );
   };
 
+  const openLink = async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open this link. Please try again later.');
+      }
+    } catch (error) {
+      // Log error for debugging while providing user-friendly message
+      if (__DEV__) {
+        console.error('Error opening link:', error);
+      }
+      Alert.alert('Error', 'Unable to open this link. Please try again later.');
+    }
+  };
+
   const SettingItem = ({ 
     title, 
     description, 
@@ -91,6 +117,21 @@ export default function PrivacySettingsScreen() {
         thumbColor={value ? '#ffffff' : '#f4f3f4'}
       />
     </View>
+  );
+
+  const LinkButton = ({ 
+    title, 
+    description, 
+    url 
+  }: {
+    title: string;
+    description: string;
+    url: string;
+  }) => (
+    <TouchableOpacity style={styles.linkButton} onPress={() => openLink(url)}>
+      <Text style={styles.linkButtonText}>{title}</Text>
+      <Text style={styles.linkButtonDescription}>{description}</Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -151,6 +192,28 @@ export default function PrivacySettingsScreen() {
           value={settings.securityAlerts}
           onValueChange={(value) => updateSetting('securityAlerts', value)}
           disabled={true}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Legal Documents</Text>
+        
+        <LinkButton
+          title="Privacy Policy"
+          description="View our privacy policy and data practices"
+          url={POLICY_URLS.privacy}
+        />
+
+        <LinkButton
+          title="Terms of Service"
+          description="Read our terms and conditions"
+          url={POLICY_URLS.terms}
+        />
+
+        <LinkButton
+          title="Cookie Policy"
+          description="Learn about our use of cookies"
+          url={POLICY_URLS.cookies}
         />
       </View>
 
@@ -305,5 +368,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
     textAlign: 'center',
+  },
+  linkButton: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  linkButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#007bff',
+    marginBottom: 4,
+  },
+  linkButtonDescription: {
+    fontSize: 14,
+    color: '#666',
   },
 });
