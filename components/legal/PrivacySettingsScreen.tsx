@@ -80,11 +80,14 @@ export default function PrivacySettingsScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        Alert.alert('Error', `Cannot open URL: ${url}`);
+        Alert.alert('Error', 'Unable to open this link. Please try again later.');
       }
     } catch (error) {
-      console.error('Error opening link:', error);
-      Alert.alert('Error', 'Failed to open the link. Please try again later.');
+      // Log error for debugging while providing user-friendly message
+      if (__DEV__) {
+        console.error('Error opening link:', error);
+      }
+      Alert.alert('Error', 'Unable to open this link. Please try again later.');
     }
   };
 
