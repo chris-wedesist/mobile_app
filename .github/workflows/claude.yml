@@ -1,0 +1,57 @@
+# Claude Code GitHub Action workflow for DESIST!
+# Drop this into each repo at .github/workflows/claude.yml
+#
+# Prerequisite: Claude GitHub app installed and ANTHROPIC_API_KEY secret added.
+# See developer-bundle/github-actions/SETUP-RUNBOOK.md for full setup.
+#
+# Invocation: tag @claude in any issue, PR comment, or PR review comment.
+
+name: Claude Code
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, assigned]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 15
+
+# Notes:
+# - Default model is Sonnet (claude-sonnet-4-6). For higher reliability on
+#   security-sensitive PRs (auth, env vars, RLS), uncomment the model line:
+#     claude_args: |
+#       --max-turns 15
+#       --model claude-opus-4-7
+# - Higher --max-turns increases runtime and cost but reduces "ran out of turns
+#   before finishing" failures on multi-file refactors. 15 is a reasonable
+#   middle ground for the DESIST! plans in developer-bundle/plans/.
+# - 30-minute job timeout is a safety net against runaway loops. If you see
+#   this hit, review what happened before re-invoking.
